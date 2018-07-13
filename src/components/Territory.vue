@@ -21,6 +21,9 @@ import { flatten, uniq } from 'lodash';
 
 export default {
   name: 'Territory',
+  async beforeRouteUpdate (to) {
+    await this.getTerritory(to.params.id);
+  },
   data() {
     return {
       terrId: this.$route.params.id,
@@ -28,6 +31,22 @@ export default {
     };
   },
   methods: {
+    async getTerritory(id) {
+      console.log('terrId', id);
+      const response = await axios({
+        url: 'http://localhost:4000/graphql',
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `{ addresses (terrId: ${id}) { id addr1 addr2 city state postalCode phone longitude latitude territory { name } }}`
+        }
+      });
+
+      this.addresses = response.data.data.addresses;
+    },
+
     getTerritoryName() {
       if (this.addresses.length) {
         return this.addresses[0].territory.name;
@@ -41,18 +60,7 @@ export default {
     }
   },
   async mounted() {
-    const response = await axios({
-      url: 'http://localhost:4000/graphql',
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: {
-        query: `{ addresses (terrId: ${this.terrId}) { id addr1 addr2 city state postalCode phone longitude latitude territory { name } }}`
-      }
-    });
-
-    this.addresses = response.data.data.addresses;
+    await this.getTerritory(this.terrId);
   },
 }
 </script>

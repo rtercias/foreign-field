@@ -6,7 +6,10 @@ import Territory from './components/Territory';
 const routes = [
   { path: '/', component: Home },
   { path: '/territories', component: Territories },
-  { path: '/territories/:id', component: Territory }
+  { 
+    path: '/territories/:id', 
+    component: Territory, 
+  }
 ];
 
 export const router = new VueRouter({

@@ -1,7 +1,7 @@
 <template>
   <div class="territories">
-    <b-list-group>
-      <b-list-group-item v-for="group in group_codes" v-bind:key="group">
+    <b-list-group class="flex-row flex-wrap">
+      <b-list-group-item class="col-md-6" v-for="group in group_codes" v-bind:key="group">
         <h3>{{ group }}</h3>
         <b-list-group-item v-for="terr in territoriesByGroup(group)" v-bind:key="terr.id" data-toggle="collapse">
           <b-link :to="`/territories/${terr.id}`">{{terr.name}} - {{territoryCities(terr.id)}}</b-link>
@@ -63,6 +63,7 @@ export default {
 <style scoped>
 h3 {
   margin: 40px 0 0;
+  text-align: left;
 }
 ul {
   list-style-type: none;
@@ -74,5 +75,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.list-group-item {
+  text-align: left;
 }
 </style>
