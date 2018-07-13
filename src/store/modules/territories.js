@@ -1,12 +1,16 @@
 import Vue from 'vue';
+import Vuex from 'vuex';
+import VueAxios, { post } from 'vue-axios';
 import axios from 'axios';
-import VueAxios from 'vue-axios';
 
-Vue.use(VueAxios); 
-Vue.use(axios); 
-
+Vue.use([
+  Vuex,
+  VueAxios, 
+  axios
+]); 
 
 export const territories = {
+  namespaced: true,
   state: {
     territories: []
   },
@@ -14,10 +18,15 @@ export const territories = {
 
   },
   actions: {
-    territoriesByCong: async (congId) => {
-      return await Vue.axios.post('52.168.120.105:4000/graphql', {
-        body: `{ "query": "{ territories (congId: ${congId}) { name type }}" }`,
-      });
+    async getTerritoriesByCong({ commit }, congId) {
+      try {
+        const response = await post('52.168.120.105:4000/graphql', {
+          body: `{ "query": "{ territories (congId: ${congId}) { name type }}" }`,
+        });
+        commit(response);
+      } catch (e) {
+        console.log(e);
+      }
     }
   }
 };

@@ -6,7 +6,7 @@
         <b-collapse is-nav id="nav_dropdown_collapse">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item to="/checkout">Checkout</b-nav-item>
+            <b-nav-item to="/territories">Territories</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
       </b-navbar>
@@ -17,13 +17,13 @@
 
 <script>
 import Home from './components/Home'
-import Checkout from './components/Checkout';
+import Territories from './components/Territories';
 
 export default {
   name: 'app',
   components: {
     Home,
-    Checkout
+    Territories
   }
 }
 </script>
