@@ -4,8 +4,8 @@
       <h3>{{getCities()}}</h3>
       <h3>{{getTerritoryName()}}</h3>
     </header>
-    <b-list-group class="flex-row flex-wrap">
-      <b-list-group-item class="col-md-6" v-for="address in addresses" v-bind:key="address.id" data-toggle="collapse">
+    <b-list-group class="columns">
+      <b-list-group-item class="col-sm-12" v-for="address in addresses" v-bind:key="address.id" data-toggle="collapse">
         <p class="addresses">
           {{address.addr1}} {{address.addr2}}<br/>
           {{address.city}} {{address.state}} {{address.postalCode}}
@@ -67,6 +67,19 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.list-group {
+  display: block;
+}
+.columns {
+  columns: 1;
+}
+.columns > [class*="col-"] {
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    width: 100%;
+    float: none;
+}
 h3 {
   margin: 40px 0 0;
 }
@@ -78,9 +91,6 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
-a {
-  color: #42b983;
-}
 header {
   display: flex;
   justify-content: space-between;
@@ -88,5 +98,11 @@ header {
 }
 .addresses {
   text-align: left;
+}
+
+@media (min-width: 769px) {
+  .columns {
+    columns: 2;
+  }
 }
 </style>

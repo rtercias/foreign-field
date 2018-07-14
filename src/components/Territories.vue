@@ -61,6 +61,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.list-group {
+  display: flex;
+}
 h3 {
   margin: 40px 0 0;
   text-align: left;
@@ -72,9 +75,6 @@ ul {
 li {
   display: inline-block;
   margin: 0 10px;
-}
-a {
-  color: #42b983;
 }
 .list-group-item {
   text-align: left;
