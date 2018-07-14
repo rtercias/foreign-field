@@ -1,11 +1,17 @@
 <template>
   <div class="territories">
+    <header>
+      <b-dropdown class="group-codes m-md-2">
+        <span slot="button-content">{{groupCode || "Group Code"}}</span>
+        <b-dropdown-header>Select Group Code</b-dropdown-header>
+        <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" @click="setGroupCode(group)">
+          {{group}}
+        </b-dropdown-item>
+      </b-dropdown>
+    </header>
     <b-list-group class="flex-row flex-wrap">
-      <b-list-group-item class="col-md-6" v-for="group in group_codes" v-bind:key="group">
-        <h3>{{ group }}</h3>
-        <b-list-group-item v-for="terr in territoriesByGroup(group)" v-bind:key="terr.id" data-toggle="collapse">
-          <b-link :to="`/territories/${terr.id}`">{{terr.name}} - {{territoryCities(terr.id)}}</b-link>
-        </b-list-group-item>
+      <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="col-md-6">
+        <b-link :to="`/territories/${terr.id}`">{{terr.name}}{{territoryCities(terr.id)}}</b-link>
       </b-list-group-item>
     </b-list-group>
   </div>
@@ -13,7 +19,7 @@
 
 <script>
 import axios from 'axios';
-import { flatten, uniq, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 // import { mapActions } from 'vuex';
 
 export default {
@@ -21,39 +27,88 @@ export default {
   data() {
     return {
       congId: 1,
+      groupCode: '',
       territories: [],
-      group_codes: [],
+      groupCodes: [],
+      cities: [],
     };
   },
   methods: {
-    territoriesByGroup(group) {
-      return this.territories.filter(t => t.group_code === group);
+    territoryCities(terrId) {
+      if (this.cities) {
+        const cities = this.cities.filter(c => c.id === terrId) || [];
+        const mapped = cities.map(c => c.city);
+        
+        if (mapped.length) {
+          return ` - ${mapped.join(',')}`;
+        }
+      }
+
+      return '';
     },
 
-    territoryCities(terrId) {
-      const cities = this.territories.filter(t => t.id === terrId)
-        .map(t => t.addresses.map(a => a.city));
-      return uniq(flatten(cities)).join(',');
+    async getTerritories() {
+      const response = await axios({
+        url: 'http://localhost:4000/graphql',
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `{ territories (congId: ${this.congId}, group_code: "${this.groupCode}") { id name type }}`
+        }
+      });
+
+      return response.data.data.territories;
+    },
+
+    async getGroupCodes() {
+      const response = await axios({
+        url: 'http://localhost:4000/graphql',
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `{ territories (congId: ${this.congId}) { group_code }}`
+        }
+      });
+
+      const territories = response.data.data.territories;
+
+      return uniqBy(territories, 'group_code').map(g => g.group_code).sort();
+    },
+
+    async setGroupCode(value) {
+      this.groupCode = value;
+      this.territories = await this.getTerritories();
+      this.getCities().then((allCities) => {
+        if (allCities) {
+          this.cities = allCities.filter(c => c.group_code === this.groupCode);
+        }
+      });
+    },
+
+    async getCities() {
+      const response = await axios({
+        url: 'http://localhost:4000/graphql',
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `{ territoriesByCity (congId: ${this.congId}) { city name group_code }}`
+        }
+      });
+
+      return response.data.data.territories;
     }
     // ...mapActions('territories', {
     //   getTerritoriesByCong: 'getTerritoriesByCong'
     // })
   },
   async mounted() {
-    const response = await axios({
-      url: 'http://localhost:4000/graphql',
-      method: 'post',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: {
-        query: `{ territories (congId: 1) { group_code id name type addresses { city } }}`
-      }
-    });
-
-    this.territories = response.data.data.territories.filter(t => t.addresses.length);
-    this.group_codes = uniqBy(this.territories, 'group_code').map(g => g.group_code).sort();
-
+    this.groupCodes = await this.getGroupCodes();
     // this.getTerritoriesByCong(1);
   },
 }
@@ -61,6 +116,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+header {
+  display: flex;
+}
 .list-group {
   display: flex;
 }
