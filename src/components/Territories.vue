@@ -11,7 +11,9 @@
     </header>
     <b-list-group class="flex-row flex-wrap">
       <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="col-md-6">
-        <b-link :to="`/territories/${terr.id}`">{{terr.name}}{{territoryCities(terr.id)}}</b-link>
+        <b-link :to="`/territories/${terr.id}`">
+          {{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span>
+        </b-link>
       </b-list-group-item>
     </b-list-group>
   </div>
@@ -34,19 +36,6 @@ export default {
     };
   },
   methods: {
-    territoryCities(terrId) {
-      if (this.cities) {
-        const cities = this.cities.filter(c => c.id === terrId) || [];
-        const mapped = cities.map(c => c.city);
-        
-        if (mapped.length) {
-          return ` - ${mapped.join(',')}`;
-        }
-      }
-
-      return '';
-    },
-
     async getTerritories() {
       const response = await axios({
         url: 'http://localhost:4000/graphql',
@@ -55,7 +44,7 @@ export default {
           'Content-Type': 'application/json'
         },
         data: {
-          query: `{ territories (congId: ${this.congId}, group_code: "${this.groupCode}") { id name type }}`
+          query: `{ territories (congId: ${this.congId}, group_code: "${this.groupCode}") { id name type city }}`
         }
       });
 
@@ -75,6 +64,8 @@ export default {
       });
 
       const territories = response.data.data.territories;
+      const group = sessionStorage.getItem('group-code');
+      if (group) this.setGroupCode(group);
 
       return uniqBy(territories, 'group_code').map(g => g.group_code).sort();
     },
@@ -82,30 +73,8 @@ export default {
     async setGroupCode(value) {
       this.groupCode = value;
       this.territories = await this.getTerritories();
-      this.getCities().then((allCities) => {
-        if (allCities) {
-          this.cities = allCities.filter(c => c.group_code === this.groupCode);
-        }
-      });
+      sessionStorage.setItem('group-code', value);
     },
-
-    async getCities() {
-      const response = await axios({
-        url: 'http://localhost:4000/graphql',
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `{ territoriesByCity (congId: ${this.congId}) { city name group_code }}`
-        }
-      });
-
-      return response.data.data.territories;
-    }
-    // ...mapActions('territories', {
-    //   getTerritoriesByCong: 'getTerritoriesByCong'
-    // })
   },
   async mounted() {
     this.groupCodes = await this.getGroupCodes();
