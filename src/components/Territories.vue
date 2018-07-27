@@ -1,17 +1,9 @@
 <template>
   <div class="territories">
-    <header>
-      <b-dropdown class="group-codes m-md-2">
-        <span slot="button-content">{{groupCode || "Group Code"}}</span>
-        <b-dropdown-header>Select Group Code</b-dropdown-header>
-        <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" @click="setGroupCode(group)">
-          {{group}}
-        </b-dropdown-item>
-      </b-dropdown>
-    </header>
+    <h4>Service Group: {{groupCode}}</h4>
     <b-list-group class="flex-row flex-wrap">
       <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="col-md-6">
-        <b-link :to="`/territories/${terr.id}`">
+        <b-link :to="`/territories/${groupCode}/${terr.id}`">
           {{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span>
         </b-link>
       </b-list-group-item>
@@ -26,6 +18,11 @@ import { uniqBy } from 'lodash';
 
 export default {
   name: 'Territories',
+  async beforeRouteUpdate (to, from, next) {
+    this.groupCode = to.params.group;
+    this.territories = await this.getTerritories();
+    next();
+  },
   data() {
     return {
       congId: 1,
@@ -38,7 +35,7 @@ export default {
   methods: {
     async getTerritories() {
       const response = await axios({
-        url: 'http://localhost:4000/graphql',
+        url: 'http://api.foreignfield.com/graphql',
         method: 'post',
         headers: {
           'Content-Type': 'application/json'
@@ -53,7 +50,7 @@ export default {
 
     async getGroupCodes() {
       const response = await axios({
-        url: 'http://localhost:4000/graphql',
+        url: 'http://api.foreignfield.com/graphql',
         method: 'post',
         headers: {
           'Content-Type': 'application/json'
@@ -76,9 +73,10 @@ export default {
       sessionStorage.setItem('group-code', value);
     },
   },
+
   async mounted() {
-    this.groupCodes = await this.getGroupCodes();
-    // this.getTerritoriesByCong(1);
+    this.groupCode = this.$route.params.group;
+    this.territories = await this.getTerritories();
   },
 }
 </script>
@@ -87,12 +85,14 @@ export default {
 <style scoped>
 header {
   display: flex;
+  padding: 0 1.25rem;
 }
 .list-group {
   display: flex;
 }
-h3 {
-  margin: 40px 0 0;
+h4 {
+  padding: 1.25rem;
+  margin: 0;
   text-align: left;
 }
 ul {

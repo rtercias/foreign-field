@@ -32,9 +32,8 @@ export default {
   },
   methods: {
     async getTerritory(id) {
-      console.log('terrId', id);
       const response = await axios({
-        url: 'http://localhost:4000/graphql',
+        url: 'http://api.foreignfield.com/graphql',
         method: 'post',
         headers: {
           'Content-Type': 'application/json'
@@ -100,9 +99,9 @@ header {
   text-align: left;
 }
 
-@media (min-width: 769px) {
+/* @media (min-width: 769px) {
   .columns {
     columns: 2;
   }
-}
+} */
 </style>
