@@ -8,7 +8,8 @@
       <b-list-group-item class="col-sm-12" v-for="address in addresses" v-bind:key="address.id" data-toggle="collapse">
         <p class="addresses">
           {{address.addr1}} {{address.addr2}}<br/>
-          {{address.city}} {{address.state}} {{address.postalCode}}
+          {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+          {{address.notes}}
         </p>
       </b-list-group-item>
     </b-list-group>
@@ -39,7 +40,7 @@ export default {
           'Content-Type': 'application/json'
         },
         data: {
-          query: `{ addresses (terrId: ${id}) { id addr1 addr2 city state postalCode phone longitude latitude territory { name } }}`
+          query: `{ addresses (terrId: ${id}) { id addr1 addr2 city state postalCode phone longitude latitude territory { name } notes }}`
         }
       });
 
@@ -99,9 +100,9 @@ header {
   text-align: left;
 }
 
-/* @media (min-width: 769px) {
+@media (min-width: 769px) {
   .columns {
     columns: 2;
   }
-} */
+}
 </style>

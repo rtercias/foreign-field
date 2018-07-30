@@ -1,6 +1,14 @@
 <template>
   <div class="territories">
-    <h4>Service Group: {{groupCode}}</h4>
+    <header class="row align-items-center justify-content-between">
+      <h4>Service Group: {{groupCode}}</h4>
+      <b-dropdown right>
+        <span slot="button-content">{{availability}}</span>
+        <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="setAvailability(avail)">
+          <font-awesome-icon icon="check" v-if="availability === avail" /> {{avail}}
+        </b-dropdown-item>
+      </b-dropdown>
+    </header>
     <b-list-group class="flex-row flex-wrap">
       <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="col-md-6">
         <b-link :to="`/territories/${groupCode}/${terr.id}`">
@@ -13,7 +21,6 @@
 
 <script>
 import axios from 'axios';
-import { uniqBy } from 'lodash';
 // import { mapActions } from 'vuex';
 
 export default {
@@ -28,8 +35,14 @@ export default {
       congId: 1,
       groupCode: '',
       territories: [],
-      groupCodes: [],
       cities: [],
+      availability: 'All',
+      availabilityFilters: [
+        'All',
+        'Available',
+        'Checked Out',
+        'Recently Worked',
+      ],
     };
   },
   methods: {
@@ -41,41 +54,27 @@ export default {
           'Content-Type': 'application/json'
         },
         data: {
-          query: `{ territories (congId: ${this.congId}, group_code: "${this.groupCode}") { id name type city }}`
+          query: `{ territories (congId: ${this.congId}, group_code: "${this.groupCode}") { id name type city status }}`
         }
       });
 
-      return response.data.data.territories;
+      if (this.availability === 'All') {
+        return response.data.data.territories;
+      }
+
+      return response.data.data.territories.filter(t => t.status === this.availability);
     },
 
-    async getGroupCodes() {
-      const response = await axios({
-        url: 'http://api.foreignfield.com/graphql',
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `{ territories (congId: ${this.congId}) { group_code }}`
-        }
-      });
-
-      const territories = response.data.data.territories;
-      const group = sessionStorage.getItem('group-code');
-      if (group) this.setGroupCode(group);
-
-      return uniqBy(territories, 'group_code').map(g => g.group_code).sort();
-    },
-
-    async setGroupCode(value) {
-      this.groupCode = value;
+    async setAvailability(value) {
+      this.availability = value;
       this.territories = await this.getTerritories();
-      sessionStorage.setItem('group-code', value);
-    },
+      sessionStorage.setItem('availability', value);
+    }
   },
 
   async mounted() {
     this.groupCode = this.$route.params.group;
+    this.availability = sessionStorage.getItem('availability');
     this.territories = await this.getTerritories();
   },
 }
@@ -84,16 +83,13 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 header {
-  display: flex;
-  padding: 0 1.25rem;
+  padding: 1.25rem 2rem;
 }
 .list-group {
   display: flex;
 }
 h4 {
-  padding: 1.25rem;
   margin: 0;
-  text-align: left;
 }
 ul {
   list-style-type: none;
@@ -105,5 +101,15 @@ li {
 }
 .list-group-item {
   text-align: left;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  padding-left: 0;
+}
+
+@media print {
+  .columns {
+    columns: 2;
+  }
 }
 </style>
