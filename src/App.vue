@@ -30,11 +30,10 @@ export default {
   name: 'app',
   components: {
     Home,
-    Territories
+    Territories,
   },
   watch: {
     '$route' (to) {
-      console.log('route changed');
       this.groupCode = to.params.group;
     }
   },
@@ -48,7 +47,7 @@ export default {
   methods: {
     async getGroupCodes() {
       const response = await axios({
-        url: 'http://api.foreignfield.com/graphql',
+        url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
           'Content-Type': 'application/json'

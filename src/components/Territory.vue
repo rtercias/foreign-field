@@ -34,7 +34,7 @@ export default {
   methods: {
     async getTerritory(id) {
       const response = await axios({
-        url: 'http://api.foreignfield.com/graphql',
+        url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
           'Content-Type': 'application/json'

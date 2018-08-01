@@ -16,24 +16,29 @@
             <h5>{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
           </b-link>
           <div class="btn-group" role="group" aria-label="Territory buttons">
+            <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status==='Available'">check out</b-btn>
+            <b-button variant="outline-info" v-if="terr.status==='Checked Out'" @click="checkinTerritory(terr)">check in</b-button>
             <b-button class="recently-worked-button" variant="disabled" v-if="terr.status === 'Recently Worked'" v-b-tooltip.hover title="Recently Worked">
               <font-awesome-icon icon="ban" />
             </b-button>
-            <b-button variant="info" v-if="terr.status==='Available'" @click="checkoutTerritory(terr)">check out</b-button>
-            <b-button variant="outline-info" v-if="terr.status==='Checked Out'" @click="checkinTerritory(terr)">check in</b-button>
           </div>
         </div>
       </b-list-group-item>
     </b-list-group>
+    <CheckoutModal></CheckoutModal>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import CheckoutModal from './CheckoutModal.vue';
 // import { mapActions } from 'vuex';
 
 export default {
   name: 'Territories',
+  components: {
+    CheckoutModal,
+  },
   async beforeRouteUpdate (to, from, next) {
     this.groupCode = to.params.group;
     this.territories = await this.getTerritories();
@@ -45,6 +50,7 @@ export default {
       publisherId: 43,
       groupCode: '',
       territories: [],
+      selectedTerritory: {},
       cities: [],
       availability: '',
       availabilityFilters: [
@@ -58,7 +64,7 @@ export default {
   methods: {
     async getTerritories() {
       const response = await axios({
-        url: 'http://api.foreignfield.com/graphql',
+        url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
           'Content-Type': 'application/json'
@@ -99,7 +105,7 @@ export default {
 
     async checkoutTerritory(territory) {
       await axios({
-        url: 'http://api.foreignfield.com/graphql',
+        url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
           'Content-Type': 'application/json'
@@ -123,7 +129,7 @@ export default {
 
     async checkinTerritory(territory) {
       await axios({
-        url: 'http://api.foreignfield.com/graphql',
+        url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
           'Content-Type': 'application/json'
@@ -154,7 +160,6 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 header {
   padding: 1.25rem 2rem;
@@ -192,6 +197,10 @@ li {
 }
 .dropdown-item.active, .dropdown-item:active {
   padding-left: 0;
+}
+
+.list-group-item .checkout-publisher-dropdown>button.btn.btn-link {
+  padding: 0 !important;
 }
 
 @media print {
