@@ -12,20 +12,20 @@
     <b-list-group class="flex-row flex-wrap">
       <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6">
         <div class="row justify-content-between">
-          <b-link :to="`/territories/${groupCode}/${terr.id}`">
+          <b-link :to="`/territories/${groupCode}/${terr.id}`" class="w-75">
             <h5>{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
           </b-link>
-          <div class="btn-group" role="group" aria-label="Territory buttons">
+          <div class="btn-group w-25 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
             <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status==='Available'">check out</b-btn>
             <b-button variant="outline-info" v-if="terr.status==='Checked Out'" @click="checkinTerritory(terr)">check in</b-button>
-            <b-button class="recently-worked-button" variant="disabled" v-if="terr.status === 'Recently Worked'" v-b-tooltip.hover title="Recently Worked">
+            <b-button class="recently-worked-button" variant="disabled" v-if="terr.status === 'Recently Worked'" v-b-tooltip.hover.boundary.viewport title="Recently Worked">
               <font-awesome-icon icon="ban" />
             </b-button>
           </div>
         </div>
       </b-list-group-item>
     </b-list-group>
-    <CheckoutModal></CheckoutModal>
+    <CheckoutModal v-bind:cong-id="congId"></CheckoutModal>
   </div>
 </template>
 
@@ -191,6 +191,9 @@ li {
 }
 .list-group-item h5 {
   font-weight: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .recently-worked-button {
   background: transparent;
