@@ -16,7 +16,7 @@
             <h5>{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
           </b-link>
           <div class="btn-group w-25 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
-            <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status==='Available'">check out</b-btn>
+            <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status==='Available'" @click="selectedTerritory = terr">check out</b-btn>
             <b-button variant="outline-info" v-if="terr.status==='Checked Out'" @click="checkinTerritory(terr)">check in</b-button>
             <b-button class="recently-worked-button" variant="disabled" v-if="terr.status === 'Recently Worked'" v-b-tooltip.hover.boundary.viewport title="Recently Worked">
               <font-awesome-icon icon="ban" />
@@ -25,7 +25,7 @@
         </div>
       </b-list-group-item>
     </b-list-group>
-    <CheckoutModal v-bind:cong-id="congId"></CheckoutModal>
+    <CheckoutModal v-bind:cong-id="congId" v-bind:territory-id="selectedTerritory.id" v-on:territory-checkedout="refreshTerritories"></CheckoutModal>
   </div>
 </template>
 
@@ -103,30 +103,6 @@ export default {
       sessionStorage.setItem('availability', value);
     },
 
-    async checkoutTerritory(territory) {
-      await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
-            checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-              status 
-            }
-          }`,
-          variables: {
-            terrId: territory.id,
-            pubId: this.publisherId,
-            user: territory.proxyUser
-          }
-        }
-      });
-      
-      territory.status = 'Checked Out';
-    },
-
     async checkinTerritory(territory) {
       await axios({
         url: process.env.VUE_APP_ROOT_API,
@@ -149,14 +125,19 @@ export default {
       });
 
       territory.status = 'Recently Worked';
+    },
+    
+    async refreshTerritories() {
+      this.territories = await this.getTerritories();
     }
   },
 
   async mounted() {
     this.groupCode = this.$route.params.group;
     this.availability = sessionStorage.getItem('availability') || 'Available';
-    this.territories = await this.getTerritories();
+    await this.refreshTerritories();
   },
+
 }
 </script>
 
