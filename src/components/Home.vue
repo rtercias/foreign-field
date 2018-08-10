@@ -4,14 +4,37 @@
     <p>
       This is the home page
     </p>
+    <button @click="login">Login</button>
   </div>
 </template>
 
 <script>
+import Vue from 'vue'
+
 export default {
   name: 'Home',
+  data: () => {
+    return {
+      authenticated: false,
+    };
+  },
   props: {
     msg: String
+  },
+  methods: {
+    login() {
+      Vue.googleAuth().directAccess();
+      Vue.googleAuth().signIn((authorizationCode) => { 
+        // things to do when sign-in succeeds
+        this.authenticated = true;
+        console.log('Yes, I am now authenticated', authorizationCode);
+          
+      }, function (error) {
+        // things to do when sign-in fails
+        this.authenticated = false;
+        console.log('Nope, authentication failed', error);
+      });
+    }
   }
 }
 </script>
