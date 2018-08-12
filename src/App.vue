@@ -57,7 +57,7 @@ export default {
     login() {
       this.$store.dispatch('auth/login').then((profile) => {
         this.name = profile.getName();
-        this.getGroupCodes();
+        this.loadGroupCodes();
       });
     },
 
@@ -65,7 +65,7 @@ export default {
      this.$store.dispatch('auth/logout');
     },
 
-    async getGroupCodes() {
+    async loadGroupCodes() {
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
@@ -81,7 +81,7 @@ export default {
       // const group = sessionStorage.getItem('group-code');
       // if (group) this.setGroupCode(group);
 
-      return uniqBy(territories, 'group_code').map(g => g.group_code).sort();
+      this.groupCodes = uniqBy(territories, 'group_code').map(g => g.group_code).sort();
     },
 
     async setGroupCode(value) {
