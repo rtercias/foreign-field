@@ -18,7 +18,8 @@
 
 <script>
 import axios from 'axios';
-import { flatten, uniq } from 'lodash';
+import flatten from 'lodash/flatten';
+import uniq from 'lodash/uniq';
 
 export default {
   name: 'Territory',

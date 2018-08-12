@@ -6,11 +6,17 @@
         <b-collapse is-nav id="nav_dropdown_collapse">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
-            <!-- <b-nav-item to="/territories">Territories</b-nav-item> -->
-            <b-nav-item-dropdown class="group-codes" text="Territories">
+            <b-nav-item-dropdown v-if="isAuthenticated" class="group-codes" text="Territories">
               <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
                 <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
               </b-dropdown-item>
+            </b-nav-item-dropdown>
+          </b-navbar-nav>
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item v-if="!isAuthenticated" right @click="login">Login</b-nav-item>
+            <b-nav-item-dropdown v-if="isAuthenticated" right>
+              <span slot="text">{{name}}</span>
+              <b-dropdown-item @click="logout">Logout</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-collapse>
@@ -22,7 +28,7 @@
 
 <script>
 import axios from 'axios';
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import Home from './components/Home'
 import Territories from './components/Territories';
 
@@ -34,17 +40,31 @@ export default {
   },
   watch: {
     '$route' (to) {
-      this.groupCode = to.params.group;
+      if (to.params.group) {
+        this.groupCode = to.params.group;
+      }
     }
   },
   data() {
     return {
+      name: '',
       congId: 1,
       groupCode: this.$route.params.group,
       groupCodes: [],
     };
   },
   methods: {
+    login() {
+      this.$store.dispatch('auth/login').then((profile) => {
+        this.name = profile.getName();
+        this.getGroupCodes();
+      });
+    },
+
+    logout() {
+     this.$store.dispatch('auth/logout');
+    },
+
     async getGroupCodes() {
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
@@ -71,13 +91,20 @@ export default {
       // this.territories = await this.getTerritories();
       // sessionStorage.setItem('group-code', value);
     },
-
+    
   },
 
-  async mounted() {
-    this.groupCodes = await this.getGroupCodes();
+  computed: {
+    isAuthenticated() {
+      return this.$store.state.auth.isAuthenticated;
+    },
   },
+
+  mounted() {
+    this.login();
+  }
 }
+
 </script>
 
 <style>

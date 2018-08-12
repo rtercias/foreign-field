@@ -11,7 +11,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCheck, faBan } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-Vue.use(GoogleAuth, { client_id: '658139066753-0r04v3m8cpqlbj75rr3gc7gnm4ib1u6i.apps.googleusercontent.com' });
+Vue.use(GoogleAuth, { client_id: process.env.VUE_APP_CLIENT_ID });
 Vue.googleAuth().load();
 
 library.add(faCheck, faBan);
