@@ -1,5 +1,5 @@
 import VueRouter from 'vue-router';
-// import { store } from './store';
+import { store } from './store';
 import Home from './components/Home';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
@@ -14,14 +14,12 @@ export const router = new VueRouter({
   routes
 });
 
-// router.beforeEach((to, from, next) => {
-  // if (to.matched.some(r => r.meta.requiresAuth)) {
-  //   if (!store.getters['auth/isAuthenticated']) {
-  //     next({
-  //       path: '/',
-  //     });
-  //   }
-  // } else {
-  //   next();
-  // }
-// });
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(r => r.meta.requiresAuth) && !store.getters['auth/isAuthenticated']) {
+    next({
+      name: 'home',
+    });
+  } else {
+    next();
+  }
+});
