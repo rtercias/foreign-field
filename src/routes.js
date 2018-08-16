@@ -13,16 +13,7 @@ const routes = [
     props: true, 
     meta: { 
       requiresAuth: true,
-      permissions: [
-        {
-          role: ['Admin', 'TS', 'SO', 'GO'],
-          access: (user, to) => { 
-            console.log(user); 
-            return user.id === to.params.id; 
-          },
-          redirect: 'home'
-        }
-      ],
+      permissions: ['Admin', 'TS'],
     } 
   },
   { 
@@ -39,10 +30,23 @@ export const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(r => r.meta.requiresAuth) && !store.getters['auth/isAuthenticated']) {
-    next({
-      name: 'home',
-    });
+  if (to.matched.some(r => r.meta.requiresAuth)) {
+    const isAuthenticated = store.getters['auth/isAuthenticated'];
+    const user = store.getters['auth/user'];
+    let hasPermission = false;
+    
+    if (user) {
+      hasPermission = to.meta.permissions.includes(user.role);
+    }
+      
+    if (!isAuthenticated || !hasPermission) {
+      store.dispatch('auth/forceout');
+      next({
+        name: 'home',
+      });
+    } else {
+      next();
+    }
   } else {
     next();
   }

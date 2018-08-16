@@ -15,6 +15,7 @@ export const auth = {
     isForcedOut: false,
     name: '',
     user: undefined,
+    congId: 0,
   },
 
   getters: {
@@ -36,6 +37,13 @@ export const auth = {
     user: state => {
       return state.user;
     },
+    congId: state => {
+      if (state.user && state.user.congregation) {
+        return state.user.congregation.id;
+      }
+
+      return 0;
+    }
   },
 
   mutations: {
@@ -47,6 +55,7 @@ export const auth = {
     LOGIN_SUCCESS(state, name) {
       state.isAuthenticated = true;
       state.isPending = false;
+      state.isForcedOut = false;
       state.name = name;
     },
 

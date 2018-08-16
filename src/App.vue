@@ -6,7 +6,8 @@
         <b-collapse is-nav id="nav_dropdown_collapse">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item-dropdown v-if="isAuthenticated" class="group-codes" text="Territories">
+            <!--TODO: move Territories dropdown into its own component -->
+            <b-nav-item-dropdown v-if="checkPermission" class="group-codes" text="Territories">
               <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
                 <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
               </b-dropdown-item>
@@ -27,7 +28,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import axios from 'axios';
 import uniqBy from 'lodash/uniqBy';
@@ -50,9 +50,11 @@ export default {
   data() {
     return {
       name: '',
-      congId: 1,
       groupCode: this.$route.params.group,
       groupCodes: [],
+      permissions: {
+        territories: ['Admin', 'TS']
+      }
     };
   },
   methods: {
@@ -60,20 +62,14 @@ export default {
       this.$store.dispatch('auth/login').then(async (profile) => {
         try {
           const username = profile.getEmail();
-          console.log('login', username);
           await this.$store.dispatch('auth/authorize', username);
           
           const user = this.$store.state.auth.user;
-          console.log('user', user);
           if (!user) {
             this.$store.dispatch('auth/forceout');
             throw new Error('User not found');
           }
           
-          Vue.prototype.$user.set({
-            ...profile,
-            ...this.$store.state.auth.user
-          });
           this.name = profile.getName();
           this.loadGroupCodes();
 
@@ -115,14 +111,18 @@ export default {
       // this.territories = await this.getTerritories();
       // sessionStorage.setItem('group-code', value);
     },
-    
   },
 
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
       isAuthorized: 'auth/isAuthorized',
-    })
+      user: 'auth/user',
+      congId: 'auth/congId'
+    }),
+    checkPermission() {
+      return this.user && this.permissions.territories.includes(this.user.role);
+    }
   },
 
   mounted() {

@@ -2,7 +2,7 @@
   <div class="hello">
     <p>
       <span v-if="isAuthenticated && isAuthorized">Hello {{name}}</span>
-      <span v-if="!isAuthenticated">Welcome to Foreign Field territory management</span>
+      <span v-if="!isAuthenticated && !isForcedOut">Welcome to Foreign Field territory management</span>
       <br/>
       <span v-if="isForcedOut">Sorry {{name}}, you are not authorized to use this app.</span>
     </p>
