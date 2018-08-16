@@ -6,8 +6,32 @@ import Territory from './components/Territory';
 
 const routes = [
   { name: 'home', path: '/', component: Home },
-  { name: 'group', path: '/territories/:group', component: Territories, props: true, meta: { requiresAuth: true } },
-  { name: 'territory', path: '/territories/:group/:id', component: Territory, props: true, meta: { requiresAuth: true } },
+  { 
+    name: 'group', 
+    path: '/territories/:group', 
+    component: Territories, 
+    props: true, 
+    meta: { 
+      requiresAuth: true,
+      permissions: [
+        {
+          role: ['Admin', 'TS', 'SO', 'GO'],
+          access: (user, to) => { 
+            console.log(user); 
+            return user.id === to.params.id; 
+          },
+          redirect: 'home'
+        }
+      ],
+    } 
+  },
+  { 
+    name: 'territory', 
+    path: '/territories/:group/:id', 
+    component: Territory, 
+    props: true, 
+    meta: {} 
+  },
 ];
 
 export const router = new VueRouter({

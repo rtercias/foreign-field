@@ -1,25 +1,29 @@
 <template>
   <div class="hello">
     <p>
-      <span v-if="isAuthenticated">Hello {{name}}</span>
+      <span v-if="isAuthenticated && isAuthorized">Hello {{name}}</span>
       <span v-if="!isAuthenticated">Welcome to Foreign Field territory management</span>
+      <br/>
+      <span v-if="isForcedOut">Sorry {{name}}, you are not authorized to use this app.</span>
     </p>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'Home',
   methods: {
     
   },
   computed: {
-    isAuthenticated() {
-      return this.$store.state.auth.isAuthenticated;
-    },
-    name() {
-      return this.$store.state.auth.name;
-    }
+    ...mapGetters({
+      isAuthenticated: 'auth/isAuthenticated',
+      isAuthorized: 'auth/isAuthorized',
+      isForcedOut: 'auth/isForcedOut',
+      name: 'auth/name'
+    })
   },
 }
 </script>

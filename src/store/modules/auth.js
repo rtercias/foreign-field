@@ -1,15 +1,20 @@
 import Vue from 'vue';
+import axios from 'axios';
 
 const LOGIN = 'LOGIN';
 const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 const LOGOUT = 'LOGOUT';
+const AUTHORIZE = 'AUTHORIZE';
+const FORCEOUT = 'FORCEOUT';
 
 export const auth = {
   namespaced: true,
   state: {
     isAuthenticated: false,
     isPending: false,
+    isForcedOut: false,
     name: '',
+    user: undefined,
   },
 
   getters: {
@@ -21,6 +26,15 @@ export const auth = {
     },
     name: state => {
       return state.name;
+    },
+    isAuthorized: state => {
+      return !!state.user;
+    },
+    isForcedOut: state => {
+      return state.isForcedOut;
+    },
+    user: state => {
+      return state.user;
     },
   },
 
@@ -38,6 +52,18 @@ export const auth = {
 
     LOGOUT(state) {
       state.isAuthenticated = false;
+      state.name = '';
+    },
+
+    AUTHORIZE(state, user) {
+      state.user = user;
+    },
+
+    FORCEOUT(state) {
+      state.user = undefined;
+      state.isAuthenticated = false;
+      state.isPending = false;
+      state.isForcedOut = true;
       state.name = '';
     }
   },
@@ -67,6 +93,45 @@ export const auth = {
         console.log('logout success');
       });
     },
+
+    async authorize({ commit }, username) {
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `query Publisher($username: String) {
+            user (username: $username) {
+              id 
+              username
+              role
+              role_description
+              congregation {
+                id
+                name
+              }
+              status
+            }
+          }`,
+          variables: {
+            username: username,
+          }
+        }
+      });
+      
+      if (!response || !response.data || !response.data.data || !response.data.data.user) {
+        return null;
+      }
+
+      const user = response.data.data.user;
+      commit(AUTHORIZE, user);
+    },
+
+    forceout({ commit }) {
+      commit(FORCEOUT);
+    }
 
   }
 }

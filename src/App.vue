@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
 import axios from 'axios';
 import uniqBy from 'lodash/uniqBy';
 import Home from './components/Home'
@@ -55,9 +57,30 @@ export default {
   },
   methods: {
     login() {
-      this.$store.dispatch('auth/login').then((profile) => {
-        this.name = profile.getName();
-        this.loadGroupCodes();
+      this.$store.dispatch('auth/login').then(async (profile) => {
+        try {
+          const username = profile.getEmail();
+          console.log('login', username);
+          await this.$store.dispatch('auth/authorize', username);
+          
+          const user = this.$store.state.auth.user;
+          console.log('user', user);
+          if (!user) {
+            this.$store.dispatch('auth/forceout');
+            throw new Error('User not found');
+          }
+          
+          Vue.prototype.$user.set({
+            ...profile,
+            ...this.$store.state.auth.user
+          });
+          this.name = profile.getName();
+          this.loadGroupCodes();
+
+        } catch (exception) {
+          this.$store.dispatch('auth/forceout');
+          console.error('User is unauthorized');
+        }
       });
     },
 
@@ -96,9 +119,10 @@ export default {
   },
 
   computed: {
-    isAuthenticated() {
-      return this.$store.state.auth.isAuthenticated;
-    },
+    ...mapGetters({
+      isAuthenticated: 'auth/isAuthenticated',
+      isAuthorized: 'auth/isAuthorized',
+    })
   },
 
   mounted() {
