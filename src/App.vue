@@ -124,10 +124,6 @@ export default {
       return this.user && this.permissions.territories.includes(this.user.role);
     }
   },
-
-  mounted() {
-    this.login();
-  }
 }
 
 </script>

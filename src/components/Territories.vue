@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import axios from 'axios';
 import CheckoutModal from './CheckoutModal.vue';
 // import { mapActions } from 'vuex';
@@ -46,8 +47,6 @@ export default {
   },
   data() {
     return {
-      congId: 1,
-      publisherId: 43,
       groupCode: '',
       territories: [],
       selectedTerritory: {},
@@ -118,8 +117,8 @@ export default {
           }`,
           variables: {
             terrId: territory.id,
-            pubId: this.publisherId,
-            user: territory.proxyUser
+            pubId: this.user.id,
+            user: this.user.username
           }
         }
       });
@@ -137,6 +136,13 @@ export default {
     this.availability = sessionStorage.getItem('availability') || 'Available';
     await this.refreshTerritories();
   },
+
+  computed: {
+    ...mapGetters({
+      congId: 'auth/congId',
+      user: 'auth/user',
+    }),
+  }
 
 }
 </script>

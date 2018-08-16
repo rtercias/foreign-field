@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import axios from 'axios';
 
 export default {
@@ -81,7 +82,7 @@ export default {
           variables: {
             terrId: Number(this.territoryId),
             pubId: this.selectedPublisher.id,
-            user: 'Anonymous' // TODO: set to current user when we have logged-in user info
+            user: this.user.username
           }
         }
       });
@@ -89,6 +90,12 @@ export default {
       this.$emit('territory-checkedout');
       return 'Checked Out';
     },
+  },
+
+  computed: {
+    ...mapGetters({
+      user: 'auth/user',
+    }),
   },
 
   async mounted() {
