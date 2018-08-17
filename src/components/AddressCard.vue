@@ -1,5 +1,5 @@
 <template>
-  <div class="row justify-content-between align-items-center">
+  <div class="row justify-content-between align-items-center pl-2 pr-2">
     <div class="address">
       <h5>{{address.addr1}} {{address.addr2}}</h5>
       <div>
@@ -8,48 +8,57 @@
       </div>
     </div>
     <div class="interaction">
-      <font-awesome-icon class="text-primary response pr-3" v-if="selectedResponse==='home'" icon="home" @click="nextResponse(1)"></font-awesome-icon>
-      <font-awesome-icon class="text-primary response pr-3" v-if="selectedResponse==='minus-circle'" icon="minus-circle" @click="nextResponse(2)"></font-awesome-icon>
-      <font-awesome-icon class="text-success response pr-3" v-if="selectedResponse==='smile'" icon="smile" @click="nextResponse(3)"></font-awesome-icon>
-      <font-awesome-icon class="text-warning response pr-3" v-if="selectedResponse==='frown'" icon="frown" @click="nextResponse(4)"></font-awesome-icon>
-      <font-awesome-icon class="text-danger response pr-3" v-if="selectedResponse==='angry'" icon="angry" @click="nextResponse(0)"></font-awesome-icon>
-      <span :class="{animate: animate, hide: hideResponseText}" class="response-text" @click="hideResponseText=!hideResponseText">{{responseText}}</span>
+      <b-button class="pr-0" variant="link" v-if="selectedResponse==='START'" @click="nextResponse('HOME')">{{selectedResponse}}</b-button>
+      <!-- <b-button class="p-2" variant="link" v-if="selectedResponse==='HOME'" @click="nextResponse('NH')">{{selectedResponse}}</b-button>
+      <b-button class="p-2" variant="link" v-if="selectedResponse==='NH'" @click="nextResponse('START')">{{selectedResponse}}</b-button> -->
+      <font-awesome-layers v-if="selectedResponse==='HOME'" class="text-success fa-3x" @click="nextResponse('NH')">
+        <font-awesome-icon icon="check-circle"></font-awesome-icon>
+      </font-awesome-layers>
+      <font-awesome-layers v-if="selectedResponse==='NH'" class="text-warning fa-3x" @click="nextResponse('START')">
+        <font-awesome-icon icon="circle"></font-awesome-icon>
+        <font-awesome-layers-text value="NH" class="nh-text text-white font-weight-bold"></font-awesome-layers-text>
+      </font-awesome-layers>
     </div>
   </div>
 </template>
 <script>
-const responses = ['home', 'minus-circle', 'smile', 'frown', 'angry'];
-const responseTexts = ['start', 'not home', 'interested', 'not interested', 'angry'];
+import getTime from 'date-fns/get_time';
+
+const responses = ['START', 'HOME', 'NH'];
 
 export default {
   name: 'AddressCard',
-  props: ['address'],
+  props: ['address', 'reset'],
   data() {
     return {
-      storageId: `address-response-${this.address.id}`,
+      storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
       responseText: '',
       animate: false,
       hideResponseText: false,
     }
   },
+  watch: {
+    'reset' () {
+      this.selectedResponse = responses[0];
+    }
+  },
   methods: {
-    nextResponse(index) {
-      this.hideResponseText = false;
-      this.selectedResponse = responses[index];
-      this.responseText = responseTexts[index];
-      window.localStorage.setItem(this.storageId, this.selectedResponse);
+    nextResponse(value) {
+      this.selectedResponse = value;
+      localStorage.setItem(this.storageId, `${this.selectedResponse}-${getTime(new Date())}`);
+    },
+    getStoredItem() {
+      const item = localStorage.getItem(this.storageId);
+      if (item) {
+        return item.split('-')[0];
+      }
 
-      this.animate = true;
-      setTimeout(() => {
-        this.animate = false;
-      }, 3000);
+      return undefined;
     }
   },
   mounted() {
-    this.selectedResponse = window.localStorage.getItem(this.storageId) || 'home';
-    const index = responses.findIndex(t => t === this.selectedResponse);
-    this.responseText = responseTexts[index];
+    this.selectedResponse = this.getStoredItem() || responses[0];
   }
 }
 </script>
@@ -57,55 +66,13 @@ export default {
 .address {
   text-align: left;
 }
-.response {
-  cursor: pointer;
-  font-size: 3.5em;
-  opacity: 0.8;
-}
-.hide {
-  display: none;
-}
-
-@keyframes bottomFadeOut {
-  0% {
-    position: absolute;
-    bottom: 0;
-    opacity: 0;
-  }
-  75% {
-    position: absolute;
-    bottom: 50%;
-    opacity: 0.8;
-  }
-  100% {
-    position: absolute;
-    top: 2px;
-    opacity: 0;
-  }
+.nh-text {
+  font-size: 0.5em;
 }
 
 .interaction {
+  cursor: pointer;
   overflow: hidden;
-}
-.response-text {
-  font-weight: bold;
-  font-size: 1rem;
-  position: absolute;
-  right: 0;
-  bottom: -35px;
-  opacity: 0;
-  width: 5.2rem;
-  text-align: center;
-  color: black;
-}
-.animate {
-  animation-name: bottomFadeOut;
-  animation-duration: 5s;
-  animation-delay: 0s;
-  text-align: center;
-}
-.fa-home {
-  margin-right: -3px;
 }
 
 @media print {

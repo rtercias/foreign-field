@@ -2,11 +2,14 @@
   <div class="territory">
     <header>
       <h3>{{getCities()}}</h3>
-      <h3>{{getTerritoryName()}}</h3>
+      <div class="row align-items-baseline">
+        <b-button variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
+        <h3>{{getTerritoryName()}}</h3>
+      </div>
     </header>
     <b-list-group class="columns">
       <b-list-group-item class="col-sm-12" v-for="address in addresses" v-bind:key="address.id" data-toggle="collapse">
-        <AddressCard v-bind="{address}"></AddressCard>
+        <AddressCard v-bind="{address, reset}"></AddressCard>
       </b-list-group-item>
     </b-list-group>
   </div>
@@ -17,6 +20,8 @@ import axios from 'axios';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
 import AddressCard from './AddressCard.vue';
+import differenceInDays from 'date-fns/difference_in_days';
+
 
 export default {
   name: 'Territory',
@@ -30,6 +35,7 @@ export default {
     return {
       terrId: this.$route.params.id,
       addresses: [],
+      reset: false,
     };
   },
   methods: {
@@ -58,9 +64,32 @@ export default {
     getCities() {
       const cities = this.addresses.map(a => a.city);
       return uniq(flatten(cities)).join(',');
-    }
+    },
+    cleanLocalStorage(force) {
+      if (force && !confirm('Are you sure you want to reset your records?')) {
+        return;
+      }
+
+      const keysToRemove = [];
+      this.reset = true;
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const item = localStorage.getItem(key);
+        const timestamp = item.split('-')[1];
+        if (key.includes('foreignfield-') && 
+        (force || differenceInDays(new Date(Number(timestamp)), new Date()) > 0)) {
+          keysToRemove.push(key);
+        }
+      }
+
+      for (const key of keysToRemove) {
+        localStorage.removeItem(key);
+      }
+    },
   },
   async mounted() {
+    // this.cleanLocalStorage();  TODO: decide whether we want to automatically clean up each user's local storage or not
     await this.getTerritory(this.terrId);
   },
 }
