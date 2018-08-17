@@ -1,7 +1,7 @@
 <template>
   <div class="row justify-content-between align-items-center pl-2 pr-2">
     <div class="address">
-      <h5>{{address.addr1}} {{address.addr2}}</h5>
+      <h5><a :href="mapsUrl" target="_blank">{{address.addr1}}</a> {{address.addr2}}</h5>
       <div>
         {{address.city}} {{address.state}} {{address.postalCode}}<br/>
         {{address.notes}}
@@ -59,6 +59,14 @@ export default {
   },
   mounted() {
     this.selectedResponse = this.getStoredItem() || responses[0];
+  },
+  computed: {
+    mapsUrl() {
+      const addr1 = this.address.addr1 || '';
+      const city = this.address.city || '';
+      const state = this.address.state_province || '';
+      return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
+    }
   }
 }
 </script>
