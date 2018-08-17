@@ -1,17 +1,19 @@
 <template>
-  <div class="row justify-content-between">
-    <p class="address">
-      {{address.addr1}} {{address.addr2}}<br/>
-      {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-      {{address.notes}}
-    </p>
+  <div class="row justify-content-between align-items-center">
+    <div class="address">
+      <h5>{{address.addr1}} {{address.addr2}}</h5>
+      <div>
+        {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+        {{address.notes}}
+      </div>
+    </div>
     <div class="interaction">
-      <font-awesome-icon class="text-primary response pr-2" v-if="selectedResponse==='home'" icon="home" @click="nextResponse(1)"></font-awesome-icon>
-      <font-awesome-icon class="text-primary response pr-2" v-if="selectedResponse==='minus-circle'" icon="minus-circle" @click="nextResponse(2)"></font-awesome-icon>
-      <font-awesome-icon class="text-success response pr-2" v-if="selectedResponse==='smile'" icon="smile" @click="nextResponse(3)"></font-awesome-icon>
-      <font-awesome-icon class="text-warning response pr-2" v-if="selectedResponse==='frown'" icon="frown" @click="nextResponse(4)"></font-awesome-icon>
-      <font-awesome-icon class="text-danger response pr-2" v-if="selectedResponse==='angry'" icon="angry" @click="nextResponse(0)"></font-awesome-icon>
-      <span :class="{animate: animate}" class="response-text">{{responseText}}</span>
+      <font-awesome-icon class="text-primary response pr-3" v-if="selectedResponse==='home'" icon="home" @click="nextResponse(1)"></font-awesome-icon>
+      <font-awesome-icon class="text-primary response pr-3" v-if="selectedResponse==='minus-circle'" icon="minus-circle" @click="nextResponse(2)"></font-awesome-icon>
+      <font-awesome-icon class="text-success response pr-3" v-if="selectedResponse==='smile'" icon="smile" @click="nextResponse(3)"></font-awesome-icon>
+      <font-awesome-icon class="text-warning response pr-3" v-if="selectedResponse==='frown'" icon="frown" @click="nextResponse(4)"></font-awesome-icon>
+      <font-awesome-icon class="text-danger response pr-3" v-if="selectedResponse==='angry'" icon="angry" @click="nextResponse(0)"></font-awesome-icon>
+      <span :class="{animate: animate, hide: hideResponseText}" class="response-text" @click="hideResponseText=!hideResponseText">{{responseText}}</span>
     </div>
   </div>
 </template>
@@ -28,10 +30,12 @@ export default {
       selectedResponse: '',
       responseText: '',
       animate: false,
+      hideResponseText: false,
     }
   },
   methods: {
     nextResponse(index) {
+      this.hideResponseText = false;
       this.selectedResponse = responses[index];
       this.responseText = responseTexts[index];
       window.localStorage.setItem(this.storageId, this.selectedResponse);
@@ -55,9 +59,11 @@ export default {
 }
 .response {
   cursor: pointer;
-  font-size: 4em;
-  z-index: 1;
+  font-size: 3.5em;
   opacity: 0.8;
+}
+.hide {
+  display: none;
 }
 
 @keyframes bottomFadeOut {
@@ -65,32 +71,31 @@ export default {
     position: absolute;
     bottom: 0;
     opacity: 0;
-    z-index: 2;
   }
   75% {
     position: absolute;
     bottom: 50%;
     opacity: 0.8;
-    z-index: 2;
   }
   100% {
     position: absolute;
-    top: 0;
+    top: 2px;
     opacity: 0;
-    z-index: 2;
   }
 }
 
+.interaction {
+  overflow: hidden;
+}
 .response-text {
   font-weight: bold;
   font-size: 1rem;
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: -35px;
   opacity: 0;
   width: 5.2rem;
   text-align: center;
-  z-index: 0;
   color: black;
 }
 .animate {
