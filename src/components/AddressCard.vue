@@ -5,12 +5,14 @@
       {{address.city}} {{address.state}} {{address.postalCode}}<br/>
       {{address.notes}}
     </p>
-    <font-awesome-icon class="text-primary response pr-2" v-if="selectedResponse==='home'" icon="home" @click="nextResponse(1)"></font-awesome-icon>
-    <font-awesome-icon class="text-primary response pr-2" v-if="selectedResponse==='minus-circle'" icon="minus-circle" @click="nextResponse(2)"></font-awesome-icon>
-    <font-awesome-icon class="text-success response pr-2" v-if="selectedResponse==='smile'" icon="smile" @click="nextResponse(3)"></font-awesome-icon>
-    <font-awesome-icon class="text-warning response pr-2" v-if="selectedResponse==='frown'" icon="frown" @click="nextResponse(4)"></font-awesome-icon>
-    <font-awesome-icon class="text-danger response pr-2" v-if="selectedResponse==='angry'" icon="angry" @click="nextResponse(0)"></font-awesome-icon>
-    <span :class="{animate: animate}" class="response-text">{{responseText}}</span>
+    <div class="interaction">
+      <font-awesome-icon class="text-primary response pr-2" v-if="selectedResponse==='home'" icon="home" @click="nextResponse(1)"></font-awesome-icon>
+      <font-awesome-icon class="text-primary response pr-2" v-if="selectedResponse==='minus-circle'" icon="minus-circle" @click="nextResponse(2)"></font-awesome-icon>
+      <font-awesome-icon class="text-success response pr-2" v-if="selectedResponse==='smile'" icon="smile" @click="nextResponse(3)"></font-awesome-icon>
+      <font-awesome-icon class="text-warning response pr-2" v-if="selectedResponse==='frown'" icon="frown" @click="nextResponse(4)"></font-awesome-icon>
+      <font-awesome-icon class="text-danger response pr-2" v-if="selectedResponse==='angry'" icon="angry" @click="nextResponse(0)"></font-awesome-icon>
+      <span :class="{animate: animate}" class="response-text">{{responseText}}</span>
+    </div>
   </div>
 </template>
 <script>
@@ -101,6 +103,11 @@ export default {
   margin-right: -3px;
 }
 
+@media print {
+  .interaction {
+    display: none;
+  }
+}
 
 </style>
 
