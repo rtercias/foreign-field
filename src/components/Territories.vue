@@ -11,33 +11,28 @@
     </header>
     <b-list-group class="flex-row flex-wrap">
       <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6">
-        <div class="row justify-content-between">
-          <b-link :to="`/territories/${groupCode}/${terr.id}`" class="w-75">
-            <h5>{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
-          </b-link>
-          <div class="btn-group w-25 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
-            <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status==='Available'" @click="selectedTerritory = terr">check out</b-btn>
-            <b-button variant="outline-info" v-if="terr.status==='Checked Out'" @click="checkinTerritory(terr)">check in</b-button>
-            <b-button class="recently-worked-button" variant="disabled" v-if="terr.status === 'Recently Worked'" v-b-tooltip.hover.boundary.viewport title="Recently Worked">
-              <font-awesome-icon icon="ban" />
-            </b-button>
-          </div>
-        </div>
+        <TerritoryCard v-bind="{terr, groupCode, selectTerritory, refreshTerritories}"></TerritoryCard>
       </b-list-group-item>
     </b-list-group>
-    <CheckoutModal v-bind:cong-id="congId" v-bind:territory-id="selectedTerritory.id" v-on:territory-checkedout="refreshTerritories"></CheckoutModal>
+    <CheckoutModal 
+      v-bind:cong-id="congId" 
+      v-bind:territory-id="selectedTerritory.id" 
+      v-on:territory-checkedout="refreshTerritories">
+    </CheckoutModal>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import axios from 'axios';
+import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
 // import { mapActions } from 'vuex';
 
 export default {
   name: 'Territories',
   components: {
+    TerritoryCard,
     CheckoutModal,
   },
   async beforeRouteUpdate (to, from, next) {
@@ -61,6 +56,10 @@ export default {
     };
   },
   methods: {
+    selectTerritory(territory) {
+      this.selectedTerritory = territory;
+    },
+
     async getTerritories() {
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
@@ -102,30 +101,6 @@ export default {
       sessionStorage.setItem('availability', value);
     },
 
-    async checkinTerritory(territory) {
-      await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
-            checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-              status 
-            }
-          }`,
-          variables: {
-            terrId: territory.id,
-            pubId: this.user.id,
-            user: this.user.username
-          }
-        }
-      });
-
-      territory.status = 'Recently Worked';
-    },
-    
     async refreshTerritories() {
       this.territories = await this.getTerritories();
     }
