@@ -6,11 +6,7 @@
     </header>
     <b-list-group class="columns">
       <b-list-group-item class="col-sm-12" v-for="address in addresses" v-bind:key="address.id" data-toggle="collapse">
-        <p class="addresses">
-          {{address.addr1}} {{address.addr2}}<br/>
-          {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-          {{address.notes}}
-        </p>
+        <AddressCard v-bind="{address}"></AddressCard>
       </b-list-group-item>
     </b-list-group>
   </div>
@@ -20,9 +16,13 @@
 import axios from 'axios';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
+import AddressCard from './AddressCard.vue';
 
 export default {
   name: 'Territory',
+  components: {
+    AddressCard,
+  },
   async beforeRouteUpdate (to) {
     await this.getTerritory(to.params.id);
   },
@@ -96,9 +96,6 @@ header {
   display: flex;
   justify-content: space-between;
   padding: 0 1.25rem 1.25rem;
-}
-.addresses {
-  text-align: left;
 }
 
 @media (min-width: 769px) {
