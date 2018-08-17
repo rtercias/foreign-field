@@ -2,7 +2,7 @@
   <div class="territory">
     <header>
       <h3>{{getCities()}}</h3>
-      <div class="row align-items-baseline">
+      <div class="row align-items-baseline mr-0">
         <b-button variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
         <h3>{{getTerritoryName()}}</h3>
       </div>
