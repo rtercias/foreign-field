@@ -47,7 +47,7 @@ export default {
           'Content-Type': 'application/json'
         },
         data: {
-          query: `{ addresses (terrId: ${id}) { id addr1 addr2 city state postalCode phone longitude latitude territory { name } notes }}`
+          query: `{ addresses (terrId: ${id}) { id addr1 addr2 city state_province postal_code phone longitude latitude territory { name } notes }}`
         }
       });
 
