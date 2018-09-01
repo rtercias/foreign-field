@@ -10,7 +10,7 @@
       </b-dropdown>
     </header>
     <b-list-group class="flex-row flex-wrap">
-      <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6">
+      <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6 pl-4 pr-4">
         <TerritoryCard v-bind="{terr, groupCode, selectTerritory, refreshTerritories}"></TerritoryCard>
       </b-list-group-item>
     </b-list-group>
@@ -151,6 +151,7 @@ li {
 .list-group-item {
   text-align: left;
   padding: 0.75rem 2rem;
+  border-width: 2px;
 }
 .list-group-item:hover {
   background-color: #f8f9fa;
