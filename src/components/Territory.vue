@@ -1,10 +1,13 @@
 <template>
   <div class="territory">
     <header>
-      <h3>{{getCities()}}</h3>
-      <div class="row align-items-baseline mr-0">
-        <b-button variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
-        <h3>{{getTerritoryName()}}</h3>
+      <div class="row justify-content-between pl-4 pr-4 pt-4">
+        <h3>{{getCities()}}</h3>
+        <h3 class="text-right">{{getTerritoryName()}}</h3>
+      </div>
+      <div class="row justify-content-between pl-4 pr-4 pb-4">
+        <!-- <span>Checked out to: Blah blah blah</span> TODO: uncomment this markup when territory includes checkedout info -->
+        <b-button class="p-0" variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
       </div>
     </header>
     <b-list-group class="columns">
@@ -36,6 +39,7 @@ export default {
       terrId: this.$route.params.id,
       addresses: [],
       reset: false,
+      workInProgress: {},
     };
   },
   methods: {
@@ -55,15 +59,19 @@ export default {
     },
 
     getTerritoryName() {
-      if (this.addresses.length) {
+      if (this.addresses && this.addresses.length) {
         return this.addresses[0].territory.name;
       }
 
       return '';
     },
     getCities() {
-      const cities = this.addresses.map(a => a.city);
-      return uniq(flatten(cities)).join(',');
+      if (this.addresses) {
+        const cities = this.addresses.map(a => a.city);
+        return uniq(flatten(cities)).join(',');
+      }
+
+      return null;
     },
     cleanLocalStorage(force) {
       if (force && !confirm('Are you sure you want to reset your records?')) {
@@ -110,9 +118,6 @@ export default {
     width: 100%;
     float: none;
 }
-h3 {
-  margin: 40px 0 0;
-}
 ul {
   list-style-type: none;
   padding: 0;
@@ -121,12 +126,6 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 1.25rem 1.25rem;
-}
-
 @media (min-width: 769px) {
   .columns {
     columns: 2;

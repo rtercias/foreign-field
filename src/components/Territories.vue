@@ -74,7 +74,15 @@ export default {
               name 
               type 
               city 
-              status 
+              status {
+                status
+                date
+                publisher {
+                  username
+                  firstname
+                  lastname
+                }
+              }
             }
           }`,
           variables: {
@@ -92,7 +100,7 @@ export default {
         return response.data.data.territories;
       }
 
-      return response.data.data.territories.filter(t => t.status === this.availability);
+      return response.data.data.territories.filter(t => t.status.status === this.availability);
     },
 
     async setAvailability(value) {

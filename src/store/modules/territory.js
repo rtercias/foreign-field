@@ -21,15 +21,13 @@ export const territory = {
   },
 
   mutations: {
-    CHECKIN(state) {
-      state.status = 'Recently Worked';
+    CHECKIN(state, newStatus) {
+      state.status = newStatus;
     },
   },
 
   actions: {
     async checkinTerritory({ commit }, args) {
-      console.log('user', args.username);
-      console.log('territory', args.territoryId);
       if (!args) {
         throw new Error('Unable to check in territory because the required arguments were not provided');
       }
@@ -49,7 +47,9 @@ export const territory = {
         }
       });
 
-      commit(CHECKIN);
+      commit(CHECKIN, {
+        status: 'Recently Worked',
+      });
     },
   }
 }
