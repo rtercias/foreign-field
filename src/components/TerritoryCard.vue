@@ -2,8 +2,9 @@
   <div class="column">
     <div class="row justify-content-around">
       <div class="row w-50 align-items-center justify-content-start ml-0">
-        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4">
-          <h5 class="mb-0">{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
+        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4 column">
+          <h5 class="mb-0">{{terr.name}}</h5>
+          <span class="city-name" v-if="terr.city">{{terr.city}}</span>
         </b-link>
       </div>
       <div class="btn-group w-50 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
@@ -18,8 +19,8 @@
       </div>
     </div>
     <div class="text-right">
-      <hr />
-      <span class="assigned-to-info">{{assignedTo}}</span>
+      <hr class="mb-2" />
+      <span class="assigned-to-info d-block">{{assignedTo}}</span>
     </div>
   </div>
 </template>
@@ -57,8 +58,12 @@ export default {
 }
 </script>
 <style scoped>
+  .city-name {
+    font-size: 18px;
+  }
   .assigned-to-info {
     font-size: 12px;
+    height: 15px;
   }
 </style>
 

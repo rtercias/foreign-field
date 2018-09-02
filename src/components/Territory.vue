@@ -1,11 +1,11 @@
 <template>
   <div class="territory">
     <header>
-      <div class="row justify-content-between pl-4 pr-4 pt-4">
+      <div class="w-100 row justify-content-between pl-4 pt-4">
         <h3>{{getCities()}}</h3>
         <h3 class="text-right">{{getTerritoryName()}}</h3>
       </div>
-      <div class="row justify-content-between pl-4 pr-4 pb-4">
+      <div class="w-100 row justify-content-between pl-4 pb-4">
         <b-button class="p-0" variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
       </div>
     </header>
