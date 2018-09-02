@@ -1,7 +1,7 @@
 <template>
   <div class="territories">
-    <header class="row align-items-center justify-content-between">
-      <h4>Service Group: {{groupCode}}</h4>
+    <header class="w-100 m-0 row align-items-center justify-content-between">
+      <h4 class="text-left">Service Group: {{groupCode}}</h4>
       <b-dropdown right variant="secondary">
         <span slot="button-content">{{availability}}</span>
         <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="setAvailability(avail)">
@@ -140,6 +140,7 @@ header {
 }
 h4 {
   margin: 0;
+  font-size: 18px;
 }
 ul {
   list-style-type: none;
