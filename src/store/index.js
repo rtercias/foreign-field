@@ -4,6 +4,7 @@ import axios from 'axios';
 import { auth } from './modules/auth';
 import { territory } from './modules/territory';
 import { territories } from './modules/territories';
+import { addresses } from './modules/addresses';
 
 Vue.use(Vuex);
 
@@ -16,6 +17,7 @@ export const store = new Store({
   modules: {
     auth,
     territory,
-    territories
+    territories,
+    addresses,
   }
 });

@@ -15,6 +15,7 @@
               <b-dropdown-item @click="shareWorkInProgress">Share
               </b-dropdown-item>
             </b-nav-item-dropdown> -->
+            <b-nav-item :to="`/dnc/${terrCongId}`" v-if="this.$route.name === 'territory'">DNC</b-nav-item>
           </b-navbar-nav>
           <b-navbar-nav class="ml-auto">
             <b-nav-item v-if="!isAuthenticated" right @click="login">Login</b-nav-item>
@@ -150,7 +151,8 @@ export default {
       isAuthenticated: 'auth/isAuthenticated',
       isAuthorized: 'auth/isAuthorized',
       user: 'auth/user',
-      congId: 'auth/congId'
+      congId: 'auth/congId',
+      terrCongId: 'territory/congId',
     }),
     checkPermission() {
       return this.user && this.permissions.territories.includes(this.user.role);
