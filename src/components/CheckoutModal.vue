@@ -76,7 +76,9 @@ export default {
         data: {
           query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
             checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-              status 
+              status {
+                status
+              }
             }
           }`,
           variables: {

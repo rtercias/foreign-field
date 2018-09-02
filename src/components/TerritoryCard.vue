@@ -1,18 +1,25 @@
 <template>
-  <div class="row justify-content-between">
-    <div class="row w-75 align-items-center">
-      <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4">
-        <h5 class="mb-0">{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
-      </b-link>
-      <b-badge class="h-50" variant="warning" v-if="terr.status === 'Recently Worked'">Recently Worked</b-badge>
+  <div class="column">
+    <div class="row justify-content-around">
+      <div class="row w-50 align-items-center justify-content-start ml-0">
+        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4">
+          <h5 class="mb-0">{{terr.name}}<span v-if="terr.city"> - {{terr.city}}</span></h5>
+        </b-link>
+      </div>
+      <div class="btn-group w-50 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
+        <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status.status === 'Available'" @click="selectTerritory(terr)">check out</b-btn>
+        <b-btn v-if="terr.status.status === 'Checked Out'" variant="outline-info" @click="checkinTerritory(terr)">check in</b-btn>
+      </div>
     </div>
-    <div class="btn-group w-25 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
-      <b-btn v-b-modal.checkoutModal variant="info" v-if="terr.status==='Available'" @click="selectTerritory(terr)">check out</b-btn>
-      <b-button variant="outline-info" v-if="terr.status === 'Checked Out' || terr.status === 'Recently Worked'" @click="checkinTerritory(terr)">check in</b-button>
+    <div class="text-right">
+      <hr />
+      <span class="assigned-to-info">{{assignedTo}}</span>
     </div>
   </div>
 </template>
 <script>
+import { format } from 'date-fns';
+
 export default {
   name: 'TerritoryCard',
   props: ['terr', 'groupCode', 'selectTerritory', 'refreshTerritories'],
@@ -27,10 +34,21 @@ export default {
 
       this.refreshTerritories();
     },
+  },
+  computed: {
+    assignedTo() {
+      if (this.terr && this.terr.status && this.terr.status.publisher) {
+        return `Assigned to ${this.terr.status.publisher.firstname} ${this.terr.status.publisher.lastname} on ${format(this.terr.status.date, 'MM/DD/YYYY')}`;
+      }
+
+      return '';
+    },
   }
 }
 </script>
 <style scoped>
-
+  .assigned-to-info {
+    font-size: 12px;
+  }
 </style>
 

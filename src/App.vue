@@ -1,17 +1,21 @@
 <template>
-  <div id="app">
+  <div id="app" class="w-100">
     <div>
-      <b-navbar type="dark" variant="primary" toggleable>
+      <b-navbar type="dark" variant="primary" toggleable fill>
         <b-navbar-toggle target="nav_dropdown_collapse"></b-navbar-toggle>
         <b-collapse is-nav id="nav_dropdown_collapse">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
-            <!--TODO: move Territories dropdown into its own component -->
             <b-nav-item-dropdown v-if="checkPermission" class="group-codes" text="Territories">
               <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
                 <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
               </b-dropdown-item>
             </b-nav-item-dropdown>
+            <!-- <b-nav-item-dropdown v-if="checkPermission && $router.currentRoute.name==='territory'" class="group-codes" text="Territory">
+              <b-dropdown-item @click="shareWorkInProgress">Share
+              </b-dropdown-item>
+            </b-nav-item-dropdown> -->
+            <b-nav-item :to="`/dnc/${terrCongId}`" v-if="this.$route.name === 'territory'">DNC</b-nav-item>
           </b-navbar-nav>
           <b-navbar-nav class="ml-auto">
             <b-nav-item v-if="!isAuthenticated" right @click="login">Login</b-nav-item>
@@ -111,6 +115,35 @@ export default {
       // this.territories = await this.getTerritories();
       // sessionStorage.setItem('group-code', value);
     },
+
+    shareWorkInProgress(addresses) {
+      if (!addresses) {
+        return;
+      }
+      
+      const workInProgress = {};
+
+      // get data from local storage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        if (key.includes('foreignfield-')) {
+          // we're only interested in addresses in the current territory
+          const addressId = key.split('-')[1];
+          const isInTerritory = addresses.find(a => a.id === addressId);
+
+          if (isInTerritory) {
+            const item = localStorage.getItem(key);
+            const val = item.split('-')[0];
+
+            // save the address and current progress
+            workInProgress[addressId] = val;
+          }
+        }
+      }
+
+      console.log('wip', workInProgress);
+    },
   },
 
   computed: {
@@ -118,7 +151,8 @@ export default {
       isAuthenticated: 'auth/isAuthenticated',
       isAuthorized: 'auth/isAuthorized',
       user: 'auth/user',
-      congId: 'auth/congId'
+      congId: 'auth/congId',
+      terrCongId: 'territory/congId',
     }),
     checkPermission() {
       return this.user && this.permissions.territories.includes(this.user.role);
@@ -135,8 +169,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #696969;
-  margin-top: 60px;
-  margin-right: 2px;
 }
 .dropdown-item {
   color: #696969;

@@ -1,13 +1,13 @@
 <template>
-  <div class="row justify-content-between align-items-center pl-2 pr-2">
-    <div class="address">
+  <div class="row justify-content-between align-items-center">
+    <div class="address col-9 pl-0">
       <h5><a :href="mapsUrl" target="_blank">{{address.addr1}}</a> {{address.addr2}}</h5>
       <div>
         {{address.city}} {{address.state}} {{address.postalCode}}<br/>
         {{address.notes}}
       </div>
     </div>
-    <div class="interaction">
+    <div class="interaction pr-0">
       <b-button class="pr-0" variant="link" v-if="selectedResponse==='START'" @click="nextResponse('HOME')">{{selectedResponse}}</b-button>
       <!-- <b-button class="p-2" variant="link" v-if="selectedResponse==='HOME'" @click="nextResponse('NH')">{{selectedResponse}}</b-button>
       <b-button class="p-2" variant="link" v-if="selectedResponse==='NH'" @click="nextResponse('START')">{{selectedResponse}}</b-button> -->
@@ -74,6 +74,7 @@ export default {
 .address {
   text-align: left;
 }
+
 .nh-text {
   font-size: 0.5em;
 }
@@ -87,7 +88,10 @@ export default {
   .interaction {
     display: none;
   }
-}
 
+  .address a {
+    text-decoration: none;
+  }
+}
 </style>
 

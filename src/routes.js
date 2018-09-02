@@ -3,6 +3,7 @@ import { store } from './store';
 import Home from './components/Home';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
+import Dnc from './components/Dnc';
 
 const routes = [
   { name: 'home', path: '/', component: Home },
@@ -22,6 +23,13 @@ const routes = [
     component: Territory, 
     props: true, 
     meta: {} 
+  },
+  {
+    name: 'dnc',
+    path: '/dnc/:id',
+    component: Dnc,
+    props: true,
+    meta: {},
   },
 ];
 

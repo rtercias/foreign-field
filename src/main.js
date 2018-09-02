@@ -5,13 +5,31 @@ import App from './App.vue';
 import GoogleAuth from 'vue-google-auth';
 import { router } from './routes';
 import { store } from './store';
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheck, faBan, faCheckCircle, faCircle } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText } from '@fortawesome/vue-fontawesome'
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText } from '@fortawesome/vue-fontawesome';
+import { 
+  faCheck, 
+  faBan, 
+  faCheckCircle, 
+  faCircle, 
+  faInfoCircle, 
+  faSpinner, 
+  faSearch, 
+  faTimes, 
+} from '@fortawesome/free-solid-svg-icons';
 
-library.add(faCheck, faBan, faCheckCircle, faCircle);
+library.add(
+  faCheck, 
+  faBan, 
+  faCheckCircle, 
+  faCircle, 
+  faInfoCircle,
+  faSpinner,
+  faSearch,
+  faTimes,
+);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
 Vue.component('font-awesome-layers-text', FontAwesomeLayersText);

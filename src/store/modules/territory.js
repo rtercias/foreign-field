@@ -1,35 +1,38 @@
 import axios from 'axios';
 
 const CHECKIN = 'CHECKIN';
+const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
+const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 
 export const territory = {
   namespaced: true,
   state: {
-    id: undefined,
-    group_code: undefined,
-    congregationid: undefined,
-    name: undefined,
-    description: undefined,
-    type: undefined,
-    addresses: undefined,
-    city: undefined,
-    status: undefined,
+    territory: {}
   },
 
   getters: {
-  
+    territory: state => {
+      return state.territory;
+    },
+    congId: state => {
+      return state.territory.congregationid;
+    }
   },
 
   mutations: {
-    CHECKIN(state) {
-      state.status = 'Recently Worked';
+    CHECKIN(state, newStatus) {
+      state.status = newStatus;
+    },
+    GET_TERRITORY_SUCCESS(state, territory) {
+      state.territory = territory;
+    },
+    GET_TERRITORY_FAIL(state, exception) {
+      console.log(GET_TERRITORY_FAIL, exception);
     },
   },
 
   actions: {
     async checkinTerritory({ commit }, args) {
-      console.log('user', args.username);
-      console.log('territory', args.territoryId);
       if (!args) {
         throw new Error('Unable to check in territory because the required arguments were not provided');
       }
@@ -49,7 +52,51 @@ export const territory = {
         }
       });
 
-      commit(CHECKIN);
+      commit(CHECKIN, {
+        status: 'Recently Worked',
+      });
+    },
+
+    async getTerritory({ commit }, id) {
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: {
+            query: `query Territory($terrId: Int) { 
+              territory (id: $terrId) {
+                group_code id congregationid name description type 
+                addresses {
+                  id addr1 addr2 city state_province postal_code
+                  phone longitude latitude notes
+                }
+                status {
+                  status
+                  date
+                  publisher {
+                    username firstname lastname
+                  }
+                }
+              }
+            }`,
+            variables: {
+              terrId: id,
+            }
+          }
+        });
+
+        if (!response || !response.data || !response.data.data || !response.data.data.territory) {
+          return null;
+        }        
+        const territory = response.data.data.territory;
+        commit(GET_TERRITORY_SUCCESS, territory);
+
+      } catch (exception) {
+        commit(GET_TERRITORY_FAIL, exception);
+      }
     },
   }
 }
