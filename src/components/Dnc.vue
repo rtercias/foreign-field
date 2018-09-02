@@ -1,11 +1,13 @@
 <template>
-  <div class="p-lg-5 justify-content-center">
-    <font-awesome-icon icon="spinner" v-if="loading"></font-awesome-icon>
-    <template v-else>
-      <font-awesome-icon icon="search" v-show="isEmpty"></font-awesome-icon>
-      <font-awesome-icon icon="times" v-show="isDirty" @click="reset"></font-awesome-icon>
-    </template>
-    <input type="text" class="w-25 w-auto border-bottom h2" v-model="text" @keydown.esc="reset" @blur="reset" />
+  <div class="w-100 p-lg-5">
+    <div class="w-100 row justify-content-center m-0 pt-2">
+      <font-awesome-icon icon="spinner" v-if="loading"></font-awesome-icon>
+      <template v-else>
+        <input type="text" class="w-25 w-auto border-bottom h2" v-model="text" @keydown.esc="reset" @blur="reset" />
+        <font-awesome-icon icon="search" v-show="isEmpty" class="search m-2"></font-awesome-icon>
+        <font-awesome-icon icon="times" v-show="isDirty" @click="reset"></font-awesome-icon>
+      </template>
+    </div>
     <b-table class="text-left" striped :items="filteredDnc"></b-table>
   </div>
 </template>
@@ -17,7 +19,7 @@ export default {
   data() {
     return {
       loading: false,
-      isEmpty: false,
+      isEmpty: true,
       isDirty: false,
       text: '',
       id: this.$route.params.id,
@@ -46,5 +48,7 @@ export default {
 </script>
 
 <style scoped>
-
+  .search {
+    font-size: 23px;
+  }
 </style>
