@@ -1,5 +1,8 @@
 <template>
-  <b-modal id="checkoutModal" :title="`Territory Checkout ${territoryId}`" @shown="clearName" @ok="checkoutTerritory">
+  <b-modal id="checkoutModal" :title="`Territory Checkout ${territory.id}`" @shown="clearName" @ok="checkoutTerritory">
+    <b-alert class="text-left" show variant="danger" v-show="territory.status.status === 'Recently Worked'">
+      This was just done. Check out again?
+    </b-alert>
     <label>To:&nbsp;</label>
     <b-dropdown class="publishers-list" right variant="outline-secondary">
         <span slot="button-content">{{selectedPublisher.name || 'Select Publisher'}}</span>
@@ -16,11 +19,12 @@ import axios from 'axios';
 
 export default {
   name: 'CheckoutModal',
-  props: ['congId', 'territoryId'],
+  props: ['congId', 'territory'],
   data() {
     return {
       publishers: [],
       selectedPublisher: { name: 'me' },
+      status: this.territory && this.territory.status ? this.territory.status.status : '',
     };
   },
 
@@ -82,7 +86,7 @@ export default {
             }
           }`,
           variables: {
-            terrId: Number(this.territoryId),
+            terrId: Number(this.territory.id),
             pubId: this.selectedPublisher.id,
             user: this.user.username
           }

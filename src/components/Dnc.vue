@@ -1,11 +1,11 @@
 <template>
-  <div class="row pl-5 pt-5 justify-content-center">
+  <div class="row pl-lg-5 pt-5 justify-content-center">
     <font-awesome-icon icon="spinner" v-if="loading"></font-awesome-icon>
     <template v-else>
       <font-awesome-icon icon="search" v-show="isEmpty"></font-awesome-icon>
       <font-awesome-icon icon="times" v-show="isDirty" @click="reset"></font-awesome-icon>
     </template>
-    <input type="text" class="w-25 border-bottom h2" v-model="text" @keydown.esc="reset" @blur="reset" />
+    <input type="text" class="w-25 w-auto border-bottom h2" v-model="text" @keydown.esc="reset" @blur="reset" />
     <b-table class="text-left" striped :items="filteredDnc"></b-table>
   </div>
 </template>

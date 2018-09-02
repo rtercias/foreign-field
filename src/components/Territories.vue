@@ -17,6 +17,7 @@
     <CheckoutModal 
       v-bind:cong-id="congId" 
       v-bind:territory-id="selectedTerritory.id" 
+      v-bind:territory="selectedTerritory"
       v-on:territory-checkedout="refreshTerritories">
     </CheckoutModal>
   </div>
