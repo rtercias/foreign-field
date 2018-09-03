@@ -41,7 +41,9 @@ export const territory = {
         data: {
           query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
             checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-              status 
+              status {
+                status
+              }
             }
           }`,
           variables: {
