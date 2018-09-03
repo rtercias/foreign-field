@@ -12,8 +12,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Deployment
 (Requires npm 5.6+ and node 8.6+)
-npm install -f
-npm run build
+1. npm install -f
+2. npm run build
 
 ## Built With
 * [vue-js](https://github.com/vuejs/vue)
