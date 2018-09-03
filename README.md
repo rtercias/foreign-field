@@ -25,4 +25,4 @@ npm run build
 
 ## License
 
-This project is licensed under the MIT License - see the [src/main.js](main.js) file for details
+This project is licensed under the MIT License - see the [main.js](src/main.js) file for details
