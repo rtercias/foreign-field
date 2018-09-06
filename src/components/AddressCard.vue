@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-content-between align-items-center pl-2 pr-2">
-    <div class="address col-10 pl-0">
+    <div class="address col-9 pl-0">
       <h5><a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;<em>{{address.addr2}}</em></h5>
       <div>
         {{address.city}} {{address.state}} {{address.postalCode}}<br/>
