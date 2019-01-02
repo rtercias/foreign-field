@@ -1,11 +1,32 @@
 import Vue from 'vue';
 import axios from 'axios';
+import { isAfter } from 'date-fns';
+import uniqBy from 'lodash/uniqBy';
 
-const LOGIN = 'LOGIN';
-const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+const AUTHENTICATE = 'AUTHENTICATE';
+const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const LOGOUT = 'LOGOUT';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
+const SET_GROUP_CODES = 'SET_GROUP_CODES';
+
+export function getToken() {
+  if (localStorage) {
+    return JSON.parse(localStorage.getItem('token'));
+  }
+
+  return undefined;
+}
+
+export function isTokenExpired(token) {
+  if (token && token.expires_at) {
+    const now = new Date();
+    const expiration = new Date(token.expires_at);
+    return isAfter(now, expiration);
+  }
+
+  return true;
+}
 
 export const auth = {
   namespaced: true,
@@ -16,6 +37,7 @@ export const auth = {
     name: '',
     user: undefined,
     congId: 0,
+    groupCodes: [],
   },
 
   getters: {
@@ -38,21 +60,20 @@ export const auth = {
       return state.user;
     },
     congId: state => {
-      if (state.user && state.user.congregation) {
-        return state.user.congregation.id;
-      }
-
-      return 0;
+      return state.congId;
+    },
+    groupCodes: state => {
+      return state.groupCodes;
     }
   },
 
   mutations: {
-    LOGIN(state) {
+    AUTHENTICATE(state) {
       state.isPending = true;
       state.name = '';
     },
 
-    LOGIN_SUCCESS(state, name) {
+    AUTHENTICATE_SUCCESS(state, name) {
       state.isAuthenticated = true;
       state.isPending = false;
       state.isForcedOut = false;
@@ -66,6 +87,7 @@ export const auth = {
 
     AUTHORIZE(state, user) {
       state.user = user;
+      state.congId = state.user && state.user.congregation && state.user.congregation.id || 0;
     },
 
     FORCEOUT(state) {
@@ -74,21 +96,34 @@ export const auth = {
       state.isPending = false;
       state.isForcedOut = true;
       state.name = '';
+    },
+
+    SET_GROUP_CODES(state, groupCodes) {
+      state.groupCodes = groupCodes;
     }
   },
 
   actions: {
-    login({ commit }) {
-      commit(LOGIN);
+    authenticate({ commit }) {
+      commit(AUTHENTICATE);
+      
       const auth = Vue.googleAuth();
       auth.directAccess();
       return new Promise((resolve) => {
         setTimeout(() => {
           auth.signIn(user => {
             const profile = user.getBasicProfile();
-            commit(LOGIN_SUCCESS, profile.getName());
-            console.log('login success');
+            commit(AUTHENTICATE_SUCCESS, profile.getName());
             resolve(profile);
+
+            localStorage.setItem('token', JSON.stringify({
+              ...user.Zi,
+              ...{
+                name: profile.getName(),
+                username: profile.getEmail(),
+              }
+            }));
+
           }, error => {
             console.log('Nope, authentication failed', error);
           });
@@ -99,7 +134,8 @@ export const auth = {
     logout({ commit }) {
       Vue.googleAuth().signOut(() => {
         commit(LOGOUT);
-        console.log('logout success');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       });
     },
 
@@ -140,8 +176,59 @@ export const auth = {
 
     forceout({ commit }) {
       commit(FORCEOUT);
-    }
+    },
 
+    async login({ commit, dispatch, state }) {
+      try {
+        const token = getToken();
+        let user, username;
+
+        if (isTokenExpired(token)) {
+          user = await dispatch('authenticate');
+          username = user.getEmail();
+        } else {
+          username = token.username;
+          commit(AUTHENTICATE_SUCCESS, token.name);
+        }
+
+        await dispatch('authorize', username);
+        
+        if (!state.user) {
+          dispatch('forceout');
+          throw new Error('User not found');
+        }
+        
+        dispatch('getGroupCodes', state.congId);
+
+        // if (localStorage && state.user) {
+        //   localStorage.setItem('user', JSON.stringify(state.user));
+        // }
+
+      } catch (exception) {
+        dispatch('forceout');
+        console.error('User is unauthorized');
+      }
+    },
+
+    async getGroupCodes({ commit }, congId) {
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `{ territories (congId: ${congId}) { group_code }}`
+        }
+      });
+
+      const territories = response.data.data.territories;
+      // const group = sessionStorage.getItem('group-code');
+      // if (group) this.setGroupCode(group);
+
+      const groupCodes = uniqBy(territories, 'group_code').map(g => g.group_code).sort();
+      commit(SET_GROUP_CODES, groupCodes);
+    },
   }
 }
 
