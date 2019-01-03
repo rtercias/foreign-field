@@ -1,45 +1,31 @@
-import Vue from 'vue';
 import axios from 'axios';
-import { isAfter } from 'date-fns';
+import firebase from 'firebase/app';
+import { config } from './../../firebase.config';
+import { router } from './../../routes';
 import uniqBy from 'lodash/uniqBy';
 
-const AUTHENTICATE = 'AUTHENTICATE';
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
-const LOGOUT = 'LOGOUT';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
 const SET_GROUP_CODES = 'SET_GROUP_CODES';
+const RESET = 'RESET';
 
-export function getToken() {
-  if (localStorage) {
-    return JSON.parse(localStorage.getItem('token'));
-  }
-
-  return undefined;
-}
-
-export function isTokenExpired(token) {
-  if (token && token.expires_at) {
-    const now = new Date();
-    const expiration = new Date(token.expires_at);
-    return isAfter(now, expiration);
-  }
-
-  return true;
-}
-
-export const auth = {
-  namespaced: true,
-  state: {
+function initialState() {
+  return {
     isAuthenticated: false,
     isPending: false,
     isForcedOut: false,
     name: '',
     user: undefined,
+    photoUrl: '',
     congId: 0,
     groupCodes: [],
-  },
+  };
+}
 
+export const auth = {
+  namespaced: true,
+  state: initialState(),
   getters: {
     isAuthenticated: state => {
       return state.isAuthenticated;
@@ -73,16 +59,12 @@ export const auth = {
       state.name = '';
     },
 
-    AUTHENTICATE_SUCCESS(state, name) {
+    AUTHENTICATE_SUCCESS(state, authenticatedUser) {
       state.isAuthenticated = true;
       state.isPending = false;
       state.isForcedOut = false;
-      state.name = name;
-    },
-
-    LOGOUT(state) {
-      state.isAuthenticated = false;
-      state.name = '';
+      state.name = authenticatedUser.name;
+      state.photoUrl = authenticatedUser.photoUrl;
     },
 
     AUTHORIZE(state, user) {
@@ -91,123 +73,98 @@ export const auth = {
     },
 
     FORCEOUT(state) {
-      state.user = undefined;
-      state.isAuthenticated = false;
-      state.isPending = false;
       state.isForcedOut = true;
-      state.name = '';
     },
 
     SET_GROUP_CODES(state, groupCodes) {
       state.groupCodes = groupCodes;
+    },
+
+    RESET (state) {
+      const s = initialState();
+      Object.keys(s).forEach(key => {
+        state[key] = s[key];
+      });
     }
   },
 
   actions: {
-    authenticate({ commit }) {
-      commit(AUTHENTICATE);
-      
-      const auth = Vue.googleAuth();
-      auth.directAccess();
+    authenticate({ commit }, params) {
       return new Promise((resolve) => {
-        setTimeout(() => {
-          auth.signIn(user => {
-            const profile = user.getBasicProfile();
-            commit(AUTHENTICATE_SUCCESS, profile.getName());
-            resolve(profile);
-
-            localStorage.setItem('token', JSON.stringify({
-              ...user.Zi,
-              ...{
-                name: profile.getName(),
-                username: profile.getEmail(),
-              }
-            }));
-
-          }, error => {
-            console.log('Nope, authentication failed', error);
-          });
-        }, 1000);
+        commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
+        resolve(params);
       });
+
     },
 
-    logout({ commit }) {
-      Vue.googleAuth().signOut(() => {
-        commit(LOGOUT);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    async logout({ commit }) {
+      return new Promise((resolve) => {
+        firebase.auth().signOut();
+        commit(RESET);
+        resolve();
       });
+
     },
 
     async authorize({ commit }, username) {
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `query Publisher($username: String) {
-            user (username: $username) {
-              id 
-              username
-              role
-              role_description
-              congregation {
-                id
-                name
+      return new Promise(async (resolve, reject) => {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: {
+            query: `query Publisher($username: String) {
+              user (username: $username) {
+                id 
+                username
+                role
+                role_description
+                congregation {
+                  id
+                  name
+                }
+                status
               }
-              status
+            }`,
+            variables: {
+              username: username,
             }
-          }`,
-          variables: {
-            username: username,
           }
+        });
+        
+        if (!response || !response.data || !response.data.data || !response.data.data.user) {
+          reject();
         }
-      });
-      
-      if (!response || !response.data || !response.data.data || !response.data.data.user) {
-        return null;
-      }
 
-      const user = response.data.data.user;
-      commit(AUTHORIZE, user);
+        const user = response.data.data.user;
+        commit(AUTHORIZE, user);
+        resolve();
+      });
     },
 
     forceout({ commit }) {
       commit(FORCEOUT);
     },
 
-    async login({ commit, dispatch, state }) {
+    async login({ dispatch, state }, user) {
       try {
-        const token = getToken();
-        let user, username;
-
-        if (isTokenExpired(token)) {
-          user = await dispatch('authenticate');
-          username = user.getEmail();
-        } else {
-          username = token.username;
-          commit(AUTHENTICATE_SUCCESS, token.name);
-        }
-
-        await dispatch('authorize', username);
-        
+        await dispatch('authenticate', user);
+        await dispatch('authorize', user.email);
+      
         if (!state.user) {
+          // unauthorized
+          await dispatch('logout');
           dispatch('forceout');
-          throw new Error('User not found');
         }
-        
-        dispatch('getGroupCodes', state.congId);
-
-        // if (localStorage && state.user) {
-        //   localStorage.setItem('user', JSON.stringify(state.user));
-        // }
 
       } catch (exception) {
+        await dispatch('logout');
         dispatch('forceout');
-        console.error('User is unauthorized');
       }
+    
+      dispatch('getGroupCodes', state.congId);
     },
 
     async getGroupCodes({ commit }, congId) {
@@ -229,6 +186,23 @@ export const auth = {
       const groupCodes = uniqBy(territories, 'group_code').map(g => g.group_code).sort();
       commit(SET_GROUP_CODES, groupCodes);
     },
+
+    firebaseInit({ dispatch, state }) {
+      firebase.initializeApp(config);
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if(user) {
+          await dispatch('login', user);
+        } else {
+          if (state.isForcedOut) {
+            router.push({ name: 'signout', params: { unauthorized: true } });
+          }
+
+          if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/signout') {
+            router.push({ name: 'auth', query: { redirect: location.pathname } });
+          }
+        }
+      });
+    }
   }
 }
 

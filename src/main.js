@@ -16,7 +16,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
 import App from './App.vue';
-import GoogleAuth from 'vue-google-auth';
 import { router } from './routes';
 import { store } from './store';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -49,13 +48,14 @@ Vue.component('font-awesome-layers', FontAwesomeLayers);
 Vue.component('font-awesome-layers-text', FontAwesomeLayersText);
 
 Vue.config.productionTip = false;
-Vue.use(GoogleAuth, { client_id: process.env.VUE_APP_CLIENT_ID });
 Vue.use(VueRouter); 
 Vue.use(BootstrapVue); 
-Vue.googleAuth().load();
 
 new Vue({
   render: h => h(App),
   router,
   store,
+  created() {
+    this.$store.dispatch('auth/firebaseInit');
+  },
 }).$mount('#app');

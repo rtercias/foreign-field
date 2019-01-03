@@ -1,13 +1,16 @@
 import VueRouter from 'vue-router';
-import { store } from './store';
-import Home from './components/Home';
+import Auth from './components/Auth';
+import Welcome from './components/Welcome';
+import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
-import { getToken, isTokenExpired } from './store/modules/auth';
 
 const routes = [
-  { name: 'home', path: '/', component: Home },
+  { name: 'home', path: '/', component: Auth },
+  { name: 'auth', path: '/auth', component: Auth },
+  { name: 'welcome', path: '/welcome', component: Welcome },
+  { name: 'signout', path: '/signout', component: Signout, props: true },
   { 
     name: 'group', 
     path: '/territories/:group', 
@@ -35,32 +38,6 @@ const routes = [
 ];
 
 export const router = new VueRouter({
+  mode: 'history',
   routes
-});
-
-router.beforeEach(async (to, from, next) => {
-  const token = getToken();
-  if (to.matched.some(r => r.meta.requiresAuth) || !isTokenExpired(token)) {
-    await store.dispatch('auth/login');
-    const isAuthenticated = store.getters['auth/isAuthenticated'];
-    const user = store.getters['auth/user'];
-    let hasPermission = false;
-    
-    if (user) {
-      hasPermission = to.meta.permissions && to.meta.permissions.includes(user.role) || true;
-    }
-      
-    if (!isAuthenticated || !hasPermission) {
-      store.dispatch('auth/forceout');
-      if (to.name !== 'home') {
-        next({
-          name: 'home',
-        });
-      }
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
 });
