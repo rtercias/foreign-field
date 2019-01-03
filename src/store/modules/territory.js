@@ -27,7 +27,7 @@ export const territory = {
       state.territory = territory;
     },
     GET_TERRITORY_FAIL(state, exception) {
-      console.log(GET_TERRITORY_FAIL, exception);
+      // console.log(GET_TERRITORY_FAIL, exception);
     },
   },
 
