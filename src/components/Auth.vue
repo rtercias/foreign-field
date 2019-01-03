@@ -1,13 +1,19 @@
 <template lang="html">
-  <div id="firebaseui-auth-container" class="p-5"></div>
+  <div :class="{ visible: !isAuthenticated, hidden: isAuthenticated }" id="firebaseui-auth-container" class="p-5"></div>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import firebaseui from 'firebaseui';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'auth',
+  computed: {
+    ...mapGetters({
+      isAuthenticated: 'auth/isAuthenticated',
+    })
+  },
   mounted() {
     const uiConfig = {
       signInOptions: [
@@ -36,3 +42,11 @@ export default {
   }
 }
 </script>
+<style>
+.visible {
+  visibility: visible;
+}
+.hidden {
+  visibility: hidden;
+}
+</style>

@@ -7,7 +7,7 @@ import Territory from './components/Territory';
 import Dnc from './components/Dnc';
 
 const routes = [
-  { name: 'home', path: '/', component: Auth },
+  { name: 'home', path: '/', component: Welcome },
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
   { name: 'signout', path: '/signout', component: Signout, props: true },
