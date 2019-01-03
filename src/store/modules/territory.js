@@ -26,7 +26,7 @@ export const territory = {
     GET_TERRITORY_SUCCESS(state, territory) {
       state.territory = territory;
     },
-    GET_TERRITORY_FAIL(state, exception) {
+    GET_TERRITORY_FAIL(state, exception) { /* eslint-disable-line no-unused-vars */
       // console.log(GET_TERRITORY_FAIL, exception);
     },
   },
