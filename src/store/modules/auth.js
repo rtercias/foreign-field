@@ -1,6 +1,6 @@
 import axios from 'axios';
 import firebase from 'firebase/app';
-import { config } from './../../firebase.config';
+import { config } from '../../../firebase.config';
 import { router } from './../../routes';
 import uniqBy from 'lodash/uniqBy';
 

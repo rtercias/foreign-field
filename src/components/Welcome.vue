@@ -3,7 +3,7 @@
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field territory management</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <div v-else>
-      <h3>Dashboard</h3>
+      <h3>Dashboard (coming soon!)</h3>
     </div>
   </div>
 </template>
