@@ -60,8 +60,8 @@ export default {
       if(value != this.groupCode) {
         this.groupCode = value;
       }
-      // this.territories = await this.getTerritories();
-      // sessionStorage.setItem('group-code', value);
+      await this.fetchTerritories({ congId: this.user.congId, groupCode: this.groupCode });
+      sessionStorage.setItem('group-code', value);
     },
 
     shareWorkInProgress(addresses) {
