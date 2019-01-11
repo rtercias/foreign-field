@@ -17,7 +17,6 @@ const routes = [
     component: Territories, 
     props: true, 
     meta: { 
-      requiresAuth: true,
       permissions: ['Admin', 'TS'],
     } 
   },
@@ -26,14 +25,15 @@ const routes = [
     path: '/territories/:group/:id', 
     component: Territory, 
     props: true, 
-    meta: {} 
+    meta: { 
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    }
   },
   {
     name: 'dnc',
     path: '/dnc/:id',
     component: Dnc,
     props: true,
-    meta: {},
   },
 ];
 

@@ -94,7 +94,6 @@ export const auth = {
         commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
         resolve(params);
       });
-
     },
 
     async logout({ commit }) {
@@ -103,7 +102,6 @@ export const auth = {
         commit(RESET);
         resolve();
       });
-
     },
 
     async authorize({ commit }, username) {
@@ -135,12 +133,18 @@ export const auth = {
         });
         
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject();
+          reject('Unauthorized');
         }
 
         const user = response.data.data.user;
-        commit(AUTHORIZE, user);
-        resolve();
+        const { permissions = [] } = router.currentRoute.meta;
+        const hasPermission = permissions.length === 0 || permissions.includes(user.role);
+        if (hasPermission) {
+          commit(AUTHORIZE, user);
+          resolve();
+        } else {
+          reject('Unauthoried');
+        }
       });
     },
 
