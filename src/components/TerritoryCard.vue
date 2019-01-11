@@ -30,7 +30,7 @@ import { format } from 'date-fns';
 
 export default {
   name: 'TerritoryCard',
-  props: ['terr', 'groupCode', 'selectTerritory'],
+  props: ['terr', 'groupCode', 'selectTerritory', 'fetch'],
   methods: {
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
@@ -43,7 +43,7 @@ export default {
         username: user.username
       });
 
-      this.fetchTerritories({ congId: user.congId, groupCode: this.groupCode });
+      this.fetch();
     },
   },
   computed: {

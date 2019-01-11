@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const CHECKIN = 'CHECKIN';
+const CHANGE_STATUS = 'CHANGE_STATUS';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 
@@ -16,11 +16,14 @@ export const territory = {
     },
     congId: state => {
       return state.territory.congregationid;
+    },
+    isCheckedOut: state => {
+      return state.territory && state.territory.status && state.territory.status.status === 'Checked Out';
     }
   },
 
   mutations: {
-    CHECKIN(state, newStatus) {
+    CHANGE_STATUS(state, newStatus) {
       state.status = newStatus;
     },
     GET_TERRITORY_SUCCESS(state, territory) {
@@ -33,30 +36,64 @@ export const territory = {
 
   actions: {
     async checkinTerritory({ commit }, args) {
-      if (!args) {
-        throw new Error('Unable to check in territory because the required arguments were not provided');
-      }
-
-      await axios({
-        data: {
-          query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
-            checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-              status {
-                status
-              }
-            }
-          }`,
-          variables: {
-            terrId: args.territoryId,
-            pubId: args.userId,
-            user: args.username,
-          }
+      try {
+        if (!args) {
+          throw new Error('Unable to check in territory because the required arguments were not provided');
         }
-      });
 
-      commit(CHECKIN, {
-        status: 'Recently Worked',
-      });
+        await axios({
+          data: {
+            query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+              checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
+                status {
+                  status
+                }
+              }
+            }`,
+            variables: {
+              terrId: args.territoryId,
+              pubId: args.userId,
+              user: args.username,
+            }
+          }
+        });
+
+        commit(CHANGE_STATUS, { status: 'Recently Worked' });
+
+      } catch (e) {
+        console.error('Unable to check in territory', e);
+      }
+    },
+
+    async checkoutTerritory({ commit }, args) {
+      try {
+        await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          data: {
+            query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+              checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
+                status {
+                  status
+                }
+              }
+            }`,
+            variables: {
+              terrId: args.territoryId,
+              pubId: args.userId,
+              user: args.username,
+            }
+          }
+        });
+
+        commit(CHANGE_STATUS, { status: 'Checked Out' });
+
+      } catch (e) {
+        console.error('Unable to checkout territory', e);
+      }
     },
 
     async getTerritory({ commit }, id) {

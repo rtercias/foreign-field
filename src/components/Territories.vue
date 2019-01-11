@@ -11,12 +11,10 @@
     </header>
     <b-list-group class="flex-row flex-wrap">
       <b-list-group-item v-for="terr in filteredTerritories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6 pl-4 pr-4">
-        <TerritoryCard v-bind="{terr, groupCode, selectTerritory}"></TerritoryCard>
+        <TerritoryCard v-bind="{ terr, groupCode, selectTerritory, fetch }"></TerritoryCard>
       </b-list-group-item>
     </b-list-group>
-    <CheckoutModal 
-      v-bind:cong-id="congId" 
-      v-bind:territory="selectedTerritory">
+    <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
     </CheckoutModal>
   </div>
 </template>
@@ -32,6 +30,13 @@ export default {
     TerritoryCard,
     CheckoutModal,
   },
+
+  async beforeRouteUpdate (to, from, next) {
+    next();
+    this.groupCode = to.params.group;
+    await this.fetch();
+  },
+  
   data() {
     return {
       groupCode: '',
@@ -86,10 +91,12 @@ export default {
       this.groupCode = this.$route.params.group;
       this.availability = sessionStorage.getItem('availability') || 'Available';
       await this.fetchTerritories({ congId, groupCode: this.groupCode });
+      await this.fetchPublishers(congId);
     },
 
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
+      fetchPublishers: 'publishers/fetchPublishers',
     }),
   },
 

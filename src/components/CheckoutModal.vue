@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="checkoutModal" :title="`Territory Checkout ${territory.id}`" @shown="clearName" @ok="checkoutTerritory">
+  <b-modal id="checkoutModal" :title="`Territory Checkout ${territory.id}`" @shown="clearName" @ok="checkout">
     <b-alert class="text-left" show variant="danger" v-show="status === 'Recently Worked'">
       This was just done. Check out again?
     </b-alert>
@@ -14,49 +14,22 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import axios from 'axios';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'CheckoutModal',
-  props: ['congId', 'territory'],
+  props: ['territory', 'fetch'],
   data() {
     return {
-      publishers: [],
       selectedPublisher: { name: 'me' },
     };
   },
 
   methods: {
-    async getPublishers() {
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `query PublishersList($congId: Int) { 
-            publishers (congId: $congId) { 
-              id 
-              firstname 
-              lastname 
-              congregationid 
-              username 
-              status
-            }
-          }`,
-          variables: {
-            congId: this.congId
-          }
-        }
-      });
-
-      if (!response || !response.data || !response.data.data || !response.data.data.publishers) {
-        return null;
-      }
-      return response.data.data.publishers.filter(t => t.status === 'active');
-    },
+    ...mapActions({
+      fetchPublishers: 'publishers/fetchPublishers',
+      checkoutTerritory: 'territory/checkoutTerritory',
+    }),
 
     selectPublisher(publisher) {
       this.selectedPublisher = {
@@ -69,37 +42,22 @@ export default {
       this.selectedPublisher = {};
     },
 
-    async checkoutTerritory() {
-      await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
-            checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-              status {
-                status
-              }
-            }
-          }`,
-          variables: {
-            terrId: Number(this.territory.id),
-            pubId: this.selectedPublisher.id,
-            user: this.user.username
-          }
-        }
+    async checkout() {
+      await this.checkoutTerritory({
+        territoryId: this.territory.id,
+        userId: this.selectedPublisher.id,
+        username: this.user.username,
       });
-      
-      this.$emit('territory-checkedout');
-      return 'Checked Out';
+
+      this.fetch();
     },
   },
 
   computed: {
     ...mapGetters({
+      congId: 'auth/congId',
       user: 'auth/user',
+      publishers: 'publishers/publishers',
     }),
     status() {
       return this.territory && this.territory.status ? this.territory.status.status : '';
@@ -107,8 +65,6 @@ export default {
   },
 
   async mounted() {
-    this.publishers = await this.getPublishers();
-
     // TODO: set to "me" once we have logged-in user info
     // this.selectedPublisher = {
     //   name: 'me',

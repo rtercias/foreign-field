@@ -19,42 +19,43 @@ export const territories = {
   },
   actions: {
     async fetchTerritories({ commit }, params) {
-      if (params.congId) {
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          data: {
-            query: `query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
-              territories (congId: $congId, group_code: $groupCode) { 
-                id 
-                name 
-                type 
-                city 
-                status {
-                  status
-                  date
-                  publisher {
-                    username
-                    firstname
-                    lastname
-                  }
+      if (!params || !params.congId) {
+        console.log('Congregation id is required');
+        return;
+      }
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: {
+          query: `query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
+            territories (congId: $congId, group_code: $groupCode) { 
+              id 
+              name 
+              type 
+              city 
+              status {
+                status
+                date
+                publisher {
+                  username
+                  firstname
+                  lastname
                 }
               }
-            }`,
-            variables: {
-              congId: params.congId,
-              groupCode: params.groupCode
             }
+          }`,
+          variables: {
+            congId: params.congId,
+            groupCode: params.groupCode
           }
-        });
-
-        if (response && response.data && response.data.data) {
-          commit(SET_TERRITORIES, response.data.data.territories);
-        } else {
-          commit(SET_TERRITORIES, null);
         }
+      });
+
+      if (response && response.data && response.data.data) {
+        commit(SET_TERRITORIES, response.data.data.territories);
       }
     }
   },
