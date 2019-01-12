@@ -16,8 +16,8 @@
         </b-list-group-item>
       </b-list-group>
     </div>
-    <h2 v-if="isCheckedOut" class="p-5">Please contact the owner of this territory.</h2>
-    <h2 v-if="isRecentlyWorked" class="p-5">Please contact your Territory Servant.</h2>
+    <h2 v-else-if="isCheckedOut" class="p-5">Please contact the owner of this territory.</h2>
+    <h2 v-else-if="isRecentlyWorked" class="p-5">Please contact your Territory Servant.</h2>
     <div v-else class="p-5">
       <h2>Good news!</h2><br/>
       <h4>This territory is available for checkout. Please contact your Territory Servant.</h4>
