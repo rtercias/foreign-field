@@ -1,24 +1,32 @@
 <template>
   <div class="territory">
-    <header>
-      <div class="w-100 row justify-content-between pl-4 pt-4">
-        <h3>{{getCities()}}</h3>
-        <h3 class="text-right">{{getTerritoryName()}}</h3>
-      </div>
-      <div class="w-100 row justify-content-between pl-4 pb-4">
-        <b-button class="p-0" variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
-      </div>
-    </header>
-    <b-list-group class="columns">
-      <b-list-group-item class="col-sm-12" v-for="address in territory.addresses" v-bind:key="address.id" data-toggle="collapse">
-        <AddressCard v-bind="{address, reset}"></AddressCard>
-      </b-list-group-item>
-    </b-list-group>
+    <div v-if="isOwnedByUser || isAdmin">
+      <header>
+        <div class="w-100 row justify-content-between pl-4 pt-4">
+          <h3>{{getCities()}}</h3>
+          <h3 class="text-right">{{getTerritoryName()}}</h3>
+        </div>
+        <div class="w-100 row justify-content-between pl-4 pb-4">
+          <b-button v-show="isOwnedByUser" class="p-0" variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
+        </div>
+      </header>
+      <b-list-group class="columns">
+        <b-list-group-item class="col-sm-12" v-for="address in territory.addresses" v-bind:key="address.id" data-toggle="collapse">
+          <AddressCard v-bind="{address, reset}"></AddressCard>
+        </b-list-group-item>
+      </b-list-group>
+    </div>
+    <h2 v-if="isCheckedOut" class="p-5">Please contact the owner of this territory.</h2>
+    <h2 v-if="isRecentlyWorked" class="p-5">Please contact your Territory Servant.</h2>
+    <div v-else class="p-5">
+      <h2>Good news!</h2><br/>
+      <h4>This territory is available for checkout. Please contact your Territory Servant.</h4>
+    </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
 import AddressCard from './AddressCard.vue';
@@ -30,8 +38,9 @@ export default {
   components: {
     AddressCard,
   },
-  mounted() {
-    this.$store.dispatch('territory/getTerritory', this.terrId);
+
+  async mounted() {
+    await this.getTerritory(this.terrId);
   },
   data() {
     return {
@@ -43,9 +52,21 @@ export default {
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
+      isOwnedByUser: 'territory/isOwnedByUser',
+      isAdmin: 'auth/isAdmin',
     }),
+    isCheckedOut() {
+      return this.territory.status && this.territory.status.status === 'Checked Out';
+    },
+    isRecentlyWorked() {
+      return this.territory.status && this.territory.status.status === 'Recently Worked';
+    }
   },
   methods: {
+    ...mapActions({
+      getTerritory: 'territory/getTerritory',
+    }),
+
     getTerritoryName() {
       if (this.territory) {
         return this.territory.name;

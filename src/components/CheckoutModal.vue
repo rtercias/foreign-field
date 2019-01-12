@@ -63,13 +63,6 @@ export default {
       return this.territory && this.territory.status ? this.territory.status.status : '';
     }
   },
-
-  async mounted() {
-    // TODO: set to "me" once we have logged-in user info
-    // this.selectedPublisher = {
-    //   name: 'me',
-    // };
-  }
 }
 </script>
 

@@ -7,7 +7,7 @@ const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 export const territory = {
   namespaced: true,
   state: {
-    territory: {}
+    territory: {},
   },
 
   getters: {
@@ -19,12 +19,22 @@ export const territory = {
     },
     isCheckedOut: state => {
       return state.territory && state.territory.status && state.territory.status.status === 'Checked Out';
-    }
+    },
+    isOwnedByUser: (state, getters, rootState, rootGetters) => {
+      const user = rootGetters['auth/user'];
+
+      if (user) {
+        const owner = state.territory && state.territory.status && state.territory.status.publisher;
+        return owner && user.username === owner.username;
+      }
+
+      return false;
+    },
   },
 
   mutations: {
     CHANGE_STATUS(state, newStatus) {
-      state.status = newStatus;
+      state.territory.status = newStatus;
     },
     GET_TERRITORY_SUCCESS(state, territory) {
       state.territory = territory;
@@ -41,12 +51,14 @@ export const territory = {
           throw new Error('Unable to check in territory because the required arguments were not provided');
         }
 
-        await axios({
+        const response = await axios({
           data: {
             query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
                 status {
+                  checkout_id
                   status
+                  date
                 }
               }
             }`,
@@ -58,7 +70,10 @@ export const territory = {
           }
         });
 
-        commit(CHANGE_STATUS, { status: 'Recently Worked' });
+        if (response && response.data && response.data.data) {
+          const { status } = response.data.data;
+          commit(CHANGE_STATUS, status);
+        }
 
       } catch (e) {
         console.error('Unable to check in territory', e);
@@ -67,7 +82,7 @@ export const territory = {
 
     async checkoutTerritory({ commit }, args) {
       try {
-        await axios({
+        const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -77,7 +92,9 @@ export const territory = {
             query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
                 status {
+                  checkout_id
                   status
+                  date
                 }
               }
             }`,
@@ -89,7 +106,10 @@ export const territory = {
           }
         });
 
-        commit(CHANGE_STATUS, { status: 'Checked Out' });
+        if (response && response.data && response.data.data) {
+          const { status } = response.data.data;
+          commit(CHANGE_STATUS, status);
+        }
 
       } catch (e) {
         console.error('Unable to checkout territory', e);

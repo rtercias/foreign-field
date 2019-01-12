@@ -50,7 +50,10 @@ export const auth = {
     },
     groupCodes: state => {
       return state.groupCodes;
-    }
+    },
+    isAdmin: (state) => {
+      return state.user && ['Admin', 'TS'].includes(state.user.role);
+    },
   },
 
   mutations: {

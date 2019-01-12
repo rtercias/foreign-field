@@ -1,16 +1,18 @@
 <template>
   <div class="row justify-content-between align-items-center pl-2 pr-2">
     <div class="address col-9 pl-0">
-      <h5><a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;<em>{{address.addr2}}</em></h5>
+      <h5>
+        <a :href="mapsUrl" target="_blank" v-if="isOwnedByUser">{{address.addr1}}</a>
+        <span v-else>{{address.addr1}}</span>&nbsp;
+        <em>{{address.addr2}}</em>
+      </h5>
       <div>
         {{address.city}} {{address.state}} {{address.postalCode}}<br/>
         {{address.notes}}
       </div>
     </div>
-    <div class="interaction pr-0">
+    <div class="interaction pr-0" v-if="isOwnedByUser">
       <b-button class="pr-0" variant="link" v-if="selectedResponse==='START'" @click="nextResponse('HOME')">{{selectedResponse}}</b-button>
-      <!-- <b-button class="p-2" variant="link" v-if="selectedResponse==='HOME'" @click="nextResponse('NH')">{{selectedResponse}}</b-button>
-      <b-button class="p-2" variant="link" v-if="selectedResponse==='NH'" @click="nextResponse('START')">{{selectedResponse}}</b-button> -->
       <font-awesome-layers v-if="selectedResponse==='HOME'" class="text-success fa-3x" @click="nextResponse('NH')">
         <font-awesome-icon icon="check-circle"></font-awesome-icon>
       </font-awesome-layers>
@@ -23,6 +25,7 @@
 </template>
 <script>
 import getTime from 'date-fns/get_time';
+import { mapGetters } from 'vuex';
 
 const responses = ['START', 'HOME', 'NH'];
 
@@ -61,6 +64,10 @@ export default {
     this.selectedResponse = this.getStoredItem() || responses[0];
   },
   computed: {
+    ...mapGetters({
+      isOwnedByUser: 'territory/isOwnedByUser',
+    }),
+
     mapsUrl() {
       const addr1 = this.address.addr1 || '';
       const city = this.address.city || '';
