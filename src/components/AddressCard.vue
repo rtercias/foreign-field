@@ -12,7 +12,14 @@
       </div>
     </div>
     <div class="interaction pr-0" v-if="isOwnedByUser">
-      <b-button class="pr-0" variant="link" v-if="selectedResponse==='START'" @click="nextResponse('HOME')">{{selectedResponse}}</b-button>
+      <b-button
+        class="pr-0"
+        variant="link"
+        v-if="selectedResponse==='START'"
+        @click="nextResponse('HOME')"
+        :disabled="isBusy">
+        {{selectedResponse}}
+      </b-button>
       <font-awesome-layers v-if="selectedResponse==='HOME'" class="text-success fa-3x" @click="nextResponse('NH')">
         <font-awesome-icon icon="check-circle"></font-awesome-icon>
       </font-awesome-layers>
@@ -24,8 +31,11 @@
   </div>
 </template>
 <script>
-import getTime from 'date-fns/get_time';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import parse from 'date-fns/parse';
+import orderBy from 'lodash/orderBy';
+import isEqual from 'date-fns/is_equal';
+import startOfDay from 'date-fns/start_of_day';
 
 const responses = ['START', 'HOME', 'NH'];
 
@@ -47,25 +57,48 @@ export default {
     }
   },
   methods: {
-    nextResponse(value) {
+    ...mapActions({
+      setAddress: 'address/setAddress',
+      addLog: 'address/addLog',
+      updateLog: 'address/updateLog',
+      removeLog: 'address/removeLog',
+    }),
+    async nextResponse(value) {
+      
       this.selectedResponse = value;
-      localStorage.setItem(this.storageId, `${this.selectedResponse}-${getTime(new Date())}`);
-    },
-    getStoredItem() {
-      const item = localStorage.getItem(this.storageId);
-      if (item) {
-        return item.split('-')[0];
-      }
+      const orderedLogs = orderBy(this.updatedAddress.activityLogs, 'timestamp', 'desc');
 
-      return undefined;
-    }
+      if (orderedLogs && orderedLogs.length) {
+        const log = orderedLogs[0];
+        const timestamp = parse(log.timestamp);
+        const logIsFromToday = isEqual(startOfDay(timestamp), startOfDay(Date()));
+
+        if (logIsFromToday) {
+          if (value === 'START') {
+            await this.removeLog({ id: log.id, addressId: this.address.id });
+          } else {
+            await this.updateLog({ id: log.id, addressId: this.address.id, value });
+          }
+
+        } else {
+          await this.addLog({ addressId: this.address.id, value });
+        }
+      } else {
+        await this.addLog({ addressId: this.address.id, value });
+      }
+      
+    },
   },
   mounted() {
-    this.selectedResponse = this.getStoredItem() || responses[0];
+    this.setAddress(this.address);
+    this.selectedResponse = this.lastActivity || responses[0];
   },
   computed: {
     ...mapGetters({
       isOwnedByUser: 'territory/isOwnedByUser',
+      lastActivity: 'address/lastActivity',
+      isBusy: 'address/isBusy',
+      updatedAddress: 'address/address',
     }),
 
     mapsUrl() {

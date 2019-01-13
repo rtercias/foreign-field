@@ -131,8 +131,13 @@ export const territory = {
                 addresses {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes
+                  activityLogs {
+                    id checkout_id address_id value tz_offset
+                    timestamp timezone publisher_id notes
+                  }
                 }
                 status {
+                  checkout_id
                   status
                   date
                   publisher {

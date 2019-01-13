@@ -4,6 +4,7 @@ import axios from 'axios';
 import { auth } from './modules/auth';
 import { territory } from './modules/territory';
 import { territories } from './modules/territories';
+import { address } from './modules/address';
 import { addresses } from './modules/addresses';
 import { publishers } from './modules/publishers';
 import "../../node_modules/firebaseui/dist/firebaseui.css";
@@ -19,6 +20,7 @@ export const store = new Store({
     auth,
     territory,
     territories,
+    address,
     addresses,
     publishers,
   }
