@@ -63,10 +63,10 @@ export default {
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
     }),
-    async nextResponse(value) {
+    nextResponse(value) {
       
       this.selectedResponse = value;
-      const orderedLogs = orderBy(this.updatedAddress.activityLogs, 'timestamp', 'desc');
+      const orderedLogs = orderBy(this.address.activityLogs, 'timestamp', 'desc');
 
       if (orderedLogs && orderedLogs.length) {
         const log = orderedLogs[0];
@@ -75,16 +75,16 @@ export default {
 
         if (logIsFromToday) {
           if (value === 'START') {
-            await this.removeLog({ id: log.id, addressId: this.address.id });
+            this.removeLog({ id: log.id, addressId: this.address.id });
           } else {
-            await this.updateLog({ id: log.id, addressId: this.address.id, value });
+            this.updateLog({ id: log.id, addressId: this.address.id, value });
           }
 
         } else {
-          await this.addLog({ addressId: this.address.id, value });
+          this.addLog({ addressId: this.address.id, value });
         }
       } else {
-        await this.addLog({ addressId: this.address.id, value });
+        this.addLog({ addressId: this.address.id, value });
       }
       
     },
@@ -97,8 +97,7 @@ export default {
     ...mapGetters({
       isOwnedByUser: 'territory/isOwnedByUser',
       lastActivity: 'address/lastActivity',
-      isBusy: 'address/isBusy',
-      updatedAddress: 'address/address',
+      isBusy: 'auth/isBusy',
     }),
 
     mapsUrl() {

@@ -22,26 +22,28 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText } from '@fortawesome/vue-fontawesome';
-import { 
-  faCheck, 
-  faBan, 
-  faCheckCircle, 
-  faCircle, 
-  faInfoCircle, 
-  faSpinner, 
-  faSearch, 
-  faTimes, 
-} from '@fortawesome/free-solid-svg-icons';
-
-library.add(
-  faCheck, 
-  faBan, 
-  faCheckCircle, 
-  faCircle, 
+import {
+  faCheck,
+  faBan,
+  faCheckCircle,
+  faCircle,
   faInfoCircle,
   faSpinner,
   faSearch,
   faTimes,
+  faCircleNotch
+} from '@fortawesome/free-solid-svg-icons';
+
+library.add(
+  faCheck,
+  faBan,
+  faCheckCircle,
+  faCircle,
+  faInfoCircle,
+  faSpinner,
+  faSearch,
+  faTimes,
+  faCircleNotch
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

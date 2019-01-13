@@ -15,6 +15,7 @@ function initialState() {
     isAuthenticated: false,
     isPending: false,
     isForcedOut: false,
+    isBusy: false,
     name: '',
     user: undefined,
     photoUrl: '',
@@ -54,6 +55,7 @@ export const auth = {
     isAdmin: (state) => {
       return state.user && ['Admin', 'TS'].includes(state.user.role);
     },
+    isBusy: state => state.isBusy,
   },
 
   mutations: {
@@ -88,6 +90,10 @@ export const auth = {
       Object.keys(s).forEach(key => {
         state[key] = s[key];
       });
+    },
+
+    IS_BUSY(state, value) {
+      state.isBusy = value;
     }
   },
 
@@ -122,11 +128,21 @@ export const auth = {
                 username
                 role
                 role_description
+                status
                 congregation {
                   id
                   name
                 }
-                status
+                territories {
+                  id
+                  name
+                  group_code
+                  type
+                  status {
+                    status
+                    date
+                  }
+                }
               }
             }`,
             variables: {
@@ -201,15 +217,15 @@ export const auth = {
           await dispatch('login', user);
         } else {
           if (state.isForcedOut) {
-            router.push({ name: 'signout', params: { unauthorized: true } });
+            router.replace({ name: 'signout', params: { unauthorized: true } });
           }
 
           if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/signout') {
-            router.push({ name: 'auth', query: { redirect: location.pathname } });
+            router.replace({ name: 'auth', query: { redirect: location.pathname } });
           }
         }
       });
-    }
+    },
   }
 }
 

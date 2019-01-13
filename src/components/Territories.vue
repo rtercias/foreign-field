@@ -80,7 +80,6 @@ export default {
     },
 
     async setAvailability(value) {
-      console.log('setAvailability:value', value);
       this.availability = value;
       await this.fetchTerritories({ congId: this.congId, groupCode: this.groupCode });
       sessionStorage.setItem('availability', value);
