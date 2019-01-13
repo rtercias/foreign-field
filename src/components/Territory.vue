@@ -2,7 +2,7 @@
   <div class="territory">
     <h3 v-if="isLoading" class="p-5">Please wait...</h3>
     <div v-else>
-      <div v-if="isOwnedByUser || isAdmin">
+      <!-- <div v-if="isOwnedByUser || isAdmin"> -->
         <header>
           <div class="w-100 row justify-content-between pl-4 pt-4">
             <h3>{{getCities()}}</h3>
@@ -16,13 +16,13 @@
             <AddressCard v-bind="{address, reset}"></AddressCard>
           </b-list-group-item>
         </b-list-group>
-      </div>
+      <!-- </div>
       <h2 v-else-if="isCheckedOut" class="p-5">Please contact the owner of this territory.</h2>
       <h2 v-else-if="isRecentlyWorked" class="p-5">Please contact your Territory Servant.</h2>
       <div v-else class="p-5">
         <h2>Good news!</h2><br/>
         <h4>This territory is available for checkout. Please contact your Territory Servant.</h4>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

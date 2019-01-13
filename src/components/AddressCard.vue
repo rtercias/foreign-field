@@ -2,8 +2,7 @@
   <div class="row justify-content-between align-items-center pl-2 pr-2">
     <div class="address col-9 pl-0">
       <h5>
-        <a :href="mapsUrl" target="_blank" v-if="isOwnedByUser">{{address.addr1}}</a>
-        <span v-else>{{address.addr1}}</span>&nbsp;
+        <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
         <em>{{address.addr2}}</em>
       </h5>
       <div>
@@ -11,7 +10,7 @@
         {{address.notes}}
       </div>
     </div>
-    <div class="interaction pr-0" v-if="isOwnedByUser">
+    <div class="interaction pr-0">
       <b-button
         class="pr-0"
         variant="link"

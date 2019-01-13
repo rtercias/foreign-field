@@ -7,14 +7,17 @@
 
       <div class="d-flex p-2 text-left justify-content-center">
         <div>
-          <span>Territories I have checked out:</span>
-          <ul class="d-flex flex-column">
-            <li class="pt-3" v-for="terr in territories" :key="terr.id">
-              <a :href="url(terr)">{{terr.name}}</a>
-              <div>Checked out on {{terr.status && checkoutDate(terr.status.date)}}</div>
-              <hr/>
-            </li>
-          </ul>
+          <span v-if="!(territories && territories.length)">I have no territories checked out.</span>
+          <div v-else>
+            <span>Territories I have checked out:</span>
+            <ul class="d-flex flex-column">
+              <li class="pt-3" v-for="terr in territories" :key="terr.id">
+                <a :href="url(terr)">{{terr.name}}</a>
+                <div>Checked out on {{terr.status && checkoutDate(terr.status.date)}}</div>
+                <hr/>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
       
