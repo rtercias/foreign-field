@@ -10,25 +10,19 @@
       </b-dropdown>
     </header>
     <b-list-group class="flex-row flex-wrap">
-      <b-list-group-item v-for="terr in territories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6 pl-4 pr-4">
-        <TerritoryCard v-bind="{terr, groupCode, selectTerritory, refreshTerritories}"></TerritoryCard>
+      <b-list-group-item v-for="terr in filteredTerritories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6 pl-4 pr-4">
+        <TerritoryCard v-bind="{ terr, groupCode, selectTerritory, fetch }"></TerritoryCard>
       </b-list-group-item>
     </b-list-group>
-    <CheckoutModal 
-      v-bind:cong-id="congId" 
-      v-bind:territory-id="selectedTerritory.id" 
-      v-bind:territory="selectedTerritory"
-      v-on:territory-checkedout="refreshTerritories">
+    <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
     </CheckoutModal>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import axios from 'axios';
+import { mapGetters, mapActions } from 'vuex';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
-// import { mapActions } from 'vuex';
 
 export default {
   name: 'Territories',
@@ -36,15 +30,16 @@ export default {
     TerritoryCard,
     CheckoutModal,
   },
+
   async beforeRouteUpdate (to, from, next) {
-    this.groupCode = to.params.group;
-    this.territories = await this.getTerritories();
     next();
+    this.groupCode = to.params.group;
+    await this.fetch();
   },
+  
   data() {
     return {
       groupCode: '',
-      territories: [],
       selectedTerritory: {},
       cities: [],
       availability: '',
@@ -56,78 +51,57 @@ export default {
       ],
     };
   },
-  methods: {
-    selectTerritory(territory) {
-      this.selectedTerritory = territory;
-    },
-
-    async getTerritories() {
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: {
-          query: `query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
-            territories (congId: $congId, group_code: $groupCode) { 
-              id 
-              name 
-              type 
-              city 
-              status {
-                status
-                date
-                publisher {
-                  username
-                  firstname
-                  lastname
-                }
-              }
-            }
-          }`,
-          variables: {
-            congId: this.congId,
-            groupCode: this.groupCode,
-          }
-        }
-      });
-
-      if (!response || !response.data || !response.data.data || !response.data.data.territories) {
-        return null;
-      }
-
-      if (this.availability === 'All') {
-        return response.data.data.territories;
-      }
-
-      return response.data.data.territories.filter(t => t.status.status === this.availability);
-    },
-
-    async setAvailability(value) {
-      this.availability = value;
-      this.territories = await this.getTerritories();
-      sessionStorage.setItem('availability', value);
-    },
-
-    async refreshTerritories() {
-      this.territories = await this.getTerritories();
-    }
-  },
-
-  async mounted() {
-    this.groupCode = this.$route.params.group;
-    this.availability = sessionStorage.getItem('availability') || 'Available';
-    await this.refreshTerritories();
-  },
 
   computed: {
     ...mapGetters({
       congId: 'auth/congId',
       user: 'auth/user',
+      territories: 'territories/territories',
     }),
-  }
 
+    filteredTerritories() {
+      if (this.availability === 'All') {
+        return this.territories;
+      }
+
+      return this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
+    }
+  },
+
+  watch: {
+    congId() {
+      this.fetch();
+    },
+  },
+
+  methods: {
+    selectTerritory(territory) {
+      this.selectedTerritory = territory;
+    },
+
+    async setAvailability(value) {
+      this.availability = value;
+      await this.fetchTerritories({ congId: this.congId, groupCode: this.groupCode });
+      sessionStorage.setItem('availability', value);
+    },
+
+    async fetch() {
+      const congId = this.congId || (this.user && this.user.congId);
+      this.groupCode = this.$route.params.group;
+      this.availability = sessionStorage.getItem('availability') || 'Available';
+      await this.fetchTerritories({ congId, groupCode: this.groupCode });
+      await this.fetchPublishers(congId);
+    },
+
+    ...mapActions({
+      fetchTerritories: 'territories/fetchTerritories',
+      fetchPublishers: 'publishers/fetchPublishers',
+    }),
+  },
+
+  mounted() {
+    this.fetch();
+  }
 }
 </script>
 

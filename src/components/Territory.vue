@@ -1,28 +1,37 @@
 <template>
   <div class="territory">
-    <header>
-      <div class="w-100 row justify-content-between pl-4 pt-4">
-        <h3>{{getCities()}}</h3>
-        <h3 class="text-right">{{getTerritoryName()}}</h3>
+    <h3 v-if="isLoading" class="p-5">Please wait...</h3>
+    <div v-else>
+      <div v-if="isOwnedByUser || isAdmin">
+        <header>
+          <div class="w-100 row justify-content-between pl-4 pt-4">
+            <h3>{{getCities()}}</h3>
+            <h3 class="text-right">{{getTerritoryName()}}</h3>
+          </div>
+          <div class="w-100 row justify-content-between pl-4 pb-4">
+          </div>
+        </header>
+        <b-list-group class="columns">
+          <b-list-group-item class="col-sm-12" v-for="address in territory.addresses" v-bind:key="address.id" data-toggle="collapse">
+            <AddressCard v-bind="{address, reset}"></AddressCard>
+          </b-list-group-item>
+        </b-list-group>
       </div>
-      <div class="w-100 row justify-content-between pl-4 pb-4">
-        <b-button class="p-0" variant="link" @click="cleanLocalStorage(true)">Reset</b-button>
+      <h2 v-else-if="isCheckedOut" class="p-5">Please contact the owner of this territory.</h2>
+      <h2 v-else-if="isRecentlyWorked" class="p-5">Please contact your Territory Servant.</h2>
+      <div v-else class="p-5">
+        <h2>Good news!</h2><br/>
+        <h4>This territory is available for checkout. Please contact your Territory Servant.</h4>
       </div>
-    </header>
-    <b-list-group class="columns">
-      <b-list-group-item class="col-sm-12" v-for="address in territory.addresses" v-bind:key="address.id" data-toggle="collapse">
-        <AddressCard v-bind="{address, reset}"></AddressCard>
-      </b-list-group-item>
-    </b-list-group>
+    </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
 import AddressCard from './AddressCard.vue';
-import differenceInDays from 'date-fns/difference_in_days';
 
 
 export default {
@@ -30,11 +39,14 @@ export default {
   components: {
     AddressCard,
   },
-  mounted() {
-    this.$store.dispatch('territory/getTerritory', this.terrId);
+
+  async mounted() {
+    await this.getTerritory(this.terrId);
+    setTimeout(() => this.isLoading = false, 300);
   },
   data() {
     return {
+      isLoading: true,
       terrId: this.$route.params.id,
       reset: false,
       workInProgress: {},
@@ -43,9 +55,21 @@ export default {
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
+      isOwnedByUser: 'territory/isOwnedByUser',
+      isAdmin: 'auth/isAdmin',
     }),
+    isCheckedOut() {
+      return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
+    },
+    isRecentlyWorked() {
+      return this.territory && this.territory.status && this.territory.status.status === 'Recently Worked';
+    }
   },
   methods: {
+    ...mapActions({
+      getTerritory: 'territory/getTerritory',
+    }),
+
     getTerritoryName() {
       if (this.territory) {
         return this.territory.name;
@@ -60,28 +84,6 @@ export default {
       }
 
       return null;
-    },
-    cleanLocalStorage(force) {
-      if (force && !confirm('Are you sure you want to reset your records?')) {
-        return;
-      }
-
-      const keysToRemove = [];
-      this.reset = true;
-
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const item = localStorage.getItem(key);
-        const timestamp = item.split('-')[1];
-        if (key.includes('foreignfield-') && 
-        (force || differenceInDays(new Date(Number(timestamp)), new Date()) > 0)) {
-          keysToRemove.push(key);
-        }
-      }
-
-      for (const key of keysToRemove) {
-        localStorage.removeItem(key);
-      }
     },
   },
 }
