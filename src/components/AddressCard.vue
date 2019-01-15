@@ -10,6 +10,20 @@
         {{address.notes}}
       </div>
     </div>
+    <!-- TODO: historical activity (show the last two) -->
+    <!-- <div v-for="log in recentLogs" :key="log.id">
+      <div>
+        <font-awesome-layers v-if="log.value==='HOME'" class="text-success fa-3x">
+          <font-awesome-icon icon="check-circle"></font-awesome-icon>
+        </font-awesome-layers>
+      </div>
+      <div>
+        <font-awesome-layers v-if="log.value==='NH'" class="text-warning fa-3x">
+          <font-awesome-icon icon="circle"></font-awesome-icon>
+          <font-awesome-layers-text value="NH" class="nh-text text-white font-weight-bold"></font-awesome-layers-text>
+        </font-awesome-layers>
+      </div>
+    </div> -->
     <div class="interaction pr-0">
       <b-button
         class="pr-0"
@@ -31,16 +45,12 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import parse from 'date-fns/parse';
-import orderBy from 'lodash/orderBy';
-import isEqual from 'date-fns/is_equal';
-import startOfDay from 'date-fns/start_of_day';
 
 const responses = ['START', 'HOME', 'NH'];
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'reset'],
+  props: ['address'],
   data() {
     return {
       storageId: `foreignfield-${this.address.id}`,
@@ -48,11 +58,6 @@ export default {
       responseText: '',
       animate: false,
       hideResponseText: false,
-    }
-  },
-  watch: {
-    'reset' () {
-      this.selectedResponse = responses[0];
     }
   },
   methods: {
@@ -63,29 +68,8 @@ export default {
       removeLog: 'address/removeLog',
     }),
     nextResponse(value) {
-      
       this.selectedResponse = value;
-      const orderedLogs = orderBy(this.address.activityLogs, 'timestamp', 'desc');
-
-      if (orderedLogs && orderedLogs.length) {
-        const log = orderedLogs[0];
-        const timestamp = parse(log.timestamp);
-        const logIsFromToday = isEqual(startOfDay(timestamp), startOfDay(Date()));
-
-        if (logIsFromToday) {
-          if (value === 'START') {
-            this.removeLog({ id: log.id, addressId: this.address.id });
-          } else {
-            this.updateLog({ id: log.id, addressId: this.address.id, value });
-          }
-
-        } else {
-          this.addLog({ addressId: this.address.id, value });
-        }
-      } else {
-        this.addLog({ addressId: this.address.id, value });
-      }
-      
+      this.addLog({ addressId: this.address.id, value });
     },
   },
   mounted() {
@@ -104,6 +88,11 @@ export default {
       const city = this.address.city || '';
       const state = this.address.state_province || '';
       return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
+    },
+
+    recentLogs() {
+      const lastActivityId = this.lastActivity && this.lastActivity.id;
+      return [...this.address.activityLogs.filter(l => l.id !== lastActivityId)];
     }
   }
 }

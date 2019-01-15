@@ -17,7 +17,6 @@
           <b-nav-item :to="`/dnc/${terrCongId}`" v-if="this.$route.name === 'territory'">DNC</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
-          <h3 class="text-white font-weight-bold m-0 mr-2 mt-1" v-if="isBusy"><font-awesome-icon icon="circle-notch" spin></font-awesome-icon></h3>
           <b-nav-item-dropdown v-if="isAuthenticated" right>
             <span slot="text">{{name}}</span>
             <b-dropdown-item @click="logout">Logout</b-dropdown-item>
@@ -104,7 +103,6 @@ export default {
       congId: 'auth/congId',
       terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
-      isBusy: 'auth/isBusy',
     }),
     checkPermission() {
       return this.user && this.permissions.territories.includes(this.user.role);

@@ -59,14 +59,18 @@ export const address = {
     UPDATE_LOG(state, log) {
       if (state.address.id === log.address_id) {
         const index = state.address.activityLogs.findIndex(a => a.id === log.id);
-        state.address.activityLogs.splice(index, 1, log);
+        if (index !== -1) {
+          state.address.activityLogs.splice(index, 1, log);
+        }
       }
     },
 
     REMOVE_LOG(state, { id, addressId }) {
       if (state.address.id === addressId) {
         const index = state.address.activityLogs.findIndex(a => a.id === id);
-        state.address.activityLogs.splice(index, 1);
+        if (index !== -1) {
+          state.address.activityLogs.splice(index, 1);
+        }
       }
     },
   },
