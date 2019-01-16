@@ -45,6 +45,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import debounce from 'lodash/debounce';
 
 const responses = ['START', 'HOME', 'NH'];
 
@@ -67,10 +68,10 @@ export default {
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
     }),
-    nextResponse(value) {
+    nextResponse: debounce(function(value) {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
-    },
+    }, 500),
   },
   mounted() {
     this.setAddress(this.address);
