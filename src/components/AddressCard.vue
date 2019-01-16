@@ -71,7 +71,7 @@ export default {
     nextResponse: debounce(function(value) {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
-    }, 500),
+    }, 500, { leading: true, trailing: false }),
   },
   mounted() {
     this.setAddress(this.address);
