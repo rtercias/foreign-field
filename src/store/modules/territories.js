@@ -40,6 +40,7 @@ export const territories = {
                 status
                 date
                 publisher {
+                  id
                   username
                   firstname
                   lastname

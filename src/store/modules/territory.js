@@ -141,7 +141,7 @@ export const territory = {
                   status
                   date
                   publisher {
-                    username firstname lastname
+                    id username firstname lastname
                   }
                 }
               }

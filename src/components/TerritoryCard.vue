@@ -15,7 +15,7 @@
           @click="selectTerritory(terr)">
           check out
         </b-btn>
-        <b-btn v-if="status === 'Checked Out'" variant="outline-info" @click="checkinTerritory(terr)">check in</b-btn>
+        <b-btn v-if="status === 'Checked Out'" variant="outline-info" @click="checkin(terr)">check in</b-btn>
       </div>
     </div>
     <div class="text-right">
@@ -34,12 +34,14 @@ export default {
   methods: {
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
+      checkinTerritory: 'territory/checkinTerritory',
     }),
-    async checkinTerritory(territory) {
+    async checkin(territory) {
+      const publisher = territory.status && territory.status.publisher || {};
       const user = this.$store.state.auth.user;
-      await this.$store.dispatch('territory/checkinTerritory', { 
+      await this.checkinTerritory({ 
         territoryId: territory.id, 
-        userId: user.id, 
+        userId: publisher.id, 
         username: user.username
       });
 
