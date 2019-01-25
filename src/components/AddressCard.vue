@@ -36,9 +36,13 @@
       <font-awesome-layers v-if="selectedResponse==='HOME'" class="text-success fa-3x" @click="nextResponse('NH')">
         <font-awesome-icon icon="check-circle"></font-awesome-icon>
       </font-awesome-layers>
-      <font-awesome-layers v-if="selectedResponse==='NH'" class="text-warning fa-3x" @click="nextResponse('START')">
+      <font-awesome-layers v-if="selectedResponse==='NH'" class="text-warning fa-3x" @click="nextResponse('NF')">
         <font-awesome-icon icon="circle"></font-awesome-icon>
         <font-awesome-layers-text value="NH" class="nh-text text-white font-weight-bold"></font-awesome-layers-text>
+      </font-awesome-layers>
+      <font-awesome-layers v-if="selectedResponse==='NF'" class="fa-3x" @click="nextResponse('START')">
+        <font-awesome-icon icon="circle"></font-awesome-icon>
+        <font-awesome-layers-text value="NF" class="nh-text text-white font-weight-bold"></font-awesome-layers-text>
       </font-awesome-layers>
     </div>
   </div>
@@ -47,7 +51,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import debounce from 'lodash/debounce';
 
-const responses = ['START', 'HOME', 'NH'];
+const responses = ['START', 'HOME', 'NH', 'NF'];
 
 export default {
   name: 'AddressCard',
