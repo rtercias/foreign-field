@@ -12,7 +12,7 @@
             <span>Territories I have checked out:</span>
             <ul class="d-flex flex-column">
               <li class="pt-3" v-for="terr in territories" :key="terr.id">
-                <a :href="url(terr)">{{terr.name}} {{terr.city}}</a>
+                <a :href="url(terr)">{{terr.name}} ({{terr.city}})</a>
                 <div>Checked out on {{terr.status && checkoutDate(terr.status.date)}}</div>
                 <hr/>
               </li>

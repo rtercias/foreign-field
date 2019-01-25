@@ -136,6 +136,7 @@ export const auth = {
                 territories {
                   id
                   name
+                  city
                   group_code
                   type
                   status {
