@@ -32,7 +32,7 @@ export const address = {
       const activity = state.address && state.address.activityLogs;
 
       if (activity) {
-        const current = orderBy(activity, 'timestamp', 'desc')[0];
+        const current = orderBy(activity, (a) => (new Date(a.timestamp)), 'desc')[0];
         return current && current.value;
       }
 
