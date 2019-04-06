@@ -46,7 +46,7 @@ export default {
     return {
       groupCode: this.$route.params.group,
       permissions: {
-        territories: ['Admin', 'TS']
+        territories: ['Admin', 'TS', 'GO', 'SO']
       }
     };
   },
@@ -54,14 +54,6 @@ export default {
     logout() {
      this.$store.dispatch('auth/logout');
      this.$router.push('/signout');
-    },
-
-    async setGroupCode(value) {
-      if(value != this.groupCode) {
-        this.groupCode = value;
-      }
-      await this.fetchTerritories({ congId: this.user.congId, groupCode: this.groupCode });
-      sessionStorage.setItem('group-code', value);
     },
 
     shareWorkInProgress(addresses) {
@@ -89,8 +81,6 @@ export default {
           }
         }
       }
-
-      console.log('wip', workInProgress);
     },
   },
 

@@ -1,17 +1,17 @@
 <template>
-  <div class="dashboard lead d-flex align-items-center flex-column p-5">
+  <div class="dashboard lead d-flex align-items-center flex-column p-3 pt-5">
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field territory management</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <div v-else class="w-100">
       <h3 class="pt-0 mt-0">Dashboard</h3>
-
+      
       <div class="d-flex p-2 text-left justify-content-center">
         <div>
           <span v-if="!(territories && territories.length)">I have no territories checked out.</span>
           <div v-else>
             <span>Territories I have checked out:</span>
             <ul class="d-flex flex-column">
-              <li class="pt-3" v-for="terr in territories" :key="terr.id">
+              <li class="pt-3 ml-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
                 <a :href="url(terr)">{{terr.name}} ({{terr.city}})</a>
                 <div>Checked out on {{terr.status && checkoutDate(terr.status.date)}}</div>
                 <hr/>

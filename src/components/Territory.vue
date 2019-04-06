@@ -63,6 +63,7 @@ export default {
       isOwnedByUser: 'territory/isOwnedByUser',
       isAdmin: 'auth/isAdmin',
       isBusy: 'auth/isBusy',
+      user: 'auth/user',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -92,6 +93,15 @@ export default {
       return null;
     },
   },
+  watch: {
+    user() {
+      // Ensures the current user's congregation owns the current territory.
+      // This ensures navigation to a territory via url are valid.
+      if (this.user.congregation.id !== this.territory.congregationid) {
+        this.$router.push('/welcome');
+      }
+    }
+  }
 }
 </script>
 
@@ -119,6 +129,11 @@ li {
   margin: 0 10px;
 }
 @media (min-width: 769px) {
+  .columns {
+    columns: 2;
+  }
+}
+@media print {
   .columns {
     columns: 2;
   }

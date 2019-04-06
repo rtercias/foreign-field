@@ -11,11 +11,11 @@
         <b-btn
           v-b-modal.checkoutModal 
           variant="info" 
-          v-if="status === 'Available' || status === 'Recently Worked'" 
+          v-if="canAssignTerritory && (status === 'Available' || status === 'Recently Worked')" 
           @click="selectTerritory(terr)">
           check out
         </b-btn>
-        <b-btn v-if="status === 'Checked Out'" variant="outline-info" @click="checkin(terr)">check in</b-btn>
+        <b-btn v-if="canAssignTerritory && status === 'Checked Out'" variant="outline-info" @click="checkin(terr)">check in</b-btn>
       </div>
     </div>
     <div class="text-right">
@@ -25,7 +25,7 @@
   </div>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import { format } from 'date-fns';
 
 export default {
@@ -49,6 +49,10 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      user: 'auth/user',
+    }),
+
     isRecentlyWorked() {
       return this.status === 'Recently Worked';
     },
@@ -64,6 +68,10 @@ export default {
 
     status() {
       return this.terr && this.terr.status && this.terr.status.status || 'Available';
+    },
+
+    canAssignTerritory() {
+      return ['Admin', 'TS'].includes(this.user.role);
     },
   }
 }

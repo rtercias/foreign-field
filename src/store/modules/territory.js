@@ -3,6 +3,7 @@ import axios from 'axios';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
+const RESET_TERRITORY = 'RESET_TERRITORY';
 
 export const territory = {
   namespaced: true,
@@ -42,6 +43,9 @@ export const territory = {
     GET_TERRITORY_FAIL(state, exception) { /* eslint-disable-line no-unused-vars */
       // console.log(GET_TERRITORY_FAIL, exception);
     },
+    RESET_TERRITORY(state) {
+      state.territory = {};
+    }
   },
 
   actions: {
@@ -162,6 +166,10 @@ export const territory = {
         commit(GET_TERRITORY_FAIL, exception);
       }
     },
+
+    resetTerritory({ commit }) {
+      commit(RESET_TERRITORY);
+    }
   }
 }
 

@@ -9,13 +9,16 @@
         </b-dropdown-item>
       </b-dropdown>
     </header>
-    <b-list-group class="flex-row flex-wrap">
-      <b-list-group-item v-for="terr in filteredTerritories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6 pl-4 pr-4">
-        <TerritoryCard v-bind="{ terr, groupCode, selectTerritory, fetch }"></TerritoryCard>
-      </b-list-group-item>
-    </b-list-group>
-    <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
-    </CheckoutModal>
+    <Loading v-if="loading"></Loading>
+    <div v-else>
+      <b-list-group class="columns flex-row flex-wrap">
+        <b-list-group-item v-for="terr in filteredTerritories" v-bind:key="terr.id" data-toggle="collapse" class="territory-card col-md-6 pl-4 pr-4">
+          <TerritoryCard v-bind="{ terr, groupCode, selectTerritory, fetch }"></TerritoryCard>
+        </b-list-group-item>
+      </b-list-group>
+      <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
+      </CheckoutModal>
+    </div>
   </div>
 </template>
 
@@ -23,18 +26,20 @@
 import { mapGetters, mapActions } from 'vuex';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
+import Loading from './Loading.vue';
 
 export default {
   name: 'Territories',
   components: {
     TerritoryCard,
     CheckoutModal,
+    Loading,
   },
 
-  async beforeRouteUpdate (to, from, next) {
+  beforeRouteUpdate (to, from, next) {
     next();
     this.groupCode = to.params.group;
-    await this.fetch();
+    this.fetch();
   },
   
   data() {
@@ -57,6 +62,7 @@ export default {
       congId: 'auth/congId',
       user: 'auth/user',
       territories: 'territories/territories',
+      loading: 'territories/loading',
     }),
 
     filteredTerritories() {
@@ -69,7 +75,7 @@ export default {
   },
 
   watch: {
-    congId() {
+    congId: function() {
       this.fetch();
     },
   },
@@ -80,6 +86,7 @@ export default {
     },
 
     async setAvailability(value) {
+      this.resetTerritories();
       this.availability = value;
       await this.fetchTerritories({ congId: this.congId, groupCode: this.groupCode });
       sessionStorage.setItem('availability', value);
@@ -95,6 +102,7 @@ export default {
 
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
+      resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
     }),
   },
