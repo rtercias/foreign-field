@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
@@ -45,7 +44,7 @@ export const territory = {
     },
     RESET_TERRITORY(state) {
       state.territory = {};
-    }
+    },
   },
 
   actions: {
@@ -169,6 +168,17 @@ export const territory = {
 
     resetTerritory({ commit }) {
       commit(RESET_TERRITORY);
+    },
+
+    async resetNHRecords({ commit, dispatch, state }, territoryId) {
+      await dispatch('getTerritory', territoryId);
+      const { addresses } = state.territory;
+
+      for (const address of addresses) {
+        if (address.activityLogs && address.activityLogs.length > 0) {
+          await dispatch('address/addLog', { addressId: address.id, value: 'START' }, { root: true });
+        }
+      }
     }
   }
 }

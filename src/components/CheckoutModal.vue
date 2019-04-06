@@ -22,6 +22,7 @@ export default {
   data() {
     return {
       selectedPublisher: { name: 'me' },
+      group: this.$route.params.group,
     };
   },
 
@@ -49,7 +50,7 @@ export default {
         username: this.user.username,
       });
 
-      this.fetch();
+      this.$router.push(`/territories/${this.group}/${this.territory.id}`)
     },
   },
 

@@ -99,6 +99,11 @@ export default {
       const lastActivityId = this.lastActivity && this.lastActivity.id;
       return [...this.address.activityLogs.filter(l => l.id !== lastActivityId)];
     }
+  },
+  watch: {
+    address() {
+      this.selectedResponse = this.lastActivity || responses[0];
+    }
   }
 }
 </script>

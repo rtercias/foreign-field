@@ -1,6 +1,6 @@
 <template>
   <div class="territory">
-    <h3 v-if="isLoading" class="p-5">Please wait...</h3>
+    <Loading v-if="isLoading"></Loading>
     <div v-else>
       <!-- <div v-if="isOwnedByUser || isAdmin"> -->
         <header>
@@ -14,6 +14,7 @@
             <h3 class="text-right">{{getTerritoryName()}}</h3>
           </div>
           <div class="w-100 row justify-content-between pl-4 pb-4">
+            <b-button v-if="canAssignTerritory" class="p-0" variant="link" @click="resetNH(true)">Reset</b-button>
           </div>
         </header>
         <b-list-group class="columns">
@@ -37,12 +38,13 @@ import { mapGetters, mapActions } from 'vuex';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
 import AddressCard from './AddressCard.vue';
-
+import Loading from './Loading.vue';
 
 export default {
   name: 'Territory',
   components: {
     AddressCard,
+    Loading,
   },
 
   async mounted() {
@@ -70,11 +72,16 @@ export default {
     },
     isRecentlyWorked() {
       return this.territory && this.territory.status && this.territory.status.status === 'Recently Worked';
-    }
+    },
+    canAssignTerritory() {
+      const { role } = this.user || {};
+      return ['Admin', 'TS'].includes(role);
+    },
   },
   methods: {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
+      resetNHRecords: 'territory/resetNHRecords',
     }),
 
     getTerritoryName() {
@@ -92,6 +99,15 @@ export default {
 
       return null;
     },
+
+    async resetNH() {
+      if (confirm('Are you sure you want to reset NH records?')) {
+        this.isLoading = true;
+        await this.resetNHRecords(this.terrId);
+        await this.getTerritory(this.terrId);
+        this.isLoading = false;
+      }
+    }
   },
   watch: {
     user() {

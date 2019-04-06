@@ -35,6 +35,9 @@ export default {
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
       checkinTerritory: 'territory/checkinTerritory',
+      resetTerritory: 'territory/resetTerritory',
+      getTerritory: 'territory/getTerritory',
+      resetNHRecords: 'territory/resetNHRecords',
     }),
     async checkin(territory) {
       const publisher = territory.status && territory.status.publisher || {};
@@ -45,12 +48,17 @@ export default {
         username: user.username
       });
 
+      if (confirm('Check-in successful. Do you want to reset NH records?')) {
+        await this.resetNHRecords(territory.id);
+      }
+
       this.fetch();
     },
   },
   computed: {
     ...mapGetters({
       user: 'auth/user',
+      territoryWithAddresses: 'territory/territory',
     }),
 
     isRecentlyWorked() {
