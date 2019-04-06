@@ -4,10 +4,11 @@
     <Auth v-if="!isAuthenticated"></Auth>
     <div v-else class="w-100">
       <h3 class="pt-0 mt-0">Dashboard</h3>
-      
+
       <div class="d-flex p-2 text-left justify-content-center">
         <div>
-          <span v-if="!(territories && territories.length)">I have no territories checked out.</span>
+          <Loading v-if="loading"></Loading>
+          <span v-else-if="!(territories && territories.length)">I have no territories checked out.</span>
           <div v-else>
             <span>Territories I have checked out:</span>
             <ul class="d-flex flex-column">
@@ -28,12 +29,14 @@
 <script>
 import { mapGetters } from 'vuex';
 import Auth from './Auth';
+import Loading from './Loading.vue';
 import format from 'date-fns/format';
 
 export default {
   name: 'Home',
   components: {
     Auth,
+    Loading,
   },
   methods: {
     checkoutDate(date) {
@@ -48,6 +51,7 @@ export default {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
       user: 'auth/user',
+      loading: 'auth/loading',
     }),
 
     territories() {

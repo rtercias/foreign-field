@@ -9,18 +9,19 @@ const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
 const SET_GROUP_CODES = 'SET_GROUP_CODES';
 const RESET = 'RESET';
+const LOADING = 'LOADING';
 
 function initialState() {
   return {
     isAuthenticated: false,
     isPending: false,
     isForcedOut: false,
-    isBusy: false,
     name: '',
     user: undefined,
     photoUrl: '',
     congId: 0,
     groupCodes: [],
+    loading: false,
   };
 }
 
@@ -55,7 +56,7 @@ export const auth = {
     isAdmin: (state) => {
       return state.user && ['Admin', 'TS'].includes(state.user.role);
     },
-    isBusy: state => state.isBusy,
+    loading: state => state.loading,
   },
 
   mutations: {
@@ -92,8 +93,8 @@ export const auth = {
       });
     },
 
-    IS_BUSY(state, value) {
-      state.isBusy = value;
+    LOADING(state, value) {
+      state.loading = value;
     }
   },
 
@@ -114,6 +115,7 @@ export const auth = {
     },
 
     async authorize({ commit }, username) {
+      commit(LOADING, true);
       return new Promise(async (resolve, reject) => {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -152,6 +154,8 @@ export const auth = {
           }
         });
         
+        commit(LOADING, false);
+
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
           reject('Unauthorized');
         }
