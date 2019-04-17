@@ -64,7 +64,7 @@ export default {
       territory: 'territory/territory',
       isOwnedByUser: 'territory/isOwnedByUser',
       isAdmin: 'auth/isAdmin',
-      isBusy: 'auth/isBusy',
+      isBusy: 'auth/loading',
       user: 'auth/user',
     }),
     isCheckedOut() {
