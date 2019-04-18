@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="pl-0">
     <b-row class="justify-content-between align-items-center pl-2 pr-2">
       <div class="address col-6 pl-0">
           <h5>
@@ -25,6 +25,15 @@
             </font-awesome-layers>
           </div>
         </div> -->
+        
+        <!-- the modal -->
+        <b-modal @ok="handleSubmit" hide-header-close ref="modal-note" title="Add a hashtag">
+          <form @submit.stop.prevent='handleSubmit' rows="5">
+            <b-form-input v-model="formText"></b-form-input>
+          </form>
+        </b-modal>
+        <!-- End of Modal componenet -->  
+
         <div class="interaction pr-0">
           <b-button
             class="pr-0"
@@ -48,28 +57,24 @@
       </div>
 
       <!-- Modal interaction -->
-        <font-awesome-icon @click="showModal" icon="pencil-alt" class="fa-2x"></font-awesome-icon>
-        <!-- the modal -->
-        <b-modal @ok="handleSubmit" hide-header-close ref="modal-note" title="Add a hashtag">
-          <form @submit.stop.prevent='handleSubmit' rows="5">
-            <b-form-input v-model="formText"></b-form-input>
-          </form>
-        </b-modal>
-        <!-- End of Modal componenet -->  
+      <font-awesome-icon @click="showModal" icon="pencil-alt" class="fa-2x"></font-awesome-icon>
     </b-row>
       
 
     <!-- Display Hashtags -->
-    <div class="tag-display pl-0">
-      <ul class="bottom-tags m-0 pl-0">Tags: 
-        <li v-for='(t, index) in tags' :key="t.id" class="tag-names-list">
-          <b-badge variant="secondary" class="ml-1 mr-1">
-              <font-awesome-icon icon="times" @click="deleteTag(index)"></font-awesome-icon>
-              {{ t + ' '}}
-          </b-badge>
-        </li>
-      </ul>
-    </div>
+    <b-row class="pl-2 pr-2 bottom-tags ">
+      <div class="tag-display">
+        <ul class="mt-2 mb-0 pl-0">Tags: 
+          <li v-for='(t, index) in tags' :key="t.id" class="tag-names-list">
+            <b-badge variant="secondary" class="ml-1 mr-1">
+                <font-awesome-icon icon="times" @click="deleteTag(index)"></font-awesome-icon>
+                {{ t + ' '}}
+            </b-badge>
+          </li>
+        </ul>
+      </div>
+    </b-row>
+    
     <!-- End of Display Hashtags -->
   </div>
 </template>
@@ -158,9 +163,9 @@ export default {
 }
 </script>
 <style scoped>
-.row {
-  height: 100px;
-}
+.modal-dialog {
+    width: 300px; /* Bootstrap default - 600px */
+  }
 
 .address {
   text-align: left;
