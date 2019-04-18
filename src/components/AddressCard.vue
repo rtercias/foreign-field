@@ -1,7 +1,7 @@
 <template>
   <div class="pl-0">
     <b-row class="justify-content-between align-items-center pl-2 pr-2">
-      <div class="address col-6 pl-0">
+      <div class="address col-8 pl-0">
           <h5>
             <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
             <em>{{address.addr2}}</em>
@@ -25,7 +25,7 @@
             </font-awesome-layers>
           </div>
         </div> -->
-        
+
         <!-- the modal -->
         <b-modal @ok="handleSubmit" hide-header-close ref="modal-note" title="Add a hashtag">
           <form @submit.stop.prevent='handleSubmit' rows="5">
@@ -55,16 +55,12 @@
             <font-awesome-layers-text value="NF" class="nh-text text-white font-weight-bold"></font-awesome-layers-text>
           </font-awesome-layers>      
       </div>
-
-      <!-- Modal interaction -->
-      <font-awesome-icon @click="showModal" icon="pencil-alt" class="fa-2x"></font-awesome-icon>
+      <!-- <font-awesome-icon @click="showModal" icon="pencil-alt" class="fa-2x"></font-awesome-icon> -->
     </b-row>
-      
-
-    <!-- Display Hashtags -->
     <b-row class="pl-2 pr-2 bottom-tags ">
       <div class="tag-display">
-        <ul class="mt-2 mb-0 pl-0">Tags: 
+        <ul class="mt-2 mb-0 pl-0"><font-awesome-icon icon="plus-square" class="" @click="showModal"></font-awesome-icon>
+        Tags: 
           <li v-for='(t, index) in tags' :key="t.id" class="tag-names-list">
             <b-badge variant="secondary" class="ml-1 mr-1">
                 <font-awesome-icon icon="times" @click="deleteTag(index)"></font-awesome-icon>
@@ -74,8 +70,6 @@
         </ul>
       </div>
     </b-row>
-    
-    <!-- End of Display Hashtags -->
   </div>
 </template>
 

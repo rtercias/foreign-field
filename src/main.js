@@ -32,7 +32,8 @@ import {
   faSearch,
   faTimes,
   faCircleNotch,
-  faPencilAlt
+  faPencilAlt,
+  faPlusSquare,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -45,7 +46,8 @@ library.add(
   faSearch,
   faTimes,
   faCircleNotch,
-  faPencilAlt
+  faPencilAlt,
+  faPlusSquare,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
