@@ -26,13 +26,32 @@
           </div>
         </div> -->
 
-      <!-- the modal -->
+      <!-- the modal for tags -->
       <b-modal @ok="handleSubmit" hide-header-close ref="modal-note" title="Add a tag">
         <form @submit.stop.prevent='handleSubmit' rows="5">
           <b-form-input v-model="formText"></b-form-input>
         </form>
       </b-modal>
-      <!-- End of Modal componenet -->  
+
+      <!-- the modal for address extended -->
+      <b-modal
+      ref="modal-extend" 
+      header-bg-variant="info" 
+      header-text-variant="light"
+      body-text-variant="dark"
+      hide-header
+      ok-only
+      centered>
+        <div class="pencil-icon">
+          <font-awesome-icon icon="pencil-alt" class="fa-2x"></font-awesome-icon>
+        </div>
+        <div class="extended-title">
+          {{address.addr1}}
+        </div>
+        <b-form-textarea
+        rows="8"
+        placeholder="Write Something" />
+      </b-modal>
 
       <div class="interaction pr-0">
         <b-button
@@ -58,10 +77,8 @@
       <!-- <font-awesome-icon @click="showModal" icon="pencil-alt" class="fa-2x"></font-awesome-icon> -->
     </b-row>
     <b-row class="pl-2 pr-2 bottom-tags">
-      <div class="tag-display">
-        <ul class="mt-2 mb-0 pl-0"><font-awesome-icon icon="plus-square" class="" @click="showModal"></font-awesome-icon>
-        <!-- <font-awesome-icon @click="addressPage" icon="pencil-alt" class="fa-2x"></font-awesome-icon> -->
-        Tags: 
+      <div>
+        <ul class="mt-2 mb-0 pl-0"><font-awesome-icon icon="plus-square" @click="showModal"></font-awesome-icon> Tags: 
           <li v-for='(t, index) in tags' :key="t.id" class="tag-names-list">
             <b-badge variant="info" class="ml-1 mr-1">
               <font-awesome-icon icon="times" @click="deleteTag(index)"></font-awesome-icon>
@@ -69,6 +86,11 @@
             </b-badge>
           </li>
         </ul>
+      </div>
+    </b-row>
+    <b-row class="pl-2">
+      <div>
+        <font-awesome-icon icon="plus-square" @click="addressExtended"></font-awesome-icon> Expand
       </div>
     </b-row>
   </div>
@@ -105,10 +127,6 @@ export default {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
     }, 500, { leading: true, trailing: false }),
-
-    addressPage(){
-      this.$router.push('/address');
-    },
     // Added methods for note submission
     showModal() {
       this.$refs['modal-note'].show();
@@ -126,6 +144,9 @@ export default {
     },
     deleteTag(index){
       this.tags.splice(index, 1);
+    },
+    addressExtended(){
+      this.$refs['modal-extend'].show()
     }
   },
   mounted() {
@@ -175,11 +196,6 @@ export default {
   cursor: pointer;
   overflow: hidden;
 }
-
-.tag-display {
-  text-align: left;
-}
-
 .bottom-tags {
   white-space: nowrap;
   overflow: scroll;
@@ -188,6 +204,20 @@ export default {
 .tag-names-list {
   display: inline;
   overflow: hidden;
+}
+
+.extended-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  padding: 25px 0;
+}
+
+.pencil-icon {
+  padding-top: 50px;
+  font-size: 1.6em;
+}
+.modal-footer {
+  border: none;
 }
 
 @media print {

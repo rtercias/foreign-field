@@ -5,14 +5,11 @@ import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
-import Address from './components/Address';
-
 const routes = [
   { name: 'home', path: '/', component: Welcome },
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
   { name: 'signout', path: '/signout', component: Signout, props: true },
-  { name: 'address', path: '/address', component: Address },
   { 
     name: 'group', 
     path: '/territories/:group', 
