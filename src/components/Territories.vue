@@ -86,7 +86,6 @@ export default {
     },
 
     async setAvailability(value) {
-      // this.resetTerritories();
       this.availability = value;
       await this.$store.cache.dispatch('territories/fetchTerritories', {
         congId: this.congId, 
