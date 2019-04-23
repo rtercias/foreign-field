@@ -146,7 +146,8 @@ export default {
       this.tags.splice(index, 1);
     },
     addressExtended(){
-      this.$refs['modal-extend'].show()
+      // this.$refs['modal-extend'].show()
+      this.$router.push({path: `/territories/${this.$route.params.group}/${this.$route.params.id}/address/${this.address.id}`})
     }
   },
   mounted() {
