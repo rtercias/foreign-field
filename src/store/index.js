@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
+import createCache from 'vuex-cache';
 import axios from 'axios';
 import { auth } from './modules/auth';
 import { territory } from './modules/territory';
@@ -16,6 +17,7 @@ axios.defaults.method = 'post';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 export const store = new Store({
+  plugins: [createCache()],
   modules: {
     auth,
     territory,

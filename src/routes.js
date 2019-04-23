@@ -34,6 +34,9 @@ const routes = [
     path: '/dnc/:id',
     component: Dnc,
     props: true,
+    meta: { 
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    }
   },
 ];
 

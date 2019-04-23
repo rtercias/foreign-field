@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { store } from './../../store';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
@@ -35,6 +36,7 @@ export const territory = {
   mutations: {
     CHANGE_STATUS(state, newStatus) {
       state.territory.status = newStatus;
+      store.cache.clear();
     },
     GET_TERRITORY_SUCCESS(state, territory) {
       state.territory = territory;
