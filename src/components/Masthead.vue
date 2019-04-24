@@ -14,7 +14,7 @@
             <b-dropdown-item @click="shareWorkInProgress">Share
             </b-dropdown-item>
           </b-nav-item-dropdown> -->
-          <b-nav-item :to="`/dnc/${terrCongId}`" v-if="this.$route.name === 'territory'">DNC</b-nav-item>
+          <b-nav-item v-if="canViewDNC" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown v-if="isAuthenticated" right>
@@ -96,6 +96,9 @@ export default {
     }),
     checkPermission() {
       return this.user && this.permissions.territories.includes(this.user.role);
+    },
+    canViewDNC() {
+      return this.user && ['Admin', 'TS', 'GO', 'SO', 'RP', 'PUB'].includes(this.user.role);
     }
   },
 }
