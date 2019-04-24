@@ -30,7 +30,7 @@
         variant="link"
         v-if="selectedResponse==='START'"
         @click="nextResponse('HOME')"
-        :disabled="isBusy">
+        :disabled="loading">
         {{selectedResponse}}
       </b-button>
       <font-awesome-layers v-if="selectedResponse==='HOME'" class="text-success fa-3x" @click="nextResponse('NH')">
@@ -63,7 +63,7 @@ export default {
       responseText: '',
       animate: false,
       hideResponseText: false,
-    }
+    };
   },
   methods: {
     ...mapActions({
@@ -72,7 +72,7 @@ export default {
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
     }),
-    nextResponse: debounce(function(value) {
+    nextResponse: debounce((value) => {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
     }, 500, { leading: true, trailing: false }),
@@ -85,7 +85,7 @@ export default {
     ...mapGetters({
       isOwnedByUser: 'territory/isOwnedByUser',
       lastActivity: 'address/lastActivity',
-      isBusy: 'auth/isBusy',
+      loading: 'auth/loading',
     }),
 
     mapsUrl() {
@@ -98,14 +98,14 @@ export default {
     recentLogs() {
       const lastActivityId = this.lastActivity && this.lastActivity.id;
       return [...this.address.activityLogs.filter(l => l.id !== lastActivityId)];
-    }
+    },
   },
   watch: {
     address() {
       this.selectedResponse = this.lastActivity || responses[0];
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .address {
@@ -131,4 +131,3 @@ export default {
   }
 }
 </style>
-

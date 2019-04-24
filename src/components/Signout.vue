@@ -19,7 +19,7 @@ export default {
     }),
     redirect() {
       return `https://appengine.google.com/_ah/logout?continue=${location.protocol}//${location.host}`;
-    }
+    },
   },
-}
+};
 </script>

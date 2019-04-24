@@ -9,7 +9,7 @@ const REMOVE_LOG = 'REMOVE_LOG';
 
 function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
-    id: id,
+    id,
     checkout_id: checkoutId,
     address_id: addressId,
     value,
@@ -28,11 +28,11 @@ export const address = {
   getters: {
     address: state => state.address,
 
-    lastActivity: state => {
+    lastActivity: (state) => {
       const activity = state.address && state.address.activityLogs;
 
       if (activity) {
-        const current = orderBy(activity, (a) => (new Date(a.timestamp)), 'desc')[0];
+        const current = orderBy(activity, a => (new Date(a.timestamp)), 'desc')[0];
         return current && current.value;
       }
 
@@ -81,13 +81,13 @@ export const address = {
     },
 
     async fetchAddress({ commit }, addressId) {
-      commit('auth/IS_BUSY', true, { root: true });
+      commit('auth/LOADING', true, { root: true });
 
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         data: {
           query: `query Address($addressId: Int) { 
@@ -102,32 +102,33 @@ export const address = {
           }`,
           variables: {
             addressId,
-          }
-        }
+          },
+        },
       });
 
       if (response && response.data && response.data.data) {
         const { address } = response.data.data;
         commit(SET_ADDRESS, address);
-        commit('auth/IS_BUSY', false, { root: true });
+        commit('auth/LOADING', false, { root: true });
       }
     },
 
-    async addLog({ commit, dispatch, getters, rootGetters }, { addressId, value }) {
+    async addLog({
+      commit, dispatch, getters, rootGetters,
+    }, { addressId, value }) {
       try {
-        
-        const checkoutId = getters['checkoutInfo'] &&  getters['checkoutInfo'].checkout_id;
+        const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, addressId, value, checkoutId, user);
-        
-        commit('auth/IS_BUSY', true, { root: true });
+
+        commit('auth/LOADING', true, { root: true });
         commit(ADD_LOG, activityLog);
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `mutation AddLog($activityLog: ActivityLogInput!) { 
@@ -137,36 +138,37 @@ export const address = {
               }
             }`,
             variables: {
-              activityLog: activityLog,
-            }
-          }
+              activityLog,
+            },
+          },
         });
 
         if (response && response.data && response.data.data) {
           dispatch('fetchAddress', addressId);
         }
-
       } catch (e) {
         console.error('Unable to add an activityLog', e);
       }
 
-      commit('auth/IS_BUSY', false, { root: true });
+      commit('auth/LOADING', false, { root: true });
     },
 
-    async updateLog({ commit, dispatch, getters, rootGetters }, { id, addressId, value }) {
+    async updateLog({
+      commit, dispatch, getters, rootGetters,
+    }, { id, addressId, value }) {
       try {
-        const checkoutId = getters['checkoutInfo'] &&  getters['checkoutInfo'].checkout_id;
+        const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(id, addressId, value, checkoutId, user);
-        
-        commit('auth/IS_BUSY', true, { root: true });
+
+        commit('auth/LOADING', true, { root: true });
         commit(UPDATE_LOG, activityLog);
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `mutation UpdateLog($activityLog: ActivityLogInput!) { 
@@ -176,32 +178,31 @@ export const address = {
               }
             }`,
             variables: {
-              activityLog: activityLog,
-            }
-          }
+              activityLog,
+            },
+          },
         });
 
         if (response && response.data && response.data.data) {
           dispatch('fetchAddress', addressId);
         }
-
       } catch (e) {
         console.error('Unable to update an activityLog', e);
       }
 
-      commit('auth/IS_BUSY', false, { root: true });
+      commit('auth/LOADING', false, { root: true });
     },
 
     async removeLog({ commit, dispatch }, { id, addressId }) {
       try {
-        commit('auth/IS_BUSY', true, { root: true });
+        commit('auth/LOADING', true, { root: true });
         commit(REMOVE_LOG, { id, addressId });
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `mutation RemoveLog($id: Int!) { 
@@ -209,19 +210,18 @@ export const address = {
             }`,
             variables: {
               id,
-            }
-          }
+            },
+          },
         });
 
         if (response && response.data && response.data.data) {
           dispatch('fetchAddress', addressId);
         }
-
       } catch (e) {
         console.error('Unable to remove an activityLog', e);
       }
 
-      commit('auth/IS_BUSY', false, { root: true });
+      commit('auth/LOADING', false, { root: true });
     },
-  }
-}
+  },
+};

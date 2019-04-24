@@ -9,13 +9,16 @@
       </div>
       <div class="btn-group w-50 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
         <b-btn
-          v-b-modal.checkoutModal 
-          variant="info" 
-          v-if="canAssignTerritory && (status === 'Available' || status === 'Recently Worked')" 
+          v-b-modal.checkoutModal
+          variant="info"
+          v-if="canAssignTerritory && (status === 'Available' || status === 'Recently Worked')"
           @click="selectTerritory(terr)">
           check out
         </b-btn>
-        <b-btn v-if="canAssignTerritory && status === 'Checked Out'" variant="outline-info" @click="checkin(terr)">check in</b-btn>
+        <b-btn
+          v-if="canAssignTerritory && status === 'Checked Out'"
+          variant="outline-info"
+          @click="checkin(terr)">check in</b-btn>
       </div>
     </div>
     <div class="text-right">
@@ -41,11 +44,11 @@ export default {
     }),
     async checkin(territory) {
       const publisher = territory.status && territory.status.publisher || {};
-      const user = this.$store.state.auth.user;
-      await this.checkinTerritory({ 
-        territoryId: territory.id, 
-        userId: publisher.id, 
-        username: user.username
+      const { user } = this.$store.state.auth;
+      await this.checkinTerritory({
+        territoryId: territory.id,
+        userId: publisher.id,
+        username: user.username,
       });
 
       if (confirm('Check-in successful. Do you want to reset NH records?')) {
@@ -81,8 +84,8 @@ export default {
     canAssignTerritory() {
       return ['Admin', 'TS'].includes(this.user.role);
     },
-  }
-}
+  },
+};
 </script>
 <style scoped>
   .city-name {
@@ -93,4 +96,3 @@ export default {
     height: 15px;
   }
 </style>
-

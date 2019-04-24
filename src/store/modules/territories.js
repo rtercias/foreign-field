@@ -19,7 +19,7 @@ export const territories = {
   },
   mutations: {
     SET_TERRITORIES: (state, territories) => state.territories = territories,
-    RESET_TERRITORIES: (state) => state.territories = [],
+    RESET_TERRITORIES: state => state.territories = [],
     SET_LOADING: (state, value) => state.loading = value,
     SET_ERROR: (state, value) => state.error = value,
   },
@@ -36,7 +36,7 @@ export const territories = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
@@ -59,9 +59,9 @@ export const territories = {
             }`,
             variables: {
               congId: params.congId,
-              groupCode: params.groupCode
-            }
-          }
+              groupCode: params.groupCode,
+            },
+          },
         });
 
         if (response && response.data && response.data.data) {
@@ -76,6 +76,6 @@ export const territories = {
 
     resetTerritories({ commit }) {
       commit(RESET_TERRITORIES);
-    }
+    },
   },
 };
