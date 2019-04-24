@@ -7,7 +7,7 @@
           <div class="w-100 row justify-content-between pl-4 pt-4">
             <div class="d-flex">
               <h3>{{getCities()}}</h3>
-              <h3 class="font-weight-bold m-0 mr-2 ml-2" v-if="isBusy">
+              <h3 class="font-weight-bold m-0 mr-2 ml-2" v-if="authIsLoading">
                 <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
               </h3>
             </div>
@@ -64,7 +64,7 @@ export default {
       territory: 'territory/territory',
       isOwnedByUser: 'territory/isOwnedByUser',
       isAdmin: 'auth/isAdmin',
-      isBusy: 'auth/isBusy',
+      authIsLoading: 'auth/loading',
       user: 'auth/user',
     }),
     isCheckedOut() {

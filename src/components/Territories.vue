@@ -86,9 +86,11 @@ export default {
     },
 
     async setAvailability(value) {
-      this.resetTerritories();
       this.availability = value;
-      await this.fetchTerritories({ congId: this.congId, groupCode: this.groupCode });
+      await this.$store.cache.dispatch('territories/fetchTerritories', {
+        congId: this.congId, 
+        groupCode: this.groupCode 
+      });
       sessionStorage.setItem('availability', value);
     },
 
@@ -96,12 +98,14 @@ export default {
       const congId = this.congId || (this.user && this.user.congId);
       this.groupCode = this.$route.params.group;
       this.availability = sessionStorage.getItem('availability') || 'Available';
-      await this.fetchTerritories({ congId, groupCode: this.groupCode });
+      await this.$store.cache.dispatch('territories/fetchTerritories', {
+        congId,
+        groupCode: this.groupCode
+      });
       await this.fetchPublishers(congId);
     },
 
     ...mapActions({
-      fetchTerritories: 'territories/fetchTerritories',
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
     }),
