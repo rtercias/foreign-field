@@ -11,14 +11,13 @@ export const publishers = {
     publishers: state => state.publishers,
   },
   mutations: {
-    SET_PUBLISHERS: (state, publishers) => {
-      state.publishers = publishers;
+    SET_PUBLISHERS: (state, pubs) => {
+      state.publishers = pubs;
     },
   },
   actions: {
     async fetchPublishers({ commit }, congId) {
       if (!congId) {
-        console.log('Congregation id is required');
         return;
       }
 
@@ -46,8 +45,8 @@ export const publishers = {
       });
 
       if (response && response.data && response.data.data) {
-        const publishers = response.data.data.publishers || [];
-        commit(SET_PUBLISHERS, publishers.filter(p => p.status === 'active'
+        const pubs = response.data.data.publishers || [];
+        commit(SET_PUBLISHERS, pubs.filter(p => p.status === 'active'
           // TODO: remove congId filter when api has been pushed
           && p.congregationid === congId));
       }

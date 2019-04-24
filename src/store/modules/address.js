@@ -46,8 +46,8 @@ export const address = {
   },
 
   mutations: {
-    SET_ADDRESS(state, address) {
-      state.address = address;
+    SET_ADDRESS(state, addr) {
+      state.address = addr;
     },
 
     ADD_LOG(state, log) {
@@ -76,8 +76,8 @@ export const address = {
   },
 
   actions: {
-    setAddress({ commit }, address) {
-      commit(SET_ADDRESS, address);
+    setAddress({ commit }, addr) {
+      commit(SET_ADDRESS, addr);
     },
 
     async fetchAddress({ commit }, addressId) {
@@ -107,8 +107,8 @@ export const address = {
       });
 
       if (response && response.data && response.data.data) {
-        const { address } = response.data.data;
-        commit(SET_ADDRESS, address);
+        const { addr } = response.data.data;
+        commit(SET_ADDRESS, addr);
         commit('auth/LOADING', false, { root: true });
       }
     },

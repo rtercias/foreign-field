@@ -33,8 +33,8 @@ export const territory = {
       state.territory.status = newStatus;
       store.cache.clear();
     },
-    GET_TERRITORY_SUCCESS(state, territory) {
-      state.territory = territory;
+    GET_TERRITORY_SUCCESS(state, terr) {
+      state.territory = terr;
     },
     GET_TERRITORY_FAIL(state, exception) { /* eslint-disable-line no-unused-vars */
       // console.log(GET_TERRITORY_FAIL, exception);
@@ -151,10 +151,10 @@ export const territory = {
         });
 
         if (!response || !response.data || !response.data.data || !response.data.data.territory) {
-          return null;
+          return;
         }
-        const { territory } = response.data.data;
-        commit(GET_TERRITORY_SUCCESS, territory);
+        const { terr } = response.data.data;
+        commit(GET_TERRITORY_SUCCESS, terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
       }
@@ -164,7 +164,7 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async resetNHRecords({ commit, dispatch, state }, territoryId) {
+    async resetNHRecords({ dispatch, state }, territoryId) {
       await dispatch('getTerritory', territoryId);
       const { addresses } = state.territory;
 

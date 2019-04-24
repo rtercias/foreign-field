@@ -13,6 +13,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.1",
     "@types/axios": "^0.14.0",
     "axios": "^0.18.0",
+    "bootstrap": "^4.3.1",
     "bootstrap-vue": "^2.0.0-rc.16",
     "date-fns": "^1.29.0",
     "firebase": "^5.7.2",
@@ -49,8 +50,45 @@
       "node": true
     },
     "rules": {
-      "max-len": [2, { "code": 125 }],
-      "comma-dangle": ["error", "always-multiline"]
+      "max-len": [
+        2,
+        {
+          "code": 125
+        }
+      ],
+      "comma-dangle": [
+        "error",
+        "always-multiline"
+      ],
+      "import/prefer-default-export": "off",
+      "no-await-in-loop": "off",
+      "no-restricted-syntax": [
+        "error",
+        "ForInStatement",
+        "LabeledStatement",
+        "WithStatement"
+      ],
+      "no-console": [
+        "error",
+        {
+          "allow": [
+            "error"
+          ]
+        }
+      ],
+      "no-param-reassign": [
+        "error",
+        {
+          "props": false
+        }
+      ],
+      "no-return-assign": "off",
+      "no-mixed-operators": "off",
+      "import/no-cycle": "off",
+      "import/extensions": "off",
+      "import/order": "off",
+      "no-alert": "off",
+      "no-plusplus": "off"
     },
     "parserOptions": {
       "parser": "babel-eslint",

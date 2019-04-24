@@ -18,7 +18,7 @@ export const territories = {
     error: state => state.error,
   },
   mutations: {
-    SET_TERRITORIES: (state, territories) => state.territories = territories,
+    SET_TERRITORIES: (state, terrs) => state.territories = terrs,
     RESET_TERRITORIES: state => state.territories = [],
     SET_LOADING: (state, value) => state.loading = value,
     SET_ERROR: (state, value) => state.error = value,
@@ -26,7 +26,6 @@ export const territories = {
   actions: {
     async fetchTerritories({ commit }, params) {
       if (!params || !params.congId) {
-        console.log('Congregation id is required');
         return;
       }
 

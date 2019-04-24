@@ -105,7 +105,7 @@ export default {
     },
 
     async resetNH() {
-      if (confirm('Are you sure you want to reset NH records?')) {
+      if (window.confirm('Are you sure you want to reset NH records?')) {
         this.isLoading = true;
         await this.resetNHRecords(this.terrId);
         await this.getTerritory(this.terrId);

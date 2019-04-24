@@ -17,14 +17,14 @@ export const addresses = {
       state.dnc = dnc;
     },
     DNC_FAIL(state, exception) {
-      console.log(DNC_FAIL, exception);
+      console.error(DNC_FAIL, exception);
     },
   },
   actions: {
     async getDnc({ commit }, id) {
       try {
         if (!id) {
-          return null;
+          return;
         }
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -48,7 +48,7 @@ export const addresses = {
         });
 
         if (!response || !response.data || !response.data.data || !response.data.data.dnc) {
-          return null;
+          return;
         }
 
         const raw = response.data.data.dnc;

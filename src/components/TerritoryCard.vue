@@ -51,7 +51,7 @@ export default {
         username: user.username,
       });
 
-      if (confirm('Check-in successful. Do you want to reset NH records?')) {
+      if (window.confirm('Check-in successful. Do you want to reset NH records?')) {
         await this.resetNHRecords(territory.id);
       }
 

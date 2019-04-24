@@ -139,7 +139,7 @@ export const auth = {
         commit(LOADING, false);
 
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject('Unauthorized');
+          reject(new Error('Unauthorized'));
         }
 
         const { user } = response.data.data;
@@ -149,7 +149,7 @@ export const auth = {
           commit(AUTHORIZE, user);
           resolve();
         } else {
-          reject('Unauthoried');
+          reject(new Error('Unauthorized'));
         }
       });
     },
@@ -206,8 +206,9 @@ export const auth = {
             router.replace({ name: 'signout', params: { unauthorized: true } });
           }
 
-          if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/signout') {
-            router.replace({ name: 'auth', query: { redirect: location.pathname } });
+          const loc = window.location;
+          if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
+            router.replace({ name: 'auth', query: { redirect: loc.pathname } });
           }
         }
       });
