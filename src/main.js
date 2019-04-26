@@ -34,6 +34,7 @@ import {
   faCircleNotch,
   faPencilAlt,
   faPlusSquare,
+  faHome,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -48,6 +49,7 @@ library.add(
   faCircleNotch,
   faPencilAlt,
   faPlusSquare,
+  faHome,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
