@@ -1,17 +1,14 @@
 <template>
   <div class="main-body">
-    <div class="address-info">
-      <div class="house-icon">
-        <font-awesome-icon icon="home" class="fa-2x"></font-awesome-icon>
-      </div>
+    <div class="row address-info m-0 align-items-center justify-content-center">
       <div class="address-title">
         <h3>{{ address.addr1 }}</h3>
         <h5>{{ address.city }}</h5>
       </div>
     </div>
-
+    <h4>Notes</h4>
     <div class="notes">
-      <b-list-group-item v-for="(note, index) in notes" :key="note.id" class="notes-list">
+      <li v-for="(note, index) in notes" :key="note.id" class="notes-list">
         <div class="row align-items-center">
           <b-col cols='10'>
             {{ note }}  
@@ -20,23 +17,24 @@
             <font-awesome-icon class="delete-button" icon="times" @click="deleteTag(index)"></font-awesome-icon>
           </b-col>
         </div>
-      </b-list-group-item>
+      </li>
     </div>
 
     <div class="address-notes" ref="note-card">
       <div class="form-submit row align-items-center">
-        <b-col cols="9">
+        <b-col cols="12">
           <b-form-input
           @focus="animateCard()"
           @blur="hideCard()"
+          v-on:keyup.enter="submitForm()"
           v-model="formText"
           maxlength="100"
-          placeholder="please keep notes brief...">
+          placeholder="Add a note...">
           </b-form-input>
         </b-col>
-        <b-col cols="3">
-          <b-button @click="submitForm()" variant="primary" size="lg" >+</b-button>
-        </b-col>
+      </div>
+      <div class="submit-button">
+        <b-button @click="submitForm()" variant="outline-primary">Add</b-button>
       </div>
     </div>
   </div>
@@ -69,47 +67,50 @@ export default {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
     }),
-    submitForm(){
-      this.notes.unshift(this.formText);
-      this.formText = '';
-    },
     deleteTag(index){
       this.notes.splice(index, 1);
     },
     animateCard(){
-      this.$refs['note-card'].style.transform = 'translateY(-400px)';
+      this.$refs['note-card'].style.transform = 'translateY(-45%)';
     },
     hideCard(){
-      this.$refs['note-card'].style.transform = 'translateY(0px)';
-    }
+      this.$refs['note-card'].style.transform = 'translateY(0)';
+    },
+    submitForm(){
+      this.notes.unshift(this.formText);
+      this.formText = '';
+      this.hideCard();
+    },
   }
 }
 
 </script>
 
 <style scoped>
-.main-body {
-  overflow: hidden;
-}
 .address-info {
-  color: black;
-  height: 250px;
+  color: white;
+  height: 200px;
+  background-color: #007bff;
 }
 h3 {
-  margin-top: 30px;
+  /* margin-top: 30px; */
   font-weight: 700;
 }
-.house-icon {
-  padding-top: 50px;
-  font-size: 1.6em;
+h4 {
+  color: #007bff;
+  font-weight: 700;
+  text-align: left;
+  padding-left: 20px;
 }
 .address-notes {
+  position: fixed;
+  top: 85%;
   background-color: white;
   height: 1000px;
   width: 100%;
   border-radius: 30px;
   box-shadow: 0 -4px 6px 0 hsla(0, 0%, 14%, 0.1);
-  transition: all .3s ease-in-out;
+  transition: all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .form-submit {
   margin: 0 20px;
@@ -117,22 +118,30 @@ h3 {
 }
 .notes {
   overflow: scroll;
-  height: 300px;
+  height: 40%;
 }
 .notes-list {
   text-align: left;
   padding: 20px;
-  overflow-wrap: break-word
+  overflow-wrap: break-word;
 }
 .delete-button {
   float: right;
   color: rgb(201, 201, 201);
 }
 
+.submit-button {
+  margin-top: 30%;
+}
+li {
+  list-style: none;
+}
+h4 {
+  padding-top: 20px;
+}
 
 input {
   border: none;
   box-shadow: none !important;
 }
-
 </style>
