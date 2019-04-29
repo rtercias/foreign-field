@@ -21,16 +21,16 @@
           </div>
         </div>
       </div>
-      
+
     </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import format from 'date-fns/format';
 import Auth from './Auth';
 import Loading from './Loading.vue';
-import format from 'date-fns/format';
 
 export default {
   name: 'Home',
@@ -58,7 +58,7 @@ export default {
       return this.user && this.user.territories;
     },
   },
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

@@ -10,37 +10,39 @@ const routes = [
   { name: 'home', path: '/', component: Welcome },
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
-  { name: 'signout', path: '/signout', component: Signout, props: true },
-  { 
-    name: 'group', 
-    path: '/territories/:group', 
-    component: Territories, 
-    props: true, 
-    meta: { 
-      permissions: ['Admin', 'TS', 'GO', 'SO'],
-    } 
+  {
+    name: 'signout', path: '/signout', component: Signout, props: true,
   },
-  { 
-    name: 'territory', 
-    path: '/territories/:group/:id', 
-    component: Territory, 
-    props: true, 
-    meta: { 
+  {
+    name: 'group',
+    path: '/territories/:group',
+    component: Territories,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'GO', 'SO'],
+    },
+  },
+  {
+    name: 'territory',
+    path: '/territories/:group/:id',
+    component: Territory,
+    props: true,
+    meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
-    }
+    },
   },
   {
     name: 'dnc',
     path: '/dnc/:id',
     component: Dnc,
     props: true,
-    meta: { 
+    meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
-    }
+    },
   },
 ];
 
 export const router = new VueRouter({
   mode: 'history',
-  routes
+  routes,
 });

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { store } from './../../store';
+import { store } from '..';
+
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
@@ -12,15 +13,9 @@ export const territory = {
   },
 
   getters: {
-    territory: state => {
-      return state.territory;
-    },
-    congId: state => {
-      return state.territory.congregationid;
-    },
-    isCheckedOut: state => {
-      return state.territory && state.territory.status && state.territory.status.status === 'Checked Out';
-    },
+    territory: state => state.territory,
+    congId: state => state.territory.congregationid,
+    isCheckedOut: state => state.territory && state.territory.status && state.territory.status.status === 'Checked Out',
     isOwnedByUser: (state, getters, rootState, rootGetters) => {
       const user = rootGetters['auth/user'];
 
@@ -38,8 +33,8 @@ export const territory = {
       state.territory.status = newStatus;
       store.cache.clear();
     },
-    GET_TERRITORY_SUCCESS(state, territory) {
-      state.territory = territory;
+    GET_TERRITORY_SUCCESS(state, terr) {
+      state.territory = terr;
     },
     GET_TERRITORY_FAIL(state, exception) { /* eslint-disable-line no-unused-vars */
       // console.log(GET_TERRITORY_FAIL, exception);
@@ -71,15 +66,14 @@ export const territory = {
               terrId: args.territoryId,
               pubId: args.userId,
               user: args.username,
-            }
-          }
+            },
+          },
         });
 
         if (response && response.data && response.data.data) {
           const { status } = response.data.data;
           commit(CHANGE_STATUS, status);
         }
-
       } catch (e) {
         console.error('Unable to check in territory', e);
       }
@@ -91,7 +85,7 @@ export const territory = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
@@ -107,15 +101,14 @@ export const territory = {
               terrId: args.territoryId,
               pubId: args.userId,
               user: args.username,
-            }
-          }
+            },
+          },
         });
 
         if (response && response.data && response.data.data) {
           const { status } = response.data.data;
           commit(CHANGE_STATUS, status);
         }
-
       } catch (e) {
         console.error('Unable to checkout territory', e);
       }
@@ -127,7 +120,7 @@ export const territory = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `query Territory($terrId: Int) { 
@@ -153,16 +146,15 @@ export const territory = {
             }`,
             variables: {
               terrId: id,
-            }
-          }
+            },
+          },
         });
 
         if (!response || !response.data || !response.data.data || !response.data.data.territory) {
-          return null;
-        }        
-        const territory = response.data.data.territory;
-        commit(GET_TERRITORY_SUCCESS, territory);
-
+          return;
+        }
+        const { terr } = response.data.data;
+        commit(GET_TERRITORY_SUCCESS, terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
       }
@@ -172,7 +164,7 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async resetNHRecords({ commit, dispatch, state }, territoryId) {
+    async resetNHRecords({ dispatch, state }, territoryId) {
       await dispatch('getTerritory', territoryId);
       const { addresses } = state.territory;
 
@@ -181,7 +173,6 @@ export const territory = {
           await dispatch('address/addLog', { addressId: address.id, value: 'START' }, { root: true });
         }
       }
-    }
-  }
-}
-
+    },
+  },
+};

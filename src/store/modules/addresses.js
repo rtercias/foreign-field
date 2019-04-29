@@ -10,29 +10,27 @@ export const addresses = {
     dnc: [],
   },
   getters: {
-    dnc: state => {
-      return state.dnc;
-    },
+    dnc: state => state.dnc,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
       state.dnc = dnc;
     },
     DNC_FAIL(state, exception) {
-      console.log(DNC_FAIL, exception);
-    }
+      console.error(DNC_FAIL, exception);
+    },
   },
   actions: {
     async getDnc({ commit }, id) {
       try {
         if (!id) {
-          return null;
+          return;
         }
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `query Dnc($congId: Int) {
@@ -45,31 +43,28 @@ export const addresses = {
             }`,
             variables: {
               congId: id,
-            }
-          }
+            },
+          },
         });
-        
+
         if (!response || !response.data || !response.data.data || !response.data.data.dnc) {
-          return null;
+          return;
         }
 
         const raw = response.data.data.dnc;
 
-        const dnc = raw.map(d => {
-          return {
-            address: `
+        const dnc = raw.map(d => ({
+          address: `
               ${d.addr1} 
               ${d.addr2 ? `${d.addr2} ` : ''}
               ${d.city ? `${d.city} ` : ''}
-              ${d.state_province ? `${d.state_province} ` : ''}`
-          };
-        });
+              ${d.state_province ? `${d.state_province} ` : ''}`,
+        }));
 
         commit(DNC_SUCCESS, dnc);
-      
       } catch (exception) {
         commit(DNC_FAIL, exception);
       }
-    }
-  }
+    },
+  },
 };

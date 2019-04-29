@@ -18,7 +18,11 @@
           </div>
         </header>
         <b-list-group class="columns">
-          <b-list-group-item class="col-sm-12" v-for="address in territory.addresses" v-bind:key="address.id" data-toggle="collapse">
+          <b-list-group-item
+            class="col-sm-12"
+            v-for="address in territory.addresses"
+            v-bind:key="address.id"
+            data-toggle="collapse">
             <AddressCard v-bind="{address, reset}"></AddressCard>
           </b-list-group-item>
         </b-list-group>
@@ -101,13 +105,13 @@ export default {
     },
 
     async resetNH() {
-      if (confirm('Are you sure you want to reset NH records?')) {
+      if (window.confirm('Are you sure you want to reset NH records?')) {
         this.isLoading = true;
         await this.resetNHRecords(this.terrId);
         await this.getTerritory(this.terrId);
         this.isLoading = false;
       }
-    }
+    },
   },
   watch: {
     user() {
@@ -116,9 +120,9 @@ export default {
       if (this.user.congregation.id !== this.territory.congregationid) {
         this.$router.push('/welcome');
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

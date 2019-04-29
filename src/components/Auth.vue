@@ -12,7 +12,7 @@ export default {
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
-    })
+    }),
   },
   mounted() {
     const uiConfig = {
@@ -28,7 +28,7 @@ export default {
           // Do not automatically redirect.
           return false;
         },
-      }
+      },
     };
 
     let ui = firebaseui.auth.AuthUI.getInstance();
@@ -39,8 +39,8 @@ export default {
   },
   destroy() {
     firebaseui.auth.destroy();
-  }
-}
+  },
+};
 </script>
 <style>
 .visible {
