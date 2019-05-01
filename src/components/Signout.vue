@@ -18,8 +18,8 @@ export default {
       isForcedOut: 'auth/isForcedOut',
     }),
     redirect() {
-      return `https://appengine.google.com/_ah/logout?continue=${location.protocol}//${location.host}`;
-    }
+      return `https://appengine.google.com/_ah/logout?continue=${window.location.protocol}//${window.location.host}`;
+    },
   },
-}
+};
 </script>

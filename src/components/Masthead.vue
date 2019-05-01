@@ -10,11 +10,13 @@
               <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
             </b-dropdown-item>
           </b-nav-item-dropdown>
-          <!-- <b-nav-item-dropdown v-if="checkPermission && $router.currentRoute.name==='territory'" class="group-codes" text="Territory">
+          <!-- <b-nav-item-dropdown
+            v-if="checkPermission && $router.currentRoute.name==='territory'"
+            class="group-codes" text="Territory">
             <b-dropdown-item @click="shareWorkInProgress">Share
             </b-dropdown-item>
           </b-nav-item-dropdown> -->
-          <b-nav-item :to="`/dnc/${terrCongId}`" v-if="this.$route.name === 'territory'">DNC</b-nav-item>
+          <b-nav-item v-if="canViewDNC" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown v-if="isAuthenticated" right>
@@ -29,38 +31,34 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Territories from './Territories';
 
 export default {
-  components: {
-    Territories,
-  },
   watch: {
-    '$route' (to) {
+    $route(to) {
       if (to.params.group) {
         this.groupCode = to.params.group;
       }
-    }
+    },
   },
   data() {
     return {
       groupCode: this.$route.params.group,
       permissions: {
-        territories: ['Admin', 'TS', 'GO', 'SO']
-      }
+        territories: ['Admin', 'TS', 'GO', 'SO'],
+      },
     };
   },
   methods: {
     logout() {
-     this.$store.dispatch('auth/logout');
-     this.$router.push('/signout');
+      this.$store.dispatch('auth/logout');
+      this.$router.push('/signout');
     },
 
     shareWorkInProgress(addresses) {
       if (!addresses) {
         return;
       }
-      
+
       const workInProgress = {};
 
       // get data from local storage
@@ -96,9 +94,12 @@ export default {
     }),
     checkPermission() {
       return this.user && this.permissions.territories.includes(this.user.role);
-    }
+    },
+    canViewDNC() {
+      return this.user && ['Admin', 'TS', 'GO', 'SO', 'RP', 'PUB'].includes(this.user.role);
+    },
   },
-}
+};
 </script>
 
 <style>

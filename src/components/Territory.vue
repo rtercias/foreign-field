@@ -7,7 +7,7 @@
           <div class="w-100 row justify-content-between pl-4 pt-4">
             <div class="d-flex">
               <h3>{{getCities()}}</h3>
-              <h3 class="font-weight-bold m-0 mr-2 ml-2" v-if="isBusy">
+              <h3 class="font-weight-bold m-0 mr-2 ml-2" v-if="authIsLoading">
                 <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
               </h3>
             </div>
@@ -18,7 +18,11 @@
           </div>
         </header>
         <b-list-group class="columns">
-          <b-list-group-item class="col-sm-12" v-for="address in territory.addresses" v-bind:key="address.id" data-toggle="collapse">
+          <b-list-group-item
+            class="col-sm-12"
+            v-for="address in territory.addresses"
+            v-bind:key="address.id"
+            data-toggle="collapse">
             <AddressCard v-bind="{address, reset}"></AddressCard>
           </b-list-group-item>
         </b-list-group>
@@ -64,7 +68,7 @@ export default {
       territory: 'territory/territory',
       isOwnedByUser: 'territory/isOwnedByUser',
       isAdmin: 'auth/isAdmin',
-      isBusy: 'auth/loading',
+      authIsLoading: 'auth/loading',
       user: 'auth/user',
     }),
     isCheckedOut() {
@@ -101,13 +105,13 @@ export default {
     },
 
     async resetNH() {
-      if (confirm('Are you sure you want to reset NH records?')) {
+      if (window.confirm('Are you sure you want to reset NH records?')) {
         this.isLoading = true;
         await this.resetNHRecords(this.terrId);
         await this.getTerritory(this.terrId);
         this.isLoading = false;
       }
-    }
+    },
   },
   watch: {
     user() {
@@ -116,9 +120,9 @@ export default {
       if (this.user.congregation.id !== this.territory.congregationid) {
         this.$router.push('/welcome');
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

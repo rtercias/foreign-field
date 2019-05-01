@@ -34,7 +34,7 @@ export default {
         return [];
       }
       return this.dnc.filter(d => d.address.toLowerCase().indexOf(this.text.toLowerCase()) > -1);
-    }
+    },
   },
   methods: {
     reset() {
@@ -43,8 +43,8 @@ export default {
   },
   mounted() {
     this.$store.dispatch('addresses/getDnc', this.id);
-  }
-}
+  },
+};
 </script>
 
 <style scoped>

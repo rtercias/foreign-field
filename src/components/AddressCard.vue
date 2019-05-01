@@ -93,7 +93,7 @@ export default {
       hideResponseText: false,
       formText: '',
       tags: [],
-    }
+    };
   },
   methods: {
     ...mapActions({
@@ -102,7 +102,7 @@ export default {
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
     }),
-    nextResponse: debounce(function(value) {
+    nextResponse: debounce((value) => {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
     }, 500, { leading: true, trailing: false }),
@@ -149,14 +149,14 @@ export default {
     recentLogs() {
       const lastActivityId = this.lastActivity && this.lastActivity.id;
       return [...this.address.activityLogs.filter(l => l.id !== lastActivityId)];
-    }
+    },
   },
   watch: {
     address() {
       this.selectedResponse = this.lastActivity || responses[0];
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style scoped>
 .modal-dialog {

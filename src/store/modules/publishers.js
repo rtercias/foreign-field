@@ -5,22 +5,19 @@ const SET_PUBLISHERS = 'SET_PUBLISHERS';
 export const publishers = {
   namespaced: true,
   state: {
-    publishers: []
+    publishers: [],
   },
   getters: {
-    publishers: (state) => {
-      return state.publishers;
-    },
+    publishers: state => state.publishers,
   },
   mutations: {
-    SET_PUBLISHERS: (state, publishers) => {
-      state.publishers = publishers;
+    SET_PUBLISHERS: (state, pubs) => {
+      state.publishers = pubs;
     },
   },
   actions: {
     async fetchPublishers({ commit }, congId) {
       if (!congId) {
-        console.log('Congregation id is required');
         return;
       }
 
@@ -28,7 +25,7 @@ export const publishers = {
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         data: {
           query: `query PublishersList($congId: Int) { 
@@ -42,18 +39,17 @@ export const publishers = {
             }
           }`,
           variables: {
-            congId: congId
-          }
-        }
+            congId,
+          },
+        },
       });
 
       if (response && response.data && response.data.data) {
-        const publishers = response.data.data.publishers || [];
-        commit(SET_PUBLISHERS, publishers.filter(p => p.status === 'active'
+        const pubs = response.data.data.publishers || [];
+        commit(SET_PUBLISHERS, pubs.filter(p => p.status === 'active'
           // TODO: remove congId filter when api has been pushed
-          && p.congregationid === congId
-        )); 
+          && p.congregationid === congId));
       }
-    }
+    },
   },
 };

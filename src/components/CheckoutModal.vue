@@ -36,7 +36,7 @@ export default {
       this.selectedPublisher = {
         ...publisher,
         name: `${publisher.firstname} ${publisher.lastname}`,
-      }
+      };
     },
 
     clearName() {
@@ -50,7 +50,7 @@ export default {
         username: this.user.username,
       });
 
-      this.$router.push(`/territories/${this.group}/${this.territory.id}`)
+      this.$router.push(`/territories/${this.group}/${this.territory.id}`);
     },
   },
 
@@ -62,9 +62,9 @@ export default {
     }),
     status() {
       return this.territory && this.territory.status ? this.territory.status.status : '';
-    }
+    },
   },
-}
+};
 </script>
 
 <style>

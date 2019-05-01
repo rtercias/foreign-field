@@ -25,26 +25,29 @@ const routes = [
     props: true, 
     meta: { 
       permissions: ['Admin', 'TS', 'GO', 'SO'],
-    } 
+    },
   },
-  { 
-    name: 'territory', 
-    path: '/territories/:group/:id', 
-    component: Territory, 
-    props: true, 
-    meta: { 
+  {
+    name: 'territory',
+    path: '/territories/:group/:id',
+    component: Territory,
+    props: true,
+    meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
-    }
+    },
   },
   {
     name: 'dnc',
     path: '/dnc/:id',
     component: Dnc,
     props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
   },
 ];
 
 export const router = new VueRouter({
   mode: 'history',
-  routes
+  routes,
 });

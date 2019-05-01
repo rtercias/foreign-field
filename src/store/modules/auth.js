@@ -1,8 +1,8 @@
 import axios from 'axios';
 import firebase from 'firebase/app';
-import { config } from '../../../firebase.config';
-import { router } from './../../routes';
 import uniqBy from 'lodash/uniqBy';
+import { config } from '../../../firebase.config';
+import { router } from '../../routes';
 
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
@@ -29,33 +29,15 @@ export const auth = {
   namespaced: true,
   state: initialState(),
   getters: {
-    isAuthenticated: state => {
-      return state.isAuthenticated;
-    },
-    isPending: state => {
-      return state.isPending;
-    },
-    name: state => {
-      return state.name;
-    },
-    isAuthorized: state => {
-      return !!state.user;
-    },
-    isForcedOut: state => {
-      return state.isForcedOut;
-    },
-    user: state => {
-      return state.user;
-    },
-    congId: state => {
-      return state.congId;
-    },
-    groupCodes: state => {
-      return state.groupCodes;
-    },
-    isAdmin: (state) => {
-      return state.user && ['Admin', 'TS'].includes(state.user.role);
-    },
+    isAuthenticated: state => state.isAuthenticated,
+    isPending: state => state.isPending,
+    name: state => state.name,
+    isAuthorized: state => !!state.user,
+    isForcedOut: state => state.isForcedOut,
+    user: state => state.user,
+    congId: state => state.congId,
+    groupCodes: state => state.groupCodes,
+    isAdmin: state => state.user && ['Admin', 'TS'].includes(state.user.role),
     loading: state => state.loading,
   },
 
@@ -86,16 +68,16 @@ export const auth = {
       state.groupCodes = groupCodes;
     },
 
-    RESET (state) {
+    RESET(state) {
       const s = initialState();
-      Object.keys(s).forEach(key => {
+      Object.keys(s).forEach((key) => {
         state[key] = s[key];
       });
     },
 
     LOADING(state, value) {
       state.loading = value;
-    }
+    },
   },
 
   actions: {
@@ -121,7 +103,7 @@ export const auth = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           },
           data: {
             query: `query Publisher($username: String) {
@@ -149,25 +131,25 @@ export const auth = {
               }
             }`,
             variables: {
-              username: username,
-            }
-          }
+              username,
+            },
+          },
         });
-        
+
         commit(LOADING, false);
 
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject('Unauthorized');
+          reject(new Error('Unauthorized'));
         }
 
-        const user = response.data.data.user;
+        const { user } = response.data.data;
         const { permissions = [] } = router.currentRoute.meta;
         const hasPermission = permissions.length === 0 || permissions.includes(user.role);
         if (hasPermission) {
           commit(AUTHORIZE, user);
           resolve();
         } else {
-          reject('Unauthoried');
+          reject(new Error('Unauthorized'));
         }
       });
     },
@@ -180,18 +162,17 @@ export const auth = {
       try {
         await dispatch('authenticate', user);
         await dispatch('authorize', user.email);
-      
+
         if (!state.user) {
           // unauthorized
           await dispatch('logout');
           dispatch('forceout');
         }
-
       } catch (exception) {
         await dispatch('logout');
         dispatch('forceout');
       }
-    
+
       dispatch('getGroupCodes', state.congId);
     },
 
@@ -200,14 +181,14 @@ export const auth = {
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         data: {
-          query: `{ territories (congId: ${congId}) { group_code }}`
-        }
+          query: `{ territories (congId: ${congId}) { group_code }}`,
+        },
       });
 
-      const territories = response.data.data.territories;
+      const { territories } = response.data.data;
       // const group = sessionStorage.getItem('group-code');
       // if (group) this.setGroupCode(group);
 
@@ -218,19 +199,19 @@ export const auth = {
     firebaseInit({ dispatch, state }) {
       firebase.initializeApp(config);
       firebase.auth().onAuthStateChanged(async (user) => {
-        if(user) {
+        if (user) {
           await dispatch('login', user);
         } else {
           if (state.isForcedOut) {
             router.replace({ name: 'signout', params: { unauthorized: true } });
           }
 
-          if (location.pathname !== '/' && location.pathname !== '/auth' && location.pathname !== '/signout') {
-            router.replace({ name: 'auth', query: { redirect: location.pathname } });
+          const loc = window.location;
+          if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
+            router.replace({ name: 'auth', query: { redirect: loc.pathname } });
           }
         }
       });
     },
-  }
-}
-
+  },
+};

@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import Masthead from './components/Masthead';
 import { mapGetters } from 'vuex';
+import Masthead from './components/Masthead';
 
 export default {
   name: 'app',
@@ -17,9 +17,9 @@ export default {
   computed: {
     ...mapGetters({
       isForcedOut: 'auth/isForcedOut',
-    })
+    }),
   },
-}
+};
 
 </script>
 
