@@ -8,7 +8,10 @@
     </div>
     <div class="row textfield m-0">
       <h4>Notes</h4>
-      <b-form-input placeholder="add a note..." maxlength="100" v-model="formText" v-on:keyup.enter="submitForm()"></b-form-input>
+      <b-form-input placeholder="add a note..."
+      maxlength="100" v-model="formText"
+      v-on:keyup.enter="submitForm()">
+      </b-form-input>
       <b-alert fade v-model="showAlert" variant="danger">
         That note already exists!
       </b-alert>
@@ -19,7 +22,7 @@
         <li v-for="(note, index) in notes" :key="note" class="notes-list">
           <div class="row align-items-center">
             <b-col cols='10'>
-              {{ note }}  
+              {{ note }}
             </b-col>
             <b-col>
               <font-awesome-icon class="delete-button" icon="times" @click="deleteTag(index)"></font-awesome-icon>
@@ -33,18 +36,17 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { setTimeout } from 'timers';
 
 export default {
   name: 'Address',
 
-  data(){
+  data() {
     return {
       addressId: this.$route.params.addressId,
       formText: '',
       notes: [],
       showAlert: false,
-    }
+    };
   },
 
   async mounted() {
@@ -54,27 +56,27 @@ export default {
   computed: {
     ...mapGetters({
       address: 'address/address',
-    })
+    }),
   },
   methods: {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
     }),
-    deleteTag(index){
+    deleteTag(index) {
       this.notes.splice(index, 1);
     },
-    submitForm(){
-      if(this.formText){
-        if(!this.notes.includes(this.formText)){
+    submitForm() {
+      if (this.formText) {
+        if (!this.notes.includes(this.formText)) {
           this.notes.unshift(this.formText);
           this.formText = '';
         } else {
           this.showAlert = 2;
         }
-      };
+      }
     },
-  }
-}
+  },
+};
 
 </script>
 
@@ -117,7 +119,7 @@ input {
   overflow-wrap: break-word;
 }
 li {
-  list-style: none; 
+  list-style: none;
 }
 .delete-button {
   float: right;

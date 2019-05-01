@@ -52,12 +52,12 @@
         <font-awesome-layers v-if="selectedResponse==='NF'" class="fa-3x" @click="nextResponse('START')">
           <font-awesome-icon icon="circle"></font-awesome-icon>
           <font-awesome-layers-text value="NF" class="nh-text text-white font-weight-bold"></font-awesome-layers-text>
-        </font-awesome-layers>      
+        </font-awesome-layers>
       </div>
     </b-row>
     <b-row class="pl-2 pr-2 bottom-tags">
       <div>
-        <ul class="mt-2 mb-0 pl-0"><font-awesome-icon icon="plus-square" @click="showModal"></font-awesome-icon> Tags: 
+        <ul class="mt-2 mb-0 pl-0"><font-awesome-icon icon="plus-square" @click="showModal"></font-awesome-icon> Tags:
           <li v-for='(t, index) in tags' :key="t.id" class="tag-names-list">
             <b-badge variant="info" class="ml-1 mr-1">
               <font-awesome-icon icon="times" @click="deleteTag(index)"></font-awesome-icon>
@@ -110,10 +110,10 @@ export default {
     showModal() {
       this.$refs['modal-note'].show();
     },
-    clearName(){
+    clearName() {
       this.formText = '';
     },
-    handleSubmit(){
+    handleSubmit() {
       // The replace method gets rid of the spaces in the text field
       this.tags.push(this.formText.replace(/\s/g, ''));
       this.clearName();
@@ -121,12 +121,14 @@ export default {
         this.$refs['modal-note'].hide();
       });
     },
-    deleteTag(index){
+    deleteTag(index) {
       this.tags.splice(index, 1);
     },
-    addressExtended(){
-      this.$router.push({path: `/territories/${this.$route.params.group}/${this.$route.params.id}/address/${this.address.id}`});
-    }
+    addressExtended() {
+      this.$router.push({
+        path: `/territories/${this.$route.params.group}/${this.$route.params.id}/address/${this.address.id}`,
+      });
+    },
   },
   mounted() {
     this.setAddress(this.address);

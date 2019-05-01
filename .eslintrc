@@ -16,6 +16,7 @@
     "ecmaVersion": 2017	
   },
   "rules": {
+    "linebreak-style": "off",
     "max-len": [2, { "code": 125 }],
     "comma-dangle": [
       "error",
