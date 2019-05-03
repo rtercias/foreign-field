@@ -153,7 +153,7 @@ export const territory = {
         if (!response || !response.data || !response.data.data || !response.data.data.territory) {
           return;
         }
-        const { terr } = response.data.data;
+        const { territory: terr } = response.data.data;
         commit(GET_TERRITORY_SUCCESS, terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
