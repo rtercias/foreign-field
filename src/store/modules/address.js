@@ -107,7 +107,7 @@ export const address = {
       });
 
       if (response && response.data && response.data.data) {
-        const { addr } = response.data.data;
+        const { address: addr } = response.data.data;
         commit(SET_ADDRESS, addr);
         commit('auth/LOADING', false, { root: true });
       }
