@@ -27,7 +27,7 @@
         </div> -->
 
       <!-- the modal for tags -->
-      <b-modal ok-only @ok="handleSubmit" ref="modal-note" title="Add a tag">
+      <b-modal ok-only @ok="handleSubmit" ref="modal-note" footer-class="border-top-0">
         <form @submit.stop.prevent='handleSubmit'>
           <b-form-input v-model="formText"></b-form-input>
         </form>
@@ -55,22 +55,24 @@
         </font-awesome-layers>
       </div>
     </b-row>
-    <b-row class="pl-2 pr-2 bottom-tags">
-      <div>
-        <ul class="mt-2 mb-0 pl-0"><font-awesome-icon icon="plus-square" @click="showModal"></font-awesome-icon> Tags:
-          <li v-for='(t, index) in tags' :key="t.id" class="tag-names-list">
-            <b-badge variant="info" class="ml-1 mr-1">
-              <font-awesome-icon icon="times" @click="deleteTag(index)"></font-awesome-icon>
-              {{ t }}
-            </b-badge>
-          </li>
-        </ul>
-      </div>
-    </b-row>
-    <b-row class="pl-2">
-      <div>
-        <font-awesome-icon icon="plus-square" @click="addressExtended"></font-awesome-icon> Expand
-      </div>
+    <b-row class="pl-2 pr-2 pt-2 bottom-tags align-items-center">
+      <b-col cols="3" class="pl-0 pr-0">
+        <span @click="showModal">add a tag...</span>
+      </b-col>
+      <b-col cols="7" class="pl-0 pr-0">
+        <div class="tag-container">
+          <ul class="pl-0 mb-0">
+            <li v-for='t in tags' :key="t.id" class="tag-names-list">
+              <b-badge variant="info" class="ml-1 mr-1">
+                {{ t }}
+              </b-badge>
+            </li>
+          </ul>
+        </div>
+      </b-col>
+      <b-col cols="2" class="pl-2 pr-0" id="expand-view">
+        <a @click="addressExtended">More</a>
+      </b-col>
     </b-row>
   </div>
 </template>
@@ -102,7 +104,7 @@ export default {
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
     }),
-    nextResponse: debounce((value) => {
+    nextResponse: debounce(function (value) {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
     }, 500, { leading: true, trailing: false }),
@@ -110,19 +112,17 @@ export default {
     showModal() {
       this.$refs['modal-note'].show();
     },
-    clearName() {
-      this.formText = '';
-    },
     handleSubmit() {
       // The replace method gets rid of the spaces in the text field
-      this.tags.push(this.formText.replace(/\s/g, ''));
-      this.clearName();
-      this.$nextTick(() => {
-        this.$refs['modal-note'].hide();
-      });
-    },
-    deleteTag(index) {
-      this.tags.splice(index, 1);
+      if (this.formText) {
+        if (!this.tags.includes(this.formText)) {
+          this.tags.unshift(this.formText.replace(/\s/g, ''));
+          this.formText = '';
+          this.$nextTick(() => {
+            this.$refs['modal-note'].hide();
+          });
+        }
+      }
     },
     addressExtended() {
       this.$router.push({
@@ -179,7 +179,15 @@ export default {
 }
 .bottom-tags {
   white-space: nowrap;
-  overflow: scroll;
+  text-align: left;
+  color: #17a2b8;
+}
+#expand-view {
+  text-align: center;
+}
+
+.tag-container {
+  overflow: hidden;
 }
 
 .tag-names-list {

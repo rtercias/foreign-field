@@ -6,16 +6,20 @@
         <h5>{{ address.city }}</h5>
       </div>
     </div>
-    <div class="row textfield m-0">
-      <h4>Notes</h4>
-      <b-form-input placeholder="add a note..."
-      maxlength="100" v-model="formText"
-      v-on:keyup.enter="submitForm()">
-      </b-form-input>
+      <!-- <h4>Notes</h4> -->
+    <div class="row textfield pl-0 pr-0 pt-10 pb-10 m-0">
+      <b-col cols="10">
+        <b-form-input placeholder="add a tag..."
+        maxlength="25" v-model="formText"
+        v-on:keyup.enter="submitForm()">
+        </b-form-input>
+      </b-col>
+      <b-col cols="2">
+        <p class="counter">{{formText.length}}/25</p>
+      </b-col>
       <b-alert fade v-model="showAlert" variant="danger">
         That note already exists!
       </b-alert>
-      <p class="counter">{{formText.length}}/100</p>
     </div>
     <div class="notes-container">
       <transition-group name="list">
@@ -100,13 +104,14 @@ input {
   padding: 0;
   margin-bottom: 10px;
   border: none;
-  border-bottom: 1px solid lightgray;
+  /* border-bottom: 1px solid lightgray; */
   border-radius: 0;
   box-shadow: none !important;
 }
 .counter {
   color: lightgray;
   margin-left: auto;
+  padding-top: 10px;
 }
 .notes-container {
   overflow-x: hidden;
