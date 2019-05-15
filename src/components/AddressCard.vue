@@ -27,9 +27,17 @@
         </div> -->
 
       <!-- the modal for tags -->
-      <b-modal ok-only @ok="handleSubmit" ref="modal-note" footer-class="border-top-0">
+      <b-modal
+      ok-only
+      ok-variant="outline-info"
+      @ok="handleSubmit"
+      ref="modal-note"
+      footer-class="border-top-0"
+      header-class="border-bottom-0"
+      hide-header-close
+      centered>
         <form @submit.stop.prevent='handleSubmit'>
-          <b-form-input v-model="formText"></b-form-input>
+          <b-form-textarea v-model="formText" rows="3" maxlength="25" no-resize/>
         </form>
       </b-modal>
 
@@ -104,10 +112,13 @@ export default {
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
     }),
+    /* eslint-disable */
     nextResponse: debounce(function (value) {
       this.selectedResponse = value;
       this.addLog({ addressId: this.address.id, value });
     }, 500, { leading: true, trailing: false }),
+    /* eslint-enable */
+
     // Added methods for note submission
     showModal() {
       this.$refs['modal-note'].show();
