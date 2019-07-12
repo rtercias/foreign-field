@@ -28,17 +28,27 @@
 
       <!-- the modal for tags -->
       <b-modal
-      ok-only
       ok-variant="outline-info"
-      @ok="handleSubmit"
+      @submit="handleSubmit"
       ref="modal-note"
       footer-class="border-top-0"
       header-class="border-bottom-0"
-      hide-header-close
+      hide-header
+      hide-footer
       centered>
-        <form @submit.stop.prevent='handleSubmit'>
-          <b-form-textarea v-model="formText" rows="3" maxlength="25" no-resize/>
-        </form>
+      <div class="row align-items-center">
+        <b-col cols="8">
+          <form @submit.stop.prevent='handleSubmit'>
+            <b-form-input v-model="formText" maxlength="25" placeholder="Add a tag..."/>
+          </form>
+        </b-col>
+        <b-col cols="2">
+          <span class="tag-counter">{{ formText.length }}/25</span>
+        </b-col>
+        <b-col cols="2" class="pl-0">
+          <b-button variant="info" @click="handleSubmit">+</b-button>
+        </b-col>
+      </div>
       </b-modal>
 
       <div class="interaction pr-0">
@@ -69,6 +79,7 @@
       </b-col>
       <b-col cols="7" class="pl-0 pr-0">
         <div class="tag-container">
+          <div class="tag-container-blur"></div>
           <ul class="pl-0 mb-0">
             <li v-for='t in tags' :key="t.id" class="tag-names-list">
               <b-badge variant="info" class="ml-1 mr-1">
@@ -126,12 +137,14 @@ export default {
     handleSubmit() {
       // The replace method gets rid of the spaces in the text field
       if (this.formText) {
-        if (!this.tags.includes(this.formText)) {
-          this.tags.unshift(this.formText.replace(/\s/g, ''));
-          this.formText = '';
-          this.$nextTick(() => {
-            this.$refs['modal-note'].hide();
-          });
+        if (this.formText) {
+          if (!this.tags.includes(this.formText)) {
+            this.tags.unshift(this.formText.replace(/\s/g, '-'));
+            this.formText = '';
+            this.$nextTick(() => {
+              this.$refs['modal-note'].hide();
+            });
+          }
         }
       }
     },
@@ -200,11 +213,28 @@ export default {
 .tag-container {
   overflow: hidden;
 }
+.tag-container-blur {
+  box-shadow: inset -5px -10px 10px hsl(0, 0%, 100%);
+  width: 100%;
+  height: 200%;
+  position: absolute;
+}
 
 .tag-names-list {
   display: inline;
   overflow: hidden;
 }
+.tag-counter {
+  color: lightgray;
+}
+
+input {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+
 
 .extended-title {
   font-size: 1.5em;

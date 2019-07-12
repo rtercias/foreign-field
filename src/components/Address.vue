@@ -104,7 +104,6 @@ input {
   padding: 0;
   margin-bottom: 10px;
   border: none;
-  /* border-bottom: 1px solid lightgray; */
   border-radius: 0;
   box-shadow: none !important;
 }
