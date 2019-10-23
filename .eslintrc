@@ -49,6 +49,7 @@
     "import/extensions": "off",
     "import/order": "off",
     "no-alert": "off",
-    "no-plusplus": "off"
+    "no-plusplus": "off",
+    "func-names": "off"
   }
 }

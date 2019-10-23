@@ -55,7 +55,7 @@ const responses = ['START', 'HOME', 'NH', 'NF'];
 
 export default {
   name: 'AddressCard',
-  props: ['address'],
+  props: ['address', 'territoryId'],
   data() {
     return {
       storageId: `foreignfield-${this.address.id}`,
@@ -71,10 +71,19 @@ export default {
       addLog: 'address/addLog',
       updateLog: 'address/updateLog',
       removeLog: 'address/removeLog',
+      getTerritory: 'territory/getTerritory',
     }),
-    nextResponse: debounce((value) => {
-      this.selectedResponse = value;
-      this.addLog({ addressId: this.address.id, value });
+    nextResponse: debounce(async function (value) {
+      const oldValue = this.selectedResponse;
+
+      try {
+        this.selectedResponse = value;
+        await this.addLog({ addressId: this.address.id, value });
+        this.getTerritory(this.territoryId);
+      } catch {
+        // revert value
+        this.selectedResponse = oldValue;
+      }
     }, 500, { leading: true, trailing: false }),
   },
   mounted() {
@@ -101,9 +110,9 @@ export default {
     },
   },
   watch: {
-    address() {
-      this.selectedResponse = this.lastActivity || responses[0];
-    },
+    // address() {
+    //   this.selectedResponse = this.lastActivity || responses[0];
+    // },
   },
 };
 </script>

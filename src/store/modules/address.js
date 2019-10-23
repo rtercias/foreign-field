@@ -148,6 +148,7 @@ export const address = {
         }
       } catch (e) {
         console.error('Unable to add an activityLog', e);
+        throw e;
       }
 
       commit('auth/LOADING', false, { root: true });
