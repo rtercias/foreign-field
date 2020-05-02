@@ -5,6 +5,7 @@ import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
+import AssignmentReport from './components/AssignmentReport';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -38,6 +39,15 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
+  },
+  {
+    name: 'assignment-report',
+    path: '/assignment-report/:id',
+    component: AssignmentReport,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
     },
   },
 ];
