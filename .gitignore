@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-firebase.config.js
+firebase.config.js.unsecured
 /dist
 
 # local env files
