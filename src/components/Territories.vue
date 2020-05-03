@@ -23,6 +23,9 @@
       <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
       </CheckoutModal>
     </div>
+    <span class="p-2" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
+      There are no {{availability}} territories
+    </span>
   </div>
 </template>
 
@@ -91,7 +94,7 @@ export default {
 
     async setAvailability(value) {
       this.availability = value;
-      await this.$store.cache.dispatch('territories/fetchTerritories', {
+      await this.$store.dispatch('territories/fetchTerritories', {
         congId: this.congId,
         groupCode: this.groupCode,
       });
@@ -102,7 +105,7 @@ export default {
       const congId = this.congId || (this.user && this.user.congId);
       this.groupCode = this.$route.params.group;
       this.availability = sessionStorage.getItem('availability') || 'Available';
-      await this.$store.cache.dispatch('territories/fetchTerritories', {
+      await this.$store.dispatch('territories/fetchTerritories', {
         congId,
         groupCode: this.groupCode,
       });
