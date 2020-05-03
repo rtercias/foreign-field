@@ -79,7 +79,7 @@ export default {
       try {
         this.selectedResponse = value;
         await this.addLog({ addressId: this.address.id, value });
-        this.getTerritory(this.territoryId);
+        await this.getTerritory(this.territoryId);
       } catch {
         // revert value
         this.selectedResponse = oldValue;

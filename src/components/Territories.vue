@@ -164,10 +164,6 @@ li {
 .recently-worked-button {
   background: transparent;
 }
-.dropdown-item.active, .dropdown-item:active {
-  padding-left: 0;
-}
-
 .list-group-item .checkout-publisher-dropdown>button.btn.btn-link {
   padding: 0 !important;
 }
