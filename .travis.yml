@@ -14,7 +14,3 @@ env:
 
 script:
   - npm run build
-deploy:
-  provide: firebase
-  token:
-    secure: 
