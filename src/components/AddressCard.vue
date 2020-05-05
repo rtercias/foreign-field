@@ -24,7 +24,7 @@
         </font-awesome-layers>
       </div>
     </div> -->
-    <div class="interaction pr-0">
+    <div class="interaction pr-0" v-if="isTerritoryCheckedOut">
       <b-button
         class="pr-0"
         variant="link"
@@ -50,6 +50,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import debounce from 'lodash/debounce';
+import get from 'lodash/get';
 
 const responses = ['START', 'HOME', 'NH', 'NF'];
 
@@ -95,6 +96,7 @@ export default {
       isOwnedByUser: 'territory/isOwnedByUser',
       lastActivity: 'address/lastActivity',
       loading: 'auth/loading',
+      territory: 'territory/territory',
     }),
 
     mapsUrl() {
@@ -107,6 +109,10 @@ export default {
     recentLogs() {
       const lastActivityId = this.lastActivity && this.lastActivity.id;
       return [...this.address.activityLogs.filter(l => l.id !== lastActivityId)];
+    },
+
+    isTerritoryCheckedOut() {
+      return get(this.territory, 'status.status') === 'Checked Out';
     },
   },
   watch: {
