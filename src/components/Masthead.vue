@@ -106,7 +106,4 @@ export default {
 .dropdown-item {
   color: #696969;
 }
-.dropdown-item.active, .dropdown-item:active {
-  padding-left: 0;
-}
 </style>
