@@ -6,6 +6,12 @@ const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
 
+export const ActivityResponse = {
+  START: 'START',
+  HOME: 'HOME',
+  NH: 'NH',
+  NF: 'NF',
+};
 
 function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
@@ -30,7 +36,6 @@ export const address = {
 
     lastActivity: (state) => {
       const activity = state.address && state.address.activityLogs;
-
       if (activity) {
         const current = orderBy(activity, a => (new Date(a.timestamp)), 'desc')[0];
         return current && current.value;
