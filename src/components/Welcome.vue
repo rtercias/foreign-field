@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     checkoutDate(date) {
-      return format(date, 'MM/DD/YYYY');
+      return format(new Date(date), 'MM/dd/yyyy');
     },
 
     url(terr) {

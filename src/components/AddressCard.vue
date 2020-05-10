@@ -11,11 +11,15 @@
       </div>
     </div>
     <div class="activity-container col-4 pl-0 pr-0">
-      <!--
       <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:response-update="updateResponse"></ActivityLog>
-      <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:response-update="updateResponse"></ActivityLog>
-      -->
-      <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:response-update="updateResponse"></ActivityLog>
+      <b-link
+        :to="`/addresses/${address.id}/history`"
+        @click="setAddress(address)">
+        <font-awesome-layers class="text-info fa-2x">
+          <font-awesome-icon icon="history">
+        </font-awesome-icon>
+        </font-awesome-layers>
+      </b-link>
     </div>
   </div>
 </template>
@@ -88,7 +92,7 @@ export default {
 .activity-container {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 @media print {

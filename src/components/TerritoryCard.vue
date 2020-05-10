@@ -71,7 +71,7 @@ export default {
       if (this.terr && this.terr.status && this.terr.status.publisher) {
         const pre = this.isRecentlyWorked ? 'Recently assigned to' : 'Assigned to';
         return `${pre} ${this.terr.status.publisher.firstname} `
-          + `${this.terr.status.publisher.lastname} on ${format(this.terr.status.date, 'MM/DD/YYYY')}`;
+          + `${this.terr.status.publisher.lastname} on ${format(new Date(this.terr.status.date), 'MM/dd/yyyy')}`;
       }
 
       return '';
