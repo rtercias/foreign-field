@@ -14,7 +14,7 @@
         <font-awesome-layers
           :class="item.class"
           @click="click(next || value)">
-          <font-awesome-icon :icon="item.icon"></font-awesome-icon>
+          <font-awesome-icon :icon="item.icon" v-if="!!item.icon"></font-awesome-icon>
           <font-awesome-layers-text
             :value="item.text"
             class="nh-text text-white font-weight-bold">
@@ -34,7 +34,6 @@ export default {
   props: [
     'value',
     'next',
-    'class',
     'displayOnly',
   ],
   data() {
