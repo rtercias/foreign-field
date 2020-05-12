@@ -8,14 +8,18 @@
         No activity logs. This address is fresh!
       </span>
       <div class="group" v-for="(group, index) in groups" :key="index" v-else>
-        <span>
-          <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
-          <b-icon-dash @click="toggleGroup(index)" v-else />
-        </span>
-        {{index}} - {{group[0].value}} - {{getPublisherName(group[0].publisher_id)}}
-        <div :id="index" class="pl-4" v-show="!groupKeys[index].collapsed">
-          <div v-for="log in group" :key="log.id">
-            {{friendlyTime(log.timestamp)}} - {{log.value}} - {{getPublisherName(log.publisher_id)}}
+        <div class="group-head">
+          <span class="fa-2x pr-2">
+            <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
+            <b-icon-dash @click="toggleGroup(index)" v-else />
+          </span>
+          <ActivityButton class="fa-xs pr-2" :disabled="true" :displayOnly="true" :value="group[0].value" />
+          <span>{{index}} - {{getPublisherName(group[0].publisher_id)}}</span>
+        </div>
+        <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
+          <div class="log pb-1" v-for="log in group" :key="log.id">
+            <ActivityButton class="fa-xs pl-3 pr-2" :disabled="true" :displayOnly="true" :value="log.value" />
+            <span>{{friendlyTime(log.timestamp)}} - {{getPublisherName(log.publisher_id)}}</span>
           </div>
         </div>
       </div>
@@ -31,6 +35,7 @@ import orderBy from 'lodash/orderBy';
 import groupBy from 'lodash/groupBy';
 import forEach from 'lodash/forEach';
 import Loading from './Loading.vue';
+import ActivityButton from './ActivityButton';
 
 export default {
   name: 'ActivityHistory',
@@ -39,6 +44,7 @@ export default {
     Loading,
     BIconPlus,
     BIconDash,
+    ActivityButton,
   },
   data() {
     return {
@@ -109,7 +115,19 @@ export default {
     flex-direction: column;
     align-items: flex-start;
   }
-  .group, .log {
+  .group-head {
     text-align: left;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .group-detail {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+  }
+  .log {
+    display: flex;
+    align-items: center;
   }
 </style>

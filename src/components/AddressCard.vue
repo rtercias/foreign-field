@@ -1,7 +1,7 @@
 <template>
   <v-touch @pan="slide">
     <div class="address-card row justify-content-between align-items-center pl-2 pr-2">
-      <div class="address col-8 pl-0 pr-0">
+      <div class="address col-8 col-sm-8 col-md-9 pl-0 pr-0">
         <h5>
           <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
           <em>{{address.addr2}}</em>
@@ -12,11 +12,11 @@
         </div>
       </div>
       <div
-        class="activity-container col-4 pl-0"
+        class="activity-container col-4 col-sm-4 col-md-3 pl-0"
         ref="activityContainer"
         :style="{ '--x': transform, right: `${activityContainerRight}px` }">
-        <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:response-update="updateResponse"></ActivityLog>
-        <font-awesome-layers class="text-info fa-2x" v-if="activityContainerRight===activityContainerStart">
+        <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:button-click="updateResponse"></ActivityLog>
+        <font-awesome-layers class="text-muted fa-2x" v-if="activityContainerRight===activityContainerStart">
           <font-awesome-icon icon="ellipsis-v">
           </font-awesome-icon>
         </font-awesome-layers>
@@ -37,7 +37,7 @@ import gsap, { Elastic } from 'gsap';
 import get from 'lodash/get';
 import ActivityLog from './ActivityLog';
 
-const RIGHT_PANEL_OFFSET = -48;
+const RIGHT_PANEL_OFFSET = -46;
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
 
@@ -61,10 +61,20 @@ export default {
   },
   methods: {
     ...mapActions({
+      addLog: 'address/addLog',
       setAddress: 'address/setAddress',
+      fetchAddress: 'address/fetchAddress',
+      // getTerritory: 'territory/getTerritory',
     }),
-    updateResponse(value) {
-      this.selectedResponse = value;
+    async updateResponse(value) {
+      try {
+        await this.addLog({ addressId: this.address.id, value });
+        // await this.getTerritory(this.territoryId);
+        await this.fetchAddress(this.address.id);
+        this.selectedResponse = this.lastActivity;
+      } catch (e) {
+        console.error('Unable to save activity log', e);
+      }
     },
     slide(e) {
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
@@ -147,6 +157,7 @@ export default {
 .address-card {
   display: flex;
   flex-direction: row;
+  overflow: hidden;
 }
 .address {
   text-align: left;

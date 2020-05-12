@@ -151,12 +151,14 @@ export const address = {
         if (response && response.data && response.data.data) {
           dispatch('fetchAddress', addressId);
         }
+
+        return response;
       } catch (e) {
         console.error('Unable to add an activityLog', e);
         throw e;
+      } finally {
+        commit('auth/LOADING', false, { root: true });
       }
-
-      commit('auth/LOADING', false, { root: true });
     },
 
     async updateLog({
