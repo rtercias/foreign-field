@@ -16,7 +16,7 @@
         ref="activityContainer"
         :style="{ '--x': transform, right: `${activityContainerRight}px` }">
         <ActivityButton :value="selectedResponse" :territory="territory" v-on:button-click="updateResponse"></ActivityButton>
-        <font-awesome-layers class="text-muted fa-2x" v-if="activityContainerRight===activityContainerStart">
+        <font-awesome-layers class="text-muted fa-2x pr-3" v-if="activityContainerRight===activityContainerStart">
           <font-awesome-icon icon="ellipsis-v">
           </font-awesome-icon>
         </font-awesome-layers>

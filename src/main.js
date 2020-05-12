@@ -39,6 +39,10 @@ import {
   faCircleNotch,
   faHistory,
   faEllipsisV,
+  faPhone,
+  faEnvelope,
+  faHouseUser,
+  faPlayCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -53,6 +57,10 @@ library.add(
   faCircleNotch,
   faHistory,
   faEllipsisV,
+  faPhone,
+  faEnvelope,
+  faHouseUser,
+  faPlayCircle,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

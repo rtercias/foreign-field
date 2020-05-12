@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction pr-2" v-if="isTerritoryCheckedOut">
+  <div class="interaction pr-4" v-if="displayOnly || isTerritoryCheckedOut">
     <span v-for="(item, index) in list" :key="index">
       <span class="pl-0" v-if="item.type === 'button'">
         <b-button
@@ -44,16 +44,22 @@ export default {
     return {
       list: [
         {
-          type: 'button', value: 'START', text: 'START', icon: '', class: '', next: 'HOME',
+          type: 'fa-icon', value: 'START', text: '', icon: 'play-circle', class: 'text-success', next: 'NH',
         },
         {
-          type: 'fa-icon', value: 'HOME', text: '', icon: 'check-circle', class: 'text-success', next: 'NH',
+          type: 'fa-icon', value: 'NH', text: 'NH', icon: 'circle', class: 'text-warning', next: 'HOME',
         },
         {
-          type: 'fa-icon', value: 'NH', text: 'NH', icon: 'circle', class: 'text-warning', next: 'NF',
+          type: 'fa-icon', value: 'HOME', text: '', icon: 'house-user', class: 'text-info', next: 'PH',
         },
         {
-          type: 'fa-icon', value: 'NF', text: 'NF', icon: 'circle', class: '', next: 'START',
+          type: 'fa-icon', value: 'PH', text: '', icon: 'phone', class: 'text-info', next: 'LW',
+        },
+        {
+          type: 'fa-icon', value: 'LW', text: '', icon: 'envelope', class: 'text-info', next: 'NF',
+        },
+        {
+          type: 'fa-icon', value: 'NF', text: 'NF', icon: 'circle', class: 'text-danger', next: 'START',
         },
       ],
     };
