@@ -13,12 +13,12 @@
             <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
             <b-icon-dash @click="toggleGroup(index)" v-else />
           </span>
-          <ActivityButton class="fa-xs pr-2" :disabled="true" :displayOnly="true" :value="group[0].value" />
+          <ActivityButton class="fa-2x pr-2" :disabled="true" :displayOnly="true" :value="group[0].value" />
           <span>{{index}} - {{getPublisherName(group[0].publisher_id)}}</span>
         </div>
         <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
           <div class="log pb-1" v-for="log in group" :key="log.id">
-            <ActivityButton class="fa-xs pl-3 pr-2" :disabled="true" :displayOnly="true" :value="log.value" />
+            <ActivityButton class="fa-2x pl-3 pr-2" :disabled="true" :displayOnly="true" :value="log.value" />
             <span>{{friendlyTime(log.timestamp)}} - {{getPublisherName(log.publisher_id)}}</span>
           </div>
         </div>

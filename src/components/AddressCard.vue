@@ -1,7 +1,7 @@
 <template>
   <v-touch @pan="slide">
     <div class="address-card row justify-content-between align-items-center pl-2 pr-2">
-      <div class="address col-8 col-sm-8 col-md-9 pl-0 pr-0">
+      <div class="address col-12">
         <h5>
           <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
           <em>{{address.addr2}}</em>
@@ -12,15 +12,57 @@
         </div>
       </div>
       <div
-        class="activity-container col-4 col-sm-4 col-md-3 pl-0"
+        class="activity-container pl-0 pr-4"
         ref="activityContainer"
         :style="{ '--x': transform, right: `${activityContainerRight}px` }">
-        <ActivityButton :value="selectedResponse" :territory="territory" v-on:button-click="updateResponse"></ActivityButton>
-        <font-awesome-layers class="text-muted fa-2x pr-3" v-if="activityContainerRight===activityContainerStart">
+        <ActivityButton
+          :class="'fa-3x'"
+          :value="selectedResponse"
+          v-if="activityContainerRight===activityContainerStart"
+          :next="'START'"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <font-awesome-layers class="text-muted fa-2x pr-3">
           <font-awesome-icon icon="ellipsis-v">
           </font-awesome-icon>
         </font-awesome-layers>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'NH' }"
+          :value="'NH'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'HOME' }"
+          :value="'HOME'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'PH' }"
+          :value="'PH'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'LW' }"
+          :value="'LW'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'NF' }"
+          :value="'NF'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
         <b-link
+          class="text-info"
           :to="`/addresses/${address.id}/history`"
           @click="setAddress(address)">
           <font-awesome-layers class="text-info fa-2x">
@@ -37,7 +79,7 @@ import gsap, { Elastic } from 'gsap';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
 
-const RIGHT_PANEL_OFFSET = -46;
+const RIGHT_PANEL_OFFSET = -330;
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
 
@@ -57,6 +99,7 @@ export default {
       activityContainerStart: RIGHT_PANEL_OFFSET,
       activityContainerRight: RIGHT_PANEL_OFFSET,
       transform: '',
+      clickedResponse: '',
     };
   },
   methods: {
@@ -66,10 +109,14 @@ export default {
       fetchAddress: 'address/fetchAddress',
     }),
     async updateResponse(value) {
+      this.clickedResponse = value;
+
       try {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
         this.selectedResponse = this.lastActivity;
+        this.activityContainerRight = RIGHT_PANEL_OFFSET;
+        this.clickedResponse = '';
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
@@ -175,6 +222,7 @@ export default {
   overflow: hidden;
   position: absolute;
   transform: translateX(calc(var(--x, 0) * 1%));
+  background-color: #fff;
 }
 
 @media print {
