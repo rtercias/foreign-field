@@ -6,13 +6,6 @@ const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
 
-export const ActivityResponse = {
-  START: 'START',
-  HOME: 'HOME',
-  NH: 'NH',
-  NF: 'NF',
-};
-
 function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
     id,
