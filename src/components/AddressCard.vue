@@ -15,7 +15,7 @@
         class="activity-container col-4 col-sm-4 col-md-3 pl-0"
         ref="activityContainer"
         :style="{ '--x': transform, right: `${activityContainerRight}px` }">
-        <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:button-click="updateResponse"></ActivityLog>
+        <ActivityButton :value="selectedResponse" :territory="territory" v-on:button-click="updateResponse"></ActivityButton>
         <font-awesome-layers class="text-muted fa-2x" v-if="activityContainerRight===activityContainerStart">
           <font-awesome-icon icon="ellipsis-v">
           </font-awesome-icon>
@@ -35,7 +35,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import gsap, { Elastic } from 'gsap';
 import get from 'lodash/get';
-import ActivityLog from './ActivityLog';
+import ActivityButton from './ActivityButton';
 
 const RIGHT_PANEL_OFFSET = -46;
 const DIRECTION_LEFT = 2;
@@ -45,7 +45,7 @@ export default {
   name: 'AddressCard',
   props: ['address', 'territoryId'],
   components: {
-    ActivityLog,
+    ActivityButton,
   },
   data() {
     return {
@@ -64,12 +64,10 @@ export default {
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
-      // getTerritory: 'territory/getTerritory',
     }),
     async updateResponse(value) {
       try {
         await this.addLog({ addressId: this.address.id, value });
-        // await this.getTerritory(this.territoryId);
         await this.fetchAddress(this.address.id);
         this.selectedResponse = this.lastActivity;
       } catch (e) {

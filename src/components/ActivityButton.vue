@@ -1,5 +1,5 @@
 <template>
-  <span>
+  <div class="interaction pr-2" v-if="isTerritoryCheckedOut">
     <span v-for="(item, index) in list" :key="index">
       <span class="pl-0" v-if="item.type === 'button'">
         <b-button
@@ -25,17 +25,19 @@
         </font-awesome-layers>
       </span>
     </span>
-  </span>
+  </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import get from 'lodash/get';
 import debounce from 'lodash/debounce';
 
 export default {
   name: 'ActivityButton',
   props: [
     'value',
+    'territory',
     'displayOnly',
   ],
   data() {
@@ -71,11 +73,25 @@ export default {
     ...mapGetters({
       loading: 'auth/loading',
     }),
+    isTerritoryCheckedOut() {
+      return get(this.territory, 'status.status') === 'Checked Out';
+    },
   },
 };
 </script>
 <style>
 .nh-text {
   font-size: 0.5em;
+}
+
+.interaction {
+  cursor: pointer;
+  overflow: hidden;
+}
+
+@media print {
+  .interaction {
+    display: none;
+  }
 }
 </style>
