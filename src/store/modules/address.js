@@ -6,7 +6,6 @@ const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
 
-
 function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
     id,
@@ -30,7 +29,6 @@ export const address = {
 
     lastActivity: (state) => {
       const activity = state.address && state.address.activityLogs;
-
       if (activity) {
         const current = orderBy(activity, a => (new Date(a.timestamp)), 'desc')[0];
         return current && current.value;
@@ -146,12 +144,14 @@ export const address = {
         if (response && response.data && response.data.data) {
           dispatch('fetchAddress', addressId);
         }
+
+        return response;
       } catch (e) {
         console.error('Unable to add an activityLog', e);
         throw e;
+      } finally {
+        commit('auth/LOADING', false, { root: true });
       }
-
-      commit('auth/LOADING', false, { root: true });
     },
 
     async updateLog({

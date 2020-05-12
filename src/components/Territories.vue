@@ -1,6 +1,6 @@
 <template>
   <div class="territories">
-    <header class="w-100 m-0 row align-items-center justify-content-between">
+    <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
       <h4 class="text-left">Service Group: {{groupCode}}</h4>
       <b-dropdown right variant="secondary">
         <span slot="button-content">{{availability}}</span>

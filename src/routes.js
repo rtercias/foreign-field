@@ -6,6 +6,7 @@ import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
 import AssignmentReport from './components/AssignmentReport';
+import ActivityHistory from './components/ActivityHistory';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -48,6 +49,15 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'activity-history',
+    path: '/addresses/:addressId/history',
+    component: ActivityHistory,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
     },
   },
 ];

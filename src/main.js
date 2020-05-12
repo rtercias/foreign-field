@@ -18,6 +18,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
+import VueTouch from 'vue-touch';
 import App from './App.vue';
 import { router } from './routes';
 import { store } from './store';
@@ -36,6 +37,12 @@ import {
   faSearch,
   faTimes,
   faCircleNotch,
+  faHistory,
+  faEllipsisV,
+  faPhone,
+  faEnvelope,
+  faHouseUser,
+  faPlayCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -48,6 +55,12 @@ library.add(
   faSearch,
   faTimes,
   faCircleNotch,
+  faHistory,
+  faEllipsisV,
+  faPhone,
+  faEnvelope,
+  faHouseUser,
+  faPlayCircle,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
@@ -56,6 +69,7 @@ Vue.component('font-awesome-layers-text', FontAwesomeLayersText);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
+Vue.use(VueTouch);
 
 new Vue({
   render: h => h(App),
