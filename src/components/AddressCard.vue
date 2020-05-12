@@ -223,6 +223,9 @@ export default {
   position: absolute;
   transform: translateX(calc(var(--x, 0) * 1%));
   background-color: #fff;
+  border-width: 10px 0;
+  border-color: #fff;
+  border-style: solid;
 }
 
 @media print {
