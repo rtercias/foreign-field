@@ -1,5 +1,5 @@
 <template>
-  <v-touch @pan="showRightHandControls">
+  <v-touch @pan="slide">
     <div class="address-card row justify-content-between align-items-center pl-2 pr-2">
       <div class="address col-8 pl-0 pr-0">
         <h5>
@@ -11,14 +11,20 @@
           {{address.notes}}
         </div>
       </div>
-      <div class="activity-container col-4 pl-0 pr-0" ref="activityContainer" :style="{ '--x': transform}">
+      <div
+        class="activity-container col-4 pl-0"
+        ref="activityContainer"
+        :style="{ '--x': transform, right: `${activityContainerRight}px` }">
         <ActivityLog v-bind="{ address, selectedResponse, territoryId }" v-on:response-update="updateResponse"></ActivityLog>
+        <font-awesome-layers class="text-info fa-2x" v-if="activityContainerRight===activityContainerStart">
+          <font-awesome-icon icon="ellipsis-v">
+          </font-awesome-icon>
+        </font-awesome-layers>
         <b-link
           :to="`/addresses/${address.id}/history`"
           @click="setAddress(address)">
           <font-awesome-layers class="text-info fa-2x">
-            <font-awesome-icon icon="history">
-          </font-awesome-icon>
+            <font-awesome-icon icon="history"></font-awesome-icon>
           </font-awesome-layers>
         </b-link>
       </div>
@@ -30,6 +36,10 @@ import { mapGetters, mapActions } from 'vuex';
 import gsap, { Elastic } from 'gsap';
 import get from 'lodash/get';
 import ActivityLog from './ActivityLog';
+
+const RIGHT_PANEL_OFFSET = -48;
+const DIRECTION_LEFT = 2;
+const DIRECTION_RIGHT = 4;
 
 export default {
   name: 'AddressCard',
@@ -44,6 +54,8 @@ export default {
       responseText: '',
       animate: false,
       currentOffset: 0,
+      activityContainerStart: RIGHT_PANEL_OFFSET,
+      activityContainerRight: RIGHT_PANEL_OFFSET,
       transform: '',
     };
   },
@@ -54,43 +66,43 @@ export default {
     updateResponse(value) {
       this.selectedResponse = value;
     },
-    showRightHandControls(e) {
-      // how far the slider has been dragged in percentage of the visible container
+    slide(e) {
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
-
-      // transforming from where the slider currently
       this.transform = this.currentOffset + dragOffset;
 
       if (e.isFinal) {
-				this.currentOffset = this.transform;
-				const maxScroll = 100 - this.overflowRatio * 100;
-				let finalOffset = this.currentOffset;
+        this.currentOffset = this.transform;
+        const maxScroll = 100 - this.overflowRatio * 100;
+        let finalOffset = this.currentOffset;
 
-				// scrolled to last item
-				if (this.currentOffset <= maxScroll) {
-					finalOffset = maxScroll;
-				} else if (this.currentOffset >= 0) {
-					// scroll to first item
-					finalOffset = 0;
-				} else {
-					// animate to next item according to pan direction
-					const index = this.currentOffset / this.overflowRatio / 100 * this.count;
-					const nextIndex = e.deltaX <= 0 ? Math.floor(index) : Math.ceil(index);
-					finalOffset = 100 * this.overflowRatio / this.count * nextIndex;
-				}
+        if (this.currentOffset <= maxScroll) {
+          finalOffset = maxScroll;
+        } else if (this.currentOffset >= 0) {
+          finalOffset = 0;
+        } else {
+          const index = this.currentOffset / this.overflowRatio / 100 * this.count;
+          const nextIndex = e.deltaX <= 0 ? Math.floor(index) : Math.ceil(index);
+          finalOffset = 100 * this.overflowRatio / this.count * nextIndex;
+        }
 
-				// bounce back animation
-				gsap.fromTo(
-					this.$refs.activityContainer,
-					0.4,
-					{ '--x': this.currentOffset },
-					{
-						'--x': finalOffset,
-						ease: Elastic.easeOut.config(1, 0.8),
-						onComplete: () => {
-							this.currentOffset = finalOffset;
-						}
-					}
+        gsap.fromTo(
+          this.$refs.activityContainer,
+          0.4,
+          { '--x': this.currentOffset },
+          {
+            '--x': finalOffset,
+            ease: Elastic.easeOut.config(1, 0.8),
+            onUpdate: () => {
+              if (e.direction === DIRECTION_LEFT) {
+                this.activityContainerRight = finalOffset;
+              } else if (e.direction === DIRECTION_RIGHT) {
+                this.activityContainerRight = RIGHT_PANEL_OFFSET;
+              }
+            },
+            onComplete: () => {
+              this.currentOffset = finalOffset;
+            },
+          },
         );
       }
     },
@@ -150,9 +162,9 @@ export default {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   overflow: hidden;
   position: absolute;
-  right: -50px;
   transform: translateX(calc(var(--x, 0) * 1%));
 }
 

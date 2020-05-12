@@ -1,7 +1,7 @@
 <template>
   <div class="interaction pr-0" v-if="isTerritoryCheckedOut">
     <b-button
-      class="pr-0 pl-0"
+      class="pl-0"
       variant="link"
       v-if="selectedResponse === START || selectedResponse === undefined"
       @click="nextResponse(HOME)"

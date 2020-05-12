@@ -38,6 +38,7 @@ import {
   faTimes,
   faCircleNotch,
   faHistory,
+  faEllipsisV,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -51,6 +52,7 @@ library.add(
   faTimes,
   faCircleNotch,
   faHistory,
+  faEllipsisV,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
