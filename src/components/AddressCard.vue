@@ -1,7 +1,7 @@
 <template>
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
     <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
-      <div class="address col-12">
+      <div class="address col-9">
         <h5>
           <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
           <em>{{address.addr2}}</em>
@@ -11,21 +11,22 @@
           {{address.notes}}
         </div>
       </div>
-      <font-awesome-layers class="ellipsis-v-static text-muted fa-2x mr-8" v-show="!isContainerVisible">
-        <font-awesome-icon icon="ellipsis-v" class="ml-0">
-        </font-awesome-icon>
-      </font-awesome-layers>
+      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
+        <ActivityButton
+          class="fa-2x pr-2"
+          :value="selectedResponse"
+          :next="'START'"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
+          <font-awesome-icon icon="ellipsis-v" class="ml-0">
+          </font-awesome-icon>
+        </font-awesome-layers>
+      </div>
       <div
         class="activity-container pl-0 pr-2"
         ref="activityContainer"
         :style="{ '--x': transform, right: `${containerRight}px` }">
-        <ActivityButton
-          class="fa-3x pr-2"
-          :value="selectedResponse"
-          v-if="!isContainerVisible"
-          :next="'START'"
-          @button-click="updateResponse">
-        </ActivityButton>
         <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
           <font-awesome-icon icon="ellipsis-v" class="ml-0">
           </font-awesome-icon>
@@ -290,9 +291,10 @@ export default {
 .activity-container * {
   display: block;
 }
-.ellipsis-v-static {
-  position: absolute;
-  right: 0;
+.static-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 @media print {
