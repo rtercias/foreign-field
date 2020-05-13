@@ -153,7 +153,6 @@ export default {
             '--x': finalOffset,
             ease: Elastic.easeOut.config(1, 0.8),
             onUpdate: () => {
-              console.log(e);
               if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.3) {
                 this.containerRight = finalOffset;
                 this.containerIsVisible = true;
@@ -216,7 +215,6 @@ export default {
 
       let width = 0;
       buttons.forEach(b => width += b.clientWidth);
-      console.log('left buttons width', width);
       return width;
     },
   },
