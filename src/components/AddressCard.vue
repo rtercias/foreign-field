@@ -31,41 +31,15 @@
           <font-awesome-icon icon="ellipsis-v" class="ml-0">
           </font-awesome-icon>
         </font-awesome-layers>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'NH' }"
-          :value="'NH'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'HOME' }"
-          :value="'HOME'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'PH' }"
-          :value="'PH'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'LW' }"
-          :value="'LW'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'NF' }"
-          :value="'NF'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
+        <div class="buttons" v-if="isTerritoryCheckedOut">
+          <ActivityButton
+            v-for="(button, index) in containerButtonList"
+            :key="index"
+            class="fa-2x"
+            :value="button.value"
+            @button-click="updateResponse">
+          </ActivityButton>
+        </div>
         <b-link
           class="text-info"
           :to="`/addresses/${address.id}/history`"
@@ -80,13 +54,13 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import gsap, { Elastic } from 'gsap';
+import gsap from 'gsap';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-const NUM_ALWAYS_VISIBLE_BUTTONS = 2;
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
   name: 'AddressCard',
@@ -161,7 +135,6 @@ export default {
           { '--x': this.currentOffset },
           {
             '--x': finalOffset,
-            ease: Elastic.easeOut.config(1, 0.8),
             onUpdate: () => {
               if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.2) {
                 this.containerRight = finalOffset;
@@ -196,6 +169,7 @@ export default {
       lastActivity: 'address/lastActivity',
       loading: 'auth/loading',
       territory: 'territory/territory',
+      actionButtonList: 'address/actionButtonList',
     }),
 
     mapsUrl() {
@@ -224,31 +198,11 @@ export default {
     containerWidth() {
       const styles = window.getComputedStyle(this.$refs.activityContainer);
       const width = styles.getPropertyValue('width');
-      // eslint-disable-next-line
-      console.log(width);
       return this.getPxValue(width);
     },
 
-    containerLeftButtonsWidth() {
-      const buttons = Array.from(this.$refs.activityContainer.children);
-
-      // we're only interested in buttons that are always visible, so reduce to the first n
-      buttons.length = NUM_ALWAYS_VISIBLE_BUTTONS;
-
-      let width = 0;
-      buttons.forEach((b) => {
-        const styles = window.getComputedStyle(b);
-        const buttonWidth = styles.getPropertyValue('width');
-        const paddingLeft = styles.getPropertyValue('padding-left');
-        const paddingRight = styles.getPropertyValue('padding-right');
-
-        width += this.getPxValue(buttonWidth) + this.getPxValue(paddingLeft) + this.getPxValue(paddingRight);
-        // width += b.clientWidth;
-      });
-
-      // eslint-disable-next-line
-      console.log('left buttons width', width);
-      return width;
+    containerButtonList() {
+      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
   },
 };
@@ -286,10 +240,16 @@ export default {
   border-color: #fff;
   border-style: solid;
   width: 100%;
+  min-height: 50px;
 }
 
 .activity-container * {
   display: block;
+}
+.activity-container .buttons {
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
 }
 .static-buttons {
   display: flex;

@@ -5,6 +5,50 @@ const SET_ADDRESS = 'SET_ADDRESS';
 const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
+const ACTION_BUTTON_LIST = [
+  {
+    type: 'fa-icon',
+    value: 'START',
+    text: '',
+    icon: '',
+    className: 'text-success',
+  },
+  {
+    type: 'fa-icon',
+    value: 'NH',
+    text: 'NH',
+    icon: 'circle',
+    className: 'text-warning',
+  },
+  {
+    type: 'fa-icon',
+    value: 'HOME',
+    text: '',
+    icon: 'house-user',
+    className: 'text-success',
+  },
+  {
+    type: 'fa-icon',
+    value: 'PH',
+    text: '',
+    icon: 'phone',
+    className: 'text-tomato',
+  },
+  {
+    type: 'fa-icon',
+    value: 'LW',
+    text: '',
+    icon: 'envelope',
+    className: 'text-slate-blue',
+  },
+  {
+    type: 'fa-icon',
+    value: 'NF',
+    text: 'NF',
+    icon: 'circle',
+    className: 'text-danger',
+  },
+];
 
 function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
@@ -41,6 +85,8 @@ export const address = {
       const terr = rootGetters['territory/territory'];
       return terr.status;
     },
+
+    actionButtonList: () => ACTION_BUTTON_LIST,
   },
 
   mutations: {
