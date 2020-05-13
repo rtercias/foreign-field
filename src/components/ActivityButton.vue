@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction pr-4">
+  <div class="interaction pl-2 pr-3">
     <span v-for="(item, index) in list" :key="index">
       <span class="pl-0" v-if="item.type === 'button' && (value === item.value || value === undefined)">
         <b-button

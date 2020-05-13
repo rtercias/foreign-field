@@ -1,6 +1,6 @@
 <template>
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-    <div class="address-card row justify-content-between align-items-center pl-2 pr-2">
+    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
       <div class="address col-12">
         <h5>
           <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
@@ -11,19 +11,23 @@
           {{address.notes}}
         </div>
       </div>
+      <font-awesome-layers class="ellipsis-v-static text-muted fa-2x mr-8" v-show="!isContainerVisible">
+        <font-awesome-icon icon="ellipsis-v" class="ml-0">
+        </font-awesome-icon>
+      </font-awesome-layers>
       <div
-        class="activity-container pl-0 pr-4"
+        class="activity-container pl-0 pr-2"
         ref="activityContainer"
         :style="{ '--x': transform, right: `${containerRight}px` }">
         <ActivityButton
-          :class="'fa-3x'"
+          class="fa-3x pr-2"
           :value="selectedResponse"
-          v-if="!this.containerIsVisible"
+          v-if="!isContainerVisible"
           :next="'START'"
           @button-click="updateResponse">
         </ActivityButton>
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x pr-3">
-          <font-awesome-icon icon="ellipsis-v">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
+          <font-awesome-icon icon="ellipsis-v" class="ml-0">
           </font-awesome-icon>
         </font-awesome-layers>
         <ActivityButton
@@ -97,7 +101,7 @@ export default {
       animate: false,
       currentOffset: 0,
       containerRight: 0,
-      containerIsVisible: false,
+      isContainerVisible: false,
       transform: '',
       clickedResponse: '',
     };
@@ -109,11 +113,13 @@ export default {
       fetchAddress: 'address/fetchAddress',
     }),
     resetContainerPosition() {
-      const pos = -this.containerWidth + this.containerLeftButtonsWidth;
+      const pos = -this.containerWidth;
       this.containerRight = pos;
-      this.containerIsVisible = false;
+      this.isContainerVisible = false;
     },
     async updateResponse(value) {
+      if (this.selectedResponse === 'START' && value === 'START') return;
+
       this.clickedResponse = value;
 
       try {
@@ -127,8 +133,11 @@ export default {
       }
     },
     slide(e) {
+      if (Number.isNaN(this.transform)) this.transform = 0;
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
-      this.transform = this.currentOffset + dragOffset;
+      if (Math.abs(e.velocityX) > 0.2) {
+        this.transform = this.currentOffset + dragOffset;
+      }
 
       if (e.isFinal) {
         this.currentOffset = this.transform;
@@ -153,19 +162,27 @@ export default {
             '--x': finalOffset,
             ease: Elastic.easeOut.config(1, 0.8),
             onUpdate: () => {
-              if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.3) {
+              if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.2) {
                 this.containerRight = finalOffset;
-                this.containerIsVisible = true;
+                this.isContainerVisible = true;
               } else if (e.direction === DIRECTION_RIGHT) {
                 this.resetContainerPosition();
               }
             },
             onComplete: () => {
-              this.currentOffset = finalOffset;
+              if (Math.abs(e.velocityX) > 0.2) {
+                this.currentOffset = finalOffset;
+              } else {
+                this.currentOffset = 0;
+              }
             },
           },
         );
       }
+    },
+
+    getPxValue(styleValue) {
+      return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
   },
   mounted() {
@@ -204,7 +221,11 @@ export default {
     },
 
     containerWidth() {
-      return this.$refs.activityContainer.clientWidth;
+      const styles = window.getComputedStyle(this.$refs.activityContainer);
+      const width = styles.getPropertyValue('width');
+      // eslint-disable-next-line
+      console.log(width);
+      return this.getPxValue(width);
     },
 
     containerLeftButtonsWidth() {
@@ -214,7 +235,18 @@ export default {
       buttons.length = NUM_ALWAYS_VISIBLE_BUTTONS;
 
       let width = 0;
-      buttons.forEach(b => width += b.clientWidth);
+      buttons.forEach((b) => {
+        const styles = window.getComputedStyle(b);
+        const buttonWidth = styles.getPropertyValue('width');
+        const paddingLeft = styles.getPropertyValue('padding-left');
+        const paddingRight = styles.getPropertyValue('padding-right');
+
+        width += this.getPxValue(buttonWidth) + this.getPxValue(paddingLeft) + this.getPxValue(paddingRight);
+        // width += b.clientWidth;
+      });
+
+      // eslint-disable-next-line
+      console.log('left buttons width', width);
       return width;
     },
   },
@@ -253,6 +285,14 @@ export default {
   border-color: #fff;
   border-style: solid;
   width: 100%;
+}
+
+.activity-container * {
+  display: block;
+}
+.ellipsis-v-static {
+  position: absolute;
+  right: 0;
 }
 
 @media print {
