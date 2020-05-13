@@ -1,5 +1,5 @@
 <template>
-  <v-touch @pan="slide">
+  <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
     <div class="address-card row justify-content-between align-items-center pl-2 pr-2">
       <div class="address col-12">
         <h5>
@@ -14,15 +14,15 @@
       <div
         class="activity-container pl-0 pr-4"
         ref="activityContainer"
-        :style="{ '--x': transform, right: `${activityContainerRight}px` }">
+        :style="{ '--x': transform, right: `${containerRight}px` }">
         <ActivityButton
           :class="'fa-3x'"
           :value="selectedResponse"
-          v-if="activityContainerRight===activityContainerStart"
+          v-if="!this.containerIsVisible"
           :next="'START'"
           @button-click="updateResponse">
         </ActivityButton>
-        <font-awesome-layers class="text-muted fa-2x pr-3">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x pr-3">
           <font-awesome-icon icon="ellipsis-v">
           </font-awesome-icon>
         </font-awesome-layers>
@@ -79,9 +79,9 @@ import gsap, { Elastic } from 'gsap';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
 
-const RIGHT_PANEL_OFFSET = -330;
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
+const NUM_ALWAYS_VISIBLE_BUTTONS = 2;
 
 export default {
   name: 'AddressCard',
@@ -96,8 +96,8 @@ export default {
       responseText: '',
       animate: false,
       currentOffset: 0,
-      activityContainerStart: RIGHT_PANEL_OFFSET,
-      activityContainerRight: RIGHT_PANEL_OFFSET,
+      containerRight: 0,
+      containerIsVisible: false,
       transform: '',
       clickedResponse: '',
     };
@@ -108,6 +108,11 @@ export default {
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
     }),
+    resetContainerPosition() {
+      const pos = -this.containerWidth + this.containerLeftButtonsWidth;
+      this.containerRight = pos;
+      this.containerIsVisible = false;
+    },
     async updateResponse(value) {
       this.clickedResponse = value;
 
@@ -115,8 +120,8 @@ export default {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
         this.selectedResponse = this.lastActivity;
-        this.activityContainerRight = RIGHT_PANEL_OFFSET;
         this.clickedResponse = '';
+        this.resetContainerPosition();
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
@@ -148,10 +153,12 @@ export default {
             '--x': finalOffset,
             ease: Elastic.easeOut.config(1, 0.8),
             onUpdate: () => {
-              if (e.direction === DIRECTION_LEFT) {
-                this.activityContainerRight = finalOffset;
+              console.log(e);
+              if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.3) {
+                this.containerRight = finalOffset;
+                this.containerIsVisible = true;
               } else if (e.direction === DIRECTION_RIGHT) {
-                this.activityContainerRight = RIGHT_PANEL_OFFSET;
+                this.resetContainerPosition();
               }
             },
             onComplete: () => {
@@ -163,6 +170,7 @@ export default {
     },
   },
   mounted() {
+    this.resetContainerPosition();
     this.setAddress(this.address);
     this.selectedResponse = this.lastActivity || this.START;
   },
@@ -195,14 +203,34 @@ export default {
     count() {
       return this.$refs.activityContainer.children.length;
     },
+
+    containerWidth() {
+      return this.$refs.activityContainer.clientWidth;
+    },
+
+    containerLeftButtonsWidth() {
+      const buttons = Array.from(this.$refs.activityContainer.children);
+
+      // we're only interested in buttons that are always visible, so reduce to the first n
+      buttons.length = NUM_ALWAYS_VISIBLE_BUTTONS;
+
+      let width = 0;
+      buttons.forEach(b => width += b.clientWidth);
+      console.log('left buttons width', width);
+      return width;
+    },
   },
 };
 </script>
 <style scoped>
+.v-touch-address-card {
+  touch-action: pan-y;
+}
 .address-card {
   display: flex;
   flex-direction: row;
   overflow: hidden;
+  position: relative;
 }
 .address {
   text-align: left;
@@ -223,9 +251,10 @@ export default {
   position: absolute;
   transform: translateX(calc(var(--x, 0) * 1%));
   background-color: #fff;
-  border-width: 10px 0;
+  border-width: 4px 0;
   border-color: #fff;
   border-style: solid;
+  width: 100%;
 }
 
 @media print {
