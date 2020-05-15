@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div class="row address-info m-0 p-4 align-items-center justify-content-center">
+    <div class="address-info m-0 p-4 align-items-center justify-content-center">
+      <div class="text-left"><a @click="backToTerr"> Back </a></div>
       <div class="address-title">
         <h3>{{ address.addr1 }}</h3>
         <h5>{{ address.city }}</h5>
@@ -21,6 +22,7 @@
         That note already exists!
       </b-alert>
     </div>
+    {{ address.addr2 }}
     <div class="notes-container">
       <transition-group name="list">
         <li v-for="(note, index) in notes" :key="note" class="notes-list">
@@ -39,7 +41,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';  
 
 export default {
   name: 'Address',
@@ -54,7 +56,11 @@ export default {
   },
 
   async mounted() {
-    await this.fetchAddress(this.addressId);
+    this.fetchAddress(this.addressId);
+    /* eslint-disable */
+    //MOUNT NOTES FROM DATABASE TO this.notes
+    //this.notes = databasenotesorsomethinglikethat 
+    /* eslint-enable */
   },
 
   computed: {
@@ -73,11 +79,19 @@ export default {
       if (this.formText) {
         if (!this.notes.includes(this.formText)) {
           this.notes.unshift(this.formText);
+          /* eslint-disable */
+          //insertion to database here
+          /* eslint-enable */
           this.formText = '';
         } else {
           this.showAlert = 2;
         }
       }
+    },
+    backToTerr() {
+      this.$router.push({
+        path: `/territories/${this.$route.params.group}/${this.$route.params.id}`,
+      });
     },
   },
 };

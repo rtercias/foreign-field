@@ -129,7 +129,6 @@ export default {
       this.addLog({ addressId: this.address.id, value });
     }, 500, { leading: true, trailing: false }),
     /* eslint-enable */
-
     // Added methods for note submission
     showModal() {
       this.$refs['modal-note'].show();
