@@ -23,7 +23,7 @@
             v-for="address in territory.addresses"
             v-bind:key="address.id"
             data-toggle="collapse">
-            <AddressCard v-bind="{address, reset}"></AddressCard>
+            <AddressCard v-bind="{address, reset}" :territoryId="terrId"></AddressCard>
           </b-list-group-item>
         </b-list-group>
       <!-- </div>

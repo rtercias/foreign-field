@@ -18,11 +18,13 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
+import VueTouch from 'vue-touch';
 import App from './App.vue';
 import { router } from './routes';
 import { store } from './store';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
+import './assets/bootstrap-overrides.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText } from '@fortawesome/vue-fontawesome';
 import {
@@ -38,6 +40,12 @@ import {
   faPencilAlt,
   faPlusSquare,
   faHome,
+  faHistory,
+  faEllipsisV,
+  faPhone,
+  faEnvelope,
+  faHouseUser,
+  faPlayCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -50,9 +58,18 @@ library.add(
   faSearch,
   faTimes,
   faCircleNotch,
+<<<<<<< HEAD
   faPencilAlt,
   faPlusSquare,
   faHome,
+=======
+  faHistory,
+  faEllipsisV,
+  faPhone,
+  faEnvelope,
+  faHouseUser,
+  faPlayCircle,
+>>>>>>> d4f8863ae161918d8b43f890a8641294c87cb081
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
@@ -61,6 +78,7 @@ Vue.component('font-awesome-layers-text', FontAwesomeLayersText);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
+Vue.use(VueTouch);
 
 new Vue({
   render: h => h(App),

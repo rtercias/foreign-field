@@ -1,6 +1,6 @@
 <template>
   <div class="territories">
-    <header class="w-100 m-0 row align-items-center justify-content-between">
+    <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
       <h4 class="text-left">Service Group: {{groupCode}}</h4>
       <b-dropdown right variant="secondary">
         <span slot="button-content">{{availability}}</span>
@@ -23,6 +23,9 @@
       <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
       </CheckoutModal>
     </div>
+    <span class="p-2" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
+      There are no {{availability}} territories
+    </span>
   </div>
 </template>
 
@@ -91,7 +94,7 @@ export default {
 
     async setAvailability(value) {
       this.availability = value;
-      await this.$store.cache.dispatch('territories/fetchTerritories', {
+      await this.$store.dispatch('territories/fetchTerritories', {
         congId: this.congId,
         groupCode: this.groupCode,
       });
@@ -102,7 +105,7 @@ export default {
       const congId = this.congId || (this.user && this.user.congId);
       this.groupCode = this.$route.params.group;
       this.availability = sessionStorage.getItem('availability') || 'Available';
-      await this.$store.cache.dispatch('territories/fetchTerritories', {
+      await this.$store.dispatch('territories/fetchTerritories', {
         congId,
         groupCode: this.groupCode,
       });
@@ -161,10 +164,6 @@ li {
 .recently-worked-button {
   background: transparent;
 }
-.dropdown-item.active, .dropdown-item:active {
-  padding-left: 0;
-}
-
 .list-group-item .checkout-publisher-dropdown>button.btn.btn-link {
   padding: 0 !important;
 }

@@ -5,7 +5,12 @@ import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
+<<<<<<< HEAD
 import Address from './components/Address';
+=======
+import AssignmentReport from './components/AssignmentReport';
+import ActivityHistory from './components/ActivityHistory';
+>>>>>>> d4f8863ae161918d8b43f890a8641294c87cb081
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -44,6 +49,24 @@ const routes = [
     name: 'dnc',
     path: '/dnc/:id',
     component: Dnc,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
+  },
+  {
+    name: 'assignment-report',
+    path: '/assignment-report/:id',
+    component: AssignmentReport,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'activity-history',
+    path: '/addresses/:addressId/history',
+    component: ActivityHistory,
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
