@@ -5,12 +5,9 @@ import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
-<<<<<<< HEAD
 import Address from './components/Address';
-=======
 import AssignmentReport from './components/AssignmentReport';
 import ActivityHistory from './components/ActivityHistory';
->>>>>>> d4f8863ae161918d8b43f890a8641294c87cb081
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },

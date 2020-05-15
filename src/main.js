@@ -58,18 +58,15 @@ library.add(
   faSearch,
   faTimes,
   faCircleNotch,
-<<<<<<< HEAD
   faPencilAlt,
   faPlusSquare,
   faHome,
-=======
   faHistory,
   faEllipsisV,
   faPhone,
   faEnvelope,
   faHouseUser,
   faPlayCircle,
->>>>>>> d4f8863ae161918d8b43f890a8641294c87cb081
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
