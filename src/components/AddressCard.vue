@@ -27,7 +27,7 @@
           @button-click="updateResponse">
         </ActivityButton>
         <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
-          <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
       </div>
       <div
@@ -35,7 +35,7 @@
         ref="activityContainer"
         :style="{ '--x': transform, right: `${containerRight}px` }">
         <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
-          <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
         <ActivityButton
           class="fa-2x"
