@@ -2,13 +2,21 @@
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
     <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
       <div class="address col-9">
-        <h5>
-          <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
-          <em>{{address.addr2}}</em>
-        </h5>
         <div>
-          {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-          {{address.notes}}
+          <h5>
+            <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
+            <em>{{address.addr2}}</em>
+          </h5>
+          <div>
+            {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+            {{address.notes}}
+          </div>
+          <b-badge class="pml-2 h-100" variant="info" :href="phoneLookup" size="sm" target="_blank">
+            <font-awesome-layers>
+              <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+            </font-awesome-layers>
+            411
+          </b-badge>
         </div>
       </div>
       <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
@@ -19,8 +27,7 @@
           @button-click="updateResponse">
         </ActivityButton>
         <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
-          <font-awesome-icon icon="ellipsis-v" class="ml-0">
-          </font-awesome-icon>
+          <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
         </font-awesome-layers>
       </div>
       <div
@@ -28,8 +35,7 @@
         ref="activityContainer"
         :style="{ '--x': transform, right: `${containerRight}px` }">
         <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
-          <font-awesome-icon icon="ellipsis-v" class="ml-0">
-          </font-awesome-icon>
+          <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
         </font-awesome-layers>
         <ActivityButton
           class="fa-2x"
@@ -250,6 +256,13 @@ export default {
       console.log('left buttons width', width);
       return width;
     },
+
+    phoneLookup() {
+      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
+      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
+      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.411.com/address/${addr1}/${city}-${state}`;
+    },
   },
 };
 </script>
@@ -264,6 +277,7 @@ export default {
   position: relative;
 }
 .address {
+  display: flex;
   text-align: left;
 }
 .nh-text {
@@ -286,6 +300,7 @@ export default {
   border-color: #fff;
   border-style: solid;
   width: 100%;
+  height: 100%;
 }
 
 .activity-container * {
