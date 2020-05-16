@@ -15,7 +15,7 @@
             {{address.city}} {{address.state}} {{address.postalCode}}<br/>
             {{address.notes}}
           </div>
-          <b-badge class="pml-2 h-100" variant="info" :href="phoneLookup" size="sm" target="_blank">
+          <b-badge class="pml-2" variant="info" :href="phoneLookup" size="sm">
             <font-awesome-layers>
               <font-awesome-icon icon="phone-alt"></font-awesome-icon>
             </font-awesome-layers>
@@ -56,6 +56,7 @@
         <b-link
           class="text-info"
           :to="`/addresses/${address.id}/history`"
+          tabindex="-1"
           @click="setAddress(address)">
           <font-awesome-layers class="text-info fa-2x">
             <font-awesome-icon icon="history"></font-awesome-icon>
