@@ -1,26 +1,24 @@
 <template>
   <div class="interaction pl-2 pr-3">
-    <span v-for="(item, index) in list" :key="index">
-      <span class="pl-0" v-if="item.type === 'button' && (value === item.value || value === undefined)">
-        <b-button
-          class="p-0"
-          variant="link"
-          @click="click(value)"
-          :disabled="loading">
-          {{ item.text }}
-        </b-button>
-      </span>
-      <span class="pl-0" v-else-if="item.type === 'fa-icon' && value === item.value">
-        <font-awesome-layers
-          :class="item.class"
-          @click="click(next || value)">
-          <font-awesome-icon :icon="item.icon" v-if="!!item.icon"></font-awesome-icon>
-          <font-awesome-layers-text
-            :value="item.text"
-            class="nh-text text-white font-weight-bold">
-          </font-awesome-layers-text>
-        </font-awesome-layers>
-      </span>
+    <span class="pl-0" v-if="get('type') === 'link'">
+      <b-button
+        class="p-0"
+        variant="link"
+        @click="click(value)"
+        :disabled="loading">
+        {{ get('text') }}
+      </b-button>
+    </span>
+    <span class="pl-0" v-else-if="get('type') === 'fa-icon'">
+      <font-awesome-layers
+        :class="get('className')"
+        @click="click(get('next') || get('value'))">
+        <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
+        <font-awesome-layers-text
+          :value="get('text')"
+          class="nh-text text-white font-weight-bold">
+        </font-awesome-layers-text>
+      </font-awesome-layers>
     </span>
   </div>
 </template>
@@ -32,34 +30,14 @@ import debounce from 'lodash/debounce';
 export default {
   name: 'ActivityButton',
   props: [
+    'type',
     'value',
+    'text',
+    'icon',
+    'className',
     'next',
     'displayOnly',
   ],
-  data() {
-    return {
-      list: [
-        {
-          type: 'fa-icon', value: 'START', text: '', icon: '', class: 'text-success', next: 'NH',
-        },
-        {
-          type: 'fa-icon', value: 'NH', text: 'NH', icon: 'circle', class: 'text-warning', next: 'HOME',
-        },
-        {
-          type: 'fa-icon', value: 'HOME', text: '', icon: 'house-user', class: 'text-success', next: 'PH',
-        },
-        {
-          type: 'fa-icon', value: 'PH', text: '', icon: 'phone', class: 'text-tomato', next: 'LW',
-        },
-        {
-          type: 'fa-icon', value: 'LW', text: '', icon: 'envelope', class: 'text-slate-blue', next: 'NF',
-        },
-        {
-          type: 'fa-icon', value: 'NF', text: 'NF', icon: 'circle', class: 'text-danger', next: 'START',
-        },
-      ],
-    };
-  },
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
@@ -72,11 +50,19 @@ export default {
         this.$emit('button-click', value);
       }
     }, 500, { leading: true, trailing: false }),
+
+    get(property) {
+      return this[property] || this.item[property];
+    },
   },
   computed: {
     ...mapGetters({
       loading: 'auth/loading',
+      actionButtonList: 'address/actionButtonList',
     }),
+    item() {
+      return this.actionButtonList.find(b => b.value === this.value) || {};
+    },
   },
 };
 </script>
