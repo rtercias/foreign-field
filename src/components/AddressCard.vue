@@ -1,92 +1,37 @@
 <template>
-  <v-touch
-    class="v-touch-address-card"
-    @panleft="slideLeft"
-    @panright="slideRight"
-    :pan-options="{ direction: 'horizontal'}">
-    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
-      <div class="address col-9">
-        <div>
-          <h5>
-            <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
-            <em>{{address.addr2}}</em>
-          </h5>
-          <div>
-            {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-            {{address.notes}}
-          </div>
-          <b-badge class="pml-2" variant="info" :href="phoneLookup" size="sm">
-            <font-awesome-layers>
-              <font-awesome-icon icon="phone-alt"></font-awesome-icon>
-            </font-awesome-layers>
-            411
-          </b-badge>
-        </div>
-      </div>
-      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isLeftPanelOpen">
-        <ActivityButton
-          class="fa-2x pr-2"
-          :value="selectedResponse"
-          :next="'START'"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-      </div>
-      <SlidePanel
-        class="left-panel pl-0 pr-2"
-        :name="'leftPanel'"
-        ref="leftPanel"
-        :direction="'left'"
-        v-on:left-panel-open="openLeftPanel"
-        v-on:left-panel-close="closeLeftPanel">
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-        <div class="buttons" v-if="isTerritoryCheckedOut">
-          <ActivityButton
-            v-for="(button, index) in containerButtonList"
-            :key="index"
-            class="fa-2x"
-            :value="button.value"
-            @button-click="updateResponse">
-          </ActivityButton>
-        </div>
-        <b-link
-          class="text-info"
-          :to="`/addresses/${address.id}/history`"
-          tabindex="-1"
-          @click="setAddress(address)">
-          <font-awesome-layers class="text-info fa-2x">
-            <font-awesome-icon icon="history"></font-awesome-icon>
-          </font-awesome-layers>
-        </b-link>
-      </SlidePanel>
-    </div>
-  </v-touch>
+  <SlideContainer>
+    <div>Middle Panel</div>
+  </SlideContainer>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
-import SlidePanel from './SlidePanel';
 import ActivityButton from './ActivityButton';
+import SlideContainer from './SlideContainer';
+import SlidePanel from './SlidePanel';
 
+// const DIRECTION_LEFT = 2;
+// const DIRECTION_RIGHT = 4;
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
   name: 'AddressCard',
   props: ['address', 'territoryId'],
   components: {
-    SlidePanel,
     ActivityButton,
+    SlideContainer,
+    SlidePanel,
   },
   data() {
     return {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
       responseText: '',
-      isLeftPanelOpen: false,
+      animate: false,
+      currentOffset: 0,
+      containerRight: 0,
+      isContainerVisible: false,
+      transform: '',
       clickedResponse: '',
     };
   },
@@ -96,11 +41,10 @@ export default {
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
     }),
-    closeLeftPanel() {
-      this.isLeftPanelOpen = false;
-    },
-    openLeftPanel() {
-      this.isLeftPanelOpen = true;
+    resetContainerPosition() {
+      const pos = -this.containerWidth;
+      this.containerRight = pos;
+      this.isContainerVisible = false;
     },
     async updateResponse(value) {
       if (this.selectedResponse === 'START' && value === 'START') return;
@@ -112,24 +56,18 @@ export default {
         await this.fetchAddress(this.address.id);
         this.selectedResponse = this.lastActivity;
         this.clickedResponse = '';
-        this.$refs.leftPanel.close();
+        this.resetContainerPosition();
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
     },
-    slideLeft(e) {
-      if (this.isLeftPanelOpen) {
-        this.closeLeftPanel();
-      } else {
-        this.$refs.leftPanel.slide(e);
-      }
-    },
-    slideRight(e) {
-      this.$refs.leftPanel.slide(e);
+
+    getPxValue(styleValue) {
+      return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
   },
   mounted() {
-    this.closeLeftPanel();
+    // this.resetContainerPosition();
     this.setAddress(this.address);
     this.selectedResponse = this.lastActivity || this.START;
   },
@@ -150,6 +88,24 @@ export default {
 
     isTerritoryCheckedOut() {
       return get(this.territory, 'status.status') === 'Checked Out';
+    },
+
+    overflowRatio() {
+      return this.itemWidth;
+    },
+
+    itemWidth() {
+      return this.$refs.activityContainer.scrollWidth;
+    },
+
+    count() {
+      return this.$refs.activityContainer.children.length;
+    },
+
+    containerWidth() {
+      const styles = window.getComputedStyle(this.$refs.activityContainer);
+      const width = styles.getPropertyValue('width');
+      return this.getPxValue(width);
     },
 
     containerButtonList() {
@@ -186,7 +142,7 @@ export default {
   cursor: pointer;
   overflow: hidden;
 }
-.left-panel {
+.activity-container {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -199,14 +155,14 @@ export default {
   border-color: #fff;
   border-style: solid;
   width: 100%;
-  min-height: 50px;
   height: 100%;
+  min-height: 50px;
 }
 
-.left-panel * {
+.activity-container * {
   display: block;
 }
-.left-panel .buttons {
+.activity-container .buttons {
   display: flex;
   width: 100%;
   justify-content: space-evenly;
