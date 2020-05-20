@@ -1,6 +1,70 @@
 <template>
   <SlideContainer>
-    <div>Middle Panel</div>
+    <template v-slot:left-panel>
+      <div class="address-buttons">
+        <b-button class="mr-3 pr-3 pl-3" variant="info" :href="lookup411" size="sm">
+          <font-awesome-layers>
+            <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+          </font-awesome-layers>
+          <div>411</div>
+        </b-button>
+        <b-button class="mr-3 pr-3 pl-3" variant="warning" :href="lookupFastPeopleSearch" size="sm">
+          <font-awesome-layers>
+            <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+          </font-awesome-layers>
+          <div>FPS</div>
+        </b-button>
+      </div>
+    </template>
+    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
+      <div class="address col-9">
+        <div>
+          <h5>
+            <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
+            <em>{{address.addr2}}</em>
+          </h5>
+          <div>
+            {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+            {{address.notes}}
+          </div>
+        </div>
+      </div>
+      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
+        <ActivityButton
+          class="fa-2x pr-2"
+          :value="selectedResponse"
+          :next="'START'"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+        </font-awesome-layers>
+      </div>
+    </div>
+    <template v-slot:right-panel>
+      <div class="activity-container">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+        </font-awesome-layers>
+        <div class="buttons" v-if="isTerritoryCheckedOut">
+          <ActivityButton
+            v-for="(button, index) in containerButtonList"
+            :key="index"
+            class="fa-2x"
+            :value="button.value"
+            @button-click="updateResponse">
+          </ActivityButton>
+        </div>
+        <b-link
+          class="text-info"
+          :to="`/addresses/${address.id}/history`"
+          @click="setAddress(address)">
+          <font-awesome-layers class="text-info fa-2x">
+            <font-awesome-icon icon="history"></font-awesome-icon>
+          </font-awesome-layers>
+        </b-link>
+      </div>
+    </template>
   </SlideContainer>
 </template>
 <script>
@@ -112,11 +176,17 @@ export default {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
 
-    phoneLookup() {
+    lookup411() {
       const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
       const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
       const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
       return `https://www.411.com/address/${addr1}/${city}-${state}`;
+    },
+    lookupFastPeopleSearch() {
+      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
+      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
+      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
   },
 };
@@ -141,6 +211,9 @@ export default {
 .interaction {
   cursor: pointer;
   overflow: hidden;
+}
+.address-buttons {
+  display: flex;
 }
 .activity-container {
   display: flex;

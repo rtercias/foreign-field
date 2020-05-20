@@ -32,16 +32,12 @@ export default {
 
 <style>
   .slide-panel {
+    z-index: 1;
     position: absolute;
     top: 0;
     width: 100%;
     height: 100%;
     background-color: #fff;
-  }
-  .slide-panel.left {
-    left: -100%;
-  }
-  .slide-panel.right {
-    left: 100%;
+    transform: translateX(calc(var(--x, 0) * 1%));
   }
 </style>

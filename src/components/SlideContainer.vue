@@ -1,10 +1,14 @@
 <template>
   <v-touch class="slide-container" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-    <SlidePanel left ref="leftPanel" :transform="leftTransform" :position="leftPosition">Left Panel</SlidePanel>
-    <div ref="main"
-      ><slot></slot>
+    <SlidePanel left ref="leftPanel" :transform="leftTransform" :position="leftPosition">
+      <slot name="left-panel"></slot>
+    </SlidePanel>
+    <div ref="main">
+      <slot></slot>
     </div>
-    <SlidePanel right ref="rightPanel" :transform="rightTransform" :position="rightPosition">Right Panel</SlidePanel>
+    <SlidePanel right ref="rightPanel" :transform="rightTransform" :position="rightPosition">
+      <slot name="right-panel"></slot>
+    </SlidePanel>
   </v-touch>
 </template>
 <script>
@@ -55,6 +59,7 @@ export default {
 
       if (Number.isNaN(transform)) transform = 0;
       const dragOffset = 100 / this.mainWidth * e.deltaX / this.count * this.overflowRatio;
+
       if (Math.abs(e.velocityX) > 0.2) {
         transform = transform + dragOffset;
       }
@@ -78,6 +83,7 @@ export default {
             currentOffset = this.leftOffset;
           }
         }
+
         const maxScroll = 100 - this.overflowRatio * 100;
         let finalOffset = currentOffset;
 
@@ -87,7 +93,6 @@ export default {
           finalOffset = 0;
         } else {
           const index = currentOffset / this.overflowRatio / 100 * this.count;
-          // TODO: may need to look into deltaX for leftPanel
           const nextIndex = e.deltaX <= 0 ? Math.floor(index) : Math.ceil(index);
           finalOffset = 100 * this.overflowRatio / this.count * nextIndex;
         }
@@ -106,7 +111,6 @@ export default {
           }
         }
 
-        console.log('panel', panel);
         gsap.fromTo(
           this.$refs[panel],
           0.4,
@@ -119,38 +123,22 @@ export default {
         );
       }
     },
-    pick(direction, callback) {
-      let prefix = '';
-      if (direction === DIRECTION_LEFT) {
-        if (this.activePanel === '' || this.activePanel === 'leftPanel') {
-          // this[`left${capitalize(key)}`] = value;
-          prefix = 'left';
-        }
-      } else if (direction === DIRECTION_RIGHT) {
-        if (this.activePanel === ''  || this.activePanel === 'rightPanel') {
-          // this[`right${capitalize(key)}`] = transform;
-          prefix = 'right';
-        }
-      }
-      if (prefix !== '' && typeof callback === 'function') callback(prefix);
-    },
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
     onSlideUpdate(e, finalOffset) {
       if (Math.abs(e.velocityX) > 0.2) {
-        this.setActivePanel();
         if (e.direction === DIRECTION_LEFT) {
           if (this.activePanel === '') {
-            this.rightPosition = finalOffset;
+            this.rightTransform = finalOffset;
           } else if (this.activePanel === 'leftPanel') {
-            this.leftPosition === finalOffset;
+            this.leftTransform = finalOffset;
           }
         } else if (e.direction === DIRECTION_RIGHT) {
           if (this.activePanel === '') {
-            this.leftPosition = finalOffset;
+            this.leftTransform = finalOffset;
           } else if (this.activePanel ==='rightPanel') {
-            this.rightPosition === finalOffset;
+            this.rightTransform = finalOffset;
           }
         }
       }
@@ -158,9 +146,9 @@ export default {
 
     onSlideComplete(e, finalOffset) {
       if (Math.abs(e.velocityX) > 0.2) {
-        this.setActivePanel();
         if (e.direction === DIRECTION_LEFT) {
           if (this.activePanel === '') {
+            this.rightTransform = finalOffset;
             this.rightPosition = finalOffset;
             this.activePanel = 'rightPanel';
           } else if (this.activePanel === 'leftPanel') {
@@ -168,10 +156,10 @@ export default {
           }
         } else if (e.direction === DIRECTION_RIGHT) {
           if (this.activePanel === '') {
+            this.leftTransform = finalOffset;
             this.leftPosition = finalOffset;
             this.activePanel = 'leftPanel'
           } else if (this.activePanel ==='rightPanel') {
-            this.rightPosition === finalOffset;
             this.resetPosition();
           }
         }
@@ -180,10 +168,12 @@ export default {
     resetPosition() {
       this.leftPosition = -this.mainWidth;
       this.rightPosition = this.mainWidth;
+      this.leftTransform = 0;
+      this.rightTransform = 0;
       this.activePanel = '';
     },
     setActivePanel() {
-      const mainWidth = this.$refs.main.getBoundingClientRect().width;
+      const mainWidth = this.containerWidth;
       const leftPanelPosition = this.$refs.leftPanel.$el.getBoundingClientRect().left;
       const rightPanelPosition = this.$refs.rightPanel.$el.getBoundingClientRect().left;
       this.activePanel = leftPanelPosition >= 0 ? 'leftPanel' : rightPanelPosition <= mainWidth ? 'rightPanel' : '';
@@ -191,7 +181,7 @@ export default {
   },
   computed: {
     overflowRatio() {
-      return this.$refs.main.scrollWidth / this.$refs.main.offsetWidth;
+      return 1;
     },
     mainWidth() {
       return this.$refs.main.scrollWidth / this.count;
@@ -212,6 +202,7 @@ export default {
     position: relative;
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
   .slide-container > * {
     width: 100%;
