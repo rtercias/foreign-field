@@ -74,8 +74,6 @@ import ActivityButton from './ActivityButton';
 import SlideContainer from './SlideContainer';
 import SlidePanel from './SlidePanel';
 
-// const DIRECTION_LEFT = 2;
-// const DIRECTION_RIGHT = 4;
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
