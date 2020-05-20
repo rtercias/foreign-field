@@ -129,7 +129,6 @@ export default {
     },
   },
   mounted() {
-    // this.resetContainerPosition();
     this.setAddress(this.address);
     this.selectedResponse = this.lastActivity || this.START;
   },
