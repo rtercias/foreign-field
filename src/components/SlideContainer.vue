@@ -12,10 +12,8 @@
   </v-touch>
 </template>
 <script>
-/* eslint-disable */ 
-import gsap, { Elastic } from 'gsap';
+import gsap from 'gsap';
 import SlidePanel from './SlidePanel';
-import capitalize from 'lodash/capitalize';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
@@ -50,7 +48,7 @@ export default {
           return;
         }
       } else if (e.direction === DIRECTION_RIGHT) {
-        if (this.activePanel === ''  || this.activePanel === 'rightPanel') {
+        if (this.activePanel === '' || this.activePanel === 'rightPanel') {
           transform = this.rightTransform;
         } else {
           return;
@@ -61,7 +59,7 @@ export default {
       const dragOffset = 100 / this.mainWidth * e.deltaX / this.count * this.overflowRatio;
 
       if (Math.abs(e.velocityX) > 0.2) {
-        transform = transform + dragOffset;
+        transform += dragOffset;
       }
 
       if (e.isFinal) {
@@ -98,14 +96,14 @@ export default {
         }
 
         let panel = '';
-  
+
         if (e.direction === DIRECTION_LEFT) {
           if (this.activePanel === '' || this.activePanel === 'leftPanel') {
             this.leftTransform = transform;
             panel = 'rightPanel';
           }
         } else if (e.direction === DIRECTION_RIGHT) {
-          if (this.activePanel === ''  || this.activePanel === 'rightPanel') {
+          if (this.activePanel === '' || this.activePanel === 'rightPanel') {
             this.rightTransform = transform;
             panel = 'leftPanel';
           }
@@ -137,7 +135,7 @@ export default {
         } else if (e.direction === DIRECTION_RIGHT) {
           if (this.activePanel === '') {
             this.leftTransform = finalOffset;
-          } else if (this.activePanel ==='rightPanel') {
+          } else if (this.activePanel === 'rightPanel') {
             this.rightTransform = finalOffset;
           }
         }
@@ -158,8 +156,8 @@ export default {
           if (this.activePanel === '') {
             this.leftTransform = finalOffset;
             this.leftPosition = finalOffset;
-            this.activePanel = 'leftPanel'
-          } else if (this.activePanel ==='rightPanel') {
+            this.activePanel = 'leftPanel';
+          } else if (this.activePanel === 'rightPanel') {
             this.resetPosition();
           }
         }
@@ -176,7 +174,8 @@ export default {
       const mainWidth = this.containerWidth;
       const leftPanelPosition = this.$refs.leftPanel.$el.getBoundingClientRect().left;
       const rightPanelPosition = this.$refs.rightPanel.$el.getBoundingClientRect().left;
-      this.activePanel = leftPanelPosition >= 0 ? 'leftPanel' : rightPanelPosition <= mainWidth ? 'rightPanel' : '';
+      const rightPanel = rightPanelPosition <= mainWidth ? 'rightPanel' : '';
+      this.activePanel = leftPanelPosition >= 0 ? 'leftPanel' : rightPanel;
     },
   },
   computed: {
