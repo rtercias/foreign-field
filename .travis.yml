@@ -24,3 +24,14 @@ env:
 
 script:
   - npm run build
+
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $ACCESSKEYID
+  secret_access_key: $SECRETACCESSKEY
+  region: "us-east-1"
+  app: "foreign-field"
+  env: "ForeignField-prod"
+  bucket_name: "elasticbeanstalk-us-east-1-639458706175"
+  on:
+    branch: master
