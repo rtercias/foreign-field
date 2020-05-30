@@ -1,155 +1,89 @@
 <template>
   <div>
-    <div class="address-info m-0 p-4 align-items-center justify-content-center">
-      <div class="text-left"><a @click="backToTerr"> Back </a></div>
-      <div class="address-title">
-        <h3>{{ address.addr1 }}</h3>
-        <h5>{{ address.city }}</h5>
+    <b-modal
+    ok-variant="outline-info"
+    @submit="handleSubmit"
+    ref="modal-note"
+    footer-class="border-top-0"
+    header-class="border-bottom-0"
+    hide-header
+    hide-footer
+    centered>
+      <div class="row align-items-center">
+        <b-col cols="8">
+          <form @submit.stop.prevent='handleSubmit'>
+            <b-form-input v-model="formText" maxlength="25" placeholder="Add a tag..."/>
+          </form>
+        </b-col>
+        <b-col cols="2">
+          <span class="tag-counter">{{ formText.length }}/25</span>
+        </b-col>
+        <b-col cols="2" class="pl-0">
+          <b-button variant="info" @click="handleSubmit">+</b-button>
+        </b-col>
       </div>
-    </div>
-      <!-- <h4>Notes</h4> -->
-    <div class="row textfield pl-0 pr-0 pt-10 pb-10 m-0">
-      <b-col cols="10">
-        <b-form-input placeholder="add a tag..."
-        maxlength="25" v-model="formText"
-        v-on:keyup.enter="submitForm()">
-        </b-form-input>
+    </b-modal>
+    <b-row class="pl-2 pr-2 pt-2 bottom-tags align-items-center">
+      <b-col class="pl-2" cols="3">
+        <span @click="showModal">add a tag</span>
       </b-col>
-      <b-col cols="2">
-        <p class="counter">{{formText.length}}/25</p>
+      <b-col cols="9">
+        <div class="tag-container">
+          <ul class="pl-0 mb-0">
+            <li v-for='t in tags' :key="t.id" class="tag-names-list">
+              <b-badge variant="info" class="ml-1 mr-1">
+                {{ t }}
+              </b-badge>
+            </li>
+          </ul>
+        </div>
       </b-col>
-      <b-alert fade v-model="showAlert" variant="danger">
-        That note already exists!
-      </b-alert>
-    </div>
-    {{ address.addr2 }}
-    <div class="notes-container">
-      <transition-group name="list">
-        <li v-for="(note, index) in notes" :key="note" class="notes-list">
-          <div class="row align-items-center">
-            <b-col cols='10'>
-              {{ note }}
-            </b-col>
-            <b-col>
-              <font-awesome-icon class="delete-button" icon="times" @click="deleteTag(index)"></font-awesome-icon>
-            </b-col>
-          </div>
-        </li>
-      </transition-group>
-    </div>
+    </b-row>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';  
-
 export default {
-  name: 'Address',
-
   data() {
     return {
-      addressId: this.$route.params.addressId,
       formText: '',
-      notes: [],
-      showAlert: false,
+      tags: [],
     };
   },
 
-  async mounted() {
-    this.fetchAddress(this.addressId);
-    /* eslint-disable */
-    //MOUNT NOTES FROM DATABASE TO this.notes
-    //this.notes = databasenotesorsomethinglikethat 
-    /* eslint-enable */
-  },
-
-  computed: {
-    ...mapGetters({
-      address: 'address/address',
-    }),
-  },
   methods: {
-    ...mapActions({
-      fetchAddress: 'address/fetchAddress',
-    }),
-    deleteTag(index) {
-      this.notes.splice(index, 1);
+    showModal() {
+      this.$refs['modal-note'].show();
     },
-    submitForm() {
+
+    handleSubmit() {
+      // The replace method gets rid of the spaces in the text field
       if (this.formText) {
-        if (!this.notes.includes(this.formText)) {
-          this.notes.unshift(this.formText);
-          /* eslint-disable */
-          //insertion to database here
-          /* eslint-enable */
-          this.formText = '';
-        } else {
-          this.showAlert = 2;
+        if (this.formText) {
+          if (!this.tags.includes(this.formText)) {
+            this.tags.unshift(this.formText.replace(/\s/g, '-'));
+            this.formText = '';
+            this.$nextTick(() => {
+              this.$refs['modal-note'].hide();
+            });
+          }
         }
       }
     },
-    backToTerr() {
-      this.$router.push({
-        path: `/territories/${this.$route.params.group}/${this.$route.params.id}`,
-      });
-    },
   },
 };
-
 </script>
 
-<style scoped>
-.address-info {
-  color: white;
-  background-color: #007bff;
-}
-h3 {
-  font-weight: 700;
-}
-h4 {
-  color: #42b983;
-  font-weight: 700;
-}
-.textfield {
-  box-shadow: 0 0 6px 0 hsla(0, 0%, 0%, 0.2);
-  padding: 20px 20px 0 20px;
-}
-input {
-  padding: 0;
-  margin-bottom: 10px;
-  border: none;
-  border-radius: 0;
-  box-shadow: none !important;
-}
-.counter {
-  color: lightgray;
-  margin-left: auto;
-  padding-top: 10px;
-}
-.notes-container {
-  overflow-x: hidden;
-  overflow-y: scroll;
-  height: 55%;
-}
-.notes-list {
-  text-align: left;
-  padding: 20px;
-  overflow-wrap: break-word;
-}
-li {
-  list-style: none;
-}
-.delete-button {
-  float: right;
-  color: rgb(201, 201, 201);
-}
-
-/* List item animation */
-.list-enter-active, .list-leave-active {
-  transition: all .3s;
-}
-.list-enter, .list-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
+<style>
+  .bottom-tags {
+    white-space: nowrap;
+    text-align: left;
+    color: #17a2b8;
+  }
+  .tag-container {
+    overflow: scroll;
+  }
+  .tag-names-list {
+    display: inline;
+  }
 </style>
