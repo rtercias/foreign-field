@@ -24,21 +24,25 @@
       </div>
     </b-modal>
     <b-row class="pl-2 pr-2 pt-2 bottom-tags align-items-center">
-      <b-col class="pl-2" cols="3">
-        <span @click="showModal">add a tag</span>
-      </b-col>
-      <b-col cols="9">
+      <b-col cols="12">
         <div class="tag-container">
-          <ul class="pl-0 mb-0">
-            <li v-for='t in tags' :key="t.id" class="tag-names-list">
-              <b-badge variant="info" class="ml-1 mr-1">
-                {{ t }}
-              </b-badge>
-            </li>
-          </ul>
+          <b-button-group size="sm">
+            <b-button
+            class="mr-1"
+            v-for="(tag, index) in tags"
+            :key="index"
+            :pressed.sync="tag.state"
+            variant="primary"
+            >
+              {{ tag.caption }}
+            </b-button>
+          </b-button-group>
         </div>
       </b-col>
     </b-row>
+    <div class="align-items-center">
+        <span @click="showModal">add a tag</span>
+      </div>
   </div>
 </template>
 
@@ -46,8 +50,13 @@
 export default {
   data() {
     return {
+      activeToggle: false,
       formText: '',
-      tags: [],
+      tags: [
+        { caption: 'daysleeper', state: false },
+        { caption: 'wife is filipina', state: false },
+        { caption: 'daysleeper', state: false },
+      ],
     };
   },
 
@@ -76,12 +85,12 @@ export default {
 
 <style>
   .bottom-tags {
-    white-space: nowrap;
+    /* white-space: nowrap; */
     text-align: left;
     color: #17a2b8;
   }
   .tag-container {
-    overflow: scroll;
+    /* overflow: scroll; */
   }
   .tag-names-list {
     display: inline;

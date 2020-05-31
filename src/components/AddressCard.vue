@@ -9,6 +9,7 @@
         {{address.city}} {{address.state}} {{address.postalCode}}<br/>
         {{address.notes}}
       </div>
+      <a v-on:click="openNotePanel">[+]</a>
     </div>
     <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
       <ActivityButton
@@ -74,16 +75,10 @@
         </font-awesome-layers>
       </b-link>
     </div>
-    <div class="col-12">
-      <Address></Address>
-    </div>
-    <div class="hidden-boi" ref="notePanel">
-      <a v-on:click="openNotePanel">[+]</a>
+    <div class="notes" ref="notePanel">
       <div class="note-bar">
-        <ul>
-          <li>note1</li>
-          <li>note2</li>
-        </ul>
+        <span v-on:click="closeNotePanel">X</span>
+        <Address></Address>
       </div>
     </div>
   </div>
@@ -202,6 +197,9 @@ export default {
     openNotePanel() {
       this.$refs.notePanel.style.height = '100%';
     },
+    closeNotePanel() {
+      this.$refs.notePanel.style.height = '0';
+    },
   },
   mounted() {
     this.resetContainerPosition();
@@ -274,14 +272,14 @@ export default {
 .v-touch-address-card {
   touch-action: pan-y;
 }
-.hidden-boi {
+.notes {
   background-color: white;
   position: absolute;
   left: 0;
   bottom: 0;
-  height: 10%;
+  height: 0;
   width: 100%;
-  transition: ease-in-out 1s;
+  transition: ease-in-out 0.5s;
 }
 .address-card {
   display: flex;
