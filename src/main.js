@@ -46,6 +46,7 @@ import {
   faEnvelope,
   faHouseUser,
   faPlayCircle,
+  faPhoneAlt,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -67,6 +68,7 @@ library.add(
   faEnvelope,
   faHouseUser,
   faPlayCircle,
+  faPhoneAlt,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

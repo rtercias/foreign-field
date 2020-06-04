@@ -2,13 +2,21 @@
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
     <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
       <div class="address col-9">
-        <h5>
-          <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
-          <em>{{address.addr2}}</em>
-        </h5>
         <div>
-          {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-          {{address.notes}}
+          <h5>
+            <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
+            <em>{{address.addr2}}</em>
+          </h5>
+          <div>
+            {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+            {{address.notes}}
+          </div>
+          <b-badge class="pml-2" variant="info" :href="lookupFastPeopleSearch" size="sm">
+            <font-awesome-layers>
+              <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+            </font-awesome-layers>
+            FPS
+          </b-badge>
         </div>
         <a v-on:click="openNotePanel"><b-button size='sm' variant="primary">...</b-button></a>
       </div>
@@ -20,8 +28,7 @@
           @button-click="updateResponse">
         </ActivityButton>
         <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
-          <font-awesome-icon icon="ellipsis-v" class="ml-0">
-          </font-awesome-icon>
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
       </div>
       <div
@@ -29,44 +36,17 @@
         ref="activityContainer"
         :style="{ '--x': transform, right: `${containerRight}px` }">
         <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
-          <font-awesome-icon icon="ellipsis-v" class="ml-0">
-          </font-awesome-icon>
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'NH' }"
-          :value="'NH'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'HOME' }"
-          :value="'HOME'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'PH' }"
-          :value="'PH'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'LW' }"
-          :value="'LW'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <ActivityButton
-          class="fa-2x"
-          :class="{ 'fa-3x': clickedResponse === 'NF' }"
-          :value="'NF'"
-          v-if="isTerritoryCheckedOut"
-          @button-click="updateResponse">
-        </ActivityButton>
+        <div class="buttons" v-if="isTerritoryCheckedOut">
+          <ActivityButton
+            v-for="(button, index) in containerButtonList"
+            :key="index"
+            class="fa-2x"
+            :value="button.value"
+            @button-click="updateResponse">
+          </ActivityButton>
+        </div>
         <b-link
           class="text-info"
           :to="`/addresses/${address.id}/history`"
@@ -88,14 +68,14 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import gsap, { Elastic } from 'gsap';
+import gsap from 'gsap';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
 import Address from './Address';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-const NUM_ALWAYS_VISIBLE_BUTTONS = 2;
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
   name: 'AddressCard',
@@ -170,7 +150,6 @@ export default {
           { '--x': this.currentOffset },
           {
             '--x': finalOffset,
-            ease: Elastic.easeOut.config(1, 0.8),
             onUpdate: () => {
               if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.2) {
                 this.containerRight = finalOffset;
@@ -214,6 +193,7 @@ export default {
       lastActivity: 'address/lastActivity',
       loading: 'auth/loading',
       territory: 'territory/territory',
+      actionButtonList: 'address/actionButtonList',
     }),
 
     mapsUrl() {
@@ -242,31 +222,25 @@ export default {
     containerWidth() {
       const styles = window.getComputedStyle(this.$refs.activityContainer);
       const width = styles.getPropertyValue('width');
-      // eslint-disable-next-line
-      console.log(width);
       return this.getPxValue(width);
     },
 
-    containerLeftButtonsWidth() {
-      const buttons = Array.from(this.$refs.activityContainer.children);
+    containerButtonList() {
+      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
+    },
 
-      // we're only interested in buttons that are always visible, so reduce to the first n
-      buttons.length = NUM_ALWAYS_VISIBLE_BUTTONS;
+    lookup411() {
+      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
+      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
+      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.411.com/address/${addr1}/${city}-${state}`;
+    },
 
-      let width = 0;
-      buttons.forEach((b) => {
-        const styles = window.getComputedStyle(b);
-        const buttonWidth = styles.getPropertyValue('width');
-        const paddingLeft = styles.getPropertyValue('padding-left');
-        const paddingRight = styles.getPropertyValue('padding-right');
-
-        width += this.getPxValue(buttonWidth) + this.getPxValue(paddingLeft) + this.getPxValue(paddingRight);
-        // width += b.clientWidth;
-      });
-
-      // eslint-disable-next-line
-      console.log('left buttons width', width);
-      return width;
+    lookupFastPeopleSearch() {
+      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
+      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
+      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
   },
 };
@@ -296,6 +270,7 @@ export default {
   transition: ease-in-out 0.5s;
 }
 .address {
+  display: flex;
   text-align: left;
 }
 .nh-text {
@@ -319,10 +294,19 @@ export default {
   border-style: solid;
   width: 100%;
   height: 100%;
+<<<<<<< HEAD
+=======
+  min-height: 50px;
+>>>>>>> master
 }
 
 .activity-container * {
   display: block;
+}
+.activity-container .buttons {
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
 }
 .static-buttons {
   display: flex;
