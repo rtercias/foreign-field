@@ -294,10 +294,7 @@ export default {
   border-style: solid;
   width: 100%;
   height: 100%;
-<<<<<<< HEAD
-=======
   min-height: 50px;
->>>>>>> master
 }
 
 .activity-container * {
