@@ -1,87 +1,89 @@
 <template>
-  <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
-    <div class="address col-9">
-      <h5>
-        <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
-        <em>{{address.addr2}}</em>
-      </h5>
-      <div>
-        {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-        {{address.notes}}
+  <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
+    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
+      <div class="address col-9">
+        <h5>
+          <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
+          <em>{{address.addr2}}</em>
+        </h5>
+        <div>
+          {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+          {{address.notes}}
+        </div>
+        <a v-on:click="openNotePanel"><b-button size='sm' variant="primary">...</b-button></a>
       </div>
-      <a v-on:click="openNotePanel">[+]</a>
-    </div>
-    <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
-      <ActivityButton
-        class="fa-2x pr-2"
-        :value="selectedResponse"
-        :next="'START'"
-        @button-click="updateResponse">
-      </ActivityButton>
-      <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
-        <font-awesome-icon icon="ellipsis-v" class="ml-0">
-        </font-awesome-icon>
-      </font-awesome-layers>
-    </div>
-    <div
-      class="activity-container pl-0 pr-2"
-      ref="activityContainer"
-      :style="{ '--x': transform, right: `${containerRight}px` }">
-      <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
-        <font-awesome-icon icon="ellipsis-v" class="ml-0">
-        </font-awesome-icon>
-      </font-awesome-layers>
-      <ActivityButton
-        class="fa-2x"
-        :class="{ 'fa-3x': clickedResponse === 'NH' }"
-        :value="'NH'"
-        v-if="isTerritoryCheckedOut"
-        @button-click="updateResponse">
-      </ActivityButton>
-      <ActivityButton
-        class="fa-2x"
-        :class="{ 'fa-3x': clickedResponse === 'HOME' }"
-        :value="'HOME'"
-        v-if="isTerritoryCheckedOut"
-        @button-click="updateResponse">
-      </ActivityButton>
-      <ActivityButton
-        class="fa-2x"
-        :class="{ 'fa-3x': clickedResponse === 'PH' }"
-        :value="'PH'"
-        v-if="isTerritoryCheckedOut"
-        @button-click="updateResponse">
-      </ActivityButton>
-      <ActivityButton
-        class="fa-2x"
-        :class="{ 'fa-3x': clickedResponse === 'LW' }"
-        :value="'LW'"
-        v-if="isTerritoryCheckedOut"
-        @button-click="updateResponse">
-      </ActivityButton>
-      <ActivityButton
-        class="fa-2x"
-        :class="{ 'fa-3x': clickedResponse === 'NF' }"
-        :value="'NF'"
-        v-if="isTerritoryCheckedOut"
-        @button-click="updateResponse">
-      </ActivityButton>
-      <b-link
-        class="text-info"
-        :to="`/addresses/${address.id}/history`"
-        @click="setAddress(address)">
-        <font-awesome-layers class="text-info fa-2x">
-          <font-awesome-icon icon="history"></font-awesome-icon>
+      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
+        <ActivityButton
+          class="fa-2x pr-2"
+          :value="selectedResponse"
+          :next="'START'"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
+          <font-awesome-icon icon="ellipsis-v" class="ml-0">
+          </font-awesome-icon>
         </font-awesome-layers>
-      </b-link>
-    </div>
-    <div class="notes" ref="notePanel">
-      <div class="note-bar">
-        <span v-on:click="closeNotePanel">X</span>
+      </div>
+      <div
+        class="activity-container pl-0 pr-2"
+        ref="activityContainer"
+        :style="{ '--x': transform, right: `${containerRight}px` }">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
+          <font-awesome-icon icon="ellipsis-v" class="ml-0">
+          </font-awesome-icon>
+        </font-awesome-layers>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'NH' }"
+          :value="'NH'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'HOME' }"
+          :value="'HOME'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'PH' }"
+          :value="'PH'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'LW' }"
+          :value="'LW'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <ActivityButton
+          class="fa-2x"
+          :class="{ 'fa-3x': clickedResponse === 'NF' }"
+          :value="'NF'"
+          v-if="isTerritoryCheckedOut"
+          @button-click="updateResponse">
+        </ActivityButton>
+        <b-link
+          class="text-info"
+          :to="`/addresses/${address.id}/history`"
+          @click="setAddress(address)">
+          <font-awesome-layers class="text-info fa-2x">
+            <font-awesome-icon icon="history"></font-awesome-icon>
+          </font-awesome-layers>
+        </b-link>
+      </div>
+      <div class="notes" ref="notePanel">
         <Address></Address>
+        <div>
+          <b-badge v-on:click="closeNotePanel" variant="danger"> X </b-badge>
+        </div>
       </div>
     </div>
-  </div>
+  </v-touch>
 </template>
 
 <script>
@@ -106,7 +108,6 @@ export default {
     return {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
-      responseText: '',
       animate: false,
       currentOffset: 0,
       containerRight: 0,
@@ -196,9 +197,11 @@ export default {
 
     openNotePanel() {
       this.$refs.notePanel.style.height = '100%';
+      this.$refs.addressCard.style.paddingBottom = '10%';
     },
     closeNotePanel() {
       this.$refs.notePanel.style.height = '0';
+      this.$refs.addressCard.style.paddingBottom = '0%';
     },
   },
   mounted() {
@@ -273,6 +276,8 @@ export default {
   touch-action: pan-y;
 }
 .notes {
+  /* display: flex;
+  flex-direction: row; */
   background-color: white;
   position: absolute;
   left: 0;
@@ -281,11 +286,14 @@ export default {
   width: 100%;
   transition: ease-in-out 0.5s;
 }
+
 .address-card {
   display: flex;
   flex-direction: row;
   overflow: hidden;
   position: relative;
+  height: 100%;
+  transition: ease-in-out 0.5s;
 }
 .address {
   text-align: left;
@@ -310,6 +318,7 @@ export default {
   border-color: #fff;
   border-style: solid;
   width: 100%;
+  height: 100%;
 }
 
 .activity-container * {
