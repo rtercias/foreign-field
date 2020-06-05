@@ -19,6 +19,9 @@
           </b-badge>
         </div>
       </div>
+      <!-- THE isContainerVisible removes col-3 so that the 'more' button
+           for the notes panel moves into this spot. Remove isContainerVisible logic
+           in order to fix this.-->
       <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
         <ActivityButton
           class="fa-2x pr-2"
@@ -55,13 +58,15 @@
           </font-awesome-layers>
         </b-link>
       </div>
-      <div class="notes" ref="notePanel">
+      <div class="row notes" ref="notePanel">
         <Address></Address>
-        <div>
-          <b-badge v-on:click="closeNotePanel" variant="danger"> X </b-badge>
+        <div class="m-auto">
+          <b-badge v-on:click="closeNotePanel" variant="secondary"> close </b-badge>
         </div>
       </div>
-      <b-button v-on:click="openNotePanel" size='sm' variant="primary">...</b-button>
+      <div class="more-option ml-auto pr-3">
+        <b-badge v-on:click="openNotePanel" variant="primary">...</b-badge>
+      </div>
     </div>
   </v-touch>
 </template>
@@ -176,7 +181,7 @@ export default {
 
     openNotePanel() {
       this.$refs.notePanel.style.height = '100%';
-      this.$refs.addressCard.style.paddingBottom = '10%';
+      // this.$refs.addressCard.style.paddingBottom = '5%';
     },
     closeNotePanel() {
       this.$refs.notePanel.style.height = '0';
@@ -248,17 +253,15 @@ export default {
 <style scoped>
 .v-touch-address-card {
   touch-action: pan-y;
+  height: 100%;
 }
 .notes {
-  /* display: flex;
-  flex-direction: row; */
   background-color: white;
   position: absolute;
   left: 0;
   bottom: 0;
   height: 0;
-  width: 100%;
-  transition: ease-in-out 0.5s;
+  transition: ease-in-out 0.3s;
 }
 
 .address-card {
@@ -266,8 +269,7 @@ export default {
   flex-direction: row;
   overflow: hidden;
   position: relative;
-  height: 100%;
-  transition: ease-in-out 0.5s;
+  transition: ease-in-out 0.3s  ;
 }
 .address {
   display: flex;
