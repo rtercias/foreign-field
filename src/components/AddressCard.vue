@@ -18,7 +18,6 @@
             FPS
           </b-badge>
         </div>
-        <a v-on:click="openNotePanel"><b-button size='sm' variant="primary">...</b-button></a>
       </div>
       <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
         <ActivityButton
@@ -62,6 +61,7 @@
           <b-badge v-on:click="closeNotePanel" variant="danger"> X </b-badge>
         </div>
       </div>
+      <b-button v-on:click="openNotePanel" size='sm' variant="primary">...</b-button>
     </div>
   </v-touch>
 </template>
