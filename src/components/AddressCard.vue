@@ -59,10 +59,14 @@
         </b-link>
       </div>
       <div class="row notes" ref="notePanel">
-        <Address></Address>
+        <Address @tagFromChild="updateTags"></Address>
         <div class="m-auto">
           <b-badge v-on:click="closeNotePanel" variant="secondary"> close </b-badge>
         </div>
+      </div>
+      <div class="tags-list">
+        <b-badge v-for="(x, i) in tags" :key="i" variant="primary">{{ x }}</b-badge>
+        <!-- <b-badge variant="primary">{{ tags }}</b-badge> -->
       </div>
       <div class="more-option ml-auto pr-3">
         <b-badge v-on:click="openNotePanel" variant="primary">...</b-badge>
@@ -99,9 +103,24 @@ export default {
       isContainerVisible: false,
       transform: '',
       clickedResponse: '',
+      tags: [],
     };
   },
   methods: {
+    /* eslint-disable */
+    updateTags(tag) {
+      let index = this.tags.indexOf(tag.caption)
+
+      if (!this.tags.includes(tag.caption)) {
+        if (tag.state === true) {
+          this.tags.push(tag.caption)
+        } 
+      }
+      else if (tag.state === false) {
+        this.tags.splice(index, 1)
+      }
+    },
+    /* eslint-enable */
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
@@ -263,7 +282,10 @@ export default {
   height: 0;
   transition: ease-in-out 0.3s;
 }
-
+.tags-list {
+  height: 20px;
+  width: 100%;
+}
 .address-card {
   display: flex;
   flex-direction: row;

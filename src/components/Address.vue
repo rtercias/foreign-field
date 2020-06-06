@@ -8,6 +8,7 @@
         v-for="(tag, index) in tags"
         :key="index"
         :pressed.sync="tag.state"
+        v-on:click="passTags"
         variant="outline-primary"
         >
           {{ tag.caption }}
@@ -23,7 +24,7 @@ export default {
     return {
       formText: '',
       tags: [
-        { caption: 'daysleeper', state: false },
+        { caption: 'daysleeper', state: true },
         { caption: 'spouse speaks Tagalog', state: false },
         { caption: '🍔', state: false },
         { caption: 'cheeseburger', state: false },
@@ -31,8 +32,14 @@ export default {
     };
   },
 
-  methods: {
+  name: 'Address',
 
+  methods: {
+    /* eslint-disable */
+    passTags(event){
+      this.tags.map(tag => this.$emit('tagFromChild', tag));
+    }
+    /* eslint-enable */
   },
 };
 </script>
