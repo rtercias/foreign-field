@@ -2,7 +2,7 @@
   <div>
     <div class="lead mt-3 font-weight-bold">{{address.addr1}} {{address.addr2}}</div>
     <div class="lead font-weight-bold">{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
-    <div class="lead mb-2 mt-4">Link to...</div>
+    <div class="lead mt-3 border-top pt-3 pb-3">Link to...</div>
     <b-list-group>
       <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
         Google Maps
