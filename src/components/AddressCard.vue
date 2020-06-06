@@ -4,19 +4,13 @@
       <div class="address col-9">
         <div>
           <h5>
-            <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
+            <b-link :to="`/addresses/${address.id}/links`">{{address.addr1}}</b-link>&nbsp;
             <em>{{address.addr2}}</em>
           </h5>
           <div>
             {{address.city}} {{address.state}} {{address.postalCode}}<br/>
             {{address.notes}}
           </div>
-          <b-badge class="pml-2" variant="info" :href="lookupFastPeopleSearch" size="sm">
-            <font-awesome-layers>
-              <font-awesome-icon icon="phone-alt"></font-awesome-icon>
-            </font-awesome-layers>
-            FPS
-          </b-badge>
         </div>
       </div>
       <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
@@ -62,6 +56,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
 import get from 'lodash/get';
+import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 
 const DIRECTION_LEFT = 2;
@@ -72,6 +67,7 @@ export default {
   name: 'AddressCard',
   props: ['address', 'territoryId'],
   components: {
+    AddressLinks,
     ActivityButton,
   },
   data() {
@@ -178,13 +174,6 @@ export default {
       actionButtonList: 'address/actionButtonList',
     }),
 
-    mapsUrl() {
-      const addr1 = this.address.addr1 || '';
-      const city = this.address.city || '';
-      const state = this.address.state_province || '';
-      return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
-    },
-
     isTerritoryCheckedOut() {
       return get(this.territory, 'status.status') === 'Checked Out';
     },
@@ -209,20 +198,6 @@ export default {
 
     containerButtonList() {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
-    },
-
-    lookup411() {
-      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
-      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
-      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
-      return `https://www.411.com/address/${addr1}/${city}-${state}`;
-    },
-
-    lookupFastPeopleSearch() {
-      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
-      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
-      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
-      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
   },
 };
