@@ -6,6 +6,7 @@ import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
 import AssignmentReport from './components/AssignmentReport';
+import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
 
 const routes = [
@@ -49,6 +50,15 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'address-links',
+    path: '/addresses/:addressId/links',
+    component: AddressLinks,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
     },
   },
   {
