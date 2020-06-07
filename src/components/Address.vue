@@ -12,6 +12,7 @@
         variant="outline-primary"
         >
           {{ tag.caption }}
+          {{ address.notes }}
         </b-button>
       </div>
     </b-button-group>
@@ -33,7 +34,7 @@ export default {
   },
 
   name: 'Address',
-
+  props: ['address'],
   methods: {
     /* eslint-disable */
     passTags(event){

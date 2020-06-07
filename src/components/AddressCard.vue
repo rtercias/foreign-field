@@ -59,13 +59,13 @@
         </b-link>
       </div>
       <div class="row notes" ref="notePanel">
-        <Address @tagFromChild="updateTags"></Address>
+        <Address :address="addressNotes" @tagFromChild="updateTags"></Address>
         <div class="m-auto">
           <b-badge v-on:click="closeNotePanel" variant="secondary"> close </b-badge>
         </div>
       </div>
       <div class="tags-list">
-        <b-badge v-for="(x, i) in tags" :key="i" variant="primary">{{ x }}</b-badge>
+        <b-badge v-for="(x, i) in addressNotes" :key="i" variant="primary">{{ x }}</b-badge>
         <!-- <b-badge variant="primary">{{ tags }}</b-badge> -->
       </div>
       <div class="more-option ml-auto pr-3">
@@ -103,21 +103,21 @@ export default {
       isContainerVisible: false,
       transform: '',
       clickedResponse: '',
-      tags: [],
+      addressNotes: [],
     };
   },
   methods: {
     /* eslint-disable */
-    updateTags(tag) {
-      let index = this.tags.indexOf(tag.caption)
+    updateTags(note) {
+      let index = this.addressNotes.indexOf(note.caption)
 
-      if (!this.tags.includes(tag.caption)) {
-        if (tag.state === true) {
-          this.tags.push(tag.caption)
+      if (!this.addressNotes.includes(note.caption)) {
+        if (note.state === true) {
+          this.addressNotes.push(note.caption)
         } 
       }
-      else if (tag.state === false) {
-        this.tags.splice(index, 1)
+      else if (note.state === false) {
+        this.addressNotes.splice(index, 1)
       }
     },
     /* eslint-enable */
