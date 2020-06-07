@@ -5,6 +5,12 @@ const SET_ADDRESS = 'SET_ADDRESS';
 const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
+const ADD_ADDRESS = 'ADD_ADDRESS';
+const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+const CHANGE_STATUS = 'CHANGE_STATUS';
+const ADD_NOTE = 'ADD_NOTE';
+const REMOVE_NOTE = 'REMOVE_NOTE';
+
 const ACTION_BUTTON_LIST = [
   {
     type: 'fa-icon',
@@ -116,6 +122,30 @@ export const address = {
           state.address.activityLogs.splice(index, 1);
         }
       }
+    },
+
+    ADD_ADDRESS(state, addr) {
+      state.address = addr;
+    },
+
+    UPDATE_ADDRESS(state, addr) {
+      state.address = addr;
+    },
+
+    CHANGE_STATUS(state, status) {
+      state.address.status = status;
+    },
+
+    ADD_NOTE(state, note) {
+      const arrNotes = (state.address.notes && state.address.notes.split(',')) || [];
+      arrNotes.push(note);
+      state.address.notes = arrNotes.join(',');
+    },
+
+    REMOVE_NOTE(state, note) {
+      const arrNotes = (state.address.notes && state.address.notes.split(',')) || [];
+      const newNotes = arrNotes.filter(n => n !== note);
+      state.address.notes = newNotes.join(',');
     },
   },
 
@@ -269,6 +299,176 @@ export const address = {
       }
 
       commit('auth/LOADING', false, { root: true });
+    },
+
+    async addAddress({ commit }, _address) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: `mutation CreateAddress($address: AddressInput!) { 
+            addAddress(address: $address) { 
+              id, addr1, addr2, city, state_province, postal_code
+            }
+          }`,
+          variables: {
+            address: _address,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const { address: addr } = response.data.data;
+        commit(ADD_ADDRESS, addr);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async updateAddress({ commit }, _address) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: `mutation UpdateAddress($address: AddressInput!) { 
+            updateAddress(address: $address) { 
+              id, addr1, addr2, city, state_province, postal_code
+            }
+          }`,
+          variables: {
+            address: _address,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const { address: addr } = response.data.data;
+        commit(UPDATE_ADDRESS, addr);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async markAsNotForeign({ commit }, addressId, userid, note) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: `mutation ChangeStatus($addressId: addressId, $status: status, $userid: userid, $note: note) { 
+            changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $note)
+          }`,
+          variables: {
+            addressId,
+            status: 'NF',
+            userid,
+            note,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const result = response.data.data;
+        commit(CHANGE_STATUS, result);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async markAsDoNotCall({ commit }, addressId, userid, note) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: `mutation ChangeStatus($addressId: addressId, $status: status, $userid: userid, $note: note) { 
+            changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $note)
+          }`,
+          variables: {
+            addressId,
+            status: 'DNC',
+            userid,
+            note,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const result = response.data.data;
+        commit(CHANGE_STATUS, result);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async addNote({ commit }, addressId, userid, note) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: `mutation AddNote($addressId: addressId, $userid: userid, $note: note) { 
+            addNote(addressId: $addressId, userid: $userid, note: $note)
+          }`,
+          variables: {
+            addressId,
+            userid,
+            note,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const result = response.data.data;
+        commit(ADD_NOTE, result);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async removeNote({ commit }, addressId, userid, note) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: `mutation RemoveNote($addressId: addressId, $userid: userid, $note: note) { 
+            removeNote(addressId: $addressId, userid: $userid, note: $note)
+          }`,
+          variables: {
+            addressId,
+            userid,
+            note,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const result = response.data.data;
+        commit(REMOVE_NOTE, result);
+        commit('auth/LOADING', false, { root: true });
+      }
     },
   },
 };
