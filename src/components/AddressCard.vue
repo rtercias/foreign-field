@@ -59,18 +59,17 @@
         </b-link>
       </div>
       <div class="row notes" ref="notePanel">
-        <Address :address="addressNotes" @tagFromChild="updateTags"></Address>
-        <div class="m-auto">
+        <Address :address="address"></Address>
+        <!-- <div class="m-auto">
           <b-badge v-on:click="closeNotePanel" variant="secondary"> close </b-badge>
-        </div>
+        </div> -->
       </div>
-      <div class="tags-list">
+      <!-- <div class="tags-list">
         <b-badge v-for="(x, i) in addressNotes" :key="i" variant="primary">{{ x }}</b-badge>
-        <!-- <b-badge variant="primary">{{ tags }}</b-badge> -->
-      </div>
-      <div class="more-option ml-auto pr-3">
+      </div> -->
+      <!-- <div class="more-option ml-auto pr-3">
         <b-badge v-on:click="openNotePanel" variant="primary">...</b-badge>
-      </div>
+      </div> -->
     </div>
   </v-touch>
 </template>
@@ -107,20 +106,6 @@ export default {
     };
   },
   methods: {
-    /* eslint-disable */
-    updateTags(note) {
-      let index = this.addressNotes.indexOf(note.caption)
-
-      if (!this.addressNotes.includes(note.caption)) {
-        if (note.state === true) {
-          this.addressNotes.push(note.caption)
-        } 
-      }
-      else if (note.state === false) {
-        this.addressNotes.splice(index, 1)
-      }
-    },
-    /* eslint-enable */
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
@@ -197,15 +182,6 @@ export default {
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
-
-    openNotePanel() {
-      this.$refs.notePanel.style.height = '100%';
-      // this.$refs.addressCard.style.paddingBottom = '5%';
-    },
-    closeNotePanel() {
-      this.$refs.notePanel.style.height = '0';
-      this.$refs.addressCard.style.paddingBottom = '0%';
-    },
   },
   mounted() {
     this.resetContainerPosition();
@@ -273,18 +249,6 @@ export default {
 .v-touch-address-card {
   touch-action: pan-y;
   height: 100%;
-}
-.notes {
-  background-color: white;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 0;
-  transition: ease-in-out 0.3s;
-}
-.tags-list {
-  height: 20px;
-  width: 100%;
 }
 .address-card {
   display: flex;
