@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div v-show="collapsed" class="tag-container">
-      <b-badge v-for="(x, i) in tagNotes" :key="i" variant="primary">{{ x }}</b-badge>
-      <b-badge v-on:click="collapsed = !collapsed" variant="primary">...</b-badge>
+    <div class="tag-container">
+      <b-badge class="mr-1" v-for="(x, i) in notes.slice(0, 2)" :key="i" variant="light">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
-        <b-button-group class="flex-wrap" size="sm">
+        <b-button-group class="pt-3 pl-2 pr-2 flex-wrap" size="sm">
           <div>
             <b-button
             class="mr-1 mb-1"
@@ -21,9 +20,14 @@
             </b-button>
           </div>
         </b-button-group>
-        <b-badge v-on:click="collapsed = !collapsed" variant="secondary">close</b-badge>
       </div>
     </transition>
+    <div class="expand-notes">
+    <b-badge v-on:click="collapsed = !collapsed" variant="light">
+      <span v-if="collapsed">...</span>
+      <span v-if="!collapsed">close</span>
+    </b-badge>
+    </div>
   </div>
 </template>
 
@@ -38,7 +42,7 @@ export default {
         { caption: '🍔', state: false },
         { caption: 'cheeseburger', state: false },
       ],
-      tagNotes: [],
+      notes: [],
     };
   },
 
@@ -46,39 +50,49 @@ export default {
   props: ['address'],
   methods: {
     dbtoArr() {
-      this.tagNotes.push(this.address.notes);
+      this.notes.push(this.address.notes);
     },
     updateTags() {
       this.tags.forEach((element) => {
-        const index = this.tagNotes.indexOf(element.caption);
+        const index = this.notes.indexOf(element.caption);
 
-        if (!this.tagNotes.includes(element.caption)) {
+        if (!this.notes.includes(element.caption)) {
           if (element.state === true) {
-            this.tagNotes.push(element.caption);
+            this.notes.splice(0, 0, element.caption);
           }
         } else if (element.state === false) {
-          this.tagNotes.splice(index, 1);
+          this.notes.splice(index, 1);
         }
       });
     },
   },
   mounted() {
     this.dbtoArr();
+    this.updateTags();
   },
 };
 </script>
 
 <style>
+  .badge-light {
+    background-color: #d9dcdf !important;
+  }
+  .expand-notes {
+    position: absolute;
+    right: 26px;
+    bottom: 10px;
+  }
+  .tag-container {
+    margin-left: 14px;
+    display: flex;
+    flex-direction: row;
+  }
   .tag-selection {
     background-color: white;
     position: absolute;
     left: 0;
     bottom: 0;
     height: 100%;
-  }
-  .bottom-tags {
-    text-align: left;
-    color: #17a2b8;
   }
   .slide-up-enter-active, .slide-up-leave-active {
     transition: all .3s ease-in-out;

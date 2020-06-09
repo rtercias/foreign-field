@@ -19,9 +19,6 @@
           </b-badge>
         </div>
       </div>
-      <!-- THE isContainerVisible removes col-3 so that the 'more' button
-           for the notes panel moves into this spot. Remove isContainerVisible logic
-           in order to fix this.-->
       <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
         <ActivityButton
           class="fa-2x pr-2"
@@ -58,18 +55,9 @@
           </font-awesome-layers>
         </b-link>
       </div>
-      <div class="row notes" ref="notePanel">
-        <Address :address="address"></Address>
-        <!-- <div class="m-auto">
-          <b-badge v-on:click="closeNotePanel" variant="secondary"> close </b-badge>
-        </div> -->
-      </div>
-      <!-- <div class="tags-list">
-        <b-badge v-for="(x, i) in addressNotes" :key="i" variant="primary">{{ x }}</b-badge>
-      </div> -->
-      <!-- <div class="more-option ml-auto pr-3">
-        <b-badge v-on:click="openNotePanel" variant="primary">...</b-badge>
-      </div> -->
+    </div>
+    <div class="row notes" ref="notePanel">
+      <Address :address="address"></Address>
     </div>
   </v-touch>
 </template>
