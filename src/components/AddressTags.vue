@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="tag-container">
-      <b-badge class="mr-1" v-for="(x, i) in notes.slice(0, 2)" :key="i" variant="light">{{ x }}</b-badge>
+      <b-badge class="mr-1" v-for="(x, i) in slicedNotes" :key="i" variant="light">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
@@ -46,11 +46,11 @@ export default {
     };
   },
 
-  name: 'Address',
+  name: 'AddressTags',
   props: ['address'],
   methods: {
     dbtoArr() {
-      this.notes.push(this.address.notes);
+      this.tags.push({ caption: this.address.notes, state: true });
     },
     updateTags() {
       this.tags.forEach((element) => {
@@ -59,9 +59,11 @@ export default {
         if (!this.notes.includes(element.caption)) {
           if (element.state === true) {
             this.notes.splice(0, 0, element.caption);
+            this.address.notes = this.notes.join(',');
           }
         } else if (element.state === false) {
           this.notes.splice(index, 1);
+          this.address.notes = this.notes.join(',');
         }
       });
     },
@@ -69,6 +71,11 @@ export default {
   mounted() {
     this.dbtoArr();
     this.updateTags();
+  },
+  computed: {
+    slicedNotes() {
+      return this.notes.slice(0, 2);
+    },
   },
 };
 </script>

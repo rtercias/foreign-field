@@ -5,7 +5,6 @@ import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
-import Address from './components/Address';
 import AssignmentReport from './components/AssignmentReport';
 import ActivityHistory from './components/ActivityHistory';
 
@@ -15,14 +14,6 @@ const routes = [
   { name: 'welcome', path: '/welcome', component: Welcome },
   {
     name: 'signout', path: '/signout', component: Signout, props: true,
-  },
-  {
-    name: 'address',
-    path: '/territories/:group/:id/address/:addressId',
-    component: Address,
-    meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
-    },
   },
   {
     name: 'group',

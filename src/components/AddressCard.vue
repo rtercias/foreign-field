@@ -57,7 +57,7 @@
       </div>
     </div>
     <div class="row notes" ref="notePanel">
-      <Address :address="address"></Address>
+      <AddressTags :address="address"></AddressTags>
     </div>
   </v-touch>
 </template>
@@ -67,7 +67,7 @@ import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
-import Address from './Address';
+import AddressTags from './AddressTags';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
@@ -78,7 +78,7 @@ export default {
   props: ['address', 'territoryId'],
   components: {
     ActivityButton,
-    Address,
+    AddressTags,
   },
   data() {
     return {
