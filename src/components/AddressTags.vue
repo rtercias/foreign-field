@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="tag-container">
-      <b-badge class="mr-1" v-for="(x, i) in slicedNotes" :key="i" variant="light">{{ x }}</b-badge>
+      <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
@@ -10,10 +10,10 @@
             <b-button
             class="mr-1 mb-1"
             size='sm'
-            v-for="(tag, index) in tags"
+            v-for="(tag, index) in availableTags"
             :key="index"
             :pressed.sync="tag.state"
-            v-on:click="updateTags"
+            @click="() => updateTag(tag)"
             variant="outline-primary"
             >
               {{ tag.caption }}
@@ -32,11 +32,13 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex';
+
 export default {
   data() {
     return {
       collapsed: true,
-      tags: [
+      availableTags: [
         { caption: 'daysleeper', state: true },
         { caption: 'spouse speaks Tagalog', state: false },
         { caption: '🍔', state: false },
@@ -49,31 +51,31 @@ export default {
   name: 'AddressTags',
   props: ['address'],
   methods: {
-    dbtoArr() {
-      this.tags.push({ caption: this.address.notes, state: true });
-    },
-    updateTags() {
-      this.tags.forEach((element) => {
-        const index = this.notes.indexOf(element.caption);
+    ...mapActions({
+      addNote: 'address/addNote',
+      removeNote: 'address/remoteNote',
+      fetchAddress: 'address/fetchAddress',
+    }),
+    updateTag(tag) {
+      const index = this.selectedTags.findIndex(t => t === tag.caption);
 
-        if (!this.notes.includes(element.caption)) {
-          if (element.state === true) {
-            this.notes.splice(0, 0, element.caption);
-            this.address.notes = this.notes.join(',');
-          }
-        } else if (element.state === false) {
-          this.notes.splice(index, 1);
-          this.address.notes = this.notes.join(',');
-        }
-      });
+      if (index !== -1 && !tag.state) {
+        this.removeNote(this.address.id, this.user.id, tag.caption);
+      } else {
+        this.addNote(this.address.id, this.user.id, tag.caption);
+      }
+
+      this.fetchAddress(this.address.id);
     },
-  },
-  mounted() {
-    this.dbtoArr();
-    this.updateTags();
   },
   computed: {
-    slicedNotes() {
+    ...mapGetters({
+      user: 'auth/user',
+    }),
+    selectedTags() {
+      return this.address.notes.split(',');
+    },
+    notesPreview() {
       return this.notes.slice(0, 2);
     },
   },
