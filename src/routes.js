@@ -8,6 +8,7 @@ import Dnc from './components/Dnc';
 import Address from './components/Address';
 import AssignmentReport from './components/AssignmentReport';
 import ActivityHistory from './components/ActivityHistory';
+import AddressMutationsTest from './components/AddressMutationsTest';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -65,6 +66,14 @@ const routes = [
     path: '/addresses/:addressId/history',
     component: ActivityHistory,
     props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
+  },
+  {
+    name: 'test',
+    path: '/test',
+    component: AddressMutationsTest,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
     },
