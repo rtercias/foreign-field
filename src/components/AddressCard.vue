@@ -9,7 +9,6 @@
           </h5>
           <div>
             {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-            {{address.notes}}
           </div>
           <b-badge class="pml-2" variant="info" :href="lookupFastPeopleSearch" size="sm">
             <font-awesome-layers>
@@ -56,9 +55,7 @@
         </b-link>
       </div>
     </div>
-    <div class="row notes" ref="notePanel">
-      <AddressTags :address="address"></AddressTags>
-    </div>
+    <AddressTags :address="address"></AddressTags>
   </v-touch>
 </template>
 

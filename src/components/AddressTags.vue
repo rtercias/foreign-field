@@ -1,7 +1,12 @@
 <template>
-  <div>
-    <div class="tag-container">
-      <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
+  <div class="address-tags w-100">
+    <div class="tagcontainerthing">
+      <div class="read-only-tags w-100 mr-2">
+        <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
+      </div>
+      <b-badge v-on:click="collapsed = !collapsed" variant="light">
+        <span v-if="collapsed">...</span>
+      </b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
@@ -23,10 +28,9 @@
       </div>
     </transition>
     <div class="expand-notes">
-    <b-badge v-on:click="collapsed = !collapsed" variant="light">
-      <span v-if="collapsed">...</span>
-      <span v-if="!collapsed">close</span>
-    </b-badge>
+      <b-badge v-on:click="collapsed = !collapsed" variant="light">
+        <span v-if="!collapsed">close</span>
+      </b-badge>
     </div>
   </div>
 </template>
@@ -43,6 +47,8 @@ export default {
         { caption: 'spouse speaks Tagalog', state: false },
         { caption: '🍔', state: false },
         { caption: 'cheeseburger', state: false },
+        { caption: 'movies', state: false },
+        { caption: 'zebras', state: false },
       ],
       notes: [],
     };
@@ -53,19 +59,20 @@ export default {
   methods: {
     ...mapActions({
       addNote: 'address/addNote',
-      removeNote: 'address/remoteNote',
+      removeNote: 'address/removeNote',
       fetchAddress: 'address/fetchAddress',
     }),
-    updateTag(tag) {
+    async updateTag(tag) {
+      // eslint-disable-next-line
+      console.log(this.user.id, this.address.id, tag.caption);
+
       const index = this.selectedTags.findIndex(t => t === tag.caption);
 
       if (index !== -1 && !tag.state) {
-        this.removeNote(this.address.id, this.user.id, tag.caption);
+        await this.removeNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
       } else {
-        this.addNote(this.address.id, this.user.id, tag.caption);
+        await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
       }
-
-      this.fetchAddress(this.address.id);
     },
   },
   computed: {
@@ -76,7 +83,7 @@ export default {
       return this.address.notes.split(',');
     },
     notesPreview() {
-      return this.notes.slice(0, 2);
+      return this.address.notes.split(',');
     },
   },
 };
@@ -86,15 +93,19 @@ export default {
   .badge-light {
     background-color: #d9dcdf !important;
   }
+  .tagcontainerthing {
+    display: flex;
+    flex-direction: row;
+  }
   .expand-notes {
     position: absolute;
     right: 26px;
     bottom: 10px;
   }
-  .tag-container {
-    margin-left: 14px;
+  .read-only-tags {
     display: flex;
     flex-direction: row;
+    overflow: hidden;
   }
   .tag-selection {
     background-color: white;
