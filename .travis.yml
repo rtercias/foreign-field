@@ -1,9 +1,9 @@
 language: node_js
 node_js:
-  - 8
+- 8
 cache:
   directories:
-    - node_modules
+  - node_modules
 env:
   VUE_APP_ROOT_API:
     secure: n9qjHLnLpIJEqnhc/7HCegLEtOuvDWQG0pycqv5BJxMWFSVVyQJOc+cYdhD4jWEzMx3t3Ss78ACHllEAG80Uz+sGHp/LjzBIfI0GjXwDt/MyeXxMRXn9bcRtl8ushAho2psThKIW9LhVbuzPnfmxEMqMuXluuAU+fxvhG+FD2q/mxNh8tpWEJ6QbSbJuciXn/covRZ2HssZE/4QAfLJv65APps7iEUoRRC7GfEwH/gpJAp9syITv3Jdk82GsBOoSvFTfexuv+Wxdzb/Ns4ozpHk2s+rb95AMN8JHEHqwczIbwXsDGYA0rLcJYEGXKGcoKl4RpjrGLbMCtgKA50VrHIUML7J4yehGSvFPlWLVUm+YgqTlWCiPgb5j4lEbUVzXwBs8trzVh0Xm2GQ7ih9dWZgBrcCN0P2W9k2HsJQl4lusRzl7ID1OCzzpq8HyX0oGYKalsmiTHGnZ2LLnfl/OkziSjLy3aMqDNlJNRteXKl+a+egQeMTx2v6GHfve0d9DGwFixkcfJsSBJM5DtjVRoQdJcCWJAeDl311XLZEE93TiBiq4d8V6bEKo6Bfata8B2OipX9y3WZGMhLCbVDna1nCJVxFXE60cREps7Jj2js+qmTusX0+tFuuBxfHvSVrMbQUolq1njaJ3I9dnOsu3xN8izHRE0cgUYq9ifMdA134=
@@ -21,19 +21,14 @@ env:
     secure: uLdvrJLVZFd2heM/73qFFh0aR6q3wrLzvASf6V+NDZA1GWiUtckCVFPmeCBj8qA4QorPfHWUR6UFmU2uJ4ZwIuNGM3A+OYduKdlZPP6EiohXD66n/o55t8+hv0kTuhMCN8iY5WQFpeuY4Y67V2f84UuvoCpG34TeYMRSq+MH4DS2mMBzWbkdYdaXN4rJz9w1bd4xpNRUVeQNyabriYWUPiik4qhcDKIOQbpZBr55pVubZy9EujgHe4sTpRekEbNjM8+KbfvqPH0VKxjTzIq/BUiohjrQT9a/msR3VYaeiC/uVWfAlUbpz3pjITQkPEMquoflXUzJS+QF2NZbkYeBECBl/oRENwL2KSYumlDjSFqRmsRwOFDoDBWdmZn1sx1u0znpfVo5vKb2e0orXpCHHgKKpbpL7Vaw3ZdzfMLjHlbh5mh33xjVadq6KIYoAoKo8DJw0GNsoZj1lKYa6x5orxvs+/VO//jLJ/K823Lg9i5KljZ7UNoJEBE2k8CP//FcK5TAlTf/fFrqjxxDH+4MeHF6kBJQq/ha0xN0rOZlKdbMj2Hp82IqIoSE3G9nCgurFdzVUDZDW+aZctx+/z/Jfgoh5XcUvnMvdYbbQtowvE/5f8QEHZp3ScA39nPA0xLojg4vAO10eCan9Jitp5PU3zNTHqr9vSOVuckS17DMRLY=
   VUE_APP_MESSAGING_SENDER_ID:
     secure: Rei08hbS36HvugzriQVFXtpFc7RDY7yonj/c4+JBZqybpVpgi2ZGco1g/BU6vlybhrq9Bbc4gXK6cwAK2WKYnQc7DDBQfcJpM0XrUqLOSrLvvG7+VwjpbF4NSMWGC7ZSWibzvJPjY/XOqEBV2IoXQOcEz8nXVa5wSpB6ihbNKX9l+RayYxb0BYoTkxcax07KpAqO7IQA6uakoK0d4rkKF1vLcIActoSH4vsfL+mcuxuEYVKQcUSZVwdmd/m48fZjXfLk6P1gOIHqqxeDJ1nVk3O0Dayag3R4yU1gKxYqW1AmN6xsVetUGn6R0+qw2iwtgkOdBr2r214n8nEZN3/+ex0tqOE4ATQmaBTzun2LQQKdHEtjeYDcW1sJBmEdLfxHHUAGGPrH2MBRQTQwf/FcjdNXx6ot6k1RnUK8fpqUfE3J3lS9yq2RoXoJOdU8A62U4Y1NsEYR7/THux8Fs6OizJPWOgUmHQ1txCV/xlnpiyoTtBee75D6rVZ9CIIxwSyWz5U9X2lwTDn12KKw70ukbl8sXYSAxKXWt8AvHX6AF9ARUumgj52Q61rJz4hpvUGtkaRahCyrHHBTRuYfX0nxCicKRhXxARVP/7J+2gNDUgbKTuxSfR8UXRuj898fxOXFC9AbXFdn9JMvsBQ3M5ZiWTBy2ilb0UdD5JrGg1lSXIE=
-
+  FIREBASE_TOKEN:
+    secure: Y5UuAhq/oO6eiLOcJCzHSkwhgtwZsBRZQXrrXlCwNzJ61W5/I8GjDuq8xhhrXhJny10ZMVv1ldSVeeDHGHwBShP2nFCIQI+/Onfb3NauV0d4APbFcK2tEmvHvj/XcA0wjv3U8B7Qbq9m/bpYsTBjhVYs64+jh4GUPu8GokAAEai1lG+6zyN+HNMNEKGecn+8V0TvQjDqaZZ7aqh4BYcTFBrgkefyf0GWNeSy1/e4rqUF8+bsdS+cylG6P/nVXGicGGW+oDUKWw9ki17Ba50L3eRKWqFisUUz2M0w5n8ZyC/udG9/bcwu0YiFsVA5qqu9r7luG25ykwCgDeZk30yZWxevSj5BQIyDhTxn07pee/US4k3Hemsw6hwbRXL3/maRAI9tcdnVjyLoiRGyLurMHEkrO/xQ3p7WHVp19wrIp/rdnUoQxX3zPfXmI/rFGlwB2Fh5HvN7zgwF/XIqqg38nLsYEqPXEioQ/oqfjrV7BInXZzRyqzqa1mzqGEx4b0Oy9C2D0dVeQjD2/iD4Wwcy47aSyA/J2deA9WOZiEOIIcrvwtZLVg17+MyeyK22eUBeYQdwsoFFCY6s5fSqSiSVAtHf97I8ARtMw+i4NoHj+sILTmXJND8Hbe4RI1cesNx6Rrcz8Kc5pNnSx3UKvjpRYQATofDqIZOVfdYi/+Plka4=
 script:
-  - npm run build
-
+- npm run build
 deploy:
-  provider: elasticbeanstalk
+  provider: firebase
   edge: true
-  access_key_id: $ACCESSKEYID
-  secret_access_key: $SECRETACCESSKEY
-  region: "us-east-1"
-  app: "foreign-field"
-  env: "ForeignField-prod"
-  bucket_name: "elasticbeanstalk-us-east-1-639458706175"
+  token:
+    secure: $FIREBASE_TOKEN
   on:
     branch: master
-    
