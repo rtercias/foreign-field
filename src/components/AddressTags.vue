@@ -43,7 +43,7 @@ export default {
     return {
       collapsed: true,
       availableTags: [
-        { caption: 'daysleeper', state: true },
+        { caption: 'daysleeper', state: false },
         { caption: 'spouse speaks Tagalog', state: false },
         { caption: '🍔', state: false },
         { caption: 'cheeseburger', state: false },
@@ -63,9 +63,6 @@ export default {
       fetchAddress: 'address/fetchAddress',
     }),
     async updateTag(tag) {
-      // eslint-disable-next-line
-      console.log(this.user.id, this.address.id, tag.caption);
-
       const index = this.selectedTags.findIndex(t => t === tag.caption);
 
       if (index !== -1 && !tag.state) {
@@ -73,6 +70,13 @@ export default {
       } else {
         await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
       }
+    },
+    loadselectedTags() {
+      this.availableTags.forEach((e) => {
+        if (this.selectedTags.includes(e.caption)) {
+          e.state = true;
+        }
+      });
     },
   },
   computed: {
@@ -85,6 +89,9 @@ export default {
     notesPreview() {
       return this.address.notes.split(',');
     },
+  },
+  mounted() {
+    this.loadselectedTags();
   },
 };
 </script>
