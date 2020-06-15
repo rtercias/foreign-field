@@ -5,6 +5,9 @@
     <div class="lead mt-3 border-top pt-3 pb-3">Link to...</div>
     <b-list-group>
       <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
+        <font-awesome-layers>
+          <font-awesome-icon icon="directions"></font-awesome-icon>
+        </font-awesome-layers>&nbsp;
         Google Maps
       </b-list-group-item>
       <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="warning" :href="lookupFastPeopleSearch">
@@ -13,8 +16,11 @@
         </font-awesome-layers>&nbsp;
         Fast People Search
       </b-list-group-item>
-      <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="lookup411" variant="success"
-        >411.com
+      <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="lookup411" variant="success">
+        <font-awesome-layers>
+          <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+        </font-awesome-layers>&nbsp;
+        411.com
       </b-list-group-item>
       <b-list-group-item
         class="lead p-4 font-weight-bold w-auto"
@@ -36,7 +42,7 @@ export default {
   ],
   async mounted() {
     await this.fetchAddress(this.addressId);
-    await this.setTerritory(this.address.territoryId);
+    await this.getTerritory(this.address.territoryId);
   },
   computed: {
     ...mapGetters({

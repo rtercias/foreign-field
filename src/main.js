@@ -44,6 +44,7 @@ import {
   faHouseUser,
   faPlayCircle,
   faPhoneAlt,
+  faDirections,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -63,6 +64,7 @@ library.add(
   faHouseUser,
   faPlayCircle,
   faPhoneAlt,
+  faDirections,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
