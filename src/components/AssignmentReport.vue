@@ -1,5 +1,5 @@
 <template>
-  <table CELLPADDING=0>
+  <table class="assignment-report">
     <thead>
       <tr><td>
         <h3 class="font-weight-bold">Territory Assignment Record (S-13)</h3>
@@ -63,9 +63,12 @@ export default {
 <style scoped>
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
-  tr {
+  .assignment-report tr {
     display: inline-block;
     vertical-align: top;
+  }
+  .assignment-report td {
+    padding: 0;
   }
   .flex {
     display: flex;
