@@ -1,5 +1,9 @@
 import axios from 'axios';
 
+export const TEST_TERRITORIES = [
+  'TEST-000',
+];
+
 const SET_TERRITORIES = 'SET_TERRITORIES';
 const RESET_TERRITORIES = 'RESET_TERRITORIES';
 const SET_LOADING = 'SET_LOADING';
