@@ -1,49 +1,32 @@
 <template>
-  <!-- <div class="assignment-report p-3"> -->
-    <!-- <h3 class="font-weight-bold">Territory Assignment Record (S-13)</h3> -->
-    <table CELLPADDING=0>
-      <thead>
-        <tr><td>
-          <h3 class="font-weight-bold">Territory Assignment Record (S-13)</h3>
-        </td></tr>
-      </thead>
-      <tbody>
-        <tr v-for="(group, groupIndex) in groupedRecords" :key="groupIndex">
-          <td>
-            <div class="flex justify-content-center">
-              <div class="box-group">
-                <div class="text-left font-weight-bold">Terr. No. {{ group[0].territory_name }}</div>
-                <div class="" v-for="(record, recordIndex) in group" :key="recordIndex">
-                  <div class="box box-main flex">
-                    <div class="box box-1">{{ record.publisher_name }}</div>
-                    <div class="row-2">
-                      <div class="box box-2">{{ record.out }}</div>
-                      <div class="box box-3">{{ record.in }}</div>
-                    </div>
+  <table CELLPADDING=0>
+    <thead>
+      <tr><td>
+        <h3 class="font-weight-bold">Territory Assignment Record (S-13)</h3>
+      </td></tr>
+    </thead>
+    <tbody>
+      <tr v-for="(group, groupIndex) in groupedRecords" :key="groupIndex">
+        <td>
+          <div class="flex justify-content-center">
+            <div class="box-group">
+              <div class="text-left font-weight-bold">Terr. No. {{ group[0].territory_name }}</div>
+              <div class="" v-for="(record, recordIndex) in group" :key="recordIndex">
+                <div class="box box-main flex">
+                  <div class="box box-1">{{ record.publisher_name }}</div>
+                  <div class="row-2">
+                    <div class="box box-2">{{ record.out }}</div>
+                    <div class="box box-3">{{ record.in }}</div>
                   </div>
                 </div>
               </div>
             </div>
-          </td>
-        </tr>
-      </tbody>
-      <tfoot></tfoot>
-    </table>
-    <!-- <div class="flex justify-content-center">
-      <div class="box-group" v-for="(group, groupIndex) in groupedRecords" :key="groupIndex">
-        <div class="text-left font-weight-bold">Terr. No. {{ group[0].territory_name }}</div>
-        <div class="" v-for="(record, recordIndex) in group" :key="recordIndex">
-          <div class="box box-main flex">
-            <div class="box box-1">{{ record.publisher_name }}</div>
-            <div class="row-2">
-              <div class="box box-2">{{ record.out }}</div>
-              <div class="box box-3">{{ record.in }}</div>
-            </div>
           </div>
-        </div>
-      </div>
-    </div> -->
-  <!-- </div> -->
+        </td>
+      </tr>
+    </tbody>
+    <tfoot></tfoot>
+  </table>
 </template>
 
 <script>
