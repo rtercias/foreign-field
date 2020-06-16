@@ -415,7 +415,7 @@ export const address = {
       }
     },
 
-    async addNote({ commit }, addressId, userid, note) {
+    async addNote({ commit }, { addressId, userid, note }) {
       commit('auth/LOADING', true, { root: true });
 
       const response = await axios({
@@ -425,7 +425,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `mutation AddNote($addressId: addressId, $userid: userid, $note: note) { 
+          query: `mutation AddNote($addressId: Int!, $userid: Int!, $note: String!) { 
             addNote(addressId: $addressId, userid: $userid, note: $note)
           }`,
           variables: {
@@ -438,12 +438,14 @@ export const address = {
 
       if (response && response.data && response.data.data) {
         const result = response.data.data;
-        commit(ADD_NOTE, result);
+        if (result) {
+          commit(ADD_NOTE, note);
+        }
         commit('auth/LOADING', false, { root: true });
       }
     },
 
-    async removeNote({ commit }, addressId, userid, note) {
+    async removeNote({ commit }, { addressId, userid, note }) {
       commit('auth/LOADING', true, { root: true });
 
       const response = await axios({
@@ -453,7 +455,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `mutation RemoveNote($addressId: addressId, $userid: userid, $note: note) { 
+          query: `mutation RemoveNote($addressId: Int!, $userid: Int!, $note: String!) { 
             removeNote(addressId: $addressId, userid: $userid, note: $note)
           }`,
           variables: {
@@ -466,7 +468,9 @@ export const address = {
 
       if (response && response.data && response.data.data) {
         const result = response.data.data;
-        commit(REMOVE_NOTE, result);
+        if (result) {
+          commit(REMOVE_NOTE, note);
+        }
         commit('auth/LOADING', false, { root: true });
       }
     },

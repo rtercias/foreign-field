@@ -9,7 +9,6 @@
           </h5>
           <div>
             {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-            {{address.notes}}
           </div>
           <b-badge class="pml-2" variant="info" :href="lookupFastPeopleSearch" size="sm">
             <font-awesome-layers>
@@ -19,9 +18,6 @@
           </b-badge>
         </div>
       </div>
-      <!-- THE isContainerVisible removes col-3 so that the 'more' button
-           for the notes panel moves into this spot. Remove isContainerVisible logic
-           in order to fix this.-->
       <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
         <ActivityButton
           class="fa-2x pr-2"
@@ -58,20 +54,8 @@
           </font-awesome-layers>
         </b-link>
       </div>
-      <div class="row notes" ref="notePanel">
-        <Address @tagFromChild="updateTags"></Address>
-        <div class="m-auto">
-          <b-badge v-on:click="closeNotePanel" variant="secondary"> close </b-badge>
-        </div>
-      </div>
-      <div class="tags-list">
-        <b-badge v-for="(x, i) in tags" :key="i" variant="primary">{{ x }}</b-badge>
-        <!-- <b-badge variant="primary">{{ tags }}</b-badge> -->
-      </div>
-      <div class="more-option ml-auto pr-3">
-        <b-badge v-on:click="openNotePanel" variant="primary">...</b-badge>
-      </div>
     </div>
+    <AddressTags :address="address"></AddressTags>
   </v-touch>
 </template>
 
@@ -80,7 +64,7 @@ import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
-import Address from './Address';
+import AddressTags from './AddressTags';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
@@ -91,7 +75,7 @@ export default {
   props: ['address', 'territoryId'],
   components: {
     ActivityButton,
-    Address,
+    AddressTags,
   },
   data() {
     return {
@@ -103,24 +87,10 @@ export default {
       isContainerVisible: false,
       transform: '',
       clickedResponse: '',
-      tags: [],
+      addressNotes: [],
     };
   },
   methods: {
-    /* eslint-disable */
-    updateTags(tag) {
-      let index = this.tags.indexOf(tag.caption)
-
-      if (!this.tags.includes(tag.caption)) {
-        if (tag.state === true) {
-          this.tags.push(tag.caption)
-        } 
-      }
-      else if (tag.state === false) {
-        this.tags.splice(index, 1)
-      }
-    },
-    /* eslint-enable */
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
@@ -197,15 +167,6 @@ export default {
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
-
-    openNotePanel() {
-      this.$refs.notePanel.style.height = '100%';
-      // this.$refs.addressCard.style.paddingBottom = '5%';
-    },
-    closeNotePanel() {
-      this.$refs.notePanel.style.height = '0';
-      this.$refs.addressCard.style.paddingBottom = '0%';
-    },
   },
   mounted() {
     this.resetContainerPosition();
@@ -273,18 +234,6 @@ export default {
 .v-touch-address-card {
   touch-action: pan-y;
   height: 100%;
-}
-.notes {
-  background-color: white;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 0;
-  transition: ease-in-out 0.3s;
-}
-.tags-list {
-  height: 20px;
-  width: 100%;
 }
 .address-card {
   display: flex;
