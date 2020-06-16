@@ -61,6 +61,9 @@ export default {
 </script>
 
 <style scoped>
+  .assignment-report {
+    margin: 3px;
+  }
   thead { display: table-header-group; }
   tfoot { display: table-footer-group; }
   .assignment-report tr {
@@ -104,5 +107,11 @@ export default {
   .box-3 {
     width: 95px;
     min-height: 28px;
+  }
+  @media print
+  {
+    .assignment-report {
+      margin: 0;
+    }
   }
 </style>
