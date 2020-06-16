@@ -45,7 +45,7 @@ const routes = [
   },
   {
     name: 'assignment-report',
-    path: '/assignment-report/:id',
+    path: '/reports/assignment-report/:id',
     component: AssignmentReport,
     props: true,
     meta: {
