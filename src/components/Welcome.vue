@@ -1,5 +1,5 @@
 <template>
-  <b-container class="dashboard lead pt-5" fluid="lg">
+  <b-container class="dashboard lead pt-5">
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field territory management</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
