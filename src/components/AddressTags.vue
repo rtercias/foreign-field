@@ -21,6 +21,11 @@
             @click="() => updateTag(tag)"
             variant="outline-primary"
             >
+            <span v-if="tag.state">
+              <b-badge variant="primary">
+                <font-awesome-icon icon="times"></font-awesome-icon>
+              </b-badge>
+            </span>
               {{ tag.caption }}
             </b-button>
           </div>
@@ -50,7 +55,6 @@ export default {
         { caption: 'movies', state: false },
         { caption: 'zebras', state: false },
       ],
-      notes: [],
     };
   },
 
@@ -77,6 +81,10 @@ export default {
           e.state = true;
         }
       });
+      // This puts whatever is in address.notes into the selectedTags
+      this.selectedTags.forEach((x) => {
+        this.availableTags.push({ caption: x, state: true });
+      });
     },
   },
   computed: {
@@ -97,6 +105,9 @@ export default {
 </script>
 
 <style>
+  .btn:focus {
+    outline: none;
+  }
   .badge-light {
     background-color: #d9dcdf !important;
   }
