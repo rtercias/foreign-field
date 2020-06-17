@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="col-sm-12 col-md-3 p-3 pt-5">
-        <Reports />
+        <Reports v-if="isAdmin || isTerritoryServant || isServiceOverseer || isGroupOverseer" />
       </div>
     </b-row>
   </b-container>
@@ -37,7 +37,7 @@ import Loading from './Loading.vue';
 import Reports from './Reports';
 
 export default {
-  name: 'Home',
+  name: 'Welcome',
   components: {
     Auth,
     Loading,
@@ -62,16 +62,16 @@ export default {
       return this.user && this.user.territories;
     },
     isAdmin() {
-      return this.user.role === 'Admin';
+      return this.user && this.user.role === 'Admin';
     },
     isTerritoryServant() {
-      return this.user.role === 'TS';
+      return this.user && this.user.role === 'TS';
     },
     isServiceOverseer() {
-      return this.user.role === 'SO';
+      return this.user && this.user.role === 'SO';
     },
     isGroupOverseer() {
-      return this.user.role === 'GO';
+      return this.user && this.user.role === 'GO';
     },
   },
 };
