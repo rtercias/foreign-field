@@ -21,6 +21,11 @@
             @click="() => updateTag(tag)"
             variant="outline-primary"
             >
+            <span v-if="tag.state">
+              <b-badge variant="primary">
+                <font-awesome-icon icon="times"></font-awesome-icon>
+              </b-badge>
+            </span>
               {{ tag.caption }}
             </b-button>
           </div>
@@ -37,6 +42,8 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import unionWith from 'lodash/unionWith';
+import map from 'lodash/map';
 
 export default {
   data() {
@@ -45,12 +52,11 @@ export default {
       availableTags: [
         { caption: 'daysleeper', state: false },
         { caption: 'spouse speaks Tagalog', state: false },
-        { caption: '🍔', state: false },
+        { caption: 'RANDOM', state: false },
         { caption: 'cheeseburger', state: false },
         { caption: 'movies', state: false },
         { caption: 'zebras', state: false },
       ],
-      notes: [],
     };
   },
 
@@ -72,6 +78,12 @@ export default {
       }
     },
     loadselectedTags() {
+      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
+      // eslint-disable-next-line
+      const finalArr = map(newArr, function (x) {
+        return { caption: x, state: false };
+      });
+
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
           e.state = true;
