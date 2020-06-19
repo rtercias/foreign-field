@@ -42,6 +42,8 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import unionWith from 'lodash/unionWith';
+import map from 'lodash/map';
 
 export default {
   data() {
@@ -50,7 +52,7 @@ export default {
       availableTags: [
         { caption: 'daysleeper', state: false },
         { caption: 'spouse speaks Tagalog', state: false },
-        { caption: '🍔', state: false },
+        { caption: 'RANDOM', state: false },
         { caption: 'cheeseburger', state: false },
         { caption: 'movies', state: false },
         { caption: 'zebras', state: false },
@@ -76,14 +78,16 @@ export default {
       }
     },
     loadselectedTags() {
+      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
+      // eslint-disable-next-line
+      const finalArr = map(newArr, function (x) {
+        return { caption: x, state: false };
+      });
+
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
           e.state = true;
         }
-      });
-      // This puts whatever is in address.notes into the selectedTags
-      this.selectedTags.forEach((x) => {
-        this.availableTags.push({ caption: x, state: true });
       });
     },
   },
@@ -105,9 +109,6 @@ export default {
 </script>
 
 <style>
-  .btn:focus {
-    outline: none;
-  }
   .badge-light {
     background-color: #d9dcdf !important;
   }
