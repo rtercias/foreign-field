@@ -1,18 +1,21 @@
 import VueRouter from 'vue-router';
 import Auth from './components/Auth';
 import Welcome from './components/Welcome';
+import Unauthorized from './components/Unauthorized';
 import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
 import Dnc from './components/Dnc';
 import AssignmentReport from './components/AssignmentReport';
+import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
-import AddressMutationsTest from './components/AddressMutationsTest';
+import AddressForm from './components/AddressForm';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
+  { name: 'unauthorized', path: '/unauthorized', component: Unauthorized },
   {
     name: 'signout', path: '/signout', component: Signout, props: true,
   },
@@ -45,11 +48,20 @@ const routes = [
   },
   {
     name: 'assignment-report',
-    path: '/assignment-report/:id',
+    path: '/reports/assignment-report/:id',
     component: AssignmentReport,
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'address-links',
+    path: '/addresses/:addressId/detail',
+    component: AddressLinks,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
     },
   },
   {
@@ -62,9 +74,19 @@ const routes = [
     },
   },
   {
-    name: 'test',
-    path: '/test',
-    component: AddressMutationsTest,
+    name: 'address-new',
+    path: '/territories/:group/:territoryId/:mode',
+    component: AddressForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'address-edit',
+    path: '/addresses/:addressId/:mode',
+    component: AddressForm,
+    props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
     },

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { store } from '..';
+import maxBy from 'lodash/maxBy';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
@@ -25,6 +26,11 @@ export const territory = {
       }
 
       return false;
+    },
+    maxSort: (state) => {
+      const addresses = state.territory && state.territory.addresses || [];
+      const max = maxBy(addresses, a => a.sort);
+      return max && max.sort || 0;
     },
   },
 
@@ -128,7 +134,7 @@ export const territory = {
                 group_code id congregationid name description type 
                 addresses {
                   id addr1 addr2 city state_province postal_code
-                  phone longitude latitude notes
+                  phone longitude latitude notes sort
                   activityLogs {
                     id checkout_id address_id value tz_offset
                     timestamp timezone publisher_id notes

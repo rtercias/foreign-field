@@ -6,14 +6,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 `git clone` this repository into your local machine
 
-### Installing
-1. `npm i`
+### Install
+1. `npm install`
 2. `npm start`
-
-## Deployment
-(Requires npm 5.6+ and node 8.6+)
-1. npm install -f
-2. npm run build
 
 ## Built With
 * [vue-js](https://github.com/vuejs/vue)

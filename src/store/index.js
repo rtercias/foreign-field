@@ -8,6 +8,7 @@ import { territories } from './modules/territories';
 import { address } from './modules/address';
 import { addresses } from './modules/addresses';
 import { publishers } from './modules/publishers';
+import { reports } from './modules/reports';
 import '../../node_modules/firebaseui/dist/firebaseui.css';
 
 Vue.use(Vuex);
@@ -25,5 +26,6 @@ export const store = new Store({
     address,
     addresses,
     publishers,
+    reports,
   },
 });
