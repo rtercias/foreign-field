@@ -10,7 +10,7 @@
         <div>{{address.city}} {{address.state_province}} {{address.postal_code}}</div>
       </div>
     </div>
-    <div class="error" v-if="error">{{error}}</div>
+    <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <b-form class="pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="canWrite">
         <div v-if="isAdmin">
@@ -40,9 +40,15 @@
           <b-form-input v-model="model.postal_code" :readonly="readOnly"></b-form-input>
         </b-form-group>
       </div>
-      <b-form-group label="Phone" class="mt-3">
-        <b-form-input type="tel" ref="phone" v-model="model.phone" :readonly="readOnly" v-mask="'+1 (###) ###-####'">
-        </b-form-input>
+      <b-form-group label="Phone" class="mt-3 position-relative">
+        <the-mask
+          class="form-control"
+          type="tel"
+          :mask="'###-###-####'"
+          :masked="false"
+          v-model="model.phone"
+          :disabled="readOnly">
+        </the-mask>
       </b-form-group>
       <div v-if="isAdmin">
         <b-form-group label="Notes" class="mt-3">
@@ -64,7 +70,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { mask } from 'vue-the-mask';
+import { TheMask } from 'vue-the-mask';
 import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 
@@ -78,9 +84,7 @@ export default {
   props: ['group', 'territoryId', 'addressId', 'mode', 'phone'],
   components: {
     Loading,
-  },
-  directives: {
-    mask,
+    TheMask,
   },
   data() {
     return {
@@ -124,17 +128,16 @@ export default {
       try {
         this.isSaving = true;
         if (this.mode === Modes.add) {
-          this.model.create_user = this.user.id;
           await this.addAddress(this.model);
           await this.getTerritory(this.territoryId);
         } else if (this.mode === Modes.edit) {
-          this.model.update_user = this.user.id;
           await this.updateAddress(this.model);
         }
         this.$router.push(this.returnRoute);
       } catch (err) {
         if (err instanceof InvalidAddressError) {
           this.error = err.message;
+          window.scrollTo(0, 0);
         } else {
           console.error(err.message);
         }

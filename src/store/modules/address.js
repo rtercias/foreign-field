@@ -1,6 +1,7 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
+import clone from 'lodash/clone';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
 const model = gql`fragment Model on Address {
@@ -38,6 +39,7 @@ const REMOVE_LOG = 'REMOVE_LOG';
 const ADD_ADDRESS = 'ADD_ADDRESS';
 const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
 const CHANGE_STATUS = 'CHANGE_STATUS';
+const TEXT_FIELDS = ['addr1', 'addr2', 'city', 'state_province', 'postal_code', 'phone'];
 const ACTION_BUTTON_LIST = [
   {
     type: 'fa-icon',
@@ -96,7 +98,9 @@ function createActivityLog(id, addressId, value, checkoutId, user) {
 }
 
 
-function validateAddress(address, isNew) {
+function validateAddress(_address, isNew) {
+  const address = clone(_address);
+
   if (isNew && address.id) {
     throw new InvalidAddressError('Address ID must be empty when adding a new address');
   }
@@ -112,6 +116,12 @@ function validateAddress(address, isNew) {
   if (!Number.isInteger(address.sort)) {
     throw new InvalidAddressError('Sort is required');
   }
+
+  for (const key of TEXT_FIELDS) {
+    address[key] = address[key] || ' ';
+  }
+
+  return address;
 }
 
 export const address = {
@@ -330,10 +340,12 @@ export const address = {
 
       commit('auth/LOADING', false, { root: true });
     },
-    async addAddress({ commit }, _address) {
+    async addAddress({ commit, rootGetters }, _address) {
       commit('auth/LOADING', true, { root: true });
 
-      validateAddress(_address, true);
+      const user = rootGetters['auth/user'];
+      const addr = validateAddress(_address, true);
+      addr.create_user = user.id;
 
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
@@ -349,7 +361,7 @@ export const address = {
           }
           ${model}`,
           variables: {
-            address: _address,
+            address: addr,
           },
         },
       });
@@ -364,10 +376,12 @@ export const address = {
       }
     },
 
-    async updateAddress({ commit }, _address) {
+    async updateAddress({ commit, rootGetters }, _address) {
       commit('auth/LOADING', true, { root: true });
 
-      validateAddress(_address);
+      const user = rootGetters['auth/user'];
+      const addr = validateAddress(_address);
+      addr.update_user = user.id;
 
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
@@ -383,7 +397,7 @@ export const address = {
           }
           ${model}`,
           variables: {
-            address: _address,
+            address: addr,
           },
         },
       });
