@@ -1,6 +1,7 @@
 import VueRouter from 'vue-router';
 import Auth from './components/Auth';
 import Welcome from './components/Welcome';
+import Unauthorized from './components/Unauthorized';
 import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
@@ -8,11 +9,13 @@ import Dnc from './components/Dnc';
 import AssignmentReport from './components/AssignmentReport';
 import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
+import AddressForm from './components/AddressForm';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
+  { name: 'unauthorized', path: '/unauthorized', component: Unauthorized },
   {
     name: 'signout', path: '/signout', component: Signout, props: true,
   },
@@ -54,7 +57,7 @@ const routes = [
   },
   {
     name: 'address-links',
-    path: '/addresses/:addressId/links',
+    path: '/addresses/:addressId/detail',
     component: AddressLinks,
     props: true,
     meta: {
@@ -65,6 +68,24 @@ const routes = [
     name: 'activity-history',
     path: '/addresses/:addressId/history',
     component: ActivityHistory,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
+  },
+  {
+    name: 'address-new',
+    path: '/territories/:group/:territoryId/:mode',
+    component: AddressForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'address-edit',
+    path: '/addresses/:addressId/:mode',
+    component: AddressForm,
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],

@@ -4,11 +4,11 @@
       <div class="address col-9">
         <div>
           <h5>
-            <b-link :to="`/addresses/${address.id}/links`">{{address.addr1}}</b-link>&nbsp;
+            <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
             <em>{{address.addr2}}</em>
           </h5>
           <div>
-            {{address.city}} {{address.state}} {{address.postalCode}}<br/>
+            {{address.city}} {{address.state_province}} {{address.postal_code}}<br/>
             {{address.notes}}
           </div>
         </div>

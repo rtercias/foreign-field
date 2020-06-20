@@ -45,6 +45,9 @@ import {
   faPlayCircle,
   faPhoneAlt,
   faDirections,
+  faEdit,
+  faChevronLeft,
+  faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -65,6 +68,9 @@ library.add(
   faPlayCircle,
   faPhoneAlt,
   faDirections,
+  faEdit,
+  faChevronLeft,
+  faPlus,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
