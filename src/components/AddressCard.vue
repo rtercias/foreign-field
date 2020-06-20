@@ -3,13 +3,15 @@
     <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
       <div class="address col-9">
         <div>
-          <h5>
+          <h5 class="mb-0">
             <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
-            <em>{{address.addr2}}</em>
           </h5>
-          <div>
-            {{address.city}} {{address.state_province}} {{address.postal_code}}<br/>
-            {{address.notes}}
+          {{address.addr2}}
+          <div class="mb-2">
+            {{address.city}} {{address.state_province}} {{address.postal_code}}
+          </div>
+          <div class="phone">
+            <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
           </div>
         </div>
       </div>
@@ -202,6 +204,10 @@ export default {
 
     containerButtonList() {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
+    },
+
+    formattedPhone() {
+      return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
   },
 };
