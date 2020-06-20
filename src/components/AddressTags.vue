@@ -1,12 +1,7 @@
 <template>
   <div class="address-tags w-100">
-    <div class="tagcontainerthing">
-      <div class="read-only-tags w-100 mr-2">
-        <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
-      </div>
-      <b-badge v-on:click="collapsed = !collapsed" variant="light">
-        <span v-if="collapsed">...</span>
-      </b-badge>
+    <div class="read-only-tags mt-1">
+      <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
@@ -15,7 +10,7 @@
             <b-button
             class="mr-1 mb-1"
             size='sm'
-            v-for="(tag, index) in availableTags"
+            v-for="(tag, index) in combinedTags"
             :key="index"
             :pressed.sync="tag.state"
             @click="() => updateTag(tag)"
@@ -37,13 +32,20 @@
         <span v-if="!collapsed">close</span>
       </b-badge>
     </div>
+    <div class="expand-notes">
+        <b-badge v-on:click="collapsed = !collapsed" variant="light">
+          <span v-if="collapsed">...</span>
+        </b-badge>
+      </div>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+/* eslint-disable */
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
+/* eslint-enable */
 
 export default {
   data() {
@@ -52,10 +54,8 @@ export default {
       availableTags: [
         { caption: 'daysleeper', state: false },
         { caption: 'spouse speaks Tagalog', state: false },
-        { caption: 'RANDOM', state: false },
-        { caption: 'cheeseburger', state: false },
-        { caption: 'movies', state: false },
-        { caption: 'zebras', state: false },
+        { caption: 'only Evening', state: false },
+        { caption: 'only Noon', state: false },
       ],
     };
   },
@@ -78,13 +78,7 @@ export default {
       }
     },
     loadselectedTags() {
-      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
-      // eslint-disable-next-line
-      const finalArr = map(newArr, function (x) {
-        return { caption: x, state: false };
-      });
-
-      this.availableTags.forEach((e) => {
+      this.combinedTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
           e.state = true;
         }
@@ -95,11 +89,20 @@ export default {
     ...mapGetters({
       user: 'auth/user',
     }),
+    combinedTags() {
+      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
+      // eslint-disable-next-line
+      const finalArr = map(newArr, function (x) {
+        return { caption: x, state: false };
+      });
+
+      return finalArr;
+    },
     selectedTags() {
       return this.address.notes.split(',');
     },
     notesPreview() {
-      return this.address.notes.split(',');
+      return this.address.notes.split(',').reverse();
     },
   },
   mounted() {
@@ -124,6 +127,8 @@ export default {
   .read-only-tags {
     display: flex;
     flex-direction: row;
+    white-space: nowrap;
+    width: 90%;
     overflow: hidden;
   }
   .tag-selection {
