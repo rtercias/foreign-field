@@ -6,6 +6,9 @@
         <header>
           <div class="w-100 row justify-content-between pl-4 pt-4">
             <div class="d-flex">
+              <b-link class="button pr-2" :to="`/territories/${group}`">
+                <font-awesome-icon icon="chevron-left"></font-awesome-icon>
+              </b-link>
               <h3>{{getCities()}}</h3>
               <h3 class="font-weight-bold m-0 mr-2 ml-2" v-if="authIsLoading">
                 <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
@@ -13,8 +16,11 @@
             </div>
             <h3 class="text-right">{{getTerritoryName()}}</h3>
           </div>
-          <div class="w-100 row justify-content-between pl-4 pb-4">
-            <b-button v-if="canAssignTerritory" class="p-0" variant="link" @click="resetNH(true)">Reset</b-button>
+          <div v-if="canAssignTerritory" class="w-100 row justify-content-between pl-4 pb-4 pt-2">
+            <b-button class="p-0" variant="link" @click="resetNH(true)">Reset</b-button>
+            <b-button class="font-weight-bold" variant="success" :to="`/territories/${group}/${id}/add`">
+              <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+            </b-button>
           </div>
         </header>
         <b-list-group class="columns">
@@ -50,7 +56,7 @@ export default {
     AddressCard,
     Loading,
   },
-
+  props: ['group', 'id'],
   async mounted() {
     await this.getTerritory(this.terrId);
     setTimeout(() => this.isLoading = false, 300);
@@ -70,6 +76,7 @@ export default {
       isAdmin: 'auth/isAdmin',
       authIsLoading: 'auth/loading',
       user: 'auth/user',
+      canWrite: 'auth/canWrite',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -148,6 +155,9 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
+.add-new {
+    font-size: 24px;
+  }
 @media (min-width: 769px) {
   .columns {
     columns: 2;

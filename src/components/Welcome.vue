@@ -1,6 +1,6 @@
 <template>
   <b-container class="dashboard lead pt-5">
-    <h3 v-if="!isAuthenticated">Welcome to Foreign Field territory management</h3>
+    <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
       <div class="col-sm-12 col-md-9">
@@ -23,7 +23,7 @@
         </div>
       </div>
       <div class="col-sm-12 col-md-3 p-3 pt-5">
-        <Reports v-if="isAdmin || isTerritoryServant || isServiceOverseer || isGroupOverseer" />
+        <Reports v-if="canWrite" />
       </div>
     </b-row>
   </b-container>
@@ -57,21 +57,10 @@ export default {
       isAuthenticated: 'auth/isAuthenticated',
       user: 'auth/user',
       loading: 'auth/loading',
+      canWrite: 'auth/canWrite',
     }),
     territories() {
       return this.user && this.user.territories;
-    },
-    isAdmin() {
-      return this.user && this.user.role === 'Admin';
-    },
-    isTerritoryServant() {
-      return this.user && this.user.role === 'TS';
-    },
-    isServiceOverseer() {
-      return this.user && this.user.role === 'SO';
-    },
-    isGroupOverseer() {
-      return this.user && this.user.role === 'GO';
     },
   },
 };

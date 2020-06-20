@@ -3,6 +3,7 @@ import firebase from 'firebase/app';
 import uniqBy from 'lodash/uniqBy';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
+import { IncompleteRegistrationError, UnauthorizedUserError } from '../exceptions/custom-errors';
 
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
@@ -37,8 +38,12 @@ export const auth = {
     user: state => state.user,
     congId: state => state.congId,
     groupCodes: state => state.groupCodes,
-    isAdmin: state => state.user && ['Admin', 'TS'].includes(state.user.role),
+    isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
+    canWrite: state => state.user && (state.user.role === 'Admin'
+      || state.user.role === 'TS'
+      || state.user.role === 'SO'
+      || state.user.role === 'GO'),
   },
 
   mutations: {
@@ -136,10 +141,8 @@ export const auth = {
           },
         });
 
-        commit(LOADING, false);
-
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject(new Error('Unauthorized'));
+          reject(new IncompleteRegistrationError('Unauthorized'));
         }
 
         const { user } = response.data.data;
@@ -149,8 +152,10 @@ export const auth = {
           commit(AUTHORIZE, user);
           resolve();
         } else {
-          reject(new Error('Unauthorized'));
+          reject(new UnauthorizedUserError('Unauthorized'));
         }
+
+        commit(LOADING, false);
       });
     },
 
@@ -168,9 +173,15 @@ export const auth = {
           await dispatch('logout');
           dispatch('forceout');
         }
-      } catch (exception) {
-        await dispatch('logout');
-        dispatch('forceout');
+      } catch (err) {
+        if (err instanceof IncompleteRegistrationError) {
+          await dispatch('logout');
+          dispatch('forceout');
+        } else if (err instanceof UnauthorizedUserError) {
+          router.replace({ name: 'unauthorized' });
+        } else {
+          console.error(err);
+        }
       }
 
       dispatch('getGroupCodes', state.congId);

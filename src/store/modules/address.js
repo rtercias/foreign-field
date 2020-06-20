@@ -1,10 +1,43 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
+import { InvalidAddressError } from '../exceptions/custom-errors';
+
+const model = gql`fragment Model on Address {
+  congregationId
+  territory_id
+  id
+  addr1
+  addr2
+  city
+  state_province
+  postal_code
+  phone
+  longitude
+  latitude
+  notes
+  status
+  sort
+  activityLogs {
+    id
+    checkout_id
+    address_id
+    value
+    tz_offset
+    timestamp
+    timezone
+    publisher_id
+    notes
+  }
+}`;
 
 const SET_ADDRESS = 'SET_ADDRESS';
 const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
+const ADD_ADDRESS = 'ADD_ADDRESS';
+const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+const CHANGE_STATUS = 'CHANGE_STATUS';
 const ACTION_BUTTON_LIST = [
   {
     type: 'fa-icon',
@@ -62,6 +95,25 @@ function createActivityLog(id, addressId, value, checkoutId, user) {
   };
 }
 
+
+function validateAddress(address, isNew) {
+  if (isNew && address.id) {
+    throw new InvalidAddressError('Address ID must be empty when adding a new address');
+  }
+  if (!address.addr1) {
+    throw new InvalidAddressError('Address 1 is required');
+  }
+  if (!address.city) {
+    throw new InvalidAddressError('City is required');
+  }
+  if (!address.state_province) {
+    throw new InvalidAddressError('State is required');
+  }
+  if (!address.sort) {
+    throw new InvalidAddressError('Sort is required');
+  }
+}
+
 export const address = {
   namespaced: true,
   state: {
@@ -117,6 +169,18 @@ export const address = {
         }
       }
     },
+
+    ADD_ADDRESS(state, addr) {
+      state.address = addr;
+    },
+
+    UPDATE_ADDRESS(state, addr) {
+      state.address = addr;
+    },
+
+    CHANGE_STATUS(state, status) {
+      state.address.status = status;
+    },
   },
 
   actions: {
@@ -134,16 +198,12 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `query Address($addressId: Int) { 
+          query: gql`query Address($addressId: Int) { 
             address(id: $addressId) { 
-              id addr1 addr2 city state_province postal_code
-              phone longitude latitude notes
-              activityLogs {
-                id checkout_id address_id value tz_offset timestamp
-                timezone publisher_id notes
-              }
+              ...Model
             }
-          }`,
+          }
+          ${model}`,
           variables: {
             addressId,
           },
@@ -175,7 +235,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation AddLog($activityLog: ActivityLogInput!) { 
+            query: gql`mutation AddLog($activityLog: ActivityLogInput!) { 
               addLog(activityLog: $activityLog) {
                 id checkout_id address_id value tz_offset timestamp
                 timezone publisher_id notes
@@ -218,7 +278,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation UpdateLog($activityLog: ActivityLogInput!) { 
+            query: gql`mutation UpdateLog($activityLog: ActivityLogInput!) { 
               updateLog(activityLog: $activityLog) {
                 id checkout_id address_id value tz_offset timestamp
                 timezone publisher_id notes
@@ -252,7 +312,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation RemoveLog($id: Int!) { 
+            query: gql`mutation RemoveLog($id: Int!) { 
               removeLog(id: $id)
             }`,
             variables: {
@@ -269,6 +329,128 @@ export const address = {
       }
 
       commit('auth/LOADING', false, { root: true });
+    },
+    async addAddress({ commit }, _address) {
+      commit('auth/LOADING', true, { root: true });
+
+      validateAddress(_address, true);
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: gql`mutation CreateAddress($address: AddressInput!) { 
+            addAddress(address: $address) { 
+              ...Model
+            }
+          }
+          ${model}`,
+          variables: {
+            address: _address,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        if (response.data.errors) {
+          throw new Error(response.data.errors[0].message);
+        }
+        const { addAddress } = response.data.data;
+        commit(ADD_ADDRESS, addAddress);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async updateAddress({ commit }, _address) {
+      commit('auth/LOADING', true, { root: true });
+
+      validateAddress(_address);
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: gql`mutation UpdateAddress($address: AddressInput!) { 
+            updateAddress(address: $address) { 
+              ...Model
+            }
+          }
+          ${model}`,
+          variables: {
+            address: _address,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const { updateAddress } = response.data.data;
+        commit(UPDATE_ADDRESS, updateAddress);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async markAsNotForeign({ commit }, addressId, userid, note) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: gql`mutation ChangeStatus($addressId: addressId, $status: status, $userid: userid, $note: note) { 
+            changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $note)
+          }`,
+          variables: {
+            addressId,
+            status: 'NF',
+            userid,
+            note,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const result = response.data.data;
+        commit(CHANGE_STATUS, result);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async markAsDoNotCall({ commit }, addressId, userid, note) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: gql`mutation ChangeStatus($addressId: addressId, $status: status, $userid: userid, $note: note) { 
+            changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $note)
+          }`,
+          variables: {
+            addressId,
+            status: 'DNC',
+            userid,
+            note,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const result = response.data.data;
+        commit(CHANGE_STATUS, result);
+        commit('auth/LOADING', false, { root: true });
+      }
     },
   },
 };
