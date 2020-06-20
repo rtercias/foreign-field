@@ -10,7 +10,7 @@
             <b-button
             class="mr-1 mb-1"
             size='sm'
-            v-for="(tag, index) in availableTags"
+            v-for="(tag, index) in combinedTags"
             :key="index"
             :pressed.sync="tag.state"
             @click="() => updateTag(tag)"
@@ -42,8 +42,10 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+/* eslint-disable */
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
+/* eslint-enable */
 
 export default {
   data() {
@@ -76,13 +78,7 @@ export default {
       }
     },
     loadselectedTags() {
-      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
-      // eslint-disable-next-line
-      const finalArr = map(newArr, function (x) {
-        return { caption: x, state: false };
-      });
-
-      this.availableTags.forEach((e) => {
+      this.combinedTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
           e.state = true;
         }
@@ -93,6 +89,15 @@ export default {
     ...mapGetters({
       user: 'auth/user',
     }),
+    combinedTags() {
+      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
+      // eslint-disable-next-line
+      const finalArr = map(newArr, function (x) {
+        return { caption: x, state: false };
+      });
+
+      return finalArr;
+    },
     selectedTags() {
       return this.address.notes.split(',');
     },
