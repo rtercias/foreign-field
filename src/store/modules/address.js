@@ -109,7 +109,7 @@ function validateAddress(address, isNew) {
   if (!address.state_province) {
     throw new InvalidAddressError('State is required');
   }
-  if (!address.sort) {
+  if (!Number.isInteger(address.sort)) {
     throw new InvalidAddressError('Sort is required');
   }
 }
