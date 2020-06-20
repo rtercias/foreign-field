@@ -3,13 +3,15 @@
     <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
       <div class="address col-9">
         <div>
-          <h5>
+          <h5 class="mb-0">
             <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
             <em>{{address.addr2}}</em>
           </h5>
-          <div>
-            {{address.city}} {{address.state_province}} {{address.postal_code}}<br/>
-            {{address.notes}}
+          <div class="mb-2">
+            {{address.city}} {{address.state_province}} {{address.postal_code}}
+          </div>
+          <div class="phone">
+            <a :href="`tel:${address.phone}`">{{address.phone}}</a>
           </div>
         </div>
       </div>
@@ -215,6 +217,9 @@ export default {
 .address {
   display: flex;
   text-align: left;
+}
+.phone {
+  font-size: 18px;
 }
 .nh-text {
   font-size: 0.5em;
