@@ -103,15 +103,15 @@ export default {
     if (this.mode === Modes.edit) {
       await this.fetchAddress(this.addressId);
       this.model = this.address;
+      if (!this.model.sort) {
+        this.model.sort = 0;
+      }
       delete this.model.activityLogs;
     } else {
       await this.getTerritory(this.territoryId);
       this.model.congregationId = this.congId;
       this.model.sort = this.maxSort + 1;
     }
-    this.$nextTick(() => {
-      this.$refs.phone.$emit('input');
-    });
   },
   methods: {
     ...mapActions({
