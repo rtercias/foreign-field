@@ -73,15 +73,16 @@ export default {
     }),
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
-      // eslint-disable-next-line
-      // console.log(this.address.id, tag.caption, 'is', tag.state, this.notesPreview)
+      const previewIndex = this.notesPreview.indexOf(tag.caption);
 
       if (index !== -1 && !tag.state) {
         await this.removeNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
-        this.notesPreview.splice(index, 1);
+        this.notesPreview.splice(previewIndex, 1);
       } else {
+        if (!this.notesPreview.includes(tag.caption)) {
+          this.notesPreview.push(tag.caption);
+        }
         await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
-        this.notesPreview.push(tag.caption);
       }
     },
     loadselectedTags() {
