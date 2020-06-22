@@ -1,7 +1,7 @@
 <template>
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
     <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
-      <div class="address col-9">
+      <div class="address col-9 text-black-50">
         <div>
           <h5 class="mb-0">
             <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
@@ -90,6 +90,7 @@ export default {
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
+      getTerritory: 'territory/getTerritory',
     }),
     resetContainerPosition() {
       const pos = -this.containerWidth;
@@ -104,6 +105,7 @@ export default {
       try {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
+        await this.getTerritory(this.territoryId);
         this.selectedResponse = this.lastActivity;
         this.clickedResponse = '';
         this.resetContainerPosition();
