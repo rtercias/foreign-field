@@ -1,7 +1,7 @@
 <template>
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
-      <div class="address col-9 text-black-50">
+    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50" ref="addressCard">
+      <div class="address col-9">
         <div>
           <h5 class="mb-0">
             <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
@@ -15,13 +15,18 @@
           </div>
         </div>
       </div>
-      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
-        <ActivityButton
-          class="fa-2x pr-2"
-          :value="selectedResponse"
-          :next="'START'"
-          @button-click="updateResponse">
-        </ActivityButton>
+      <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
+        <div :class="{ hidden: selectedResponse === 'START' }">
+          <ActivityButton
+            class="selected-response fa-2x pr-2"
+            :value="selectedResponse"
+            :next="'START'"
+            @button-click="updateResponse">
+          </ActivityButton>
+          <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
+            {{formattedLastActivity}}
+          </div>
+        </div>
         <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
@@ -57,6 +62,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
+import format from 'date-fns/format';
 import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
@@ -106,7 +112,7 @@ export default {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
         await this.getTerritory(this.territoryId);
-        this.selectedResponse = this.lastActivity;
+        this.selectedResponse = this.lastActivity && this.lastActivity.value;
         this.clickedResponse = '';
         this.resetContainerPosition();
       } catch (e) {
@@ -168,7 +174,7 @@ export default {
   mounted() {
     this.resetContainerPosition();
     this.setAddress(this.address);
-    this.selectedResponse = this.lastActivity || this.START;
+    this.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
   },
   computed: {
     ...mapGetters({
@@ -206,6 +212,10 @@ export default {
 
     formattedPhone() {
       return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+    },
+
+    formattedLastActivity() {
+      return this.lastActivity ? format(new Date(this.lastActivity.timestamp), 'E M/d') : '';
     },
   },
 };
@@ -260,6 +270,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.selected-response {
+  min-width: 70px;
+  position: relative;
+  top: 9px;
+}
+.last-activity {
+  font-size: small;
+  position: relative;
+  bottom: 2px;
 }
 
 @media print {

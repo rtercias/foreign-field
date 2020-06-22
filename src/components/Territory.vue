@@ -24,7 +24,7 @@
           <b-list-group-item
             class="col-sm-12"
             v-for="address in territory.addresses"
-            :class="isActiveAddress(address.id) ? ['bg-light', 'active'] : []"
+            :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
             v-bind:key="address.id"
             data-toggle="collapse">
             <AddressCard v-bind="{address, reset}" :territoryId="terrId"></AddressCard>
