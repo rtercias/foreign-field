@@ -1,6 +1,6 @@
 <template>
   <div class="address-tags w-100">
-    <div class="read-only-tags mt-1">
+    <div ref="prevArea" class="read-only-tags mt-1">
       <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
@@ -10,7 +10,7 @@
             <b-button
             class="mr-1 mb-1"
             size='sm'
-            v-for="(tag, index) in combinedTags"
+            v-for="(tag, index) in availableTags"
             :key="index"
             :pressed.sync="tag.state"
             @click="() => updateTag(tag)"
@@ -31,12 +31,10 @@
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">close</span>
       </b-badge>
+      <b-badge v-on:click="collapsed = !collapsed" variant="light">
+        <span v-if="collapsed">...</span>
+      </b-badge>
     </div>
-    <div class="expand-notes">
-        <b-badge v-on:click="collapsed = !collapsed" variant="light">
-          <span v-if="collapsed">...</span>
-        </b-badge>
-      </div>
   </div>
 </template>
 
@@ -56,7 +54,12 @@ export default {
         { caption: 'spouse speaks Tagalog', state: false },
         { caption: 'only Evening', state: false },
         { caption: 'only Noon', state: false },
+        { caption: 'RANDOM', state: false },
+        { caption: 'cheeseburger', state: false },
+        { caption: 'movies', state: false },
+        { caption: 'zebras', state: false },
       ],
+      notesPreview: this.address.notes.split(','),
     };
   },
 
@@ -70,15 +73,19 @@ export default {
     }),
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
+      // eslint-disable-next-line
+      // console.log(this.address.id, tag.caption, 'is', tag.state, this.notesPreview)
 
       if (index !== -1 && !tag.state) {
         await this.removeNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
+        this.notePrev2.splice(index, 1);
       } else {
         await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
+        this.notesPreview.push(tag.caption);
       }
     },
     loadselectedTags() {
-      this.combinedTags.forEach((e) => {
+      this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
           e.state = true;
         }
@@ -89,20 +96,8 @@ export default {
     ...mapGetters({
       user: 'auth/user',
     }),
-    combinedTags() {
-      const newArr = unionWith(this.selectedTags, map(this.availableTags, 'caption'));
-      // eslint-disable-next-line
-      const finalArr = map(newArr, function (x) {
-        return { caption: x, state: false };
-      });
-
-      return finalArr;
-    },
     selectedTags() {
       return this.address.notes.split(',');
-    },
-    notesPreview() {
-      return this.address.notes.split(',').reverse();
     },
   },
   mounted() {
