@@ -78,7 +78,7 @@ export default {
 
       if (index !== -1 && !tag.state) {
         await this.removeNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
-        this.notePrev2.splice(index, 1);
+        this.notesPreview.splice(index, 1);
       } else {
         await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
         this.notesPreview.push(tag.caption);
