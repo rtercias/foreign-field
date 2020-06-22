@@ -39,7 +39,7 @@ import ActivityButton from './ActivityButton';
 
 export default {
   name: 'ActivityHistory',
-  props: ['group', 'id', 'addressId'],
+  props: ['group', 'territoryId', 'addressId'],
   components: {
     Loading,
     BIconPlus,
@@ -55,6 +55,7 @@ export default {
   },
   mounted() {
     this.fetch();
+    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
   },
   computed: {
     ...mapGetters({
@@ -78,6 +79,7 @@ export default {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
       fetchPublishers: 'publishers/fetchPublishers',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     async fetch() {
       await this.fetchPublishers(this.congId);

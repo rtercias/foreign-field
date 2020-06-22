@@ -1,14 +1,11 @@
 <template>
   <div class="address-links">
     <div class="address-header justify-content-around align-items-center pt-3 pb-3">
-      <b-link class="button pl-4" :to="`/territories/${groupCode}/${territoryId}`">
-        <font-awesome-icon icon="chevron-left"></font-awesome-icon>
-      </b-link>
-      <div class="lead font-weight-bold w-100">
+      <div class="lead font-weight-bold w-100 pl-5">
         <div>{{address.addr1}} {{address.addr2}}</div>
         <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
       </div>
-      <b-link class="pr-4" :to="`/addresses/${address.id}/edit`">
+      <b-link class="pr-4" :to="`/territories/${group}/${territoryId}/addresses/${address.id}/edit`">
         <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
       </b-link>
     </div>
@@ -28,7 +25,7 @@
       </b-list-group-item>
       <b-list-group-item
         class="lead p-4 font-weight-bold w-auto"
-        :to="`/territories/${groupCode}/${territoryId}`"
+        :to="`/territories/${group}/${territoryId}`"
         variant="light">
         Cancel
       </b-list-group-item>
@@ -42,24 +39,15 @@ import get from 'lodash/get';
 
 export default {
   name: 'AddressLinks',
-  props: [
-    'addressId',
-  ],
+  props: ['addressId', 'group', 'territoryId'],
   async mounted() {
+    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
     await this.fetchAddress(this.addressId);
-    await this.getTerritory(this.address.territory_id);
   },
   computed: {
     ...mapGetters({
       address: 'address/address',
-      territory: 'territory/territory',
     }),
-    groupCode() {
-      return this.territory && this.territory.group_code;
-    },
-    territoryId() {
-      return this.territory.id;
-    },
     mapsUrl() {
       const addr1 = this.address.addr1 || '';
       const city = this.address.city || '';
@@ -82,7 +70,7 @@ export default {
   methods: {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
-      getTerritory: 'territory/getTerritory',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
   },
 };
