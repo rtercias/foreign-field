@@ -13,7 +13,7 @@
             v-for="(tag, index) in availableTags"
             :key="index"
             :pressed.sync="tag.state"
-            @click="() => updateTag(tag)"
+            @click="() => updatePreview(tag)"
             variant="outline-primary"
             >
             <span v-if="tag.state">
@@ -71,17 +71,23 @@ export default {
       removeNote: 'address/removeNote',
       fetchAddress: 'address/fetchAddress',
     }),
+    updatePreview(t) {
+      const previewIndex = this.notesPreview.indexOf(t.caption);
+
+      if (!this.notesPreview.includes(t.caption) && t.state) {
+        this.notesPreview.push(t.caption);
+        this.addNote({ addressId: this.address.id, userid: this.user.id, note: t.caption });
+      } else {
+        this.notesPreview.splice(previewIndex, 1);
+        this.removeNote({ addressId: this.address.id, userid: this.user.id, note: t.caption });
+      }
+    },
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
-      const previewIndex = this.notesPreview.indexOf(tag.caption);
 
       if (index !== -1 && !tag.state) {
         await this.removeNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
-        this.notesPreview.splice(previewIndex, 1);
       } else {
-        if (!this.notesPreview.includes(tag.caption)) {
-          this.notesPreview.push(tag.caption);
-        }
         await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
       }
     },
