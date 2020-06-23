@@ -12,10 +12,8 @@
             <div v-else>
               <span>Territories I have checked out:</span>
               <ul class="d-flex flex-column">
-                <li class="pt-3 ml-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
-                  <a :href="url(terr)">{{terr.name}} ({{terr.city}})</a>
-                  <div>Checked out on {{terr.status && checkoutDate(terr.status.date)}}</div>
-                  <hr/>
+                <li class="pt-3 m-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
+                  <MyTerritory :territory="terr"></MyTerritory>
                 </li>
               </ul>
             </div>
@@ -31,10 +29,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import format from 'date-fns/format';
 import Auth from './Auth';
 import Loading from './Loading.vue';
 import Reports from './Reports';
+import MyTerritory from './MyTerritory';
 
 export default {
   name: 'Welcome',
@@ -42,15 +40,7 @@ export default {
     Auth,
     Loading,
     Reports,
-  },
-  methods: {
-    checkoutDate(date) {
-      return format(new Date(date), 'MM/dd/yyyy');
-    },
-
-    url(terr) {
-      return `/territories/${terr.group_code}/${terr.id}`;
-    },
+    MyTerritory,
   },
   computed: {
     ...mapGetters({

@@ -115,10 +115,12 @@ export default {
     ...mapActions({
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
   },
 
   mounted() {
+    this.setLeftNavRoute('/');
     this.fetch();
   },
 };
