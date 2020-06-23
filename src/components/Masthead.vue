@@ -1,6 +1,9 @@
 <template>
   <div class="lead">
     <b-navbar type="dark" variant="primary" toggleable fill>
+      <b-link class="button text-white-50" :to="leftNavRoute">
+        <font-awesome-icon icon="chevron-left" v-show="showLeftNav"></font-awesome-icon>
+      </b-link>
       <b-navbar-toggle target="nav_dropdown_collapse"></b-navbar-toggle>
       <b-collapse is-nav id="nav_dropdown_collapse">
         <b-navbar-nav>
@@ -91,12 +94,16 @@ export default {
       congId: 'auth/congId',
       terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
+      leftNavRoute: 'auth/mastheadLeftNavRoute',
     }),
     checkPermission() {
       return this.user && this.permissions.territories.includes(this.user.role);
     },
     canViewDNC() {
       return this.user && ['Admin', 'TS', 'GO', 'SO', 'RP', 'PUB'].includes(this.user.role);
+    },
+    showLeftNav() {
+      return this.$route.name === 'home' ? false : !!this.leftNavRoute;
     },
   },
 };
