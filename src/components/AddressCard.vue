@@ -25,9 +25,11 @@
             :next="'START'"
             @button-click="confirmClearStatus">
           </ActivityButton>
-          <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
-            {{formattedLastActivity}}
-          </div>
+          <a @click="confirmClearStatus">
+            <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
+              {{formattedSelectedResponseTS}}
+            </div>
+          </a>
         </div>
         <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
@@ -88,6 +90,7 @@ export default {
     return {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
+      selectedResponseTS: '',
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -124,8 +127,13 @@ export default {
         // do nothing
       }
     },
-    async updateResponse(value) {
+    async updateResponse(_value) {
+      let value = _value;
       if (this.selectedResponse === 'START' && value === 'START') return;
+
+      if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
 
       this.clickedResponse = value;
 
@@ -134,6 +142,7 @@ export default {
         await this.fetchAddress(this.address.id);
         await this.getTerritory(this.territoryId);
         this.selectedResponse = this.lastActivity && this.lastActivity.value;
+        this.selectedResponseTS = this.lastActivity && this.lastActivity.timestamp;
         this.clickedResponse = '';
         this.resetContainerPosition();
       } catch (e) {
@@ -165,7 +174,7 @@ export default {
 
         gsap.fromTo(
           this.$refs.activityContainer,
-          0,
+          0.4,
           { '--x': this.currentOffset },
           {
             '--x': finalOffset,
@@ -207,6 +216,7 @@ export default {
     this.resetContainerPosition();
     this.setAddress(this.address);
     this.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
+    this.selectedResponseTS = this.lastActivity && this.lastActivity.timestamp || '';
   },
   computed: {
     ...mapGetters({
@@ -246,8 +256,8 @@ export default {
       return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
 
-    formattedLastActivity() {
-      return this.lastActivity ? format(new Date(this.lastActivity.timestamp), 'E M/d') : '';
+    formattedSelectedResponseTS() {
+      return this.selectedResponseTS && format(new Date(this.selectedResponseTS), 'E M/d') || '';
     },
   },
 };
@@ -261,6 +271,7 @@ export default {
   flex-direction: row;
   overflow: hidden;
   position: relative;
+  min-height: 104px;
 }
 .address {
   display: flex;
