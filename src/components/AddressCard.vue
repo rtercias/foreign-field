@@ -21,7 +21,7 @@
             class="selected-response fa-2x pr-2"
             :value="selectedResponse"
             :next="'START'"
-            @button-click="updateResponse">
+            @button-click="confirmClearStatus">
           </ActivityButton>
           <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
             {{formattedLastActivity}}
@@ -102,6 +102,20 @@ export default {
       const pos = -this.containerWidth;
       this.containerRight = pos;
       this.isContainerVisible = false;
+    },
+    async confirmClearStatus() {
+      try {
+        const value = await this.$bvModal.msgBoxConfirm('Clear the address status?', {
+          title: `${this.address.addr1} ${this.address.addr2}`,
+          centered: true,
+        });
+
+        if (value) {
+          this.updateResponse();
+        }
+      } catch (err) {
+        // do nothing
+      }
     },
     async updateResponse(value) {
       if (this.selectedResponse === 'START' && value === 'START') return;
