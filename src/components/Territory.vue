@@ -24,6 +24,7 @@
           <b-list-group-item
             class="col-sm-12"
             v-for="address in territory.addresses"
+            :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
             v-bind:key="address.id"
             data-toggle="collapse">
             <AddressCard v-bind="{address, reset}" :territoryId="terrId" :group="group"></AddressCard>
@@ -75,6 +76,7 @@ export default {
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
+      lastActivity: 'territory/lastActivity',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -118,6 +120,11 @@ export default {
         this.isLoading = false;
       }
     },
+
+    isActiveAddress(addressId) {
+      return addressId === this.lastActivity.address_id;
+    },
+
   },
   watch: {
     user() {

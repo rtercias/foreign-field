@@ -94,7 +94,7 @@ export default {
       return format(new Date(timestamp), 'hh:mm a');
     },
     friendlyDate(timestamp) {
-      return new Date(timestamp).toLocaleDateString();
+      return format(new Date(timestamp), 'E P');
     },
     logsGroupedByDate() {
       const group = groupBy(this.activityLogs, log => this.friendlyDate(log.timestamp));
