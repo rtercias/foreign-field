@@ -140,10 +140,10 @@ export const address = {
       const activity = state.address && state.address.activityLogs;
       if (activity) {
         const current = orderBy(activity, a => (new Date(a.timestamp)), 'desc')[0];
-        return current && current.value;
+        return current;
       }
 
-      return null;
+      return { value: 'START', timestamp: '' };
     },
 
     checkoutInfo: (state, getters, rootState, rootGetters) => {

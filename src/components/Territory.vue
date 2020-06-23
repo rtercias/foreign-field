@@ -15,7 +15,7 @@
           </div>
           <div v-if="canAssignTerritory" class="w-100 row justify-content-between pl-4 pb-4 pt-2">
             <b-button class="p-0" variant="link" @click="resetNH(true)">Reset</b-button>
-            <b-button class="font-weight-bold" variant="success" :to="`/territories/${group}/${id}/add`">
+            <b-button class="font-weight-bold" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
               <font-awesome-icon icon="plus"></font-awesome-icon> New Address
             </b-button>
           </div>
@@ -24,9 +24,10 @@
           <b-list-group-item
             class="col-sm-12"
             v-for="address in territory.addresses"
+            :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
             v-bind:key="address.id"
             data-toggle="collapse">
-            <AddressCard v-bind="{address, reset}" :territoryId="terrId"></AddressCard>
+            <AddressCard v-bind="{address, reset}" :territoryId="terrId" :group="group"></AddressCard>
           </b-list-group-item>
         </b-list-group>
       <!-- </div>
@@ -55,6 +56,7 @@ export default {
   },
   props: ['group', 'id'],
   async mounted() {
+    this.setLeftNavRoute(`/territories/${this.group}`);
     await this.getTerritory(this.terrId);
     setTimeout(() => this.isLoading = false, 300);
   },
@@ -74,6 +76,7 @@ export default {
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
+      lastActivity: 'territory/lastActivity',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -90,6 +93,7 @@ export default {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
 
     getTerritoryName() {
@@ -116,6 +120,11 @@ export default {
         this.isLoading = false;
       }
     },
+
+    isActiveAddress(addressId) {
+      return addressId === this.lastActivity.address_id;
+    },
+
   },
   watch: {
     user() {

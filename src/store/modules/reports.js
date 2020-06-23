@@ -18,8 +18,6 @@ export const reports = {
   },
   actions: {
     async fetchAssignmentRecords({ commit }, congId) {
-      // eslint-disable-next-line
-      console.log('congId', congId);
       if (!congId) {
         console.error('congId is required');
         return;

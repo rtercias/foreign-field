@@ -1,5 +1,6 @@
 import axios from 'axios';
 import firebase from 'firebase/app';
+import gql from 'graphql-tag';
 import uniqBy from 'lodash/uniqBy';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
@@ -11,6 +12,7 @@ const FORCEOUT = 'FORCEOUT';
 const SET_GROUP_CODES = 'SET_GROUP_CODES';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
+const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
 
 function initialState() {
   return {
@@ -23,6 +25,7 @@ function initialState() {
     congId: 0,
     groupCodes: [],
     loading: false,
+    mastheadLeftNavRoute: '/',
   };
 }
 
@@ -44,6 +47,7 @@ export const auth = {
       || state.user.role === 'TS'
       || state.user.role === 'SO'
       || state.user.role === 'GO'),
+    mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
   },
 
   mutations: {
@@ -83,6 +87,10 @@ export const auth = {
     LOADING(state, value) {
       state.loading = value;
     },
+
+    MASTHEAD_LEFT_NAV_ROUTE(state, value) {
+      state.mastheadLeftNavRoute = value;
+    },
   },
 
   actions: {
@@ -111,7 +119,7 @@ export const auth = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `query Publisher($username: String) {
+            query: gql`query Publisher($username: String) {
               user (username: $username) {
                 id 
                 username
@@ -131,6 +139,18 @@ export const auth = {
                   status {
                     status
                     date
+                  }
+                  addresses {
+                    addr1
+                    addr2
+                    city
+                    state_province
+                    postal_code
+                    activityLogs {
+                      publisher_id
+                      value
+                      timestamp
+                    }
                   }
                 }
               }
@@ -195,7 +215,7 @@ export const auth = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `{ territories (congId: ${congId}) { group_code }}`,
+          query: gql`{ territories (congId: ${congId}) { group_code }}`,
         },
       });
 
@@ -223,6 +243,10 @@ export const auth = {
           }
         }
       });
+    },
+
+    setLeftNavRoute({ commit }, value) {
+      commit(MASTHEAD_LEFT_NAV_ROUTE, value);
     },
   },
 };

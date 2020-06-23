@@ -1,10 +1,12 @@
 <template>
   <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
+    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50" ref="addressCard">
       <div class="address col-9">
         <div>
           <h5 class="mb-0">
-            <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
+            <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+              {{address.addr1}}
+            </b-link>&nbsp;
           </h5>
           {{address.addr2}}
           <div class="mb-2">
@@ -15,22 +17,33 @@
           </div>
         </div>
       </div>
-      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
-        <ActivityButton
-          class="fa-2x pr-2"
-          :value="selectedResponse"
-          :next="'START'"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
+      <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
+        <div :class="{ hidden: selectedResponse === 'START' }">
+          <ActivityButton
+            class="selected-response fa-2x pr-2"
+            :value="selectedResponse"
+            :next="'START'"
+            @button-click="confirmClearStatus">
+          </ActivityButton>
+          <a @click="confirmClearStatus">
+            <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
+              {{formattedSelectedResponseTS}}
+            </div>
+          </a>
+        </div>
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
       </div>
       <div
         class="activity-container pl-0 pr-2"
         ref="activityContainer"
-        :style="{ '--x': transform, right: `${containerRight}px` }">
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
+        :style="{
+          '--x': transform,
+          right: `${containerRight}px`,
+          transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
+        }">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
         <div class="buttons" v-if="isTerritoryCheckedOut">
@@ -44,7 +57,7 @@
         </div>
         <b-link
           class="text-info"
-          :to="`/addresses/${address.id}/history`"
+          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
           @click="setAddress(address)">
           <font-awesome-layers class="text-info fa-2x">
             <font-awesome-icon icon="history"></font-awesome-icon>
@@ -59,6 +72,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
+import format from 'date-fns/format';
 import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
@@ -70,7 +84,7 @@ const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId'],
+  props: ['address', 'territoryId', 'group'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -80,6 +94,8 @@ export default {
     return {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
+      selectedResponseTS: '',
+      responseText: '',
       animate: false,
       currentOffset: 0,
       containerRight: 0,
@@ -87,6 +103,7 @@ export default {
       transform: '',
       clickedResponse: '',
       addressNotes: [],
+      clickedToOpen: false,
     };
   },
   methods: {
@@ -94,21 +111,43 @@ export default {
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
+      getTerritory: 'territory/getTerritory',
     }),
     resetContainerPosition() {
       const pos = -this.containerWidth;
       this.containerRight = pos;
       this.isContainerVisible = false;
     },
-    async updateResponse(value) {
+    async confirmClearStatus() {
+      try {
+        const value = await this.$bvModal.msgBoxConfirm('Clear the address status?', {
+          title: `${this.address.addr1} ${this.address.addr2}`,
+          centered: true,
+        });
+
+        if (value) {
+          this.updateResponse();
+        }
+      } catch (err) {
+        // do nothing
+      }
+    },
+    async updateResponse(_value) {
+      let value = _value;
       if (this.selectedResponse === 'START' && value === 'START') return;
+
+      if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
 
       this.clickedResponse = value;
 
       try {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
-        this.selectedResponse = this.lastActivity;
+        await this.getTerritory(this.territoryId);
+        this.selectedResponse = this.lastActivity && this.lastActivity.value;
+        this.selectedResponseTS = this.lastActivity && this.lastActivity.timestamp;
         this.clickedResponse = '';
         this.resetContainerPosition();
       } catch (e) {
@@ -116,6 +155,7 @@ export default {
       }
     },
     slide(e) {
+      this.clickedToOpen = false;
       if (Number.isNaN(this.transform)) this.transform = 0;
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
       if (Math.abs(e.velocityX) > 0.2) {
@@ -166,11 +206,22 @@ export default {
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
+
+    openActivityContainer() {
+      this.clickedToOpen = true;
+      if (this.isContainerVisible) {
+        this.resetContainerPosition();
+      } else {
+        this.containerRight = 0;
+        this.isContainerVisible = true;
+      }
+    },
   },
   mounted() {
     this.resetContainerPosition();
     this.setAddress(this.address);
-    this.selectedResponse = this.lastActivity || this.START;
+    this.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
+    this.selectedResponseTS = this.lastActivity && this.lastActivity.timestamp || '';
   },
   computed: {
     ...mapGetters({
@@ -209,6 +260,10 @@ export default {
     formattedPhone() {
       return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
+
+    formattedSelectedResponseTS() {
+      return this.selectedResponseTS && format(new Date(this.selectedResponseTS), 'E M/d') || '';
+    },
   },
 };
 </script>
@@ -223,6 +278,7 @@ export default {
   overflow: hidden;
   position: relative;
   transition: ease-in-out 0.3s  ;
+  min-height: 104px;
 }
 .address {
   display: flex;
@@ -264,6 +320,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.selected-response {
+  min-width: 70px;
+  position: relative;
+  top: 9px;
+}
+.last-activity {
+  font-size: small;
+  position: relative;
+  bottom: 2px;
 }
 
 @media print {
