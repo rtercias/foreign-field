@@ -53,8 +53,9 @@ export const territory = {
     SET_TERRITORY(state, terr) {
       state.territory = terr;
     },
-    GET_TERRITORY_FAIL(state, exception) { /* eslint-disable-line no-unused-vars */
-      // console.log(GET_TERRITORY_FAIL, exception);
+    GET_TERRITORY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(GET_TERRITORY_FAIL, exception);
     },
     RESET_TERRITORY(state) {
       state.territory = {};
