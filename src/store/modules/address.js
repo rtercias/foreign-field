@@ -140,7 +140,7 @@ export const address = {
         return current;
       }
 
-      return null;
+      return { value: 'START', timestamp: '' };
     },
 
     checkoutInfo: (state, getters, rootState, rootGetters) => {
