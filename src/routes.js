@@ -57,7 +57,7 @@ const routes = [
   },
   {
     name: 'address-links',
-    path: '/addresses/:addressId/detail',
+    path: '/territories/:group/:territoryId/addresses/:addressId/detail',
     component: AddressLinks,
     props: true,
     meta: {
@@ -66,7 +66,7 @@ const routes = [
   },
   {
     name: 'activity-history',
-    path: '/addresses/:addressId/history',
+    path: '/territories/:group/:territoryId/addresses/:addressId/history',
     component: ActivityHistory,
     props: true,
     meta: {
@@ -75,7 +75,7 @@ const routes = [
   },
   {
     name: 'address-new',
-    path: '/territories/:group/:territoryId/:mode',
+    path: '/territories/:group/:territoryId/addresses/:mode',
     component: AddressForm,
     props: true,
     meta: {
@@ -84,7 +84,7 @@ const routes = [
   },
   {
     name: 'address-edit',
-    path: '/addresses/:addressId/:mode',
+    path: '/territories/:group/:territoryId/addresses/:addressId/:mode',
     component: AddressForm,
     props: true,
     meta: {

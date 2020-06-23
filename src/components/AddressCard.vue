@@ -4,7 +4,9 @@
       <div class="address col-9">
         <div>
           <h5 class="mb-0">
-            <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
+            <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+              {{address.addr1}}
+            </b-link>&nbsp;
           </h5>
           {{address.addr2}}
           <div class="mb-2">
@@ -20,17 +22,21 @@
           class="fa-2x pr-2"
           :value="selectedResponse"
           :next="'START'"
-          @button-click="updateResponse">
+          @button-click="confirmClearStatus">
         </ActivityButton>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
       </div>
       <div
         class="activity-container pl-0 pr-2"
         ref="activityContainer"
-        :style="{ '--x': transform, right: `${containerRight}px` }">
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
+        :style="{
+          '--x': transform,
+          right: `${containerRight}px`,
+          transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
+        }">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
         <div class="buttons" v-if="isTerritoryCheckedOut">
@@ -44,7 +50,7 @@
         </div>
         <b-link
           class="text-info"
-          :to="`/addresses/${address.id}/history`"
+          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
           @click="setAddress(address)">
           <font-awesome-layers class="text-info fa-2x">
             <font-awesome-icon icon="history"></font-awesome-icon>
@@ -67,7 +73,7 @@ const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId'],
+  props: ['address', 'territoryId', 'group'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -83,6 +89,7 @@ export default {
       isContainerVisible: false,
       transform: '',
       clickedResponse: '',
+      clickedToOpen: false,
     };
   },
   methods: {
@@ -95,6 +102,20 @@ export default {
       const pos = -this.containerWidth;
       this.containerRight = pos;
       this.isContainerVisible = false;
+    },
+    async confirmClearStatus() {
+      try {
+        const value = await this.$bvModal.msgBoxConfirm('Clear the address status?', {
+          title: `${this.address.addr1} ${this.address.addr2}`,
+          centered: true,
+        });
+
+        if (value) {
+          this.updateResponse();
+        }
+      } catch (err) {
+        // do nothing
+      }
     },
     async updateResponse(value) {
       if (this.selectedResponse === 'START' && value === 'START') return;
@@ -112,6 +133,7 @@ export default {
       }
     },
     slide(e) {
+      this.clickedToOpen = false;
       if (Number.isNaN(this.transform)) this.transform = 0;
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
       if (Math.abs(e.velocityX) > 0.2) {
@@ -135,7 +157,7 @@ export default {
 
         gsap.fromTo(
           this.$refs.activityContainer,
-          0.4,
+          0,
           { '--x': this.currentOffset },
           {
             '--x': finalOffset,
@@ -161,6 +183,16 @@ export default {
 
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
+    },
+
+    openActivityContainer() {
+      this.clickedToOpen = true;
+      if (this.isContainerVisible) {
+        this.resetContainerPosition();
+      } else {
+        this.containerRight = 0;
+        this.isContainerVisible = true;
+      }
     },
   },
   mounted() {
