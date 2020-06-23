@@ -4,7 +4,9 @@
       <div class="address col-9">
         <div>
           <h5 class="mb-0">
-            <b-link :to="`/addresses/${address.id}/detail`">{{address.addr1}}</b-link>&nbsp;
+            <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+              {{address.addr1}}
+            </b-link>&nbsp;
           </h5>
           {{address.addr2}}
           <div class="mb-2">
@@ -48,7 +50,7 @@
         </div>
         <b-link
           class="text-info"
-          :to="`/addresses/${address.id}/history`"
+          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
           @click="setAddress(address)">
           <font-awesome-layers class="text-info fa-2x">
             <font-awesome-icon icon="history"></font-awesome-icon>
@@ -71,7 +73,7 @@ const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId'],
+  props: ['address', 'territoryId', 'group'],
   components: {
     AddressLinks,
     ActivityButton,
