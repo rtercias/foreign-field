@@ -24,15 +24,19 @@
           :next="'START'"
           @button-click="confirmClearStatus">
         </ActivityButton>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
       </div>
       <div
         class="activity-container pl-0 pr-2"
         ref="activityContainer"
-        :style="{ '--x': transform, right: `${containerRight}px` }">
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
+        :style="{
+          '--x': transform,
+          right: `${containerRight}px`,
+          transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
+        }">
+        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
         </font-awesome-layers>
         <div class="buttons" v-if="isTerritoryCheckedOut">
@@ -85,6 +89,7 @@ export default {
       isContainerVisible: false,
       transform: '',
       clickedResponse: '',
+      clickedToOpen: false,
     };
   },
   methods: {
@@ -128,6 +133,7 @@ export default {
       }
     },
     slide(e) {
+      this.clickedToOpen = false;
       if (Number.isNaN(this.transform)) this.transform = 0;
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
       if (Math.abs(e.velocityX) > 0.2) {
@@ -151,7 +157,7 @@ export default {
 
         gsap.fromTo(
           this.$refs.activityContainer,
-          0.4,
+          0,
           { '--x': this.currentOffset },
           {
             '--x': finalOffset,
@@ -177,6 +183,16 @@ export default {
 
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
+    },
+
+    openActivityContainer() {
+      this.clickedToOpen = true;
+      if (this.isContainerVisible) {
+        this.resetContainerPosition();
+      } else {
+        this.containerRight = 0;
+        this.isContainerVisible = true;
+      }
     },
   },
   mounted() {
