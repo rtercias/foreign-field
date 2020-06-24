@@ -27,7 +27,12 @@
             :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
             v-bind:key="address.id"
             data-toggle="collapse">
-            <AddressCard v-bind="{address, reset}" :territoryId="terrId" :group="group"></AddressCard>
+            <AddressCard
+              v-bind="{address, reset}"
+              :territoryId="terrId"
+              :group="group"
+              @address-updated="refreshTerritory">
+            </AddressCard>
           </b-list-group-item>
         </b-list-group>
       <!-- </div>
@@ -125,6 +130,9 @@ export default {
       return addressId === this.lastActivity.address_id;
     },
 
+    async refreshTerritory() {
+      await this.getTerritory(this.terrId);
+    },
   },
   watch: {
     user() {
