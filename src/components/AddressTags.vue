@@ -31,6 +31,9 @@
         <span v-else-if="!preview || preview.length===0">new tag</span>
         <span v-else>...</span>
       </b-badge>
+      <b-badge v-on:click="collapsed = !collapsed" variant="light">
+        <span v-if="collapsed">...</span>
+      </b-badge>
     </div>
   </div>
 </template>
@@ -49,7 +52,12 @@ export default {
         'spouse speaks Tagalog',
         'only Evening',
         'only Noon',
+        'RANDOM',
+        'cheeseburger',
+        'movies',
+        'zebras',
       ],
+      notesPreview: this.address.notes.split(','),
     };
   },
 
@@ -61,6 +69,17 @@ export default {
       addTag: 'address/addTag',
       removeTag: 'address/removeTag',
     }),
+    updatePreview(t) {
+      const previewIndex = this.notesPreview.indexOf(t.caption);
+
+      if (!this.notesPreview.includes(t.caption) && t.state) {
+        this.notesPreview.push(t.caption);
+        this.addNote({ addressId: this.address.id, userid: this.user.id, note: t.caption });
+      } else {
+        this.notesPreview.splice(previewIndex, 1);
+        this.removeNote({ addressId: this.address.id, userid: this.user.id, note: t.caption });
+      }
+    },
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
 
@@ -76,7 +95,7 @@ export default {
       this.$parent.$emit('address-updated');
     },
     loadselectedTags() {
-      this.combinedTags.forEach((e) => {
+      this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
           e.state = true;
         }
