@@ -159,7 +159,11 @@ export const address = {
 
     actionButtonList: () => ACTION_BUTTON_LIST,
 
-    tags: state => ((state.address.notes && state.address.notes.split(',').filter(n => !n.length)) || []),
+    tags: state => ((state.address.notes && state.address.notes
+      .toLowerCase()
+      .split(',')
+      .filter(n => !n.length))
+      || []),
   },
 
   mutations: {

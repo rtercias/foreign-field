@@ -19,7 +19,7 @@
               <span v-if="tag.state">
                 <font-awesome-icon icon="times"></font-awesome-icon>
               </span>
-                {{ tag.caption }}
+                {{ tag.caption.toLowerCase() }}
             </b-button>
           </div>
         </b-button-group>
@@ -30,9 +30,6 @@
         <span v-if="!collapsed">close</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
         <span v-else>...</span>
-      </b-badge>
-      <b-badge v-on:click="collapsed = !collapsed" variant="light">
-        <span v-if="collapsed">...</span>
       </b-badge>
     </div>
   </div>
@@ -57,7 +54,6 @@ export default {
         'movies',
         'zebras',
       ],
-      notesPreview: this.address.notes.split(','),
     };
   },
 
@@ -113,7 +109,11 @@ export default {
       return finalArr;
     },
     selectedTags() {
-      return (this.address.notes && this.address.notes.split(',').filter(n => n.length)) || [];
+      return (this.address.notes && this.address.notes
+        .toLowerCase()
+        .split(',')
+        .filter(n => n.length))
+        || [];
     },
     preview() {
       return [...this.selectedTags].reverse();
