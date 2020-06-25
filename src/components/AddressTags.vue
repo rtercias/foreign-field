@@ -1,7 +1,8 @@
 <template>
   <div class="address-tags w-100">
     <div ref="prevArea" class="read-only-tags mt-1">
-      <b-badge class="mr-1" v-for="(x, i) in notesPreview" :key="i" variant="light">{{ x }}</b-badge>
+      <b-badge class="mr-1" v-for="(x, i) in selectedTags" :key="i" variant="light">{{ x }}</b-badge>
+      <AddressTagDisplay :address="address"></AddressTagDisplay>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
@@ -13,7 +14,7 @@
             v-for="(tag, index) in availableTags"
             :key="index"
             :pressed.sync="tag.state"
-            @click="() => updatePreview(tag)"
+            @click="() => updateTag(tag)"
             variant="outline-primary"
             >
             <span v-if="tag.state">
@@ -54,15 +55,10 @@ export default {
         { caption: 'spouse speaks Tagalog', state: false },
         { caption: 'only Evening', state: false },
         { caption: 'only Noon', state: false },
-        { caption: 'RANDOM', state: false },
         { caption: 'cheeseburger', state: false },
-        { caption: 'movies', state: false },
-        { caption: 'zebras', state: false },
       ],
-      notesPreview: this.address.notes.split(','),
     };
   },
-
   name: 'AddressTags',
   props: ['address'],
   methods: {
@@ -71,17 +67,6 @@ export default {
       removeNote: 'address/removeNote',
       fetchAddress: 'address/fetchAddress',
     }),
-    updatePreview(t) {
-      const previewIndex = this.notesPreview.indexOf(t.caption);
-
-      if (!this.notesPreview.includes(t.caption) && t.state) {
-        this.notesPreview.push(t.caption);
-        this.addNote({ addressId: this.address.id, userid: this.user.id, note: t.caption });
-      } else {
-        this.notesPreview.splice(previewIndex, 1);
-        this.removeNote({ addressId: this.address.id, userid: this.user.id, note: t.caption });
-      }
-    },
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
 
