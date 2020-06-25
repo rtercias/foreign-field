@@ -1,39 +1,35 @@
 <template>
   <div class="address-tags w-100">
-    <div ref="prevArea" class="read-only-tags mt-1">
-      <b-badge class="mr-1" v-for="(x, i) in selectedTags" :key="i" variant="light">{{ x }}</b-badge>
-      <AddressTagDisplay :address="address"></AddressTagDisplay>
+    <div class="read-only-tags mt-1">
+      <b-badge pill class="mr-1" v-for="(x, i) in preview" :key="i" variant="primary">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
         <b-button-group class="pt-3 pl-2 pr-2 flex-wrap" size="sm">
           <div>
             <b-button
-            class="mr-1 mb-1"
-            size='sm'
-            v-for="(tag, index) in availableTags"
-            :key="index"
-            :pressed.sync="tag.state"
-            @click="() => updateTag(tag)"
-            variant="outline-primary"
-            >
-            <span v-if="tag.state">
-              <b-badge variant="primary">
+              pill
+              class="tag-button mr-1 mb-1"
+              size='sm'
+              v-for="(tag, index) in combinedTags"
+              :key="index"
+              :pressed.sync="tag.state"
+              @click="() => updateTag(tag)"
+              :variant="tag.state ? 'primary' : 'outline-primary'">
+              <span v-if="tag.state">
                 <font-awesome-icon icon="times"></font-awesome-icon>
-              </b-badge>
-            </span>
-              {{ tag.caption }}
+              </span>
+                {{ tag.caption.toLowerCase() }}
             </b-button>
           </div>
         </b-button-group>
       </div>
     </transition>
-    <div class="expand-notes">
+    <div class="expand-tags">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">close</span>
-      </b-badge>
-      <b-badge v-on:click="collapsed = !collapsed" variant="light">
-        <span v-if="collapsed">...</span>
+        <span v-else-if="!preview || preview.length===0">new tag</span>
+        <span v-else>...</span>
       </b-badge>
     </div>
   </div>
@@ -41,21 +37,22 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-/* eslint-disable */
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
-/* eslint-enable */
 
 export default {
   data() {
     return {
       collapsed: true,
       availableTags: [
-        { caption: 'daysleeper', state: false },
-        { caption: 'spouse speaks Tagalog', state: false },
-        { caption: 'only Evening', state: false },
-        { caption: 'only Noon', state: false },
-        { caption: 'cheeseburger', state: false },
+        'daysleeper',
+        'spouse speaks Tagalog',
+        'only Evening',
+        'only Noon',
+        'RANDOM',
+        'cheeseburger',
+        'movies',
+        'zebras',
       ],
     };
   },
@@ -63,18 +60,23 @@ export default {
   props: ['address'],
   methods: {
     ...mapActions({
-      addNote: 'address/addNote',
-      removeNote: 'address/removeNote',
-      fetchAddress: 'address/fetchAddress',
+      setAddress: 'address/setAddress',
+      addTag: 'address/addTag',
+      removeTag: 'address/removeTag',
     }),
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
 
+      this.$set(this.selectedTags, index, tag);
+      this.setAddress(this.address);
+
       if (index !== -1 && !tag.state) {
-        await this.removeNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
+        await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
       } else {
-        await this.addNote({ addressId: this.address.id, userid: this.user.id, note: tag.caption });
+        await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
       }
+
+      this.$parent.$emit('address-updated');
     },
     loadselectedTags() {
       this.availableTags.forEach((e) => {
@@ -88,8 +90,21 @@ export default {
     ...mapGetters({
       user: 'auth/user',
     }),
+    combinedTags() {
+      const newArr = unionWith(this.selectedTags, this.availableTags);
+      const finalArr = map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
+
+      return finalArr;
+    },
     selectedTags() {
-      return this.address.notes.split(',');
+      return (this.address.notes && this.address.notes
+        .toLowerCase()
+        .split(',')
+        .filter(n => n.length))
+        || [];
+    },
+    preview() {
+      return [...this.selectedTags].reverse();
     },
   },
   mounted() {
@@ -99,14 +114,10 @@ export default {
 </script>
 
 <style>
-  .badge-light {
-    background-color: #d9dcdf !important;
+  .address-tags {
+    min-height: 18px;
   }
-  .tagcontainerthing {
-    display: flex;
-    flex-direction: row;
-  }
-  .expand-notes {
+  .expand-tags {
     position: absolute;
     right: 26px;
     bottom: 10px;

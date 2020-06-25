@@ -1,11 +1,8 @@
 <template>
   <div class="address-form">
     <div class="address-header justify-content-around align-items-center lead pt-3 pb-3">
-      <b-link class="button pl-4" :to="returnRoute">
-        <font-awesome-icon icon="chevron-left"></font-awesome-icon>
-      </b-link>
-      <span v-if="mode===modes.add" class="lead font-weight-bold w-100 pr-5">Add New Address</span>
-      <div v-else class="lead font-weight-bold w-100 pr-5">
+      <span v-if="mode===modes.add" class="lead font-weight-bold w-100">Add New Address</span>
+      <div v-else class="lead font-weight-bold w-100">
         <div>{{address.addr1}} {{address.addr2}}</div>
         <div>{{address.city}} {{address.state_province}} {{address.postal_code}}</div>
       </div>
@@ -100,10 +97,12 @@ export default {
       error: '',
       returnRoute: this.mode === Modes.add
         ? `/territories/${this.group}/${this.territoryId}`
-        : `/addresses/${this.addressId}/detail`,
+        : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail`,
     };
   },
   async mounted() {
+    this.setLeftNavRoute(this.returnRoute);
+
     if (this.mode === Modes.edit) {
       await this.fetchAddress(this.addressId);
       this.model = this.address;
@@ -123,6 +122,7 @@ export default {
       updateAddress: 'address/updateAddress',
       fetchAddress: 'address/fetchAddress',
       getTerritory: 'territory/getTerritory',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     async submitAddress() {
       try {

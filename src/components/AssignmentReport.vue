@@ -38,11 +38,13 @@ export default {
   name: 'AssignmentReport',
   props: ['id'],
   async mounted() {
+    this.setLeftNavRoute('/');
     await this.fetchAssignmentRecords(this.id);
   },
   methods: {
     ...mapActions({
       fetchAssignmentRecords: 'reports/fetchAssignmentRecords',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
   },
   computed: {
