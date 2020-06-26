@@ -5,6 +5,7 @@
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
+        <div class="text-secondary bg-light border-bottom font-weight-bold">Address Tags</div>
         <b-button-group class="pt-2 pb-2 pl-2 pr-2 flex-wrap" size="sm">
           <div class="combined-tags">
             <b-badge
