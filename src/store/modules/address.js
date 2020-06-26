@@ -85,13 +85,6 @@ const ACTION_BUTTON_LIST = [
     icon: 'envelope',
     className: 'text-slate-blue',
   },
-  {
-    type: 'fa-icon',
-    value: 'NF',
-    text: 'NF',
-    icon: 'circle',
-    className: 'text-danger',
-  },
 ];
 
 function createActivityLog(id, addressId, value, checkoutId, user) {
@@ -436,7 +429,7 @@ export const address = {
       }
     },
 
-    async markAsNotForeign({ commit }, addressId, userid, tag) {
+    async markAsNotForeign({ commit }, { addressId, userid, tag }) {
       commit('auth/LOADING', true, { root: true });
 
       const response = await axios({
@@ -446,7 +439,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation ChangeStatus($addressId: addressId, $status: status, $userid: userid, $tag: tag) { 
+          query: gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
             changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
           }`,
           variables: {
@@ -467,7 +460,7 @@ export const address = {
       }
     },
 
-    async markAsDoNotCall({ commit }, addressId, userid, tag) {
+    async markAsDoNotCall({ commit }, { addressId, userid, tag }) {
       commit('auth/LOADING', true, { root: true });
 
       const response = await axios({

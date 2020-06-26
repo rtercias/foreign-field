@@ -7,11 +7,11 @@
       <div v-show="!collapsed" class="tag-selection">
         <b-button-group class="pt-2 pb-2 pl-2 pr-2 flex-wrap" size="sm">
           <div class="combined-tags">
-            <b-button
+            <b-badge
               v-for="(tag, index) in combinedTags"
               pill
-              class="tag-button mr-1 mb-1"
-              :class="{ active: false, 'd-none': readOnlyTag(tag) }"
+              class="tag-button mr-1 mb-1 border-primary"
+              :class="{ active: false, 'd-none': readOnlyTag(tag), 'text-primary': !tag.state }"
               size='sm'
               :key="index"
               @click="() => updateTag(tag)"
@@ -20,7 +20,7 @@
                 <font-awesome-icon icon="times"></font-awesome-icon>
               </span>
                 {{ tag.caption.toLowerCase() }}
-            </b-button>
+            </b-badge>
           </div>
         </b-button-group>
       </div>
@@ -40,6 +40,9 @@ import { mapActions, mapGetters } from 'vuex';
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
 import get from 'lodash/get';
+import startsWith from 'lodash/startsWith';
+import addYears from 'date-fns/addYears';
+import format from 'date-fns/format';
 
 export default {
   data() {
@@ -55,9 +58,12 @@ export default {
       setAddress: 'address/setAddress',
       addTag: 'address/addTag',
       removeTag: 'address/removeTag',
+      markAsDoNotCall: 'address/markAsDoNotCall',
+      markAsNotForeign: 'address/markAsNotForeign',
     }),
     async updateTag(tag) {
       if (this.readOnlyTag(tag)) return;
+
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       this.setAddress(this.address);
 
@@ -67,6 +73,10 @@ export default {
           this.$set(this.selectedTags, index, tag);
           await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
         }
+      } else if (startsWith(tag.caption, 'do not call')) {
+        await this.doNotCall(tag);
+      } else if (startsWith(tag.caption, 'does not speak')) {
+        await this.notForeign(tag);
       } else {
         this.$set(this.selectedTags, this.selectedTags.length, tag);
         await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
@@ -82,12 +92,33 @@ export default {
       });
     },
     async confirmRemoveTag(tag) {
-      const value = await this.$bvModal.msgBoxConfirm(`Remove "${tag.caption}" tag?`, {
+      const response = await this.$bvModal.msgBoxConfirm(`Remove "${tag.caption}" tag?`, {
         title: `${this.address.addr1} ${this.address.addr2}`,
         centered: true,
       });
 
-      return value;
+      return response;
+    },
+    async doNotCall(tag) {
+      const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
+        title: `${this.address.addr1} ${this.address.addr2} - Do Not Call`,
+        centered: true,
+      });
+
+      if (response) {
+        const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
+        await this.markAsDoNotCall({ addressId: this.address.id, userid: this.user.id, tag: datestamped });
+      }
+    },
+    async notForeign(tag) {
+      const response = await this.$bvModal.msgBoxConfirm('Press OK to remove this address from the territory.', {
+        title: `${this.address.addr1} ${this.address.addr2} - Remove address`,
+        centered: true,
+      });
+
+      if (response) {
+        await this.markAsNotForeign({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
+      }
     },
     readOnlyTag(/* tag */) {
       return false;
@@ -101,11 +132,15 @@ export default {
     }),
     availableTags() {
       return [
-        'daysleeper',
+        'verify',
+        'day sleeper',
         `wife speaks ${this.language}`,
         `husband speaks ${this.language}`,
         `does not speak ${this.language}`,
         'do not call',
+        'deaf/mute',
+        'blind',
+        'business',
       ];
     },
     combinedTags() {
@@ -149,11 +184,11 @@ export default {
     white-space: nowrap;
     width: 90%;
     overflow: hidden;
+    font-size: large;
   }
-  .tag-button.btn-outline-primary:hover {
-    color: #007bff;
-    background-color: transparent;
-    border-color: #007bff;
+  .combined-tags {
+    font-size: large;
+    color: initial;
   }
   .tag-selection {
     background-color: white;
@@ -171,5 +206,8 @@ export default {
   }
   .slide-up-enter, .slide-up-leave-to {
     height: 0%;
+  }
+  .tag-button {
+    border: solid 1px;
   }
 </style>

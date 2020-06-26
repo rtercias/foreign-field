@@ -83,7 +83,7 @@ import AddressTags from './AddressTags';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'AddressCard',
