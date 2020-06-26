@@ -8,12 +8,12 @@
         <b-button-group class="pt-3 pl-2 pr-2 flex-wrap" size="sm">
           <div>
             <b-button
+              v-for="(tag, index) in combinedTags"
               pill
               class="tag-button mr-1 mb-1"
+              :class="{ active: false }"
               size='sm'
-              v-for="(tag, index) in combinedTags"
               :key="index"
-              :pressed.sync="tag.state"
               @click="() => updateTag(tag)"
               :variant="tag.state ? 'primary' : 'outline-primary'">
               <span v-if="tag.state">
@@ -66,13 +66,16 @@ export default {
     }),
     async updateTag(tag) {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
-
-      this.$set(this.selectedTags, index, tag);
       this.setAddress(this.address);
 
-      if (index !== -1 && !tag.state) {
-        await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
+      if (index !== -1 && tag.state) {
+        const confirm = await this.confirmRemoveTag(tag);
+        if (confirm) {
+          this.$set(this.selectedTags, index, tag);
+          await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
+        }
       } else {
+        this.$set(this.selectedTags, this.selectedTags.length, tag);
         await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
       }
 
@@ -85,13 +88,24 @@ export default {
         }
       });
     },
+    async confirmRemoveTag(tag) {
+      const value = await this.$bvModal.msgBoxConfirm(`Remove "${tag.caption}" tag?`, {
+        title: `${this.address.addr1} ${this.address.addr2}`,
+        centered: true,
+      });
+
+      return value;
+    },
   },
   computed: {
     ...mapGetters({
       user: 'auth/user',
     }),
     combinedTags() {
-      const newArr = unionWith(this.selectedTags, this.availableTags);
+      const newArr = unionWith(this.selectedTags, this.availableTags,
+        (t1, t2) => t1.toLowerCase() === t2.toLowerCase())
+        .map(t => t.toLowerCase())
+        .sort();
       const finalArr = map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
 
       return finalArr;
@@ -128,6 +142,11 @@ export default {
     white-space: nowrap;
     width: 90%;
     overflow: hidden;
+  }
+  .tag-button.btn-outline-primary:hover {
+    color: #007bff;
+    background-color: transparent;
+    border-color: #007bff;
   }
   .tag-selection {
     background-color: white;
