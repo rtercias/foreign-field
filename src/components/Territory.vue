@@ -127,7 +127,7 @@ export default {
     },
 
     isActiveAddress(addressId) {
-      return addressId === this.lastActivity.address_id;
+      return this.lastActivity ? addressId === this.lastActivity.address_id : false;
     },
 
     async refreshTerritory() {
