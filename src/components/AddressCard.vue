@@ -1,72 +1,77 @@
 <template>
-  <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50" ref="addressCard">
-      <div class="address col-9">
-        <div>
-          <h5 class="mb-0">
-            <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
-              {{address.addr1}}
-            </b-link>&nbsp;
-          </h5>
-          {{address.addr2}}
-          <div class="mb-2">
-            {{address.city}} {{address.state_province}} {{address.postal_code}}
-          </div>
-          <div class="phone">
-            <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
-          </div>
-        </div>
-      </div>
-      <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
-        <div :class="{ hidden: selectedResponse === 'START' }">
-          <ActivityButton
-            class="selected-response fa-2x pr-2"
-            :value="selectedResponse"
-            :next="'START'"
-            @button-click="confirmClearStatus">
-          </ActivityButton>
-          <a @click="confirmClearStatus">
-            <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
-              {{formattedSelectedResponseTS}}
+  <div class="address-card-container">
+    <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
+      <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
+        <div class="address col-9">
+          <div>
+            <h5 class="mb-0">
+              <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+                {{address.addr1}}
+              </b-link>&nbsp;
+            </h5>
+            {{address.addr2}}
+            <div class="mb-2">
+              {{address.city}} {{address.state_province}} {{address.postal_code}}
             </div>
-          </a>
+            <div class="phone">
+              <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
+            </div>
+          </div>
         </div>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-      </div>
-      <div
-        class="activity-container pl-0 pr-2"
-        ref="activityContainer"
-        :style="{
-          '--x': transform,
-          right: `${containerRight}px`,
-          transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
-        }">
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-        <div class="buttons" v-if="isTerritoryCheckedOut">
-          <ActivityButton
-            v-for="(button, index) in containerButtonList"
-            :key="index"
-            class="fa-2x"
-            :value="button.value"
-            @button-click="updateResponse">
-          </ActivityButton>
-        </div>
-        <b-link
-          class="text-info"
-          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
-          @click="setAddress(address)">
-          <font-awesome-layers class="text-info fa-2x">
-            <font-awesome-icon icon="history"></font-awesome-icon>
+        <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
+          <div :class="{ hidden: selectedResponse === 'START' }">
+            <ActivityButton
+              class="selected-response fa-2x pr-2"
+              :value="selectedResponse"
+              :next="'START'"
+              @button-click="confirmClearStatus">
+            </ActivityButton>
+            <a @click="confirmClearStatus">
+              <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
+                {{formattedSelectedResponseTS}}
+              </div>
+            </a>
+          </div>
+          <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
+            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
           </font-awesome-layers>
-        </b-link>
+        </div>
+        <div
+          class="activity-container pl-0 pr-2"
+          ref="activityContainer"
+          :style="{
+            '--x': transform,
+            right: `${containerRight}px`,
+            transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
+          }">
+          <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
+            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+          </font-awesome-layers>
+          <div class="buttons" v-if="isTerritoryCheckedOut">
+            <ActivityButton
+              v-for="(button, index) in containerButtonList"
+              :key="index"
+              class="fa-2x"
+              :value="button.value"
+              @button-click="updateResponse">
+            </ActivityButton>
+          </div>
+          <b-link
+            class="text-info"
+            :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
+            @click="setAddress(address)">
+            <font-awesome-layers class="text-info fa-2x">
+              <font-awesome-icon icon="history"></font-awesome-icon>
+            </font-awesome-layers>
+          </b-link>
+        </div>
       </div>
-    </div>
-  </v-touch>
+    </v-touch>
+    <hr class="m-0 mb-2" />
+    <AddressTags :address="address" v-on="$listeners"></AddressTags>
+  </div>
 </template>
+
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
@@ -74,10 +79,11 @@ import format from 'date-fns/format';
 import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
+import AddressTags from './AddressTags';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'AddressCard',
@@ -85,6 +91,7 @@ export default {
   components: {
     AddressLinks,
     ActivityButton,
+    AddressTags,
   },
   data() {
     return {
@@ -265,12 +272,14 @@ export default {
 <style scoped>
 .v-touch-address-card {
   touch-action: pan-y;
+  height: 100%;
 }
 .address-card {
   display: flex;
   flex-direction: row;
   overflow: hidden;
   position: relative;
+  transition: ease-in-out 0.3s  ;
   min-height: 104px;
 }
 .address {

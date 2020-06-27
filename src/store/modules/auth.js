@@ -129,6 +129,7 @@ export const auth = {
                 congregation {
                   id
                   name
+                  description
                 }
                 territories {
                   id
