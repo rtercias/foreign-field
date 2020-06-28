@@ -47,6 +47,8 @@ export const auth = {
       || state.user.role === 'TS'
       || state.user.role === 'SO'
       || state.user.role === 'GO'),
+    canRead: (state, getters) => getters.canWrite
+      || (state.user && (state.user.role === 'RP' || state.user.role === 'TS')),
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
   },
 

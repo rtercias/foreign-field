@@ -52,7 +52,7 @@ const routes = [
     component: AssignmentReport,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
     },
   },
   {
