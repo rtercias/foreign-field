@@ -8,18 +8,18 @@
       <b-collapse is-nav id="nav_dropdown_collapse">
         <b-navbar-nav>
           <b-nav-item to="/">Home</b-nav-item>
-          <b-nav-item-dropdown v-if="checkPermission" class="group-codes" text="Territories">
+          <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
             <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
               <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
             </b-dropdown-item>
           </b-nav-item-dropdown>
           <!-- <b-nav-item-dropdown
-            v-if="checkPermission && $router.currentRoute.name==='territory'"
+            v-if="canWrite && $router.currentRoute.name==='territory'"
             class="group-codes" text="Territory">
             <b-dropdown-item @click="shareWorkInProgress">Share
             </b-dropdown-item>
           </b-nav-item-dropdown> -->
-          <b-nav-item v-if="canViewDNC" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
+          <b-nav-item v-if="canRead" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
           <b-nav-item-dropdown v-if="isAuthenticated" right>
@@ -95,13 +95,9 @@ export default {
       terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
+      canWrite: 'auth/canWrite',
+      canRead: 'auth/canRead',
     }),
-    checkPermission() {
-      return this.user && this.permissions.territories.includes(this.user.role);
-    },
-    canViewDNC() {
-      return this.user && ['Admin', 'TS', 'GO', 'SO', 'RP', 'PUB'].includes(this.user.role);
-    },
     showLeftNav() {
       return this.$route.name === 'home' ? false : !!this.leftNavRoute;
     },
