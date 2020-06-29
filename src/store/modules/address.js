@@ -118,6 +118,19 @@ function validateAddress(_address, isNew) {
     throw new InvalidAddressError('Sort is required');
   }
 
+  // convert nullable fields to empty string when null
+  if (address.addr2 === null) {
+    address.addr2 = '';
+  }
+
+  if (address.postal_code === null) {
+    address.postal_code = '';
+  }
+
+  if (address.phone === null) {
+    address.phone = '';
+  }
+
   if (address.notes === null) {
     address.notes = '';
   }
