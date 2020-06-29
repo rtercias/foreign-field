@@ -48,7 +48,6 @@ const CHANGE_STATUS = 'CHANGE_STATUS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
 
-const TEXT_FIELDS = ['addr1', 'addr2', 'city', 'state_province', 'postal_code', 'phone'];
 const ACTION_BUTTON_LIST = [
   {
     type: 'fa-icon',
@@ -119,8 +118,8 @@ function validateAddress(_address, isNew) {
     throw new InvalidAddressError('Sort is required');
   }
 
-  for (const key of TEXT_FIELDS) {
-    address[key] = address[key] || ' ';
+  if (address.notes === null) {
+    address.notes = '';
   }
 
   return address;
