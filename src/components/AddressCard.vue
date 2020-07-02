@@ -116,7 +116,7 @@ export default {
       getTerritory: 'territory/getTerritory',
     }),
     resetContainerPosition() {
-      const pos = -this.containerWidth;
+      const pos = -this.containerWidth - 20;
       this.containerRight = pos;
       this.isContainerVisible = false;
     },
@@ -277,7 +277,6 @@ export default {
 .address-card {
   display: flex;
   flex-direction: row;
-  overflow: hidden;
   position: relative;
   transition: ease-in-out 0.3s  ;
   min-height: 104px;
