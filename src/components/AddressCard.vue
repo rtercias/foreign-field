@@ -84,7 +84,6 @@ import AddressTags from './AddressTags';
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
-const MARGIN_BETWEEN_COLUMNS = 20;
 
 export default {
   name: 'AddressCard',
@@ -117,7 +116,7 @@ export default {
       getTerritory: 'territory/getTerritory',
     }),
     resetContainerPosition() {
-      const pos = -this.containerWidth - MARGIN_BETWEEN_COLUMNS;
+      const pos = -this.containerWidth;
       this.containerRight = pos;
       this.isContainerVisible = false;
     },
@@ -278,6 +277,7 @@ export default {
 .address-card {
   display: flex;
   flex-direction: row;
+  overflow: hidden;
   position: relative;
   transition: ease-in-out 0.3s  ;
   min-height: 104px;
