@@ -97,3 +97,10 @@ export const router = new VueRouter({
   mode: 'history',
   routes,
 });
+
+router.beforeEach((to, from, next) => {
+  if (to.params.id) {
+    to.params.id = Number(to.params.id);
+  }
+  next();
+});

@@ -98,7 +98,7 @@ export default {
     return {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
-      selectedResponseTS: '',
+      selectedResponseTS: null,
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -150,7 +150,7 @@ export default {
         await this.fetchAddress(this.address.id);
         await this.getTerritory(this.territoryId);
         this.selectedResponse = this.lastActivity && this.lastActivity.value;
-        this.selectedResponseTS = this.lastActivity && this.lastActivity.timestamp;
+        this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp);
         this.clickedResponse = '';
         this.resetContainerPosition();
       } catch (e) {
@@ -224,7 +224,7 @@ export default {
     this.resetContainerPosition();
     this.setAddress(this.address);
     this.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
-    this.selectedResponseTS = this.lastActivity && this.lastActivity.timestamp || '';
+    this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp) || null;
   },
   computed: {
     ...mapGetters({
@@ -309,7 +309,9 @@ export default {
   height: 100%;
   min-height: 50px;
 }
-
+.ellipsis-v, .ellipsis-v-static {
+  cursor: pointer;
+}
 .activity-container * {
   display: block;
 }

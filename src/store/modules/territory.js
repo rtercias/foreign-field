@@ -1,5 +1,5 @@
 import axios from 'axios';
-import gql from 'graphql-tag';
+// import gql from 'graphql-tag';
 import { store } from '..';
 import maxBy from 'lodash/maxBy';
 
@@ -71,7 +71,7 @@ export const territory = {
 
         const response = await axios({
           data: {
-            query: gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+            query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
                 status {
                   checkout_id
@@ -106,7 +106,7 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+            query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
                 status {
                   checkout_id
@@ -141,7 +141,7 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: gql`query Territory($terrId: Int) { 
+            query: `query Territory($terrId: Int) { 
               territory (id: $terrId) {
                 group_code id congregationid name description type 
                 addresses {

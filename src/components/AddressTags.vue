@@ -178,6 +178,7 @@ export default {
     position: absolute;
     right: 26px;
     bottom: 10px;
+    cursor: pointer;
   }
   .preview-tags {
     display: flex;

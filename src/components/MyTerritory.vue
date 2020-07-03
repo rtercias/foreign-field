@@ -30,7 +30,10 @@ export default {
     }),
     lastTimestamp() {
       if (this.lastActivity) {
-        return format(new Date(this.lastActivity.timestamp), 'E M/d p');
+        const timestamp = Number(this.lastActivity.timestamp);
+        if (!Number.isNaN(timestamp)) {
+          return format(new Date(timestamp), 'E M/d p');
+        }
       }
       return null;
     },

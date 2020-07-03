@@ -1,10 +1,10 @@
 import axios from 'axios';
-import gql from 'graphql-tag';
+// import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
 import clone from 'lodash/clone';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
-const model = gql`fragment Model on Address {
+const model = `fragment Model on Address {
   congregationId
   territory_id
   id
@@ -240,7 +240,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`query Address($addressId: Int) { 
+          query: `query Address($addressId: Int) { 
             address(id: $addressId) { 
               ...Model
             }
@@ -277,7 +277,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: gql`mutation AddLog($activityLog: ActivityLogInput!) { 
+            query: `mutation AddLog($activityLog: ActivityLogInput!) { 
               addLog(activityLog: $activityLog) {
                 id checkout_id address_id value tz_offset timestamp
                 timezone publisher_id notes
@@ -320,7 +320,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: gql`mutation UpdateLog($activityLog: ActivityLogInput!) { 
+            query: `mutation UpdateLog($activityLog: ActivityLogInput!) { 
               updateLog(activityLog: $activityLog) {
                 id checkout_id address_id value tz_offset timestamp
                 timezone publisher_id notes
@@ -354,7 +354,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: gql`mutation RemoveLog($id: Int!) { 
+            query: `mutation RemoveLog($id: Int!) { 
               removeLog(id: $id)
             }`,
             variables: {
@@ -386,7 +386,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation CreateAddress($address: AddressInput!) { 
+          query: `mutation CreateAddress($address: AddressInput!) { 
             addAddress(address: $address) { 
               ...Model
             }
@@ -422,7 +422,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation UpdateAddress($address: AddressInput!) { 
+          query: `mutation UpdateAddress($address: AddressInput!) { 
             updateAddress(address: $address) { 
               ...Model
             }
@@ -451,7 +451,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
+          query: `mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
             changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
           }`,
           variables: {
@@ -482,7 +482,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
+          query: `mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
             changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
           }`,
           variables: {
@@ -513,7 +513,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation AddTag($addressId: Int!, $userid: Int!, $tag: String!) { 
+          query: `mutation AddTag($addressId: Int!, $userid: Int!, $tag: String!) { 
             addNote(addressId: $addressId, userid: $userid, note: $tag)
           }`,
           variables: {
@@ -543,7 +543,7 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: gql`mutation RemoveTag($addressId: Int!, $userid: Int!, $tag: String!) { 
+          query: `mutation RemoveTag($addressId: Int!, $userid: Int!, $tag: String!) { 
             removeNote(addressId: $addressId, userid: $userid, note: $tag)
           }`,
           variables: {
