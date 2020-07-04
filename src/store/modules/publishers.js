@@ -1,4 +1,6 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 
 const SET_PUBLISHERS = 'SET_PUBLISHERS';
 
@@ -28,7 +30,7 @@ export const publishers = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `query PublishersList($congId: Int) { 
+          query: print(gql`query PublishersList($congId: Int) { 
             publishers (congId: $congId) { 
               id 
               firstname 
@@ -37,7 +39,7 @@ export const publishers = {
               username 
               status
             }
-          }`,
+          }`),
           variables: {
             congId,
           },

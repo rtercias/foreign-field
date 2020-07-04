@@ -1,4 +1,6 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 
 const DNC_SUCCESS = 'DNC_SUCCESS';
 const DNC_FAIL = 'DNC_FAIL';
@@ -33,14 +35,14 @@ export const addresses = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `query Dnc($congId: Int) {
+            query: print(gql`query Dnc($congId: Int) {
               dnc(congId:$congId) {
                 addr1
                 addr2
                 city
                 state_province
               }
-            }`,
+            }`),
             variables: {
               congId: id,
             },

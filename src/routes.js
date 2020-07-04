@@ -98,9 +98,19 @@ export const router = new VueRouter({
   routes,
 });
 
+function convertIdsToNumber(to) {
+  const keys = Object.keys(to.params) || [];
+  const keysWithId = keys.filter(k => k.toLowerCase().includes('id')) || [];
+
+  keysWithId.forEach((k) => {
+    const value = Number(to.params[k]);
+    if (!Number.isNaN(value)) {
+      to.params[k] = value;
+    }
+  });
+}
+
 router.beforeEach((to, from, next) => {
-  if (to.params.id) {
-    to.params.id = Number(to.params.id);
-  }
+  convertIdsToNumber(to);
   next();
 });

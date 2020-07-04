@@ -165,6 +165,9 @@ export default {
         this.$router.push('/unauthorized');
       }
     },
+    congId() {
+      this.model.congregationId = this.congId;
+    },
   },
 };
 </script>

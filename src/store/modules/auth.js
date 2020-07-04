@@ -1,6 +1,7 @@
 import axios from 'axios';
 import firebase from 'firebase/app';
-// import gql from 'graphql-tag';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 import uniqBy from 'lodash/uniqBy';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
@@ -121,7 +122,7 @@ export const auth = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `query Publisher($username: String) {
+            query: print(gql`query Publisher($username: String) {
               user (username: $username) {
                 id 
                 username
@@ -157,7 +158,7 @@ export const auth = {
                   }
                 }
               }
-            }`,
+            }`),
             variables: {
               username,
             },
@@ -218,7 +219,7 @@ export const auth = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `{ territories (congId: ${congId}) { group_code }}`,
+          query: print(gql`{ territories (congId: ${congId}) { group_code }}`),
         },
       });
 
