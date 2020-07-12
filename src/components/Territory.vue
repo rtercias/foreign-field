@@ -50,7 +50,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
-import get from 'lodash/get';
 import AddressCard from './AddressCard.vue';
 import Loading from './Loading.vue';
 
