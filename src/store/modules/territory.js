@@ -70,19 +70,17 @@ export const territory = {
           throw new Error('Unable to check in territory because the required arguments were not provided');
         }
 
-        const query = gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
-          checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-            status {
-              checkout_id
-              status
-              date
-            }
-          }
-        }`;
-
         const response = await axios({
           data: {
-            query: print(query),
+            query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+              checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
+                status {
+                  checkout_id
+                  status
+                  date
+                }
+              }
+            }`),
             variables: {
               terrId: args.territoryId,
               pubId: args.userId,
@@ -102,16 +100,6 @@ export const territory = {
 
     async checkoutTerritory({ commit }, args) {
       try {
-        const query = gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
-          checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
-            status {
-              checkout_id
-              status
-              date
-            }
-          }
-        }`;
-
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -119,7 +107,15 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(query),
+            query: print(gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+              checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
+                status {
+                  checkout_id
+                  status
+                  date
+                }
+              }
+            }`),
             variables: {
               terrId: args.territoryId,
               pubId: args.userId,
@@ -139,33 +135,31 @@ export const territory = {
 
     async getTerritory({ commit }, id) {
       try {
-        const query = gql`query Territory($terrId: Int) { 
-          territory (id: $terrId) {
-            group_code id congregationid name description type 
-            addresses {
-              id addr1 addr2 city state_province postal_code
-              phone longitude latitude notes sort
-              activityLogs {
-                id checkout_id address_id value tz_offset
-                timestamp timezone publisher_id notes
-              }
-            }
-            status {
-              checkout_id
-              status
-              date
-              publisher {
-                id username firstname lastname
-              }
-            }
-          }
-        }`;
-
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(query),
+            query: print(gql`query Territory($terrId: Int) { 
+              territory (id: $terrId) {
+                group_code id congregationid name description type 
+                addresses {
+                  id addr1 addr2 city state_province postal_code
+                  phone longitude latitude notes sort
+                  activityLogs {
+                    id checkout_id address_id value tz_offset
+                    timestamp timezone publisher_id notes
+                  }
+                }
+                status {
+                  checkout_id
+                  status
+                  date
+                  publisher {
+                    id username firstname lastname
+                  }
+                }
+              }
+            }`),
             variables: {
               terrId: id,
             },
