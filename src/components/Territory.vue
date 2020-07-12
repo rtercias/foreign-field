@@ -22,7 +22,7 @@
         </header>
         <b-list-group class="columns">
           <b-list-group-item
-            class="col-sm-12"
+            class="col-sm-12 overflow-auto"
             v-for="address in territory.addresses"
             :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
             v-bind:key="address.id"
