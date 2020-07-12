@@ -1,4 +1,6 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 
 export const TEST_TERRITORIES = [
   'TEST-000',
@@ -42,7 +44,7 @@ export const territories = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
+            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
               territories (congId: $congId, group_code: $groupCode) { 
                 id 
                 name 
@@ -59,7 +61,7 @@ export const territories = {
                   }
                 }
               }
-            }`,
+            }`),
             variables: {
               congId: params.congId,
               groupCode: params.groupCode,

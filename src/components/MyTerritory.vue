@@ -1,8 +1,8 @@
 <template>
   <div>
-    <a :href="url(territory)">
+    <b-link :to="url(territory)">
       {{territory.name}} ({{territory.city}})
-    </a> on {{territory.status && checkoutDate(territory.status.date)}}
+    </b-link> on {{territory.status && checkoutDate(territory.status.date)}}
     <div class="last-activity font-weight-normal">Last activity: {{this.lastTimestamp}}</div>
   </div>
 </template>
@@ -30,7 +30,10 @@ export default {
     }),
     lastTimestamp() {
       if (this.lastActivity) {
-        return format(new Date(this.lastActivity.timestamp), 'E M/d p');
+        const timestamp = Number(this.lastActivity.timestamp);
+        if (!Number.isNaN(timestamp)) {
+          return format(new Date(timestamp), 'E M/d p');
+        }
       }
       return null;
     },

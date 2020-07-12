@@ -19,7 +19,7 @@
     "date-fns": "^2.13.0",
     "firebase": "^7.14.4",
     "firebaseui": "^3.6.1",
-    "graphql": "^15.1.0",
+    "graphql": "^15.2.0",
     "graphql-tag": "^2.10.3",
     "gsap": "^3.2.6",
     "lodash": "^4.17.15",

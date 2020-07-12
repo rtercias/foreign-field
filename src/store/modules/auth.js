@@ -1,6 +1,7 @@
 import axios from 'axios';
 import firebase from 'firebase/app';
 import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 import uniqBy from 'lodash/uniqBy';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
@@ -26,6 +27,7 @@ function initialState() {
     groupCodes: [],
     loading: false,
     mastheadLeftNavRoute: '/',
+    token: '',
   };
 }
 
@@ -50,6 +52,7 @@ export const auth = {
     canRead: (state, getters) => getters.canWrite
       || (state.user && (state.user.role === 'RP' || state.user.role === 'TS')),
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
+    token: state => state.token,
   },
 
   mutations: {
@@ -64,6 +67,7 @@ export const auth = {
       state.isForcedOut = false;
       state.name = authenticatedUser.name;
       state.photoUrl = authenticatedUser.photoUrl;
+      state.token = authenticatedUser.token;
     },
 
     AUTHORIZE(state, user) {
@@ -96,11 +100,9 @@ export const auth = {
   },
 
   actions: {
-    authenticate({ commit }, params) {
-      return new Promise((resolve) => {
-        commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
-        resolve(params);
-      });
+    async authenticate({ commit }, params) {
+      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl, token: params.token });
+      return params;
     },
 
     async logout({ commit }) {
@@ -117,11 +119,8 @@ export const auth = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           data: {
-            query: gql`query Publisher($username: String) {
+            query: print(gql`query Publisher($username: String) {
               user (username: $username) {
                 id 
                 username
@@ -157,7 +156,7 @@ export const auth = {
                   }
                 }
               }
-            }`,
+            }`),
             variables: {
               username,
             },
@@ -168,7 +167,7 @@ export const auth = {
           reject(new IncompleteRegistrationError('Unauthorized'));
         }
 
-        const { user } = response.data.data;
+        const { user } = (response && response.data && response.data.data) || {};
         const { permissions = [] } = router.currentRoute.meta;
         const hasPermission = permissions.length === 0 || permissions.includes(user.role);
         if (hasPermission) {
@@ -214,15 +213,12 @@ export const auth = {
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         data: {
-          query: gql`{ territories (congId: ${congId}) { group_code }}`,
+          query: print(gql`{ territories (congId: ${congId}) { group_code }}`),
         },
       });
 
-      const { territories } = response.data.data;
+      const { territories } = (response && response.data && response.data.data) || [];
       // const group = sessionStorage.getItem('group-code');
       // if (group) this.setGroupCode(group);
 
@@ -230,10 +226,20 @@ export const auth = {
       commit(SET_GROUP_CODES, groupCodes);
     },
 
-    firebaseInit({ dispatch, state }) {
+    async firebaseInit({ dispatch, state }) {
       firebase.initializeApp(config);
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
+          user.token = await user.getIdToken();
+          if (!user.token) {
+            throw new Error('Unable to retrieve token from Firebase');
+          }
+
+          axios.interceptors.request.use((cfg) => {
+            cfg.headers.Authorization = `Bearer ${user.token}`;
+            return cfg;
+          });
+
           await dispatch('login', user);
         } else {
           if (state.isForcedOut) {

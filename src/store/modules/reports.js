@@ -1,4 +1,6 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 import { TEST_TERRITORIES } from './territories';
 
 const SET_ASSIGNMENT_RECORDS = 'SET_ASSIGNMENT_RECORDS';
@@ -30,7 +32,7 @@ export const reports = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `query AssignmentRecords($congId: Int) { 
+          query: print(gql`query AssignmentRecords($congId: Int) { 
             getAssignmentRecords (congId: $congId) { 
               territory_name
               publisher_name
@@ -38,7 +40,7 @@ export const reports = {
               in
               timestamp
             }
-          }`,
+          }`),
           variables: {
             congId,
           },
