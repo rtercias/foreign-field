@@ -164,9 +164,6 @@ export const territory = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           data: {
             query: print(query),
             variables: {

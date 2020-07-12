@@ -97,11 +97,9 @@ export const auth = {
   },
 
   actions: {
-    authenticate({ commit }, params) {
-      return new Promise((resolve) => {
-        commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
-        resolve(params);
-      });
+    async authenticate({ commit }, params) {
+      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
+      return params;
     },
 
     async logout({ commit }) {
@@ -118,9 +116,6 @@ export const auth = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           data: {
             query: print(gql`query Publisher($username: String) {
               user (username: $username) {
@@ -169,7 +164,7 @@ export const auth = {
           reject(new IncompleteRegistrationError('Unauthorized'));
         }
 
-        const { user } = response.data.data;
+        const { user } = (response && response.data && response.data.data) || {};
         const { permissions = [] } = router.currentRoute.meta;
         const hasPermission = permissions.length === 0 || permissions.includes(user.role);
         if (hasPermission) {
@@ -215,15 +210,12 @@ export const auth = {
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         data: {
           query: print(gql`{ territories (congId: ${congId}) { group_code }}`),
         },
       });
 
-      const { territories } = response.data.data;
+      const { territories } = (response && response.data && response.data.data) || [];
       // const group = sessionStorage.getItem('group-code');
       // if (group) this.setGroupCode(group);
 
@@ -231,10 +223,23 @@ export const auth = {
       commit(SET_GROUP_CODES, groupCodes);
     },
 
-    firebaseInit({ dispatch, state }) {
+    async firebaseInit({ dispatch, state }) {
       firebase.initializeApp(config);
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
+          const token = await user.getIdToken();
+          if (!token) {
+            throw new Error('Unable to retrieve token from Firebase');
+          }
+
+          axios.interceptors.request.use((cfg) => {
+            // eslint-disable-next-line
+            console.log('cfg', cfg);
+            cfg.headers.Authorization = `Bearer ${token}`;
+            cfg.headers['Content-Type'] = 'application/json';
+            return cfg;
+          });
+
           await dispatch('login', user);
         } else {
           if (state.isForcedOut) {
