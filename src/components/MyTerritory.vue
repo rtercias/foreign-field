@@ -1,8 +1,8 @@
 <template>
   <div>
-    <a :href="url(territory)">
+    <b-link :to="url(territory)">
       {{territory.name}} ({{territory.city}})
-    </a> on {{territory.status && checkoutDate(territory.status.date)}}
+    </b-link> on {{territory.status && checkoutDate(territory.status.date)}}
     <div class="last-activity font-weight-normal">Last activity: {{this.lastTimestamp}}</div>
   </div>
 </template>

@@ -50,6 +50,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
+import get from 'lodash/get';
 import AddressCard from './AddressCard.vue';
 import Loading from './Loading.vue';
 
@@ -62,8 +63,10 @@ export default {
   props: ['group', 'id'],
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}`);
-    await this.getTerritory(this.terrId);
-    setTimeout(() => this.isLoading = false, 300);
+    if (this.token) {
+      await this.getTerritory(this.terrId);
+    }
+    this.isLoading = false;
   },
   data() {
     return {
@@ -82,6 +85,7 @@ export default {
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       lastActivity: 'territory/lastActivity',
+      token: 'auth/token',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -135,12 +139,8 @@ export default {
     },
   },
   watch: {
-    user() {
-      // Ensures the current user's congregation owns the current territory.
-      // This ensures navigation to a territory via url are valid.
-      if (this.user.congregation.id !== this.territory.congregationid) {
-        this.$router.push('/welcome');
-      }
+    async token() {
+      await this.getTerritory(this.terrId);
     },
   },
 };

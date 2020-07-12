@@ -1,7 +1,7 @@
 <template>
   <div class="address-tags w-100">
     <div class="preview-tags mt-1" :class="{ hidden: !collapsed }">
-      <b-badge pill class="mr-1" v-for="(x, i) in preview" :key="i" variant="primary">{{ x }}</b-badge>
+      <b-badge pill class="tag-button-preview mr-1" v-for="(x, i) in preview" :key="i" variant="primary">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
       <div v-show="!collapsed" class="tag-selection">
@@ -211,5 +211,9 @@ export default {
   }
   .tag-button {
     border: solid 1px;
+    cursor: pointer;
+  }
+  .tag-button-preview {
+    cursor: pointer;
   }
 </style>

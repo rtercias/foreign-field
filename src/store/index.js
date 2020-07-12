@@ -15,7 +15,7 @@ Vue.use(Vuex);
 
 axios.defaults.baseURL = process.env.VUE_APP_ROOT_API;
 axios.defaults.method = 'post';
-axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export const store = new Store({
   plugins: [createCache()],

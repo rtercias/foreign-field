@@ -27,6 +27,7 @@ function initialState() {
     groupCodes: [],
     loading: false,
     mastheadLeftNavRoute: '/',
+    token: '',
   };
 }
 
@@ -51,6 +52,7 @@ export const auth = {
     canRead: (state, getters) => getters.canWrite
       || (state.user && (state.user.role === 'RP' || state.user.role === 'TS')),
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
+    token: state => state.token,
   },
 
   mutations: {
@@ -65,6 +67,7 @@ export const auth = {
       state.isForcedOut = false;
       state.name = authenticatedUser.name;
       state.photoUrl = authenticatedUser.photoUrl;
+      state.token = authenticatedUser.token;
     },
 
     AUTHORIZE(state, user) {
@@ -98,7 +101,7 @@ export const auth = {
 
   actions: {
     async authenticate({ commit }, params) {
-      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
+      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl, token: params.token });
       return params;
     },
 
@@ -227,16 +230,13 @@ export const auth = {
       firebase.initializeApp(config);
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
-          const token = await user.getIdToken();
-          if (!token) {
+          user.token = await user.getIdToken();
+          if (!user.token) {
             throw new Error('Unable to retrieve token from Firebase');
           }
 
           axios.interceptors.request.use((cfg) => {
-            // eslint-disable-next-line
-            console.log('cfg', cfg);
-            cfg.headers.Authorization = `Bearer ${token}`;
-            cfg.headers['Content-Type'] = 'application/json';
+            cfg.headers.Authorization = `Bearer ${user.token}`;
             return cfg;
           });
 
