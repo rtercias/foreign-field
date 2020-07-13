@@ -19,7 +19,8 @@
           </div>
         </div>
         <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
-          <div :class="{ hidden: selectedResponse === 'START' }">
+          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
+          <div :class="{ hidden: selectedResponse === 'START' || isLogging }">
             <ActivityButton
               class="selected-response fa-2x pr-2"
               :value="selectedResponse"
@@ -106,6 +107,7 @@ export default {
       transform: '',
       clickedResponse: '',
       clickedToOpen: false,
+      isLogging: false,
     };
   },
   methods: {
@@ -128,14 +130,17 @@ export default {
         });
 
         if (value) {
-          this.updateResponse();
+          await this.updateResponse();
         }
       } catch (err) {
         // do nothing
       }
     },
     async updateResponse(_value) {
+      this.isLogging = true;
       let value = _value;
+      this.resetContainerPosition();
+
       if (this.selectedResponse === 'START' && value === 'START') return;
 
       if (!this.actionButtonList.some(b => b.value === value)) {
@@ -154,6 +159,8 @@ export default {
         this.resetContainerPosition();
       } catch (e) {
         console.error('Unable to save activity log', e);
+      } finally {
+        this.isLogging = false;
       }
     },
     slide(e) {
@@ -334,6 +341,11 @@ export default {
   font-size: small;
   position: relative;
   bottom: 2px;
+}
+.logging-spinner {
+  font-size: 30px;
+  position: absolute;
+  right: 47px;
 }
 
 @media print {
