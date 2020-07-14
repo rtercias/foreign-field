@@ -17,6 +17,15 @@
                 </li>
               </ul>
             </div>
+            <hr>
+            <div >
+              <span>Territories I have recently seen on this browser:</span>
+              <ul class="d-flex flex-column">
+                <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
+                  <MyTerritory :territory="terr"></MyTerritory>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -51,6 +60,17 @@ export default {
     }),
     territories() {
       return this.user && this.user.territories;
+    },
+    seenTerritories() {
+      let seenTerritories = [];
+      if (localStorage.getItem('seenTerritories')) {
+        try {
+          seenTerritories = JSON.parse(localStorage.getItem('seenTerritories'));
+        } catch (e) {
+          localStorage.removeItem('seenTerritories');
+        }
+      }
+      return seenTerritories;
     },
   },
 };

@@ -2,13 +2,22 @@
   <div>
     <b-link :to="url(territory)">
       {{territory.name}} ({{territory.city}})
-    </b-link> on {{territory.status && checkoutDate(territory.status.date)}}
-    <div class="last-activity font-weight-normal">Last activity: {{this.lastTimestamp}}</div>
+    </b-link>
+    <span v-if="territory.status">
+      on {{territory.status && checkoutDate(territory.status.date)}}
+    </span>
+    <span v-if="territory.lastVisited">
+      {{formattedLastVisited}}
+    </span>
+    <div class="last-activity font-weight-normal"
+      v-if="territory.status" >Last activity: {{this.lastTimestamp}}
+    </div>
   </div>
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import format from 'date-fns/format';
+import formatDistance from 'date-fns/formatDistance';
 
 export default {
   name: 'MyTerritory',
@@ -36,6 +45,9 @@ export default {
         }
       }
       return null;
+    },
+    formattedLastVisited() {
+      return formatDistance(new Date(this.territory.lastVisited), new Date(), { addSuffix: true });
     },
   },
   mounted() {

@@ -141,7 +141,7 @@ export const territory = {
           data: {
             query: print(gql`query Territory($terrId: Int) { 
               territory (id: $terrId) {
-                group_code id congregationid name description type 
+                group_code id congregationid name description type city
                 addresses {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
