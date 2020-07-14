@@ -19,7 +19,7 @@
           </ul>
           <div v-if="seenTerritories.length">
             <hr />
-            <span>Territories I've recently seen:</span>
+            <span>Other territories I've recently seen:</span>
             <ul class="d-flex flex-column">
               <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
                 <MyTerritory :territory="terr"></MyTerritory>
