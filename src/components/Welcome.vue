@@ -1,33 +1,33 @@
 <template>
-  <b-container class="dashboard lead pt-5">
+  <b-container class="dashboard lead">
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
+      <div class="col-sm-12">
+        <h3><span>Dashboard</span></h3>
+        <hr />
+      </div>
       <div class="col-sm-12 col-md-9">
-        <h3 class="pt-0 mt-0"><img src="../assets/field.png" /><span>Dashboard</span></h3>
-        <div class="">
-          <div>
-            <Loading v-if="loading"></Loading>
-            <span v-else-if="!(territories && territories.length)">I have no territories checked out.</span>
-            <div v-else>
-              <span>Territories I have checked out:</span>
-              <ul class="d-flex flex-column">
-                <li class="pt-3 m-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
-                  <MyTerritory :territory="terr"></MyTerritory>
-                </li>
-              </ul>
-            </div>
-            <hr>
-            <div >
-              <span>Territories I have recently seen on this browser:</span>
-              <ul class="d-flex flex-column">
-                <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
-                  <MyTerritory :territory="terr"></MyTerritory>
-                </li>
-              </ul>
-            </div>
-          </div>
+        <Loading v-if="loading"></Loading>
+        <span v-else-if="!(territories && territories.length)">I have no territories checked out.</span>
+        <div v-else>
+          <span>Territories I've checked out:</span>
+          <ul class="d-flex flex-column">
+            <li class="pt-3 m-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
+              <MyTerritory :territory="terr"></MyTerritory>
+            </li>
+          </ul>
         </div>
+        <div v-if="seenTerritories.length">
+          <hr />
+          <span>Territories I've recently seen:</span>
+          <ul class="d-flex flex-column">
+            <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
+              <MyTerritory :territory="terr"></MyTerritory>
+            </li>
+          </ul>
+        </div>
+        <hr />
       </div>
       <div class="col-sm-12 col-md-3 p-3 pt-5">
         <Reports v-if="canWrite" />
@@ -70,7 +70,7 @@ export default {
           localStorage.removeItem('seenTerritories');
         }
       }
-      return seenTerritories;
+      return seenTerritories.filter(s => !this.territories.some(t => t.id === s.id));
     },
   },
 };
