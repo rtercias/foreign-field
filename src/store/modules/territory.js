@@ -12,7 +12,9 @@ const RESET_TERRITORY = 'RESET_TERRITORY';
 export const territory = {
   namespaced: true,
   state: {
-    territory: {},
+    territory: {
+      addresses: [],
+    },
   },
 
   getters: {
@@ -44,6 +46,7 @@ export const territory = {
 
       return maxBy(mostRecentLogs, log => log && new Date(log.timestamp));
     },
+    address: state => id => state.territory.addresses.find(a => a.id === id),
   },
 
   mutations: {
