@@ -50,6 +50,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
+import orderBy from 'lodash/orderBy';
 import AddressCard from './AddressCard.vue';
 import Loading from './Loading.vue';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -160,7 +161,7 @@ export default {
         id: this.territory.id,
         lastVisited: (new Date()).toISOString(),
       };
-      const seenList = this.seenTerritories();
+      let seenList = this.seenTerritories();
       const idx = seenList.findIndex(terr => terr.id === this.territory.id);
       if (idx >= 0) {
         seenList.splice(idx, 1, basicTerritory);
@@ -168,8 +169,10 @@ export default {
         seenList.push(basicTerritory);
       }
       // filter out old ones
-      const seenList2 = seenList.filter(terr => differenceInDays(new Date(), new Date(terr.lastVisited)) < 60);
-      const parsed = JSON.stringify(seenList2);
+      seenList = seenList.filter(terr => differenceInDays(new Date(), new Date(terr.lastVisited)) < 60);
+      seenList = orderBy(seenList, 'lastVisited', 'desc');
+      seenList.length = seenList.length <= 5 ? seenList.length : 5;
+      const parsed = JSON.stringify(seenList);
       localStorage.setItem('seenTerritories', parsed);
     },
 
