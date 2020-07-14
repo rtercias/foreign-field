@@ -6,10 +6,10 @@
       <div class="col-sm-12">
         <h3><span>Dashboard</span></h3>
         <hr />
-      </div>
-      <div class="col-sm-12 col-md-9">
         <Loading v-if="loading"></Loading>
-        <span v-else-if="!(territories && territories.length)">I have no territories checked out.</span>
+      </div>
+      <div v-if="!loading" class="col-sm-12 col-md-6">
+        <span v-if="!(territories && territories.length)">I have no territories checked out.</span>
         <div v-else>
           <span>Territories I've checked out:</span>
           <ul class="d-flex flex-column">
@@ -17,19 +17,19 @@
               <MyTerritory :territory="terr"></MyTerritory>
             </li>
           </ul>
-        </div>
-        <div v-if="seenTerritories.length">
-          <hr />
-          <span>Territories I've recently seen:</span>
-          <ul class="d-flex flex-column">
-            <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
-              <MyTerritory :territory="terr"></MyTerritory>
-            </li>
-          </ul>
+          <div v-if="seenTerritories.length">
+            <hr />
+            <span>Territories I've recently seen:</span>
+            <ul class="d-flex flex-column">
+              <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
+                <MyTerritory :territory="terr"></MyTerritory>
+              </li>
+            </ul>
+          </div>
         </div>
         <hr />
       </div>
-      <div class="col-sm-12 col-md-3 p-3 pt-5">
+      <div v-if="!loading" class="col-sm-12 col-md-6 p-3 pt-5">
         <Reports v-if="canWrite" />
       </div>
     </b-row>
@@ -70,7 +70,7 @@ export default {
           localStorage.removeItem('seenTerritories');
         }
       }
-      return seenTerritories.filter(s => !this.territories.some(t => t.id === s.id));
+      return seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
     },
   },
 };
