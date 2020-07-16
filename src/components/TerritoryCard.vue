@@ -11,12 +11,12 @@
         <b-btn
           v-b-modal.checkoutModal
           variant="info"
-          v-if="canAssignTerritory && (status === 'Available' || status === 'Recently Worked')"
+          v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
           @click="selectTerritory(terr)">
           check out
         </b-btn>
         <b-btn
-          v-if="canAssignTerritory && status === 'Checked Out'"
+          v-if="canWrite && status === 'Checked Out'"
           variant="outline-info"
           @click="checkin(terr)">check in</b-btn>
       </div>
@@ -62,6 +62,7 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       territoryWithAddresses: 'territory/territory',
+      canWrite: 'auth/canWrite',
     }),
 
     isRecentlyWorked() {
@@ -70,8 +71,11 @@ export default {
     assignedTo() {
       if (this.terr && this.terr.status && this.terr.status.publisher) {
         const pre = this.isRecentlyWorked ? 'Recently assigned to' : 'Assigned to';
+        const timestamp = Number(this.terr.status.date);
+        const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
+
         return `${pre} ${this.terr.status.publisher.firstname} `
-          + `${this.terr.status.publisher.lastname} on ${format(new Date(this.terr.status.date), 'MM/dd/yyyy')}`;
+          + `${this.terr.status.publisher.lastname}${formattedDate}`;
       }
 
       return '';
@@ -79,10 +83,6 @@ export default {
 
     status() {
       return this.terr && this.terr.status && this.terr.status.status || 'Available';
-    },
-
-    canAssignTerritory() {
-      return ['Admin', 'TS'].includes(this.user.role);
     },
   },
 };

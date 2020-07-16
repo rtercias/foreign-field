@@ -37,6 +37,9 @@ import {
   faSearch,
   faTimes,
   faCircleNotch,
+  faPencilAlt,
+  faPlusSquare,
+  faHome,
   faHistory,
   faEllipsisV,
   faPhone,
@@ -44,6 +47,10 @@ import {
   faHouseUser,
   faPlayCircle,
   faPhoneAlt,
+  faDirections,
+  faEdit,
+  faChevronLeft,
+  faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -56,6 +63,9 @@ library.add(
   faSearch,
   faTimes,
   faCircleNotch,
+  faPencilAlt,
+  faPlusSquare,
+  faHome,
   faHistory,
   faEllipsisV,
   faPhone,
@@ -63,6 +73,10 @@ library.add(
   faHouseUser,
   faPlayCircle,
   faPhoneAlt,
+  faDirections,
+  faEdit,
+  faChevronLeft,
+  faPlus,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

@@ -39,7 +39,7 @@ import ActivityButton from './ActivityButton';
 
 export default {
   name: 'ActivityHistory',
-  props: ['group', 'id', 'addressId'],
+  props: ['group', 'territoryId', 'addressId'],
   components: {
     Loading,
     BIconPlus,
@@ -55,6 +55,7 @@ export default {
   },
   mounted() {
     this.fetch();
+    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
   },
   computed: {
     ...mapGetters({
@@ -63,7 +64,13 @@ export default {
       publishers: 'publishers/publishers',
     }),
     activityLogs() {
-      return this.address && orderBy(this.address.activityLogs, a => (new Date(a.timestamp)), 'desc') || [];
+      return this.address && orderBy(this.address.activityLogs, (a) => {
+        const timestamp = Number(a.timestamp);
+        if (!Number.isNaN(timestamp)) {
+          return new Date(timestamp);
+        }
+        return null;
+      }, 'desc') || [];
     },
   },
   watch: {
@@ -78,6 +85,7 @@ export default {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
       fetchPublishers: 'publishers/fetchPublishers',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     async fetch() {
       await this.fetchPublishers(this.congId);
@@ -88,11 +96,19 @@ export default {
       const pub = this.publishers && this.publishers.find(p => p.id === id);
       return pub && `${pub.firstname} ${pub.lastname}`;
     },
-    friendlyTime(timestamp) {
-      return format(new Date(timestamp), 'hh:mm a');
+    friendlyTime(ts) {
+      const timestamp = Number(ts);
+      if (!Number.isNaN(timestamp)) {
+        return format(new Date(timestamp), 'hh:mm a');
+      }
+      return '';
     },
-    friendlyDate(timestamp) {
-      return new Date(timestamp).toLocaleDateString();
+    friendlyDate(ts) {
+      const timestamp = Number(ts);
+      if (!Number.isNaN(timestamp)) {
+        return format(new Date(timestamp), 'E P');
+      }
+      return '';
     },
     logsGroupedByDate() {
       const group = groupBy(this.activityLogs, log => this.friendlyDate(log.timestamp));

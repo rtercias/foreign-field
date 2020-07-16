@@ -1,10 +1,54 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 import orderBy from 'lodash/orderBy';
+import clone from 'lodash/clone';
+import { InvalidAddressError } from '../exceptions/custom-errors';
+
+const model = gql`fragment Model on Address {
+  congregationId
+  territory_id
+  id
+  addr1
+  addr2
+  city
+  state_province
+  postal_code
+  phone
+  longitude
+  latitude
+  notes
+  status
+  sort
+  activityLogs {
+    id
+    checkout_id
+    address_id
+    value
+    tz_offset
+    timestamp
+    timezone
+    publisher_id
+    notes
+  }
+}`;
+
+export const ADDRESS_STATUS = {
+  Active: 'Active',
+  NF: 'NF',
+  DNC: 'DNC',
+};
 
 const SET_ADDRESS = 'SET_ADDRESS';
 const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
+const ADD_ADDRESS = 'ADD_ADDRESS';
+const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+const CHANGE_STATUS = 'CHANGE_STATUS';
+const ADD_TAG = 'ADD_TAG';
+const REMOVE_TAG = 'REMOVE_TAG';
+
 const ACTION_BUTTON_LIST = [
   {
     type: 'fa-icon',
@@ -41,13 +85,6 @@ const ACTION_BUTTON_LIST = [
     icon: 'envelope',
     className: 'text-slate-blue',
   },
-  {
-    type: 'fa-icon',
-    value: 'NF',
-    text: 'NF',
-    icon: 'circle',
-    className: 'text-danger',
-  },
 ];
 
 function createActivityLog(id, addressId, value, checkoutId, user) {
@@ -62,6 +99,46 @@ function createActivityLog(id, addressId, value, checkoutId, user) {
   };
 }
 
+
+function validateAddress(_address, isNew) {
+  const address = clone(_address);
+
+  if (isNew && address.id) {
+    throw new InvalidAddressError('Address ID must be empty when adding a new address');
+  }
+  if (!address.addr1) {
+    throw new InvalidAddressError('Address 1 is required');
+  }
+  if (!address.city) {
+    throw new InvalidAddressError('City is required');
+  }
+  if (!address.state_province) {
+    throw new InvalidAddressError('State is required');
+  }
+  if (!Number.isInteger(address.sort)) {
+    throw new InvalidAddressError('Sort is required');
+  }
+
+  // convert nullable fields to empty string when null
+  if (address.addr2 === null) {
+    address.addr2 = '';
+  }
+
+  if (address.postal_code === null) {
+    address.postal_code = '';
+  }
+
+  if (address.phone === null) {
+    address.phone = '';
+  }
+
+  if (address.notes === null) {
+    address.notes = '';
+  }
+
+  return address;
+}
+
 export const address = {
   namespaced: true,
   state: {
@@ -74,11 +151,18 @@ export const address = {
     lastActivity: (state) => {
       const activity = state.address && state.address.activityLogs;
       if (activity) {
-        const current = orderBy(activity, a => (new Date(a.timestamp)), 'desc')[0];
-        return current && current.value;
+        const current = orderBy(activity, (a) => {
+          const timestamp = Number(a.timestamp);
+          if (!Number.isNaN(timestamp)) {
+            return new Date(timestamp);
+          }
+          return null;
+        }, 'desc')[0];
+
+        return current;
       }
 
-      return null;
+      return { value: 'START', timestamp: '' };
     },
 
     checkoutInfo: (state, getters, rootState, rootGetters) => {
@@ -87,6 +171,12 @@ export const address = {
     },
 
     actionButtonList: () => ACTION_BUTTON_LIST,
+
+    tags: state => ((state.address.notes && state.address.notes
+      .toLowerCase()
+      .split(',')
+      .filter(n => !n.length))
+      || []),
   },
 
   mutations: {
@@ -117,6 +207,30 @@ export const address = {
         }
       }
     },
+
+    ADD_ADDRESS(state, addr) {
+      state.address = addr;
+    },
+
+    UPDATE_ADDRESS(state, addr) {
+      state.address = addr;
+    },
+
+    CHANGE_STATUS(state, status) {
+      state.address.status = status;
+    },
+
+    ADD_TAG(state, tag) {
+      const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
+      arrTags.push(tag);
+      state.address.notes = arrTags.join(',');
+    },
+
+    REMOVE_TAG(state, tag) {
+      const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
+      const newTags = arrTags.filter(t => t !== tag);
+      state.address.notes = newTags.join(',');
+    },
   },
 
   actions: {
@@ -134,16 +248,12 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: `query Address($addressId: Int) { 
+          query: print(gql`query Address($addressId: Int) { 
             address(id: $addressId) { 
-              id addr1 addr2 city state_province postal_code
-              phone longitude latitude notes
-              activityLogs {
-                id checkout_id address_id value tz_offset timestamp
-                timezone publisher_id notes
-              }
+              ...Model
             }
-          }`,
+          }
+          ${model}`),
           variables: {
             addressId,
           },
@@ -175,12 +285,12 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation AddLog($activityLog: ActivityLogInput!) { 
+            query: print(gql`mutation AddLog($activityLog: ActivityLogInput!) { 
               addLog(activityLog: $activityLog) {
                 id checkout_id address_id value tz_offset timestamp
                 timezone publisher_id notes
               }
-            }`,
+            }`),
             variables: {
               activityLog,
             },
@@ -218,12 +328,12 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation UpdateLog($activityLog: ActivityLogInput!) { 
+            query: print(gql`mutation UpdateLog($activityLog: ActivityLogInput!) { 
               updateLog(activityLog: $activityLog) {
                 id checkout_id address_id value tz_offset timestamp
                 timezone publisher_id notes
               }
-            }`,
+            }`),
             variables: {
               activityLog,
             },
@@ -252,9 +362,9 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation RemoveLog($id: Int!) { 
+            query: print(gql`mutation RemoveLog($id: Int!) { 
               removeLog(id: $id)
-            }`,
+            }`),
             variables: {
               id,
             },
@@ -269,6 +379,196 @@ export const address = {
       }
 
       commit('auth/LOADING', false, { root: true });
+    },
+    async addAddress({ commit, rootGetters }, _address) {
+      commit('auth/LOADING', true, { root: true });
+
+      const user = rootGetters['auth/user'];
+      const addr = validateAddress(_address, true);
+      addr.create_user = user.id;
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation CreateAddress($address: AddressInput!) { 
+            addAddress(address: $address) { 
+              ...Model
+            }
+          }
+          ${model}`),
+          variables: {
+            address: addr,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        if (response.data.errors) {
+          throw new Error(response.data.errors[0].message);
+        }
+        const { addAddress } = response.data.data;
+        commit(ADD_ADDRESS, addAddress);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async updateAddress({ commit, rootGetters }, _address) {
+      commit('auth/LOADING', true, { root: true });
+
+      const user = rootGetters['auth/user'];
+      const addr = validateAddress(_address);
+      addr.update_user = user.id;
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation UpdateAddress($address: AddressInput!) { 
+            updateAddress(address: $address) { 
+              ...Model
+            }
+          }
+          ${model}`),
+          variables: {
+            address: addr,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const { updateAddress } = response.data.data;
+        commit(UPDATE_ADDRESS, updateAddress);
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async markAsNotForeign({ commit }, { addressId, userid, tag }) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
+            changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
+          }`),
+          variables: {
+            addressId,
+            status: ADDRESS_STATUS.NF,
+            userid,
+            tag,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const changeAddressStatus = response.data.data;
+        if (changeAddressStatus) {
+          commit(CHANGE_STATUS, ADDRESS_STATUS.NF);
+        }
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async markAsDoNotCall({ commit }, { addressId, userid, tag }) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
+            changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
+          }`),
+          variables: {
+            addressId,
+            status: ADDRESS_STATUS.DNC,
+            userid,
+            tag,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const changeAddressStatus = response.data.data;
+        if (changeAddressStatus) {
+          commit(CHANGE_STATUS, ADDRESS_STATUS.DNC);
+        }
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async addTag({ commit }, { addressId, userid, tag }) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation AddTag($addressId: Int!, $userid: Int!, $tag: String!) { 
+            addNote(addressId: $addressId, userid: $userid, note: $tag)
+          }`),
+          variables: {
+            addressId,
+            userid,
+            tag,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const addNote = response.data.data;
+        if (addNote) {
+          commit(ADD_TAG, tag);
+        }
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async removeTag({ commit }, { addressId, userid, tag }) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation RemoveTag($addressId: Int!, $userid: Int!, $tag: String!) { 
+            removeNote(addressId: $addressId, userid: $userid, note: $tag)
+          }`),
+          variables: {
+            addressId,
+            userid,
+            tag,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const removeNote = response.data.data;
+        if (removeNote) {
+          commit(REMOVE_TAG, tag);
+        }
+        commit('auth/LOADING', false, { root: true });
+      }
     },
   },
 };

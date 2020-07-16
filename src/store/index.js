@@ -8,13 +8,14 @@ import { territories } from './modules/territories';
 import { address } from './modules/address';
 import { addresses } from './modules/addresses';
 import { publishers } from './modules/publishers';
+import { reports } from './modules/reports';
 import '../../node_modules/firebaseui/dist/firebaseui.css';
 
 Vue.use(Vuex);
 
 axios.defaults.baseURL = process.env.VUE_APP_ROOT_API;
 axios.defaults.method = 'post';
-axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export const store = new Store({
   plugins: [createCache()],
@@ -25,5 +26,6 @@ export const store = new Store({
     address,
     addresses,
     publishers,
+    reports,
   },
 });

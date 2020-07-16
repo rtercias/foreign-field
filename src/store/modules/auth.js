@@ -1,8 +1,11 @@
 import axios from 'axios';
 import firebase from 'firebase/app';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 import uniqBy from 'lodash/uniqBy';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
+import { IncompleteRegistrationError, UnauthorizedUserError } from '../exceptions/custom-errors';
 
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
@@ -10,6 +13,7 @@ const FORCEOUT = 'FORCEOUT';
 const SET_GROUP_CODES = 'SET_GROUP_CODES';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
+const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
 
 function initialState() {
   return {
@@ -22,6 +26,8 @@ function initialState() {
     congId: 0,
     groupCodes: [],
     loading: false,
+    mastheadLeftNavRoute: '/',
+    token: '',
   };
 }
 
@@ -37,8 +43,16 @@ export const auth = {
     user: state => state.user,
     congId: state => state.congId,
     groupCodes: state => state.groupCodes,
-    isAdmin: state => state.user && ['Admin', 'TS'].includes(state.user.role),
+    isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
+    canWrite: state => state.user && (state.user.role === 'Admin'
+      || state.user.role === 'TS'
+      || state.user.role === 'SO'
+      || state.user.role === 'GO'),
+    canRead: (state, getters) => getters.canWrite
+      || (state.user && (state.user.role === 'RP' || state.user.role === 'TS')),
+    mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
+    token: state => state.token,
   },
 
   mutations: {
@@ -53,6 +67,7 @@ export const auth = {
       state.isForcedOut = false;
       state.name = authenticatedUser.name;
       state.photoUrl = authenticatedUser.photoUrl;
+      state.token = authenticatedUser.token;
     },
 
     AUTHORIZE(state, user) {
@@ -78,14 +93,16 @@ export const auth = {
     LOADING(state, value) {
       state.loading = value;
     },
+
+    MASTHEAD_LEFT_NAV_ROUTE(state, value) {
+      state.mastheadLeftNavRoute = value;
+    },
   },
 
   actions: {
-    authenticate({ commit }, params) {
-      return new Promise((resolve) => {
-        commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl });
-        resolve(params);
-      });
+    async authenticate({ commit }, params) {
+      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl, token: params.token });
+      return params;
     },
 
     async logout({ commit }) {
@@ -102,11 +119,8 @@ export const auth = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           data: {
-            query: `query Publisher($username: String) {
+            query: print(gql`query Publisher($username: String) {
               user (username: $username) {
                 id 
                 username
@@ -116,6 +130,7 @@ export const auth = {
                 congregation {
                   id
                   name
+                  description
                 }
                 territories {
                   id
@@ -127,30 +142,42 @@ export const auth = {
                     status
                     date
                   }
+                  addresses {
+                    addr1
+                    addr2
+                    city
+                    state_province
+                    postal_code
+                    activityLogs {
+                      publisher_id
+                      value
+                      timestamp
+                    }
+                  }
                 }
               }
-            }`,
+            }`),
             variables: {
               username,
             },
           },
         });
 
-        commit(LOADING, false);
-
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject(new Error('Unauthorized'));
+          reject(new IncompleteRegistrationError('Unauthorized'));
         }
 
-        const { user } = response.data.data;
+        const { user } = (response && response.data && response.data.data) || {};
         const { permissions = [] } = router.currentRoute.meta;
         const hasPermission = permissions.length === 0 || permissions.includes(user.role);
         if (hasPermission) {
           commit(AUTHORIZE, user);
           resolve();
         } else {
-          reject(new Error('Unauthorized'));
+          reject(new UnauthorizedUserError('Unauthorized'));
         }
+
+        commit(LOADING, false);
       });
     },
 
@@ -168,9 +195,15 @@ export const auth = {
           await dispatch('logout');
           dispatch('forceout');
         }
-      } catch (exception) {
-        await dispatch('logout');
-        dispatch('forceout');
+      } catch (err) {
+        if (err instanceof IncompleteRegistrationError) {
+          await dispatch('logout');
+          dispatch('forceout');
+        } else if (err instanceof UnauthorizedUserError) {
+          router.replace({ name: 'unauthorized' });
+        } else {
+          console.error(err);
+        }
       }
 
       dispatch('getGroupCodes', state.congId);
@@ -180,15 +213,12 @@ export const auth = {
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         data: {
-          query: `{ territories (congId: ${congId}) { group_code }}`,
+          query: print(gql`{ territories (congId: ${congId}) { group_code }}`),
         },
       });
 
-      const { territories } = response.data.data;
+      const { territories } = (response && response.data && response.data.data) || [];
       // const group = sessionStorage.getItem('group-code');
       // if (group) this.setGroupCode(group);
 
@@ -196,10 +226,20 @@ export const auth = {
       commit(SET_GROUP_CODES, groupCodes);
     },
 
-    firebaseInit({ dispatch, state }) {
+    async firebaseInit({ dispatch, state }) {
       firebase.initializeApp(config);
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
+          user.token = await user.getIdToken();
+          if (!user.token) {
+            throw new Error('Unable to retrieve token from Firebase');
+          }
+
+          axios.interceptors.request.use((cfg) => {
+            cfg.headers.Authorization = `Bearer ${user.token}`;
+            return cfg;
+          });
+
           await dispatch('login', user);
         } else {
           if (state.isForcedOut) {
@@ -212,6 +252,10 @@ export const auth = {
           }
         }
       });
+    },
+
+    setLeftNavRoute({ commit }, value) {
+      commit(MASTHEAD_LEFT_NAV_ROUTE, value);
     },
   },
 };

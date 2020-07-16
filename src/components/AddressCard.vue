@@ -1,83 +1,104 @@
 <template>
-  <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-    <div class="address-card row justify-content-between align-items-center pr-2" ref="addressCard">
-      <div class="address col-9">
-        <div>
-          <h5>
-            <a :href="mapsUrl" target="_blank">{{address.addr1}}</a>&nbsp;
-            <em>{{address.addr2}}</em>
-          </h5>
+  <div class="address-card-container">
+    <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
+      <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
+        <div class="address col-9">
           <div>
-            {{address.city}} {{address.state}} {{address.postalCode}}<br/>
-            {{address.notes}}
+            <h5 class="mb-0">
+              <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+                {{address.addr1}}
+              </b-link>&nbsp;
+            </h5>
+            {{address.addr2}}
+            <div class="mb-2">
+              {{address.city}} {{address.state_province}} {{address.postal_code}}
+            </div>
+            <div class="phone">
+              <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
+            </div>
           </div>
-          <b-badge class="pml-2" variant="info" :href="lookupFastPeopleSearch" size="sm">
-            <font-awesome-layers>
-              <font-awesome-icon icon="phone-alt"></font-awesome-icon>
-            </font-awesome-layers>
-            FPS
-          </b-badge>
         </div>
-      </div>
-      <div class="static-buttons col-3 pl-0 pr-2" v-show="!isContainerVisible">
-        <ActivityButton
-          class="fa-2x pr-2"
-          :value="selectedResponse"
-          :next="'START'"
-          @button-click="updateResponse">
-        </ActivityButton>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-      </div>
-      <div
-        class="activity-container pl-0 pr-2"
-        ref="activityContainer"
-        :style="{ '--x': transform, right: `${containerRight}px` }">
-        <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-        <div class="buttons" v-if="isTerritoryCheckedOut">
-          <ActivityButton
-            v-for="(button, index) in containerButtonList"
-            :key="index"
-            class="fa-2x"
-            :value="button.value"
-            @button-click="updateResponse">
-          </ActivityButton>
-        </div>
-        <b-link
-          class="text-info"
-          :to="`/addresses/${address.id}/history`"
-          @click="setAddress(address)">
-          <font-awesome-layers class="text-info fa-2x">
-            <font-awesome-icon icon="history"></font-awesome-icon>
+        <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
+          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
+          <div :class="{ hidden: selectedResponse === 'START' || isLogging }">
+            <ActivityButton
+              class="selected-response fa-2x pr-2"
+              :value="selectedResponse"
+              :next="'START'"
+              @button-click="confirmClearStatus">
+            </ActivityButton>
+            <a @click="confirmClearStatus">
+              <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
+                {{formattedSelectedResponseTS}}
+              </div>
+            </a>
+          </div>
+          <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
+            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
           </font-awesome-layers>
-        </b-link>
+        </div>
+        <div
+          class="activity-container pl-0 pr-2"
+          ref="activityContainer"
+          :style="{
+            '--x': transform,
+            right: `${containerRight}px`,
+            transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
+          }">
+          <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
+            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+          </font-awesome-layers>
+          <div class="buttons" v-if="isTerritoryCheckedOut">
+            <ActivityButton
+              v-for="(button, index) in containerButtonList"
+              :key="index"
+              class="fa-2x"
+              :value="button.value"
+              @button-click="updateResponse">
+            </ActivityButton>
+          </div>
+          <b-link
+            class="text-info"
+            :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
+            @click="setAddress(address)">
+            <font-awesome-layers class="text-info fa-2x">
+              <font-awesome-icon icon="history"></font-awesome-icon>
+            </font-awesome-layers>
+          </b-link>
+        </div>
       </div>
-    </div>
-  </v-touch>
+    </v-touch>
+    <hr class="m-0 mb-2" />
+    <AddressTags :address="address" v-on="$listeners"></AddressTags>
+  </div>
 </template>
+
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
+import format from 'date-fns/format';
 import get from 'lodash/get';
+import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
+import AddressTags from './AddressTags';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW', 'NF'];
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId'],
+  props: ['address', 'territoryId', 'group'],
   components: {
+    AddressLinks,
     ActivityButton,
+    AddressTags,
   },
   data() {
     return {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
+      selectedResponseTS: null,
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -85,6 +106,8 @@ export default {
       isContainerVisible: false,
       transform: '',
       clickedResponse: '',
+      clickedToOpen: false,
+      isLogging: false,
     };
   },
   methods: {
@@ -92,28 +115,56 @@ export default {
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
+      getTerritory: 'territory/getTerritory',
     }),
     resetContainerPosition() {
       const pos = -this.containerWidth;
       this.containerRight = pos;
       this.isContainerVisible = false;
     },
-    async updateResponse(value) {
+    async confirmClearStatus() {
+      try {
+        const value = await this.$bvModal.msgBoxConfirm('Clear the address status?', {
+          title: `${this.address.addr1} ${this.address.addr2}`,
+          centered: true,
+        });
+
+        if (value) {
+          await this.updateResponse();
+        }
+      } catch (err) {
+        // do nothing
+      }
+    },
+    async updateResponse(_value) {
+      this.isLogging = true;
+      let value = _value;
+      this.resetContainerPosition();
+
       if (this.selectedResponse === 'START' && value === 'START') return;
+
+      if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
 
       this.clickedResponse = value;
 
       try {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
-        this.selectedResponse = this.lastActivity;
+        await this.getTerritory(this.territoryId);
+        this.selectedResponse = this.lastActivity && this.lastActivity.value;
+        this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp);
         this.clickedResponse = '';
         this.resetContainerPosition();
       } catch (e) {
         console.error('Unable to save activity log', e);
+      } finally {
+        this.isLogging = false;
       }
     },
     slide(e) {
+      this.clickedToOpen = false;
       if (Number.isNaN(this.transform)) this.transform = 0;
       const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
       if (Math.abs(e.velocityX) > 0.2) {
@@ -164,11 +215,22 @@ export default {
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
+
+    openActivityContainer() {
+      this.clickedToOpen = true;
+      if (this.isContainerVisible) {
+        this.resetContainerPosition();
+      } else {
+        this.containerRight = 0;
+        this.isContainerVisible = true;
+      }
+    },
   },
   mounted() {
     this.resetContainerPosition();
     this.setAddress(this.address);
-    this.selectedResponse = this.lastActivity || this.START;
+    this.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
+    this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp) || null;
   },
   computed: {
     ...mapGetters({
@@ -177,13 +239,6 @@ export default {
       territory: 'territory/territory',
       actionButtonList: 'address/actionButtonList',
     }),
-
-    mapsUrl() {
-      const addr1 = this.address.addr1 || '';
-      const city = this.address.city || '';
-      const state = this.address.state_province || '';
-      return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
-    },
 
     isTerritoryCheckedOut() {
       return get(this.territory, 'status.status') === 'Checked Out';
@@ -211,18 +266,12 @@ export default {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
 
-    lookup411() {
-      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
-      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
-      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
-      return `https://www.411.com/address/${addr1}/${city}-${state}`;
+    formattedPhone() {
+      return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
 
-    lookupFastPeopleSearch() {
-      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
-      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
-      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
-      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
+    formattedSelectedResponseTS() {
+      return this.selectedResponseTS && format(new Date(this.selectedResponseTS), 'E M/d') || '';
     },
   },
 };
@@ -230,12 +279,15 @@ export default {
 <style scoped>
 .v-touch-address-card {
   touch-action: pan-y;
+  height: 100%;
 }
 .address-card {
   display: flex;
   flex-direction: row;
   overflow: hidden;
   position: relative;
+  transition: ease-in-out 0.3s  ;
+  min-height: 104px;
 }
 .address {
   display: flex;
@@ -264,7 +316,9 @@ export default {
   height: 100%;
   min-height: 50px;
 }
-
+.ellipsis-v, .ellipsis-v-static {
+  cursor: pointer;
+}
 .activity-container * {
   display: block;
 }
@@ -277,6 +331,21 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.selected-response {
+  min-width: 70px;
+  position: relative;
+  top: 9px;
+}
+.last-activity {
+  font-size: small;
+  position: relative;
+  bottom: 2px;
+}
+.logging-spinner {
+  font-size: 30px;
+  position: absolute;
+  right: 47px;
 }
 
 @media print {

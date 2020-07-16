@@ -1,61 +1,76 @@
 <template>
-  <div class="dashboard lead d-flex align-items-center flex-column p-3 pt-5">
-    <h3 v-if="!isAuthenticated">Welcome to Foreign Field territory management</h3>
+  <b-container class="dashboard lead">
+    <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
-    <div v-else class="w-100">
-      <h3 class="pt-0 mt-0">Dashboard</h3>
-
-      <div class="d-flex p-2 text-left justify-content-center">
-        <div>
-          <Loading v-if="loading"></Loading>
-          <span v-else-if="!(territories && territories.length)">I have no territories checked out.</span>
-          <div v-else>
-            <span>Territories I have checked out:</span>
+    <b-row v-else class="main">
+      <div class="col-sm-12">
+        <h3><span>Dashboard</span></h3>
+        <hr />
+        <Loading v-if="loading"></Loading>
+      </div>
+      <div v-if="!loading" class="col-sm-12 col-md-6">
+        <span v-if="!(territories && territories.length)">I have no territories checked out.</span>
+        <div v-else>
+          <span>Territories I've checked out:</span>
+          <ul class="d-flex flex-column">
+            <li class="pt-3 m-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
+              <MyTerritory :territory="terr"></MyTerritory>
+            </li>
+          </ul>
+          <div v-if="seenTerritories.length">
+            <hr />
+            <span>Other territories I've recently seen:</span>
             <ul class="d-flex flex-column">
-              <li class="pt-3 ml-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
-                <a :href="url(terr)">{{terr.name}} ({{terr.city}})</a>
-                <div>Checked out on {{terr.status && checkoutDate(terr.status.date)}}</div>
-                <hr/>
+              <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
+                <MyTerritory :territory="terr"></MyTerritory>
               </li>
             </ul>
           </div>
         </div>
+        <hr />
       </div>
-
-    </div>
-  </div>
+      <div v-if="!loading" class="col-sm-12 col-md-6 p-3 pt-5">
+        <Reports v-if="canWrite" />
+      </div>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import format from 'date-fns/format';
 import Auth from './Auth';
 import Loading from './Loading.vue';
+import Reports from './Reports';
+import MyTerritory from './MyTerritory';
 
 export default {
-  name: 'Home',
+  name: 'Welcome',
   components: {
     Auth,
     Loading,
-  },
-  methods: {
-    checkoutDate(date) {
-      return format(new Date(date), 'MM/dd/yyyy');
-    },
-
-    url(terr) {
-      return `/territories/${terr.group_code}/${terr.id}`;
-    },
+    Reports,
+    MyTerritory,
   },
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
       user: 'auth/user',
       loading: 'auth/loading',
+      canWrite: 'auth/canWrite',
     }),
-
     territories() {
       return this.user && this.user.territories;
+    },
+    seenTerritories() {
+      let seenTerritories = [];
+      if (localStorage.getItem('seenTerritories')) {
+        try {
+          seenTerritories = JSON.parse(localStorage.getItem('seenTerritories'));
+        } catch (e) {
+          localStorage.removeItem('seenTerritories');
+        }
+      }
+      return seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
     },
   },
 };
@@ -79,5 +94,8 @@ a {
 }
 router-link {
   cursor: pointer;
+}
+.main {
+  display: flex;
 }
 </style>

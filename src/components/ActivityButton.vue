@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction pl-2 pr-3">
+  <div class="interaction pl-2 pr-2">
     <span class="pl-0" v-if="get('type') === 'link'">
       <b-button
         class="p-0"

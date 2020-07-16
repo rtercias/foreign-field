@@ -1,15 +1,20 @@
 import axios from 'axios';
+import gql from 'graphql-tag';
+import { print } from 'graphql/language/printer';
 import { store } from '..';
+import maxBy from 'lodash/maxBy';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
-const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
+const SET_TERRITORY = 'SET_TERRITORY';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 const RESET_TERRITORY = 'RESET_TERRITORY';
 
 export const territory = {
   namespaced: true,
   state: {
-    territory: {},
+    territory: {
+      addresses: [],
+    },
   },
 
   getters: {
@@ -26,6 +31,22 @@ export const territory = {
 
       return false;
     },
+    maxSort: (state) => {
+      const addresses = state.territory && state.territory.addresses || [];
+      const max = maxBy(addresses, a => a.sort);
+      return max && max.sort || 0;
+    },
+    lastActivity: (state) => {
+      const addresses = state.territory && state.territory.addresses || [];
+      const mostRecentLogs = [];
+      for (const addr of addresses) {
+        const max = maxBy(addr.activityLogs, log => log && new Date(log.timestamp));
+        mostRecentLogs.push(max);
+      }
+
+      return maxBy(mostRecentLogs, log => log && new Date(log.timestamp));
+    },
+    address: state => id => state.territory.addresses.find(a => a.id === id),
   },
 
   mutations: {
@@ -33,11 +54,12 @@ export const territory = {
       state.territory.status = newStatus;
       store.cache.clear();
     },
-    GET_TERRITORY_SUCCESS(state, terr) {
+    SET_TERRITORY(state, terr) {
       state.territory = terr;
     },
-    GET_TERRITORY_FAIL(state, exception) { /* eslint-disable-line no-unused-vars */
-      // console.log(GET_TERRITORY_FAIL, exception);
+    GET_TERRITORY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(GET_TERRITORY_FAIL, exception);
     },
     RESET_TERRITORY(state) {
       state.territory = {};
@@ -53,7 +75,7 @@ export const territory = {
 
         const response = await axios({
           data: {
-            query: `mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+            query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
                 status {
                   checkout_id
@@ -61,7 +83,7 @@ export const territory = {
                   date
                 }
               }
-            }`,
+            }`),
             variables: {
               terrId: args.territoryId,
               pubId: args.userId,
@@ -88,7 +110,7 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: `mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+            query: print(gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
                 status {
                   checkout_id
@@ -96,7 +118,7 @@ export const territory = {
                   date
                 }
               }
-            }`,
+            }`),
             variables: {
               terrId: args.territoryId,
               pubId: args.userId,
@@ -119,16 +141,13 @@ export const territory = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           data: {
-            query: `query Territory($terrId: Int) { 
+            query: print(gql`query Territory($terrId: Int) { 
               territory (id: $terrId) {
-                group_code id congregationid name description type 
+                group_code id congregationid name description type city
                 addresses {
                   id addr1 addr2 city state_province postal_code
-                  phone longitude latitude notes
+                  phone longitude latitude notes sort
                   activityLogs {
                     id checkout_id address_id value tz_offset
                     timestamp timezone publisher_id notes
@@ -143,7 +162,7 @@ export const territory = {
                   }
                 }
               }
-            }`,
+            }`),
             variables: {
               terrId: id,
             },
@@ -154,10 +173,14 @@ export const territory = {
           return;
         }
         const { territory: terr } = response.data.data;
-        commit(GET_TERRITORY_SUCCESS, terr);
+        commit(SET_TERRITORY, terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
       }
+    },
+
+    async setTerritory({ commit }, terr) {
+      commit(SET_TERRITORY, terr);
     },
 
     resetTerritory({ commit }) {
