@@ -19,6 +19,7 @@
               <font-awesome-icon icon="plus"></font-awesome-icon> New Address
             </b-button>
           </div>
+          <TerritoryMap></TerritoryMap>
         </header>
         <b-list-group class="columns">
           <b-list-group-item
@@ -53,6 +54,7 @@ import uniq from 'lodash/uniq';
 import orderBy from 'lodash/orderBy';
 import AddressCard from './AddressCard.vue';
 import Loading from './Loading.vue';
+import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
 
 export default {
@@ -60,6 +62,7 @@ export default {
   components: {
     AddressCard,
     Loading,
+    TerritoryMap,
   },
   props: ['group', 'id'],
   async mounted() {
