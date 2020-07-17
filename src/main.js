@@ -90,6 +90,7 @@ Vue.use(VueTouch);
 
 // eslint-disable-next-line
 console.log('key', process.env.VUE_APP_PUSHER_KEY);
+Pusher.logToConsole = true;
 const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
   cluster: 'us2',
 });
