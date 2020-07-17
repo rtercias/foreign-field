@@ -88,6 +88,8 @@ Vue.use(VueRouter);
 Vue.use(BootstrapVue);
 Vue.use(VueTouch);
 
+// eslint-disable-next-line
+console.log('key', process.env.VUE_APP_PUSHER_KEY);
 const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
   cluster: 'us2',
 });
