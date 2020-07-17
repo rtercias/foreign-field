@@ -88,16 +88,11 @@ Vue.use(VueRouter);
 Vue.use(BootstrapVue);
 Vue.use(VueTouch);
 
-Pusher.logToConsole = true;
 const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
   cluster: 'us2',
 });
 
-// eslint-disable-next-line
-console.log('key', pusher.key);
-
 export const channel = pusher.subscribe('foreign-field');
-
 
 new Vue({
   render: h => h(App),

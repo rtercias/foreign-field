@@ -66,8 +66,6 @@ export default {
   props: ['group', 'id'],
   async mounted() {
     channel.bind('add-log', (log) => {
-      // eslint-disable-next-line
-      console.log('add-log', log);
       const address = this.territory.addresses.find(a => a.id === log.address_id);
       this.$set(address, 'incomingResponse', log);
     });
