@@ -20,6 +20,7 @@ import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
 import VueTouch from 'vue-touch';
 import App from './App.vue';
+import Pusher from 'pusher-js';
 import { router } from './routes';
 import { store } from './store';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -86,6 +87,13 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
 Vue.use(VueTouch);
+
+const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
+  cluster: 'us2',
+});
+
+export const channel = pusher.subscribe('foreign-field');
+
 
 new Vue({
   render: h => h(App),

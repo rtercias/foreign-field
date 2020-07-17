@@ -7,6 +7,7 @@ import { territory } from './modules/territory';
 import { territories } from './modules/territories';
 import { address } from './modules/address';
 import { addresses } from './modules/addresses';
+import { publisher } from './modules/publisher';
 import { publishers } from './modules/publishers';
 import { reports } from './modules/reports';
 import '../../node_modules/firebaseui/dist/firebaseui.css';
@@ -25,6 +26,7 @@ export const store = new Store({
     territories,
     address,
     addresses,
+    publisher,
     publishers,
     reports,
   },
