@@ -31,6 +31,7 @@
               v-bind="{address, reset}"
               :territoryId="terrId"
               :group="group"
+              :incomingResponse="address.incomingResponse"
               @address-updated="refreshTerritory">
             </AddressCard>
           </b-list-group-item>
@@ -54,6 +55,7 @@ import orderBy from 'lodash/orderBy';
 import AddressCard from './AddressCard.vue';
 import Loading from './Loading.vue';
 import differenceInDays from 'date-fns/differenceInDays';
+import { channel } from '../main';
 
 export default {
   name: 'Territory',
@@ -63,6 +65,11 @@ export default {
   },
   props: ['group', 'id'],
   async mounted() {
+    channel.bind('add-log', (log) => {
+      const address = this.territory.addresses.find(a => a.id === log.address_id);
+      this.$set(address, 'incomingResponse', log);
+    });
+
     this.setLeftNavRoute(`/territories/${this.group}`);
     if (this.token) {
       await this.loadTerritory();
@@ -153,7 +160,7 @@ export default {
 
     saveSeenTerritory() {
       // create a basic territory and save it to localstorage
-      const city = this.territory.city.length ? this.territory.city.split(',')[0] : '';
+      const city = Array.isArray(this.territory.city) && this.territory.city.length ? this.territory.city.split(',')[0] : '';
       const basicTerritory = {
         name: this.territory.name,
         city,
