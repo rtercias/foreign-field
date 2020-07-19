@@ -1,6 +1,7 @@
 <template>
   <div id="map">
-    <l-map style="height: 350px" :zoom="zoom" :center="center">
+    <!-- <b-button :to="territory" variant="success">LIST VIEW</b-button> -->
+    <l-map ref="leafmap" style="height: 350px" :zoom="zoom" :center="center">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
       v-for="(x, i) in territory.addresses"
@@ -9,17 +10,15 @@
       <l-popup>{{ x.addr1 }}</l-popup>
       </l-marker>
     </l-map>
-    <b-button @click="testthing()" variant="success">TEST</b-button>
   </div>
 </template>
 
 <script>
-// eslint-disable-next-line
-import L from 'leaflet';
 import {
   LMap, LTileLayer, LMarker, LPopup,
 } from 'vue2-leaflet';
-import { mapGetters, mapActions } from 'vuex';
+// eslint-disable-next-line
+import { mapGetters, mapActions, featureGroup } from 'vuex';
 
 export default {
   name: 'MyMap',
@@ -34,7 +33,7 @@ export default {
       terrId: this.$route.params.id,
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       zoom: 13,
-      center: [40.9, -74],
+      markers: [],
     };
   },
   computed: {
@@ -46,9 +45,14 @@ export default {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
     }),
+    centerMarkers() {
+      this.territory.addresses.forEach(e => this.markers.push([e.latitude, e.longitude]));
+      this.$refs.leafmap.mapObject.fitBounds(this.markers);
+    },
   },
   async mounted() {
     await this.getTerritory(this.terrId);
+    this.centerMarkers();
   },
 };
 </script>
