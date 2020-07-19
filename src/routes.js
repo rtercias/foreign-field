@@ -5,6 +5,7 @@ import Unauthorized from './components/Unauthorized';
 import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
+import TerritoryMap from './components/TerritoryMap';
 import Dnc from './components/Dnc';
 import AssignmentReport from './components/AssignmentReport';
 import AddressLinks from './components/AddressLinks';
@@ -32,6 +33,15 @@ const routes = [
     name: 'territory',
     path: '/territories/:group/:id',
     component: Territory,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
+  },
+  {
+    name: 'map-view',
+    path: '/territories/:group/:territoryId/map',
+    component: TerritoryMap,
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],

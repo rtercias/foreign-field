@@ -19,7 +19,11 @@
               <font-awesome-icon icon="plus"></font-awesome-icon> New Address
             </b-button>
           </div>
-          <TerritoryMap></TerritoryMap>
+          <b-button
+          variant="success"
+          @click="switchToMap">
+          Map View
+          </b-button>
         </header>
         <b-list-group class="columns">
           <b-list-group-item
@@ -177,6 +181,17 @@ export default {
       seenList.length = seenList.length <= 5 ? seenList.length : 5;
       const parsed = JSON.stringify(seenList);
       localStorage.setItem('seenTerritories', parsed);
+    },
+
+    switchToMap() {
+      this.$router.push({
+        name: 'map-view',
+        params: { group: this.$route.params.group, territoryId: this.$route.params.id },
+      });
+    },
+
+    mapViewTog() {
+      this.mapvViewToggle = !this.mapvViewToggle;
     },
 
     async loadTerritory() {

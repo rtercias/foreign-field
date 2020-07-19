@@ -53,6 +53,7 @@ import {
   faChevronLeft,
   faPlus,
 } from '@fortawesome/free-solid-svg-icons';
+import { Icon } from 'leaflet';
 
 library.add(
   faCheck,
@@ -87,6 +88,15 @@ Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
 Vue.use(VueTouch);
+
+/* eslint-disable */
+delete Icon.Default.prototype._getIconUrl;
+Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+/* eslint-enable */
 
 new Vue({
   render: h => h(App),
