@@ -9,7 +9,7 @@
       <l-popup>{{ x.addr1 }}</l-popup>
       </l-marker>
     </l-map>
-    <b-button @click="testthing" variant="success">TEST</b-button>
+    <b-button @click="testthing()" variant="success">TEST</b-button>
   </div>
 </template>
 
@@ -19,7 +19,7 @@ import L from 'leaflet';
 import {
   LMap, LTileLayer, LMarker, LPopup,
 } from 'vue2-leaflet';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'MyMap',
@@ -42,10 +42,14 @@ export default {
       territory: 'territory/territory',
     }),
   },
-  // methods: {
-  //   testthing() {
-  //   },
-  // },
+  methods: {
+    ...mapActions({
+      getTerritory: 'territory/getTerritory',
+    }),
+  },
+  async mounted() {
+    await this.getTerritory(this.terrId);
+  },
 };
 </script>
 

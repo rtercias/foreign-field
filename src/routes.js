@@ -40,7 +40,7 @@ const routes = [
   },
   {
     name: 'map-view',
-    path: '/territories/:group/:territoryId/map',
+    path: '/territories/:group/:id/map',
     component: TerritoryMap,
     props: true,
     meta: {
