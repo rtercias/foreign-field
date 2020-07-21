@@ -1,10 +1,16 @@
 <template>
   <div>
     <div v-show="showCard" class="interactable">
-      <h2>{{ heading }}</h2>
+      <h3><strong>{{ heading }}</strong></h3>
     </div>
     <!-- <b-button :to="territory" variant="success">LIST VIEW</b-button> -->
-    <l-map class="map" ref="leafmap" style="height: 100%" :zoom="zoom" @click="hideInteractable">
+    <l-map
+    class="map"
+    ref="leafmap"
+    style="height: 100%"
+    :zoom="zoom"
+    :options="{zoomControl:false}"
+    :center="center">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
       ref="markerwindow"
@@ -24,7 +30,7 @@
 
 <script>
 import {
-  LMap, LTileLayer, LMarker, LPopup,
+  LMap, LTileLayer, LMarker, LPopup, LControlZoom,
 } from 'vue2-leaflet';
 import { mapGetters, mapActions } from 'vuex';
 
@@ -35,6 +41,7 @@ export default {
     LTileLayer,
     LMarker,
     LPopup,
+    LControlZoom,
   },
   props: ['group', 'id'],
   data() {
@@ -44,6 +51,7 @@ export default {
       markers: [],
       showCard: false,
       heading: '',
+      center: [0, 0],
     };
   },
   computed: {
@@ -56,7 +64,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
-    centerView() {
+    centerAll() {
       this.territory.addresses.forEach(e => this.markers.push([e.latitude, e.longitude]));
       this.$refs.leafmap.mapObject.fitBounds(this.markers);
     },
@@ -64,18 +72,16 @@ export default {
       // eslint-disable-next-line
       this.$router.push({ name: 'address-links', params: { group: this.group, territoryId: this.id, addressId: idtest } });
     },
-    interactiveMarker(idthing) {
+    interactiveMarker(address) {
       this.showCard = true;
-      this.heading = idthing.addr1;
-    },
-    hideInteractable() {
-      this.showCard = false;
+      this.heading = address.addr1;
+      this.center = [address.latitude + -0.002, address.longitude];
     },
   },
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
     await this.getTerritory(this.id);
-    this.centerView();
+    this.centerAll();
   },
 };
 </script>
@@ -83,7 +89,7 @@ export default {
 <style>
 .interactable {
   position: absolute;
-  bottom: 0;
+  bottom: 20px;
   left: 20px;
   z-index: 2;
   height: 350px;
@@ -93,7 +99,8 @@ export default {
 .map {
   z-index: 0;
 }
-h2 {
+h3 {
   padding-top:20px;
+  color: black;
 }
 </style>
