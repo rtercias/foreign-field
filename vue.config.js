@@ -25,7 +25,7 @@ module.exports = {
           {
             src: path.resolve('public/assets/icon.png'),
             destination: 'assets',
-            sizes: [20, 29, 40, 60, 76, 83.5], // multiple sizes
+            sizes: [20, 29, 40, 60, 76], // multiple sizes
             ios: true,
           },
           {
