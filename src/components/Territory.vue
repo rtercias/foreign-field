@@ -67,7 +67,9 @@ export default {
   async mounted() {
     channel.bind('add-log', (log) => {
       const address = this.territory.addresses.find(a => a.id === log.address_id);
-      this.$set(address, 'incomingResponse', log);
+      if (address) {
+        this.$set(address, 'incomingResponse', log);
+      }
     });
 
     this.setLeftNavRoute(`/territories/${this.group}`);
