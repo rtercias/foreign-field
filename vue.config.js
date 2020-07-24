@@ -23,13 +23,13 @@ module.exports = {
         },
         icons: [
           {
-            src: path.resolve('public/assets/icon.png'),
+            src: path.resolve('public/assets/ios-icon.png'),
             destination: 'assets',
             sizes: [20, 29, 40, 60, 76], // multiple sizes
             ios: true,
           },
           {
-            src: path.resolve('public/assets/icon.png'),
+            src: path.resolve('public/assets/ios-1027x1027.png'),
             destination: 'assets',
             sizes: ['828x1792', '1125x2436', '750x1334', '1242x2208', '640x1136', '1536x2048', '1668x2224', '2048x2732'],
             ios: 'startup',

@@ -4,7 +4,10 @@
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
       <div class="col-sm-12">
-        <h3><img :src="require('../assets/icon-x.png')" class="logo" /><span>Dashboard</span></h3>
+        <h3 class="align-items-center d-flex justify-content-center">
+          <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
+          <span class="title w-100">Dashboard</span>
+        </h3>
         <hr />
         <Loading v-if="loading"></Loading>
       </div>
@@ -33,11 +36,6 @@
         <Reports v-if="canWrite" />
       </div>
     </b-row>
-    <div class="icon-attribution">
-      Icon made by
-      <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>
-      from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
-    </div>
   </b-container>
 </template>
 
@@ -88,7 +86,9 @@ h3 {
 }
 .logo {
   width: 100px;
-  margin-left: -30px;
+}
+.title {
+  padding-right: 5.5rem;
 }
 ul {
   list-style-type: none;
@@ -106,13 +106,5 @@ router-link {
 }
 .main {
   display: flex;
-}
-.icon-attribution {
-  font-size: 12px;
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  padding-bottom: 30px;
-  padding-right: 15px;
 }
 </style>
