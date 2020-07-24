@@ -23,6 +23,11 @@ module.exports = {
         },
         icons: [
           {
+            src: path.resolve('public/assets/android-512x512.png'),
+            destination: 'assets',
+            size: 512,
+          },
+          {
             src: path.resolve('public/assets/ios-icon.png'),
             destination: 'assets',
             sizes: [20, 29, 40, 60, 76], // multiple sizes
