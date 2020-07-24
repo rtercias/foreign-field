@@ -73,9 +73,6 @@ export default {
     });
 
     this.setLeftNavRoute(`/territories/${this.group}`);
-    if (this.token) {
-      await this.loadTerritory();
-    }
     this.isLoading = false;
   },
   data() {
@@ -194,6 +191,7 @@ export default {
     async token() {
       await this.loadTerritory();
     },
+    immediate: true,
   },
 };
 </script>

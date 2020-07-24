@@ -1,17 +1,28 @@
 <template>
-  <div class="optimize-card row justify-content-between align-items-center pr-2 text-black-50">
-    <div class="address col-10">
+  <div class="optimize-card col justify-content-between align-items-center pr-2 text-black-0">
+    <div class="address" :class="{ 'col-10': isManual, 'col-5': isOptimize, 'border-right': isManual }">
       <div>
-        <h5 class="mb-0">
+        <div class="mb-0">
           {{address.addr1}}
-        </h5>
+        </div>
         {{address.addr2}}
         <div class="mb-2">
-          {{address.city}} {{address.state_province}} {{address.postal_code}}
+          {{address.city}}
         </div>
       </div>
     </div>
-    <div class="col-2" v-show="isManual">
+    <div class="address col-5 border-left border-right" v-if="isOptimize">
+      <div>
+        <div class="mb-0">
+          {{address.addr1}}
+        </div>
+        {{address.addr2}}
+        <div class="mb-2">
+          {{address.city}}
+        </div>
+      </div>
+    </div>
+    <div class="col-2 p-0" v-if="isManual || isOptimize">
       <font-awesome-layers class="drag-drop-handle fa-2x">
         <font-awesome-icon icon="grip-lines"></font-awesome-icon>
       </font-awesome-layers>
@@ -40,6 +51,9 @@ export default {
     }),
     isManual() {
       return this.mode === 'manual';
+    },
+    isOptimize() {
+      return this.mode === 'optimize';
     },
   },
 

@@ -1,12 +1,18 @@
 <template>
   <div class="optimize">
-    <div class="optimize-header w-100 d-flex justify-content-between p-2">
-      <b-button variant="warning" @click="switchToManual">Manual</b-button>
-      <b-button variant="success" @click="switchToOptimize">Optimize</b-button>
+    <div class="optimize-header w-100 p-2">
+      <div v-if="mode===''" class="d-flex justify-content-between">
+        <b-button variant="warning" @click="switchToManual">Manual</b-button>
+        <b-button variant="success" @click="switchToOptimize">Optimize</b-button>
+      </div>
+      <div v-else class="d-flex justify-content-between">
+        <b-button variant="secondary" @click="cancel">Cancel</b-button>
+        <b-button variant="primary" @click="optimize">Finalize</b-button>
+      </div>
     </div>
     <b-list-group class="columns">
       <b-list-group-item
-        class="col-sm-12 overflow-auto"
+        class="col-sm-12 overflow-auto p-0"
         v-for="address in territory.addresses"
         v-bind:key="address.id"
         data-toggle="collapse">
@@ -27,12 +33,11 @@ export default {
   },
   data() {
     return {
-      mode: 'optimize',
+      mode: '',
     };
   },
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
-    await this.getTerritory(this.id);
   },
   methods: {
     ...mapActions({
@@ -45,11 +50,25 @@ export default {
     switchToOptimize() {
       this.mode = 'optimize';
     },
+    cancel() {
+      this.mode = '';
+    },
+    optimize() {
+      // TODO
+      this.mode = '';
+    },
   },
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
+      token: 'auth/token',
     }),
+  },
+  watch: {
+    async token() {
+      await this.getTerritory(this.id);
+    },
+    immediate: true,
   },
 };
 </script>
