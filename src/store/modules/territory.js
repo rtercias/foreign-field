@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import { store } from '..';
 import maxBy from 'lodash/maxBy';
+import orderBy from 'lodash/orderBy';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
@@ -148,6 +149,7 @@ export const territory = {
                 addresses {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
+                  territory_id congregationId status
                   activityLogs {
                     id checkout_id address_id value tz_offset
                     timestamp timezone publisher_id notes
@@ -173,6 +175,7 @@ export const territory = {
           return;
         }
         const { territory: terr } = response.data.data;
+        terr.addresses = orderBy(terr.addresses, 'sort');
         commit(SET_TERRITORY, terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);

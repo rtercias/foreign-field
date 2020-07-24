@@ -1,6 +1,6 @@
 <template>
-  <div class="optimize-card col justify-content-between align-items-center pr-2 text-black-0">
-    <div class="address" :class="{ 'col-10': isManual, 'col-5': isOptimize, 'border-right': isManual }">
+  <div class="optimize-card col justify-content-between text-black-0 pt-0 pb-0">
+    <div class="address d-flex justify-content-between align-items-center w-100 pl-0 pr-0">
       <div>
         <div class="mb-0">
           {{address.addr1}}
@@ -10,54 +10,28 @@
           {{address.city}}
         </div>
       </div>
-    </div>
-    <div class="address col-5 border-left border-right" v-if="isOptimize">
-      <div>
-        <div class="mb-0">
-          {{address.addr1}}
-        </div>
-        {{address.addr2}}
-        <div class="mb-2">
-          {{address.city}}
-        </div>
+      <div class="p-0" v-if="showGrip">
+        <font-awesome-layers class="grip fa-2x">
+          <font-awesome-icon icon="grip-lines"></font-awesome-icon>
+        </font-awesome-layers>
       </div>
-    </div>
-    <div class="col-2 p-0" v-if="isManual || isOptimize">
-      <font-awesome-layers class="drag-drop-handle fa-2x">
-        <font-awesome-icon icon="grip-lines"></font-awesome-icon>
-      </font-awesome-layers>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-
 export default {
   name: 'OptimizeCard',
-  props: ['address', 'territoryId', 'group', 'mode'],
-  data() {
-    return {
-    };
-  },
-  methods: {
-    ...mapActions({
-    }),
-  },
-  mounted() {
+  props: ['address', 'mode', 'state', 'pos'],
+  watch: {
+    pos(value) {
+      this.address.sort = value + 1;
+    },
   },
   computed: {
-    ...mapGetters({
-    }),
-    isManual() {
-      return this.mode === 'manual';
+    showGrip() {
+      return (this.mode === 'manual' && this.state === 'manual') || (this.mode === 'optimize' && this.state === 'optimize');
     },
-    isOptimize() {
-      return this.mode === 'optimize';
-    },
-  },
-
-  watch: {
   },
 };
 </script>
@@ -72,5 +46,11 @@ export default {
 .optimize-card .address {
   display: flex;
   text-align: left;
+}
+.grip {
+  cursor: grab;
+}
+.grip:active {
+  cursor: grabbing;
 }
 </style>

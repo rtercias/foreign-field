@@ -73,6 +73,9 @@ export default {
     });
 
     this.setLeftNavRoute(`/territories/${this.group}`);
+    if (this.token) {
+      await this.loadTerritory();
+    }
     this.isLoading = false;
   },
   data() {
