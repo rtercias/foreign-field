@@ -1,5 +1,5 @@
 {
-  "name": "territory-servant-app",
+  "name": "foreign-field",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,8 @@
     "start": "vue-cli-service serve --open"
   },
   "dependencies": {
+    "@capacitor/cli": "^1.0.0-alpha.38",
+    "@capacitor/core": "^1.0.0-alpha.38",
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "@fortawesome/vue-fontawesome": "^0.1.9",
@@ -40,7 +42,9 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.3",
-    "vue-template-compiler": "^2.6.11"
+    "vue-cli-plugin-pwa": "^1.0.0-alpha.1",
+    "vue-template-compiler": "^2.6.11",
+    "webpack-pwa-manifest": "git+https://github.com/rtercias/webpack-pwa-manifest.git"
   },
   "babel": {
     "presets": [

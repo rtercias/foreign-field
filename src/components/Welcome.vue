@@ -4,7 +4,10 @@
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
       <div class="col-sm-12">
-        <h3><span>Dashboard</span></h3>
+        <h3 class="align-items-center d-flex justify-content-center">
+          <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
+          <span class="title w-100">Dashboard</span>
+        </h3>
         <hr />
         <Loading v-if="loading"></Loading>
       </div>
@@ -80,6 +83,12 @@ export default {
 <style scoped>
 h3 {
   margin: 40px 0 0;
+}
+.logo {
+  width: 100px;
+}
+.title {
+  padding-right: 5.5rem;
 }
 ul {
   list-style-type: none;
