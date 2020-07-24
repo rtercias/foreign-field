@@ -128,7 +128,24 @@ export default {
     },
     async confirmClearStatus() {
       try {
-        const value = await this.$bvModal.msgBoxConfirm('Clear the address status?', {
+        const h = this.$createElement;
+        let publisherName = '';
+        if (this.lastActivity.publisher_id === this.user.id) {
+          publisherName = 'you';
+        } else {
+          await this.getLastActivityPublisher();
+          publisherName = this.publisher.firstname && this.publisher.lastname
+            && `${this.publisher.firstname} ${this.publisher.lastname}`;
+        }
+
+        const message = h('p', {
+          domProps: {
+            innerHTML:
+            `<div class="pb-3">${publisherName ? `Updated by: ${publisherName}</div>` : ''}
+            <div class="fa-lg">Clear the address status?</div>`,
+          },
+        });
+        const value = await this.$bvModal.msgBoxConfirm([message], {
           title: `${this.address.addr1} ${this.address.addr2}`,
           centered: true,
         });
@@ -231,6 +248,11 @@ export default {
         this.isContainerVisible = true;
       }
     },
+    async getLastActivityPublisher() {
+      const id = this.lastActivity.publisher_id;
+      const congId = this.user.congregation.id;
+      await this.fetchPublisher({ id, congId });
+    },
   },
   mounted() {
     this.resetContainerPosition();
@@ -244,6 +266,7 @@ export default {
       territory: 'territory/territory',
       actionButtonList: 'address/actionButtonList',
       user: 'auth/user',
+      publisher: 'publisher/publisher',
     }),
 
     isTerritoryCheckedOut() {
