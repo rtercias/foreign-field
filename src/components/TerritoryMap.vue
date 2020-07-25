@@ -15,7 +15,7 @@
       @click="() => centerMarker(x)"
       :lat-lng="[x.latitude, x.longitude]">
       <l-popup>
-        <h2>{{x.addr1}}</h2>
+        <MapLinks :address='x'></MapLinks>
       </l-popup>
       </l-marker>
     </l-map>
@@ -27,6 +27,7 @@ import {
   LMap, LTileLayer, LMarker, LPopup, LControlZoom,
 } from 'vue2-leaflet';
 import { mapGetters, mapActions } from 'vuex';
+import MapLinks from './MapLinks';
 
 export default {
   name: 'MyMap',
@@ -36,6 +37,7 @@ export default {
     LMarker,
     LPopup,
     LControlZoom,
+    MapLinks,
   },
   props: ['group', 'id'],
   data() {
@@ -44,7 +46,6 @@ export default {
       zoom: 13,
       markers: [],
       showCard: false,
-      heading: '',
       center: [0, 0],
     };
   },
@@ -63,14 +64,13 @@ export default {
       this.$refs.leafmap.mapObject.fitBounds(this.markers);
     },
     centerMarker(address) {
-      this.showCard = true;
       this.heading = address.addr1;
       this.center = [address.latitude, address.longitude];
     },
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
     await this.getTerritory(this.id);
+    this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
     this.centerAll();
   },
 };
@@ -101,8 +101,7 @@ export default {
 .map {
   z-index: 0;
 }
-h3 {
-  padding-top:20px;
-  color: black;
+.map-links {
+  font-size: 1rem;
 }
 </style>

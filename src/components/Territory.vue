@@ -195,12 +195,8 @@ export default {
     switchToMap() {
       this.$router.push({
         name: 'map-view',
-        params: { group: this.$route.params.group, territoryId: this.$route.params.id },
+        params: { group: this.group, territoryId: this.id },
       });
-    },
-
-    mapViewTog() {
-      this.mapvViewToggle = !this.mapvViewToggle;
     },
 
     async loadTerritory() {
