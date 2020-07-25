@@ -13,12 +13,11 @@
               <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
             </b-dropdown-item>
           </b-nav-item-dropdown>
-          <!-- <b-nav-item-dropdown
-            v-if="canWrite && $router.currentRoute.name==='territory'"
-            class="group-codes" text="Territory">
-            <b-dropdown-item @click="shareWorkInProgress">Share
-            </b-dropdown-item>
-          </b-nav-item-dropdown> -->
+          <b-nav-item
+            v-if="canAdmin && $router.currentRoute.name === 'territory'"
+            :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
+            Optimize
+          </b-nav-item>
           <b-nav-item v-if="canRead" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
         </b-navbar-nav>
         <b-navbar-nav class="ml-auto">
@@ -56,33 +55,6 @@ export default {
       this.$store.dispatch('auth/logout');
       this.$router.push('/signout');
     },
-
-    shareWorkInProgress(addresses) {
-      if (!addresses) {
-        return;
-      }
-
-      const workInProgress = {};
-
-      // get data from local storage
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-
-        if (key.includes('foreignfield-')) {
-          // we're only interested in addresses in the current territory
-          const addressId = key.split('-')[1];
-          const isInTerritory = addresses.find(a => a.id === addressId);
-
-          if (isInTerritory) {
-            const item = localStorage.getItem(key);
-            const val = item.split('-')[0];
-
-            // save the address and current progress
-            workInProgress[addressId] = val;
-          }
-        }
-      }
-    },
   },
 
   computed: {
@@ -95,8 +67,10 @@ export default {
       terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
+      canAdmin: 'auth/canAdmin',
       canWrite: 'auth/canWrite',
       canRead: 'auth/canRead',
+      territory: 'territory/territory',
     }),
     showLeftNav() {
       return this.$route.name === 'home' ? false : !!this.leftNavRoute;

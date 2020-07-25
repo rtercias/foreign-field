@@ -20,6 +20,7 @@ import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
 import VueTouch from 'vue-touch';
 import App from './App.vue';
+import Pusher from 'pusher-js';
 import { router } from './routes';
 import { store } from './store';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -52,6 +53,8 @@ import {
   faEdit,
   faChevronLeft,
   faPlus,
+  faGripLines,
+  faQuestionCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -79,6 +82,8 @@ library.add(
   faEdit,
   faChevronLeft,
   faPlus,
+  faGripLines,
+  faQuestionCircle,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
@@ -97,6 +102,11 @@ Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 /* eslint-enable */
+const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
+  cluster: 'us2',
+});
+
+export const channel = pusher.subscribe('foreign-field');
 
 new Vue({
   render: h => h(App),

@@ -1,9 +1,19 @@
 <template>
   <div>
-    <div v-show="showCard" class="interactable">
-      <h3><strong>{{ heading }}</strong></h3>
-    </div>
-    <!-- <b-button :to="territory" variant="success">LIST VIEW</b-button> -->
+    <!-- <div class="fixed-wrapper">
+      <div v-show="showCard" class="card-scroller">
+        <div class="interactable">
+          <h3><strong>{{ heading }}</strong></h3>
+          <h4>Territory details...</h4>
+        </div>
+        <div class="interactable">
+          <h3>Links...</h3>
+        </div>
+        <div class="interactable">
+          <h3>Links...</h3>
+        </div>
+      </div>
+    </div> -->
     <l-map
     class="map"
     ref="leafmap"
@@ -18,11 +28,9 @@
       :key="i"
       @click="() => interactiveMarker(x)"
       :lat-lng="[x.latitude, x.longitude]">
-      <!-- <l-popup>
-        <b-link @click="() => detailFromMap(x.id)">
-          {{x.addr1}}
-        </b-link>
-      </l-popup> -->
+      <l-popup>
+        <h2>{{x.addr1}}</h2>
+      </l-popup>
       </l-marker>
     </l-map>
   </div>
@@ -69,13 +77,15 @@ export default {
       this.$refs.leafmap.mapObject.fitBounds(this.markers);
     },
     detailFromMap(idtest) {
-      // eslint-disable-next-line
-      this.$router.push({ name: 'address-links', params: { group: this.group, territoryId: this.id, addressId: idtest } });
+      this.$router.push({
+        name: 'address-links',
+        params: { group: this.group, territoryId: this.id, addressId: idtest },
+      });
     },
     interactiveMarker(address) {
       this.showCard = true;
       this.heading = address.addr1;
-      this.center = [address.latitude + -0.002, address.longitude];
+      this.center = [address.latitude - 0.001, address.longitude];
     },
   },
   async mounted() {
@@ -87,14 +97,26 @@ export default {
 </script>
 
 <style>
-.interactable {
+.fixed-wrapper {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  z-index: 2;
-  height: 350px;
-  width: 90%;
+  bottom: 0;
+  overflow: scroll;
+  width: 100%;
+}
+.card-scroller {
+  scroll-snap-type: x mandatory;
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  z-index: 1;
+}
+.interactable {
+  scroll-snap-align: center;
+  height: 200px;
   background-color: white;
+  padding-right: 100px;
+  padding-left: 100px;
+  margin: 5px;
 }
 .map {
   z-index: 0;

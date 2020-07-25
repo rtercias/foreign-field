@@ -45,6 +45,7 @@ export const auth = {
     groupCodes: state => state.groupCodes,
     isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
+    canAdmin: state => state.user && (state.user.role === 'Admin' || state.user.role === 'TS'),
     canWrite: state => state.user && (state.user.role === 'Admin'
       || state.user.role === 'TS'
       || state.user.role === 'SO'

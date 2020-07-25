@@ -23,6 +23,7 @@
           <div :class="{ hidden: selectedResponse === 'START' || isLogging }">
             <ActivityButton
               class="selected-response fa-2x pr-2"
+              :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
               :value="selectedResponse"
               :next="'START'"
               @button-click="confirmClearStatus">
@@ -78,6 +79,7 @@ import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
 import format from 'date-fns/format';
 import get from 'lodash/get';
+import orderBy from 'lodash/orderBy';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
@@ -88,7 +90,7 @@ const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group'],
+  props: ['address', 'territoryId', 'group', 'incomingResponse'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -99,6 +101,7 @@ export default {
       storageId: `foreignfield-${this.address.id}`,
       selectedResponse: '',
       selectedResponseTS: null,
+      isIncomingResponse: false,
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -116,6 +119,7 @@ export default {
       setAddress: 'address/setAddress',
       fetchAddress: 'address/fetchAddress',
       getTerritory: 'territory/getTerritory',
+      fetchPublisher: 'publisher/fetchPublisher',
     }),
     resetContainerPosition() {
       const pos = -this.containerWidth;
@@ -124,7 +128,24 @@ export default {
     },
     async confirmClearStatus() {
       try {
-        const value = await this.$bvModal.msgBoxConfirm('Clear the address status?', {
+        const h = this.$createElement;
+        let publisherName = '';
+        if (this.lastActivity.publisher_id === this.user.id) {
+          publisherName = 'you';
+        } else {
+          await this.getLastActivityPublisher();
+          publisherName = this.publisher.firstname && this.publisher.lastname
+            && `${this.publisher.firstname} ${this.publisher.lastname}`;
+        }
+
+        const message = h('p', {
+          domProps: {
+            innerHTML:
+            `<div class="pb-3">${publisherName ? `Updated by: ${publisherName}</div>` : ''}
+            <div class="fa-lg">Clear the address status?</div>`,
+          },
+        });
+        const value = await this.$bvModal.msgBoxConfirm([message], {
           title: `${this.address.addr1} ${this.address.addr2}`,
           centered: true,
         });
@@ -153,8 +174,10 @@ export default {
         await this.addLog({ addressId: this.address.id, value });
         await this.fetchAddress(this.address.id);
         await this.getTerritory(this.territoryId);
+
         this.selectedResponse = this.lastActivity && this.lastActivity.value;
         this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp);
+
         this.clickedResponse = '';
         this.resetContainerPosition();
       } catch (e) {
@@ -225,6 +248,11 @@ export default {
         this.isContainerVisible = true;
       }
     },
+    async getLastActivityPublisher() {
+      const id = this.lastActivity.publisher_id;
+      const congId = this.user.congregation.id;
+      await this.fetchPublisher({ id, congId });
+    },
   },
   mounted() {
     this.resetContainerPosition();
@@ -234,10 +262,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      lastActivity: 'address/lastActivity',
       loading: 'auth/loading',
       territory: 'territory/territory',
       actionButtonList: 'address/actionButtonList',
+      user: 'auth/user',
+      publisher: 'publisher/publisher',
     }),
 
     isTerritoryCheckedOut() {
@@ -272,6 +301,35 @@ export default {
 
     formattedSelectedResponseTS() {
       return this.selectedResponseTS && format(new Date(this.selectedResponseTS), 'E M/d') || '';
+    },
+    lastActivity() {
+      const activity = this.address && this.address.activityLogs;
+      if (activity) {
+        const current = orderBy(activity, (a) => {
+          const timestamp = Number(a.timestamp);
+          if (!Number.isNaN(timestamp)) {
+            return new Date(timestamp);
+          }
+          return null;
+        }, 'desc')[0];
+
+        return current;
+      }
+
+      return { value: 'START', timestamp: '' };
+    },
+    isMySelectedResponse() {
+      return get(this.lastActivity, 'publisher_id', '').toString() === get(this.user, 'id', '').toString();
+    },
+  },
+
+  watch: {
+    incomingResponse(log) {
+      if (log) {
+        this.selectedResponse = log.value;
+        this.selectedResponseTS = log.timestamp;
+        this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
+      }
     },
   },
 };
@@ -336,6 +394,9 @@ export default {
   min-width: 70px;
   position: relative;
   top: 9px;
+}
+.selected-response.faded {
+  opacity: 0.6;
 }
 .last-activity {
   font-size: small;

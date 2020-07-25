@@ -94,7 +94,7 @@ export default {
     },
     getPublisherName(id) {
       const pub = this.publishers && this.publishers.find(p => p.id === id);
-      return pub && `${pub.firstname} ${pub.lastname}`;
+      return pub && `${pub.firstname} ${pub.lastname.charAt(0)}.`;
     },
     friendlyTime(ts) {
       const timestamp = Number(ts);

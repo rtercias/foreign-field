@@ -11,6 +11,7 @@ import AssignmentReport from './components/AssignmentReport';
 import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
 import AddressForm from './components/AddressForm';
+import Optimize from './components/Optimize';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -45,6 +46,12 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    name: 'optimize',
+    path: '/territories/:group/:id/optimize',
+    component: Optimize,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS'],
     },
   },
   {
