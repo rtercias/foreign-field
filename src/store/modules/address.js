@@ -136,6 +136,10 @@ function validateAddress(_address, isNew) {
     address.notes = '';
   }
 
+  if (address.activityLogs) {
+    delete address.activityLogs;
+  }
+
   return address;
 }
 

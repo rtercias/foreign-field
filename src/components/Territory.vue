@@ -194,6 +194,7 @@ export default {
     async token() {
       await this.loadTerritory();
     },
+    immediate: true,
   },
 };
 </script>
