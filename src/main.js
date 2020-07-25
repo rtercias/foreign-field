@@ -53,6 +53,7 @@ import {
   faChevronLeft,
   faPlus,
   faGripLines,
+  faQuestionCircle,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -80,6 +81,7 @@ library.add(
   faChevronLeft,
   faPlus,
   faGripLines,
+  faQuestionCircle,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

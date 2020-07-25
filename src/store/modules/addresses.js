@@ -4,15 +4,19 @@ import { print } from 'graphql/language/printer';
 
 const DNC_SUCCESS = 'DNC_SUCCESS';
 const DNC_FAIL = 'DNC_FAIL';
+const OPTIMIZE_SUCCESS = 'OPTIMIZE_SUCCESS';
+const OPTIMIZE_FAIL = 'OPTIMIZE_FAIL';
 
 export const addresses = {
   namespaced: true,
   state: {
     addresses: [],
     dnc: [],
+    optimized: [],
   },
   getters: {
     dnc: state => state.dnc,
+    optimized: state => state.optimized,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -20,6 +24,12 @@ export const addresses = {
     },
     DNC_FAIL(state, exception) {
       console.error(DNC_FAIL, exception);
+    },
+    OPTIMIZE_SUCCESS(state, optimized) {
+      state.optimized = optimized;
+    },
+    OPTIMIZE_FAIL(state, exception) {
+      console.error(OPTIMIZE_FAIL, exception);
     },
   },
   actions: {
@@ -66,6 +76,36 @@ export const addresses = {
         commit(DNC_SUCCESS, dnc);
       } catch (exception) {
         commit(DNC_FAIL, exception);
+      }
+    },
+
+    async optimize({ commit }, territoryId) {
+      try {
+        if (!territoryId) {
+          return;
+        }
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`query optimize($territoryId: Int!) {
+              optimize(territoryId:$territoryId) { id sort }
+            }`),
+            variables: {
+              territoryId,
+            },
+          },
+        });
+
+        if (response && response.data && response.data.data) {
+          const { optimize } = response.data.data;
+          commit(OPTIMIZE_SUCCESS, optimize);
+        }
+      } catch (exception) {
+        commit(OPTIMIZE_FAIL, exception);
       }
     },
   },
