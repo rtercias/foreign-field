@@ -1,19 +1,5 @@
 <template>
   <div>
-    <!-- <div class="fixed-wrapper">
-      <div v-show="showCard" class="card-scroller">
-        <div class="interactable">
-          <h3><strong>{{ heading }}</strong></h3>
-          <h4>Territory details...</h4>
-        </div>
-        <div class="interactable">
-          <h3>Links...</h3>
-        </div>
-        <div class="interactable">
-          <h3>Links...</h3>
-        </div>
-      </div>
-    </div> -->
     <l-map
     class="map"
     ref="leafmap"
@@ -26,7 +12,7 @@
       ref="markerwindow"
       v-for="(x, i) in territory.addresses"
       :key="i"
-      @click="() => interactiveMarker(x)"
+      @click="() => centerMarker(x)"
       :lat-lng="[x.latitude, x.longitude]">
       <l-popup>
         <h2>{{x.addr1}}</h2>
@@ -76,16 +62,10 @@ export default {
       this.territory.addresses.forEach(e => this.markers.push([e.latitude, e.longitude]));
       this.$refs.leafmap.mapObject.fitBounds(this.markers);
     },
-    detailFromMap(idtest) {
-      this.$router.push({
-        name: 'address-links',
-        params: { group: this.group, territoryId: this.id, addressId: idtest },
-      });
-    },
-    interactiveMarker(address) {
+    centerMarker(address) {
       this.showCard = true;
       this.heading = address.addr1;
-      this.center = [address.latitude - 0.001, address.longitude];
+      this.center = [address.latitude, address.longitude];
     },
   },
   async mounted() {

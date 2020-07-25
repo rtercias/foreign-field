@@ -46,6 +46,9 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+    },
+  },
+  {
     name: 'optimize',
     path: '/territories/:group/:id/optimize',
     component: Optimize,
