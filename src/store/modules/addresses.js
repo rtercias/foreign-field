@@ -6,6 +6,7 @@ const DNC_SUCCESS = 'DNC_SUCCESS';
 const DNC_FAIL = 'DNC_FAIL';
 const OPTIMIZE_SUCCESS = 'OPTIMIZE_SUCCESS';
 const OPTIMIZE_FAIL = 'OPTIMIZE_FAIL';
+const SORT_UPDATED = 'SORT_UPDATED';
 
 export const addresses = {
   namespaced: true,
@@ -31,6 +32,7 @@ export const addresses = {
     OPTIMIZE_FAIL(state, exception) {
       console.error(OPTIMIZE_FAIL, exception);
     },
+    SORT_UPDATED() {},
   },
   actions: {
     async getDnc({ commit }, id) {
@@ -106,6 +108,31 @@ export const addresses = {
         }
       } catch (exception) {
         commit(OPTIMIZE_FAIL, exception);
+      }
+    },
+
+    async updateSort({ commit }, addressIds) {
+      commit('auth/LOADING', true, { root: true });
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation UpdateSort($addressIds: [Int]!) { 
+            updateSort(addressIds: $addressIds)
+          }`),
+          variables: {
+            addressIds,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        commit(SORT_UPDATED);
+        commit('auth/LOADING', false, { root: true });
       }
     },
   },

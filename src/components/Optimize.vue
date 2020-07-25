@@ -126,7 +126,7 @@ export default {
     ...mapActions({
       setLeftNavRoute: 'auth/setLeftNavRoute',
       getTerritory: 'territory/getTerritory',
-      updateAddress: 'address/updateAddress',
+      updateSort: 'addresses/updateSort',
       optimize: 'addresses/optimize',
     }),
     switchToManual() {
@@ -184,10 +184,8 @@ export default {
         }
 
         this.saving = true;
-        for (const address of this.territory.addresses) {
-          await this.updateAddress(address);
-        }
-
+        const addressIds = this.territory.addresses.map(a => a.id);
+        await this.updateSort(addressIds);
         await this.getTerritory(this.id);
         this.reset();
       }
