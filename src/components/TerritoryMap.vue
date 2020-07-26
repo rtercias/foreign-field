@@ -13,7 +13,7 @@
       v-for="(x, i) in territory.addresses"
       :key="i"
       @click="() => centerMarker(x)"
-      :lat-lng="[x.latitude, x.longitude]">
+      :lat-lng="[x.latitude - 0.0009, x.longitude]">
       <l-popup>
         <MapLinks :address='x'></MapLinks>
       </l-popup>
