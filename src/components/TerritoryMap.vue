@@ -1,22 +1,19 @@
 <template>
-  <div>
+  <div class="territory-map">
     <l-map
-    class="map"
-    ref="leafmap"
-    style="height: 100%"
-    :zoom="zoom"
-    :options="{zoomControl:false}"
-    :center="center">
+      class="map"
+      :zoom="zoom"
+      :center="center"
+      :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
-      ref="markerwindow"
-      v-for="(x, i) in territory.addresses"
-      :key="i"
-      @click="() => centerMarker(x)"
-      :lat-lng="[x.latitude - 0.0009, x.longitude]">
-      <l-popup>
-        <MapLinks :address='x'></MapLinks>
-      </l-popup>
+        v-for="(x, i) in territory.addresses"
+        :key="i"
+        @click="() => centerMarker(x)"
+        :lat-lng="getLatLng(x)">
+        <l-popup>
+          <MapLinks :address='x'></MapLinks>
+        </l-popup>
       </l-marker>
     </l-map>
   </div>
@@ -24,13 +21,18 @@
 
 <script>
 import {
-  LMap, LTileLayer, LMarker, LPopup, LControlZoom,
+  LMap,
+  LTileLayer,
+  LMarker,
+  LPopup,
+  LControlZoom,
 } from 'vue2-leaflet';
+import { latLngBounds } from 'leaflet';
 import { mapGetters, mapActions } from 'vuex';
 import MapLinks from './MapLinks';
 
 export default {
-  name: 'MyMap',
+  name: 'TerritoryMap',
   components: {
     LMap,
     LTileLayer,
@@ -44,64 +46,62 @@ export default {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       zoom: 13,
-      markers: [],
       showCard: false,
       center: [0, 0],
+      mapOptions: {},
     };
   },
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
+      token: 'auth/token',
     }),
+    bounds() {
+      return latLngBounds(this.territory.addresses.map(terr => [terr.latitude, terr.longitude]));
+    },
   },
   methods: {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
-    centerAll() {
-      this.territory.addresses.forEach(e => this.markers.push([e.latitude, e.longitude]));
-      this.$refs.leafmap.mapObject.fitBounds(this.markers);
-    },
     centerMarker(address) {
       this.heading = address.addr1;
-      this.center = [address.latitude, address.longitude];
+      if (address.latitude && address.longitude) {
+        this.center = [address.latitude, address.longitude];
+      }
+    },
+    getLatLng(address) {
+      if (address.latitude && address.longitude) {
+        return [address.latitude, address.longitude];
+      }
+      return [0, 0];
     },
   },
   async mounted() {
-    await this.getTerritory(this.id);
     this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
-    this.centerAll();
+    if (this.token) {
+      await this.getTerritory(this.id);
+    }
+  },
+  watch: {
+    async token() {
+      await this.getTerritory(this.id);
+    },
+    immediate: true,
   },
 };
 </script>
 
 <style>
-.fixed-wrapper {
-  position: absolute;
-  bottom: 0;
-  overflow: scroll;
-  width: 100%;
-}
-.card-scroller {
-  scroll-snap-type: x mandatory;
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  z-index: 1;
-}
-.interactable {
-  scroll-snap-align: center;
-  height: 200px;
-  background-color: white;
-  padding-right: 100px;
-  padding-left: 100px;
-  margin: 5px;
-}
-.map {
-  z-index: 0;
-}
-.map-links {
-  font-size: 1rem;
-}
+  .territory-map {
+    height: 100%;
+  }
+  .map {
+    height: calc(100%-38px);
+    width: 100%;
+  }
+  .leaflet-popup h2 {
+    font-size: 18px;
+  }
 </style>
