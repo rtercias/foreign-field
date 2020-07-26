@@ -86,7 +86,7 @@ export default {
       return this.cityNames[0];
     },
     secondaryCities() {
-      return this.cityNames.length ? `also: ${this.cityNames.slice(1).join(',')}` : '';
+      return this.cityNames.length > 1 ? `also: ${this.cityNames.slice(1).join(',')}` : '';
     },
   },
   methods: {
