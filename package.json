@@ -24,6 +24,7 @@
     "graphql": "^15.2.0",
     "graphql-tag": "^2.10.3",
     "gsap": "^3.2.6",
+    "leaflet": "^1.6.0",
     "lodash": "^4.17.19",
     "pusher-js": "^6.0.3",
     "vue": "^2.6.11",
@@ -31,6 +32,7 @@
     "vue-router": "^3.1.6",
     "vue-the-mask": "^0.11.1",
     "vue-touch": "^2.0.0-beta.4",
+    "vue2-leaflet": "^2.5.2",
     "vuedraggable": "^2.24.0",
     "vuex": "^3.3.0",
     "vuex-cache": "^3.1.1"

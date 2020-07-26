@@ -5,6 +5,8 @@ import Unauthorized from './components/Unauthorized';
 import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
+import TerritoryAddresses from './components/TerritoryAddresses';
+import TerritoryMap from './components/TerritoryMap';
 import Dnc from './components/Dnc';
 import AssignmentReport from './components/AssignmentReport';
 import AddressLinks from './components/AddressLinks';
@@ -37,6 +39,23 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
     },
+    children: [{
+      name: 'address-list',
+      path: '/',
+      component: TerritoryAddresses,
+      props: true,
+      meta: {
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      },
+    }, {
+      name: 'map-view',
+      path: 'map',
+      component: TerritoryMap,
+      props: true,
+      meta: {
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      },
+    }],
   },
   {
     name: 'optimize',
