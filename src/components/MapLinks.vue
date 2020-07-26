@@ -12,7 +12,7 @@
       class="d-flex lead p-2 justify-content-around align-items-center font-weight-bold"
       :href="mapsUrl"
       target="_blank">
-      <font-awesome-icon icon="directions"></font-awesome-icon>
+      <font-awesome-icon class="mr-2" icon="directions"></font-awesome-icon>
       <span>Get directions</span>
     </b-list-group-item>
   </div>
