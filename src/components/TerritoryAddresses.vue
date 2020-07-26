@@ -1,0 +1,126 @@
+<template>
+  <div class="territory">
+    <Loading v-if="isLoading"></Loading>
+    <b-list-group v-else class="columns">
+      <b-list-group-item
+        class="col-sm-12 overflow-auto"
+        v-for="address in territory.addresses"
+        :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
+        v-bind:key="address.id"
+        data-toggle="collapse">
+        <AddressCard
+          v-bind="{address, reset}"
+          :territoryId="id"
+          :group="group"
+          :incomingResponse="address.incomingResponse"
+          @address-updated="refreshTerritory">
+        </AddressCard>
+      </b-list-group-item>
+    </b-list-group>
+  </div>
+</template>
+
+<script>
+import { mapGetters, mapActions } from 'vuex';
+import AddressCard from './AddressCard.vue';
+import Loading from './Loading.vue';
+import { channel } from '../main';
+
+export default {
+  name: 'TerritoryAddresses',
+  components: {
+    AddressCard,
+    Loading,
+  },
+  props: ['group', 'id'],
+  async mounted() {
+    channel.bind('add-log', (log) => {
+      const address = this.territory.addresses.find(a => a.id === log.address_id);
+      if (address) {
+        this.$set(address, 'incomingResponse', log);
+      }
+    });
+    this.setLeftNavRoute(`/territories/${this.group}`);
+    await this.loadTerritory();
+  },
+  data() {
+    return {
+      isLoading: true,
+      reset: false,
+      workInProgress: {},
+    };
+  },
+  computed: {
+    ...mapGetters({
+      territory: 'territory/territory',
+      user: 'auth/user',
+      lastActivity: 'territory/lastActivity',
+      token: 'auth/token',
+    }),
+  },
+  methods: {
+    ...mapActions({
+      getTerritory: 'territory/getTerritory',
+      resetNHRecords: 'territory/resetNHRecords',
+      setLeftNavRoute: 'auth/setLeftNavRoute',
+    }),
+
+    isActiveAddress(addressId) {
+      return this.lastActivity ? addressId === this.lastActivity.address_id : false;
+    },
+
+    async refreshTerritory() {
+      await this.getTerritory(this.id);
+    },
+
+    async loadTerritory() {
+      await this.getTerritory(this.id);
+      this.isLoading = false;
+    },
+  },
+  watch: {
+    async token() {
+      await this.loadTerritory();
+    },
+    immediate: true,
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+.list-group {
+  display: block;
+}
+.columns {
+  columns: 1;
+}
+.columns > [class*="col-"] {
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    width: 100%;
+    float: none;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+.add-new {
+    font-size: 24px;
+  }
+@media (min-width: 769px) {
+  .columns {
+    columns: 2;
+  }
+}
+@media print {
+  .columns {
+    columns: 2;
+  }
+}
+</style>
