@@ -14,7 +14,7 @@
             </b-dropdown-item>
           </b-nav-item-dropdown>
           <b-nav-item
-            v-if="canAdmin && $router.currentRoute.name === 'territory'"
+            v-if="canAdmin && $router.currentRoute.name === 'address-list'"
             :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
             Optimize
           </b-nav-item>
