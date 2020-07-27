@@ -7,7 +7,7 @@
     <b-dropdown class="publishers-list" right variant="outline-secondary">
         <span slot="button-content">{{selectedPublisher.name || 'Select Publisher'}}</span>
         <b-dropdown-item v-for="pub in publishers" v-bind:key="pub.id" @click="selectPublisher(pub)">
-          {{pub.firstname}} {{pub.lastname}}
+          {{pub.lastname}}, {{pub.firstname}}
         </b-dropdown-item>
       </b-dropdown>
   </b-modal>

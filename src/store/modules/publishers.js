@@ -1,5 +1,6 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
+import orderBy from 'lodash/orderBy';
 import { print } from 'graphql/language/printer';
 
 const SET_PUBLISHERS = 'SET_PUBLISHERS';
@@ -10,7 +11,7 @@ export const publishers = {
     publishers: [],
   },
   getters: {
-    publishers: state => state.publishers,
+    publishers: state => orderBy(state.publishers, 'lastname', 'firstname'),
   },
   mutations: {
     SET_PUBLISHERS: (state, pubs) => {
