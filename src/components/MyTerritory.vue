@@ -9,9 +9,10 @@
     <div v-if="territory.lastVisited">
       {{formattedLastVisited}}
     </div>
-    <div class="last-activity font-weight-normal" v-if="territory.status">
+    <!-- TODO: fix lastActivity first -->
+    <!-- <div class="last-activity font-weight-normal" v-if="territory.status">
       Last activity: {{this.lastTimestamp}}
-    </div>
+    </div> -->
   </div>
 </template>
 <script>

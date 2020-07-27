@@ -20,7 +20,7 @@ export const territories = {
     error: '',
   },
   getters: {
-    territories: state => orderBy(state.territories, 'name'),
+    territories: state => orderBy(state.territories, 'city', 'name'),
     loading: state => state.loading,
     error: state => state.error,
   },
