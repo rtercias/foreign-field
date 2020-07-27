@@ -1,24 +1,30 @@
 <template>
   <div class="column">
-    <div class="row justify-content-around">
-      <div class="row w-50 align-items-center justify-content-start ml-0">
+    <div class="row justify-content-between pl-2 pr-2">
+      <div>
         <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4 column">
-          <h5 class="mb-0">{{terr.name}}</h5>
-          <span class="city-name" v-if="terr.city">{{terr.city}}</span>
+          <h5 class="mb-0">{{`${primaryCity}${cityNames.length > 1 ? ` +${cityNames.length-1}` : ''}` || terr.name}}</h5>
+          <span class="terr-name">{{primaryCity && terr.name}}</span>
         </b-link>
       </div>
-      <div class="btn-group w-50 row justify-content-end pr-3" role="group" aria-label="Territory buttons">
+      <div class="check-in-out" size="small" role="group">
         <b-btn
           v-b-modal.checkoutModal
           variant="info"
           v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
-          @click="selectTerritory(terr)">
+          @click="selectTerritory(terr)"
+          :disabled="saving">
+          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
           check out
         </b-btn>
         <b-btn
           v-if="canWrite && status === 'Checked Out'"
           variant="outline-info"
-          @click="checkin(terr)">check in</b-btn>
+          @click="checkin(terr)"
+          :disabled="saving">
+          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
+          check in
+        </b-btn>
       </div>
     </div>
     <div class="text-right">
@@ -34,6 +40,11 @@ import format from 'date-fns/format';
 export default {
   name: 'TerritoryCard',
   props: ['terr', 'groupCode', 'selectTerritory', 'fetch'],
+  data() {
+    return {
+      saving: false,
+    };
+  },
   methods: {
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
@@ -52,7 +63,9 @@ export default {
       });
 
       if (window.confirm('Check-in successful. Do you want to reset NH records?')) {
+        this.saving = true;
         await this.resetNHRecords(territory.id);
+        this.saving = false;
       }
 
       this.fetch();
@@ -79,16 +92,24 @@ export default {
 
       return '';
     },
-
     status() {
       return this.terr && this.terr.status && this.terr.status.status || 'Available';
+    },
+    cityNames() {
+      return this.terr && this.terr.city ? this.terr.city.split(',') : [];
+    },
+    primaryCity() {
+      return this.cityNames[0];
     },
   },
 };
 </script>
 <style scoped>
-  .city-name {
+  .terr-name {
     font-size: 18px;
+  }
+  .check-in-out .btn {
+    min-width: 100px;
   }
   .assigned-to-info {
     font-size: 12px;
