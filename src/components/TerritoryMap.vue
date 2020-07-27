@@ -95,10 +95,10 @@ export default {
 
 <style>
   .territory-map {
-    height: 100%;
+    height: calc(100% - 163px);
   }
   .map {
-    height: calc(100%-38px);
+    height: 100%;
     width: 100%;
   }
   .leaflet-popup h2 {
