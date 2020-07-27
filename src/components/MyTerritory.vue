@@ -15,9 +15,10 @@
   </div>
 </template>
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions } from 'vuex';
 import format from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
+import maxBy from 'lodash/maxBy';
 
 export default {
   name: 'MyTerritory',
@@ -34,9 +35,16 @@ export default {
     },
   },
   computed: {
-    ...mapGetters({
-      lastActivity: 'territory/lastActivity',
-    }),
+    lastActivity() {
+      const addresses = this.territory && this.territory.addresses || [];
+      const mostRecentLogs = [];
+      for (const addr of addresses) {
+        const max = maxBy(addr.activityLogs, log => log && new Date(log.timestamp));
+        mostRecentLogs.push(max);
+      }
+
+      return maxBy(mostRecentLogs, log => log && new Date(log.timestamp));
+    },
     lastTimestamp() {
       if (this.lastActivity) {
         const timestamp = Number(this.lastActivity.timestamp);
