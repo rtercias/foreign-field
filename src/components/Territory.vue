@@ -1,40 +1,43 @@
 <template>
   <div class="territory h-100">
-    <header class="w-100 pl-2 pr-2">
-      <div class="font-weight-bold m-0 mr-2 ml-2 medium" v-if="authIsLoading">
-        Authorizing <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
-      </div>
-      <div v-if="isLoading"></div>
-      <div v-else class="w-100">
-        <div class="w-100 d-flex justify-content-between pt-3">
-          <div class="text-left">
-            <h4 class="mb-0">{{primaryCity}}</h4>
-            <span>{{secondaryCities}}</span>
+    <div v-if="isLoading" class="font-weight-bold m-0 mr-2 ml-2 medium">
+      Authorizing <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+    </div>
+    <div v-else class="h-100">
+      <header class="w-100 pl-2 pr-2">
+        <div class="w-100">
+          <div class="w-100 d-flex justify-content-between pt-3">
+            <div class="text-left">
+              <h4 class="mb-0">{{primaryCity}}</h4>
+              <span>{{secondaryCities}}</span>
+            </div>
+            <h4 class="text-right">{{getTerritoryName()}}</h4>
           </div>
-          <h4 class="text-right">{{getTerritoryName()}}</h4>
+          <div class="w-100 d-flex justify-content-between pb-3 pt-2">
+            <b-button-group size="sm">
+              <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
+                List
+              </b-button>
+              <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map'">
+                Map
+              </b-button>
+            </b-button-group>
+            <b-button-group v-if="viewMode==='address-list'" size="sm">
+              <b-button v-if="canAdmin" variant="danger" @click="resetNH(true)">Reset</b-button>
+              <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
+                <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+              </b-button>
+            </b-button-group>
+          </div>
         </div>
-        <div class="w-100 d-flex justify-content-between pb-3 pt-2">
-          <b-button-group size="sm">
-            <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">List</b-button>
-            <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map'">Map</b-button>
-          </b-button-group>
-          <b-button-group v-if="viewMode==='address-list'" size="sm">
-            <b-button v-if="canAdmin" variant="danger" @click="resetNH(true)">Reset</b-button>
-            <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
-              <font-awesome-icon icon="plus"></font-awesome-icon> New Address
-            </b-button>
-          </b-button-group>
-        </div>
-      </div>
-    </header>
-    <router-view></router-view>
+      </header>
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import flatten from 'lodash/flatten';
-import uniq from 'lodash/uniq';
 import orderBy from 'lodash/orderBy';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -75,18 +78,20 @@ export default {
       return this.territory && this.territory.status && this.territory.status.status === 'Recently Worked';
     },
     cityNames() {
-      if (this.territory && this.territory.addresses && this.territory.id === this.id) {
-        const cities = this.territory.addresses.map(a => a.city);
-        return uniq(flatten(cities));
-      }
-
-      return [];
+      return this.territory && this.territory.city ? this.territory.city.split(',') : [];
     },
     primaryCity() {
       return this.cityNames[0];
     },
     secondaryCities() {
-      return this.cityNames.length > 1 ? `also: ${this.cityNames.slice(1).join(',')}` : '';
+      if (this.cityNames.length > 1 && this.cityNames.length <= 3) {
+        return `also: ${this.cityNames.slice(1).join(',')}`;
+      }
+      if (this.cityNames.length > 3) {
+        return `also: ${this.cityNames.length} cities`;
+      }
+
+      return '';
     },
   },
   methods: {
