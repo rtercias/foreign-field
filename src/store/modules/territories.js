@@ -1,5 +1,6 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
+import orderBy from 'lodash/orderBy';
 import { print } from 'graphql/language/printer';
 
 export const TEST_TERRITORIES = [
@@ -19,7 +20,7 @@ export const territories = {
     error: '',
   },
   getters: {
-    territories: state => state.territories,
+    territories: state => orderBy(state.territories, 'name'),
     loading: state => state.loading,
     error: state => state.error,
   },

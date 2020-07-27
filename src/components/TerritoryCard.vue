@@ -29,7 +29,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { format } from 'date-fns';
+import format from 'date-fns/format';
 
 export default {
   name: 'TerritoryCard',
@@ -61,7 +61,6 @@ export default {
   computed: {
     ...mapGetters({
       user: 'auth/user',
-      territoryWithAddresses: 'territory/territory',
       canWrite: 'auth/canWrite',
     }),
 
