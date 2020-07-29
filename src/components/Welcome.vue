@@ -3,8 +3,7 @@
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
-      <div
-      class="new-message d-flex text-white bg-secondary w-100 align-items-center pt-2 pb-2"
+      <div class="new-message align-items-center pt-2 pb-2 w-100 bg-secondary text-white"
       v-show='messageOpen'>
         <div class="message text-left col-10">
           <span class="update-message">App version now available! To download, add this page to your home screen.</span>
@@ -137,6 +136,10 @@ router-link {
 }
 .main {
   display: flex;
+}
+.new-message {
+  display: flex;
+  flex-direction: row;
 }
 .update-message {
   font-size: 1rem;
