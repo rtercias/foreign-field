@@ -3,6 +3,17 @@
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
+      <div class="new-message align-items-center pt-2 pb-2"
+      v-show='messageOpen'>
+        <div class="message text-left col-10">
+          <span class="update-message">App version now available! To download, add this page to your home screen.</span>
+        </div>
+        <div class="col-2">
+          <b-button pill variant="secondary" v-on:click='messageOpen = !messageOpen'>
+            <font-awesome-icon icon="times"></font-awesome-icon>
+          </b-button>
+        </div>
+      </div>
       <div class="col-sm-12">
         <h3 class="align-items-center d-flex justify-content-center">
           <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
@@ -54,6 +65,11 @@ export default {
     Reports,
     MyTerritory,
   },
+  data() {
+    return {
+      messageOpen: '',
+    };
+  },
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
@@ -75,6 +91,20 @@ export default {
       }
       return seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
     },
+  },
+  methods: {
+    advertiseMsg() {
+      const readByUser = JSON.parse(localStorage.getItem('readByUser'));
+      if (!readByUser) {
+        localStorage.setItem('readByUser', true);
+        this.messageOpen = true;
+      } else {
+        this.messageOpen = false;
+      }
+    },
+  },
+  mounted() {
+    this.advertiseMsg();
   },
 };
 </script>
@@ -106,5 +136,15 @@ router-link {
 }
 .main {
   display: flex;
+}
+.new-message {
+  background-color: rgb(132, 136, 139);
+  color: white;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+.update-message {
+  font-size: 1rem;
 }
 </style>
