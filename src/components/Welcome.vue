@@ -4,12 +4,12 @@
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
       <div class="new-message align-items-center pt-2 pb-2 w-100 bg-secondary text-white"
-      v-show='messageOpen'>
+      v-show='msgBoxOpen'>
         <div class="message text-left col-10">
           <span class="update-message">App version now available! To download, add this page to your home screen.</span>
         </div>
         <div class="col-2">
-          <b-button pill variant="secondary" v-on:click='messageOpen = !messageOpen'>
+          <b-button pill variant="secondary" @click="dismissMsg">
             <font-awesome-icon icon="times"></font-awesome-icon>
           </b-button>
         </div>
@@ -67,7 +67,8 @@ export default {
   },
   data() {
     return {
-      messageOpen: '',
+      msgBoxOpen: '',
+      msgDismissed: JSON.parse(localStorage.getItem('updateMsgDismissed')),
     };
   },
   computed: {
@@ -94,13 +95,15 @@ export default {
   },
   methods: {
     advertiseMsg() {
-      const readByUser = JSON.parse(localStorage.getItem('readByUser'));
-      if (!readByUser) {
-        localStorage.setItem('readByUser', true);
-        this.messageOpen = true;
+      if (!this.msgDismissed) {
+        this.msgBoxOpen = true;
       } else {
-        this.messageOpen = false;
+        this.msgBoxOpen = false;
       }
+    },
+    dismissMsg() {
+      localStorage.setItem('updateMsgDismissed', true);
+      this.msgBoxOpen = false;
     },
   },
   mounted() {
