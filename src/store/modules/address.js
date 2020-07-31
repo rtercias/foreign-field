@@ -144,6 +144,10 @@ function validateAddress(_address, isNew) {
     delete address.activityLogs;
   }
 
+  if (address.lastActivity) {
+    delete address.lastActivity;
+  }
+
   return address;
 }
 
@@ -412,6 +416,11 @@ export const address = {
 
       const user = rootGetters['auth/user'];
       const addr = validateAddress(_address);
+
+      if (!user) {
+        throw new Error('No authorized user');
+      }
+
       addr.update_user = user.id;
 
       const response = await axios({

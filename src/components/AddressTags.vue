@@ -61,6 +61,7 @@ export default {
       removeTag: 'address/removeTag',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
+      updateAddress: 'address/updateAddress',
     }),
     async updateTag(tag) {
       if (this.readOnlyTag(tag)) return;
@@ -78,12 +79,15 @@ export default {
         await this.doNotCall(tag);
       } else if (startsWith(tag.caption, 'does not speak')) {
         await this.notForeign(tag);
+      } else if (startsWith(tag.caption, 'invalid phone#')) {
+        await this.invalidPhoneNumber(tag);
       } else {
         this.$set(this.selectedTags, this.selectedTags.length, tag);
         await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
       }
 
       this.$parent.$emit('address-updated');
+      this.collapsed = true;
     },
     loadselectedTags() {
       this.availableTags.forEach((e) => {
@@ -121,6 +125,25 @@ export default {
         await this.markAsNotForeign({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
       }
     },
+    async invalidPhoneNumber(tag) {
+      if (!this.address.phone) {
+        this.$bvToast.toast('There is no phone number on record');
+        return;
+      }
+
+      const response = await this.$bvModal.msgBoxConfirm(`Make phone # "${this.formattedPhone}" invalid`, {
+        title: `${this.address.addr1} ${this.address.addr2} - Remove phone`,
+        centered: true,
+      });
+
+      if (response) {
+        const invalidPhoneNumberTag = `${tag.caption} ${this.formattedPhone}`;
+        const updatedAddress = { ...this.address, phone: '' };
+
+        await this.updateAddress(updatedAddress);
+        await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: invalidPhoneNumberTag });
+      }
+    },
     readOnlyTag(/* tag */) {
       return false;
       // Temporarily commented out this code to allow for user cleanup
@@ -142,6 +165,7 @@ export default {
         'deaf/mute',
         'blind',
         'business',
+        'invalid phone#',
       ];
     },
     combinedTags() {
@@ -162,6 +186,10 @@ export default {
     },
     preview() {
       return [...this.selectedTags].reverse();
+    },
+    formattedPhone() {
+      const { phone } = this.address;
+      return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
   },
   mounted() {
