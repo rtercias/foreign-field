@@ -28,8 +28,9 @@
       </div>
     </div>
     <div class="text-right">
-      <hr class="mb-2" />
-      <span class="assigned-to-info d-block">{{assignedTo}}</span>
+      <hr class="mb-2 mt-2" />
+      <div class="assigned-to-info">{{assignedTo}}</div>
+      <div class="last-worked">Last worked: {{lastWorked}}</div>
     </div>
   </div>
 </template>
@@ -101,6 +102,10 @@ export default {
     primaryCity() {
       return this.cityNames[0];
     },
+    lastWorked() {
+      const timestamp = Number(this.terr.lastActivity.timestamp);
+      return format(new Date(timestamp), 'MM/dd/yyyy');
+    },
   },
 };
 </script>
@@ -111,8 +116,7 @@ export default {
   .check-in-out .btn {
     min-width: 100px;
   }
-  .assigned-to-info {
+  .assigned-to-info, .last-worked {
     font-size: 12px;
-    height: 15px;
   }
 </style>

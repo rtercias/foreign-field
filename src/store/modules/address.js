@@ -1,7 +1,6 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
-import orderBy from 'lodash/orderBy';
 import clone from 'lodash/clone';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
@@ -30,6 +29,11 @@ const model = gql`fragment Model on Address {
     timezone
     publisher_id
     notes
+  }
+  lastActivity {
+    value
+    timestamp
+    publisher_id
   }
 }`;
 
@@ -151,23 +155,6 @@ export const address = {
 
   getters: {
     address: state => state.address,
-
-    lastActivity: (state) => {
-      const activity = state.address && state.address.activityLogs;
-      if (activity) {
-        const current = orderBy(activity, (a) => {
-          const timestamp = Number(a.timestamp);
-          if (!Number.isNaN(timestamp)) {
-            return new Date(timestamp);
-          }
-          return null;
-        }, 'desc')[0];
-
-        return current;
-      }
-
-      return { value: 'START', timestamp: '' };
-    },
 
     checkoutInfo: (state, getters, rootState, rootGetters) => {
       const terr = rootGetters['territory/territory'];

@@ -9,17 +9,15 @@
     <div v-if="territory.lastVisited">
       {{formattedLastVisited}}
     </div>
-    <!-- TODO: fix lastActivity first -->
-    <!-- <div class="last-activity font-weight-normal" v-if="territory.status">
+    <div class="last-activity font-weight-normal" v-if="territory.status">
       Last activity: {{this.lastTimestamp}}
-    </div> -->
+    </div>
   </div>
 </template>
 <script>
 import { mapActions } from 'vuex';
 import format from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
-import maxBy from 'lodash/maxBy';
 
 export default {
   name: 'MyTerritory',
@@ -37,14 +35,7 @@ export default {
   },
   computed: {
     lastActivity() {
-      const addresses = this.territory && this.territory.addresses || [];
-      const mostRecentLogs = [];
-      for (const addr of addresses) {
-        const max = maxBy(addr.activityLogs, log => log && new Date(log.timestamp));
-        mostRecentLogs.push(max);
-      }
-
-      return maxBy(mostRecentLogs, log => log && new Date(log.timestamp));
+      return this.territory.lastActivity;
     },
     lastTimestamp() {
       if (this.lastActivity) {

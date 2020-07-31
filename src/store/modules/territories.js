@@ -51,6 +51,9 @@ export const territories = {
                 name 
                 type 
                 city 
+                lastActivity {
+                  timestamp
+                }
                 status {
                   status
                   date

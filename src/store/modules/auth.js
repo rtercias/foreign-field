@@ -139,6 +139,9 @@ export const auth = {
                   city
                   group_code
                   type
+                  lastActivity {
+                    timestamp
+                  }
                   status {
                     status
                     date
