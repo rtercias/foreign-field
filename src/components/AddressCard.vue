@@ -303,7 +303,8 @@ export default {
       return this.address.lastActivity || { value: 'START', timestamp: '' };
     },
     isMySelectedResponse() {
-      return get(this.lastActivity, 'publisher_id', '').toString() === get(this.user, 'id', '').toString();
+      const publisherId = get(this.address.lastActivity, 'publisher_id', '') || '';
+      return publisherId.toString() === get(this.user, 'id', '').toString();
     },
   },
 
