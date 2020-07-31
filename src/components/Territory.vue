@@ -69,7 +69,6 @@ export default {
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       canAdmin: 'auth/canAdmin',
-      lastActivity: 'territory/lastActivity',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -92,6 +91,9 @@ export default {
       }
 
       return '';
+    },
+    lastActivity() {
+      return this.territory.lastActivity;
     },
   },
   methods: {

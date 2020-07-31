@@ -3,9 +3,9 @@
     <Loading v-if="isLoading"></Loading>
     <b-list-group v-else class="columns">
       <b-list-group-item
-        class="col-sm-12 overflow-auto"
+        class="item col-sm-12 overflow-auto"
         v-for="address in territory.addresses"
-        :class="isActiveAddress(address.id) ? ['bg-white', 'active'] : []"
+        :class="isActiveAddress(address.id) ? ['bg-white border-warning border-medium', 'active'] : []"
         v-bind:key="address.id"
         data-toggle="collapse">
         <AddressCard
@@ -54,9 +54,11 @@ export default {
     ...mapGetters({
       territory: 'territory/territory',
       user: 'auth/user',
-      lastActivity: 'territory/lastActivity',
       token: 'auth/token',
     }),
+    lastActivity() {
+      return this.territory.lastActivity;
+    },
   },
   methods: {
     ...mapActions({
@@ -101,6 +103,9 @@ export default {
     break-inside: avoid;
     width: 100%;
     float: none;
+}
+.border-medium {
+  border-width: medium;
 }
 ul {
   list-style-type: none;

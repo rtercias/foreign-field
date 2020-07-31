@@ -37,16 +37,6 @@ export const territory = {
       const max = maxBy(addresses, a => a.sort);
       return max && max.sort || 0;
     },
-    lastActivity: (state) => {
-      const addresses = state.territory && state.territory.addresses || [];
-      const mostRecentLogs = [];
-      for (const addr of addresses) {
-        const max = maxBy(addr.activityLogs, log => log && new Date(log.timestamp));
-        mostRecentLogs.push(max);
-      }
-
-      return maxBy(mostRecentLogs, log => log && new Date(log.timestamp));
-    },
     address: state => id => state.territory.addresses.find(a => a.id === id),
   },
 
@@ -146,6 +136,10 @@ export const territory = {
             query: print(gql`query Territory($terrId: Int) { 
               territory (id: $terrId) {
                 group_code id congregationid name description type city
+                lastActivity {
+                  address_id
+                  timestamp
+                }
                 addresses {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
@@ -153,6 +147,11 @@ export const territory = {
                   activityLogs {
                     id checkout_id address_id value tz_offset
                     timestamp timezone publisher_id notes
+                  }
+                  lastActivity {
+                    timestamp
+                    value
+                    publisher_id
                   }
                 }
                 status {

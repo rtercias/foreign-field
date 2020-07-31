@@ -79,7 +79,6 @@ import { mapGetters, mapActions } from 'vuex';
 import gsap from 'gsap';
 import format from 'date-fns/format';
 import get from 'lodash/get';
-import orderBy from 'lodash/orderBy';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
@@ -172,8 +171,6 @@ export default {
 
       try {
         await this.addLog({ addressId: this.address.id, value });
-        await this.fetchAddress(this.address.id);
-        await this.getTerritory(this.territoryId);
 
         this.selectedResponse = this.lastActivity && this.lastActivity.value;
         this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp);
@@ -303,20 +300,7 @@ export default {
       return this.selectedResponseTS && format(new Date(this.selectedResponseTS), 'E M/d') || '';
     },
     lastActivity() {
-      const activity = this.address && this.address.activityLogs;
-      if (activity) {
-        const current = orderBy(activity, (a) => {
-          const timestamp = Number(a.timestamp);
-          if (!Number.isNaN(timestamp)) {
-            return new Date(timestamp);
-          }
-          return null;
-        }, 'desc')[0];
-
-        return current;
-      }
-
-      return { value: 'START', timestamp: '' };
+      return this.address.lastActivity || { value: 'START', timestamp: '' };
     },
     isMySelectedResponse() {
       return get(this.lastActivity, 'publisher_id', '').toString() === get(this.user, 'id', '').toString();
