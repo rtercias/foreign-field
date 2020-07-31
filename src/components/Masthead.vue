@@ -14,7 +14,7 @@
             </b-dropdown-item>
           </b-nav-item-dropdown>
           <b-nav-item
-            v-if="canAdmin && $router.currentRoute.name === 'address-list'"
+            v-if="canAdmin && matchingRouteNames.includes('territory')"
             :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
             Optimize
           </b-nav-item>
@@ -74,6 +74,9 @@ export default {
     }),
     showLeftNav() {
       return this.$route.name === 'home' ? false : !!this.leftNavRoute;
+    },
+    matchingRouteNames() {
+      return this.$route.matched.map(r => r.name);
     },
   },
 };
