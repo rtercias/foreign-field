@@ -102,19 +102,7 @@ export default {
   },
   async mounted() {
     this.setLeftNavRoute(this.returnRoute);
-
-    if (this.mode === Modes.edit) {
-      await this.fetchAddress(this.addressId);
-      this.model = this.address;
-      if (!this.model.sort) {
-        this.model.sort = 0;
-      }
-      delete this.model.activityLogs;
-    } else {
-      await this.getTerritory(this.territoryId);
-      this.model.congregationId = this.congId;
-      this.model.sort = this.maxSort + 1;
-    }
+    await this.refresh();
   },
   methods: {
     ...mapActions({
@@ -144,6 +132,21 @@ export default {
       }
       this.isSaving = false;
     },
+
+    async refresh() {
+      if (this.mode === Modes.edit) {
+        await this.fetchAddress(this.addressId);
+        this.model = this.address;
+        if (!this.model.sort) {
+          this.model.sort = 0;
+        }
+        delete this.model.activityLogs;
+      } else {
+        await this.getTerritory(this.territoryId);
+        this.model.congregationId = this.congId;
+        this.model.sort = this.maxSort + 1;
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -157,7 +160,8 @@ export default {
     }),
   },
   watch: {
-    user() {
+    async user() {
+      await this.refresh();
       const unauthAddressCongId = this.mode === Modes.edit && this.congId !== this.address.congregationId;
       const unauthTerritoryCongId = this.mode === Modes.add && this.congId !== this.territory.congregationid;
 
