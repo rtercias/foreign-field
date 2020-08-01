@@ -30,7 +30,7 @@
     <div class="text-right">
       <hr class="mb-2 mt-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
-      <div class="last-worked">Last worked: {{lastWorked}}</div>
+      <div class="last-worked" v-if="lastWorked">Last worked: {{lastWorked}}</div>
     </div>
   </div>
 </template>
@@ -104,6 +104,10 @@ export default {
     },
     lastWorked() {
       const timestamp = Number(this.terr.lastActivity.timestamp);
+      if (timestamp === 0) {
+        return '';
+      }
+
       return format(new Date(timestamp), 'MM/dd/yyyy');
     },
   },
