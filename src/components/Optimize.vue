@@ -11,13 +11,13 @@
         <div class="text-left" v-if="showHelp">
           <hr/>
           <p>
-            Use <b>Manual Sort</b> or <b>Optimize</b> to sort addresses.
+            Use <b>Manual Sort</b><span v-if="canAdmin"> or <b>Optimize</b></span> to sort addresses.
           </p>
         </div>
         <hr/>
         <div v-if="state===''" class="d-flex justify-content-between">
           <b-button variant="outline-primary" @click="switchToManual">Manual Sort</b-button>
-          <b-button variant="primary" @click="runOptimizer">Optimize</b-button>
+          <b-button variant="primary" @click="runOptimizer" v-if="canAdmin">Optimize</b-button>
         </div>
         <div v-else class="d-flex justify-content-between">
           <b-button variant="outline-secondary" @click="reset">Cancel</b-button>
@@ -66,10 +66,10 @@
             >
               <b-list-group-item
                 class="col-sm-12 overflow-auto p-0"
-                v-for="address in manualAddresses"
+                v-for="(address, index) in manualAddresses"
                 v-bind:key="address.id"
                 data-toggle="collapse">
-                <OptimizeCard :address="address" mode="manual" :state="state" :pos="address.sort">
+                <OptimizeCard :address="address" mode="manual" :state="state" :pos="index + 1">
                 </OptimizeCard>
               </b-list-group-item>
             </draggable>
@@ -88,7 +88,7 @@
                 v-for="(address, index) in optimizedAddresses"
                 v-bind:key="address.id"
                 data-toggle="collapse">
-                <OptimizeCard :address="address" mode="optimize" :pos="index" :state="state"></OptimizeCard>
+                <OptimizeCard :address="address" mode="optimize" :state="state" :pos="index + 1"></OptimizeCard>
               </b-list-group-item>
             </draggable>
           </b-list-group>
@@ -141,7 +141,7 @@ export default {
     }),
     switchToManual() {
       this.state = 'manual';
-      this.mappedAddresses = this.manualAddresses.map(this.normalizeSort);
+      this.mappedAddresses = this.manualAddresses;
     },
     onDragUpdate() {
       this.hasChanges = true;
@@ -169,7 +169,7 @@ export default {
         });
 
         this.optimizedAddresses = orderBy(optimized, 'sort');
-        this.mappedAddresses = this.optimizedAddresses.map(this.normalizeSort);
+        this.mappedAddresses = this.optimizedAddresses;
         this.hasChanges = true;
       }
       this.optimizing = false;
@@ -181,11 +181,7 @@ export default {
       this.saving = false;
       this.manualAddresses = cloneDeep(this.territory.addresses);
       this.optimizedAddresses = cloneDeep(this.territory.addresses);
-      this.mappedAddresses = this.territory.addresses.map(this.normalizeSort);
-    },
-    normalizeSort(addr) {
-      const hasZero = this.territory.addresses.some(a => a.sort === 0);
-      return hasZero ? { ...addr, sort: addr.sort + 1 } : addr;
+      this.mappedAddresses = this.territory.addresses;
     },
     async finalize() {
       const value = await this.$bvModal.msgBoxConfirm('Save the new sort order?', {
@@ -212,6 +208,7 @@ export default {
     ...mapGetters({
       territory: 'territory/territory',
       token: 'auth/token',
+      canAdmin: 'auth/canAdmin',
       optimized: 'addresses/optimized',
     }),
     isManual() {
@@ -240,4 +237,9 @@ export default {
   .optimize-map {
     height: 300px;
   }
+  @media (min-width: 769px) {
+  .optimize-map {
+    height: 100%;
+  }
+}
 </style>
