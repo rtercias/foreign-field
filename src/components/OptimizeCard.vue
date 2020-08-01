@@ -5,7 +5,7 @@
         <div class="mb-0">{{address.addr1}}</div>
         <div>{{address.addr2}}</div>
         <div class="mb-2">{{address.city}}</div>
-        <div class="sort-order position-absolute w-100 h-100" v-if="mode==='manual'">{{pos + 1}}</div>
+        <div class="sort-order position-absolute w-100 h-100" v-if="mode==='manual'">{{pos}}</div>
       </div>
       <div class="p-0" v-if="showGrip">
         <font-awesome-layers class="grip fa-2x">
@@ -20,11 +20,6 @@
 export default {
   name: 'OptimizeCard',
   props: ['address', 'mode', 'state', 'pos'],
-  watch: {
-    pos(value) {
-      this.address.sort = value + 1;
-    },
-  },
   computed: {
     showGrip() {
       return (this.mode === 'manual' && this.state === 'manual') || (this.mode === 'optimize' && this.state === 'optimize');

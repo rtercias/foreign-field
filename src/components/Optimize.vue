@@ -66,10 +66,10 @@
             >
               <b-list-group-item
                 class="col-sm-12 overflow-auto p-0"
-                v-for="(address, index) in manualAddresses"
+                v-for="address in manualAddresses"
                 v-bind:key="address.id"
                 data-toggle="collapse">
-                <OptimizeCard :address="address" mode="manual" :state="state" :pos="index">
+                <OptimizeCard :address="address" mode="manual" :state="state" :pos="address.sort">
                 </OptimizeCard>
               </b-list-group-item>
             </draggable>
@@ -141,7 +141,7 @@ export default {
     }),
     switchToManual() {
       this.state = 'manual';
-      this.mappedAddresses = this.manualAddresses;
+      this.mappedAddresses = this.manualAddresses.map(this.normalizeSort);
     },
     onDragUpdate() {
       this.hasChanges = true;
@@ -169,7 +169,7 @@ export default {
         });
 
         this.optimizedAddresses = orderBy(optimized, 'sort');
-        this.mappedAddresses = this.optimizedAddresses;
+        this.mappedAddresses = this.optimizedAddresses.map(this.normalizeSort);
         this.hasChanges = true;
       }
       this.optimizing = false;
@@ -181,7 +181,11 @@ export default {
       this.saving = false;
       this.manualAddresses = cloneDeep(this.territory.addresses);
       this.optimizedAddresses = cloneDeep(this.territory.addresses);
-      this.mappedAddresses = this.territory.addresses;
+      this.mappedAddresses = this.territory.addresses.map(this.normalizeSort);
+    },
+    normalizeSort(addr) {
+      const hasZero = this.territory.addresses.some(a => a.sort === 0);
+      return hasZero ? { ...addr, sort: addr.sort + 1 } : addr;
     },
     async finalize() {
       const value = await this.$bvModal.msgBoxConfirm('Save the new sort order?', {

@@ -12,7 +12,7 @@
         @click="() => centerMarker(x)"
         :lat-lng="getLatLng(x)">
         <l-icon v-if="mapOptions.showSortOrder">
-          <div class="sort-order-icon font-weight-bolder text-primary bg-warning">{{x.sort + 1}}</div>
+          <div class="sort-order-icon font-weight-bolder text-primary bg-warning">{{x.sort}}</div>
         </l-icon>
         <l-popup>
           <MapLinks :address='x' :simple="mapOptions.simple"></MapLinks>
