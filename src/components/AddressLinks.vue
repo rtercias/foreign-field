@@ -47,6 +47,7 @@ export default {
   computed: {
     ...mapGetters({
       address: 'address/address',
+      token: 'auth/token',
     }),
     mapsUrl() {
       const addr1 = this.address.addr1 || '';
@@ -72,6 +73,12 @@ export default {
       fetchAddress: 'address/fetchAddress',
       setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
+  },
+  watch: {
+    async token() {
+      await this.fetchAddress(this.addressId);
+    },
+    immediate: true,
   },
 };
 </script>

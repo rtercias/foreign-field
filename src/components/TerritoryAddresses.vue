@@ -1,6 +1,6 @@
 <template>
   <div class="territory">
-    <Loading v-if="isLoading"></Loading>
+    <Loading v-if="isLoading || authLoading"></Loading>
     <b-list-group v-else class="columns">
       <b-list-group-item
         class="item col-sm-12 overflow-auto"
@@ -55,6 +55,7 @@ export default {
       territory: 'territory/territory',
       user: 'auth/user',
       token: 'auth/token',
+      authLoading: 'auth/loading',
     }),
     lastActivity() {
       return this.territory.lastActivity;
