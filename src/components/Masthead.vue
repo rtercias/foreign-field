@@ -14,7 +14,7 @@
             </b-dropdown-item>
           </b-nav-item-dropdown>
           <b-nav-item
-            v-if="canAdmin && matchingRouteNames.includes('territory')"
+            v-if="canWrite && matchingRouteNames.includes('territory')"
             :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
             Optimize
           </b-nav-item>

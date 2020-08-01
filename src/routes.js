@@ -63,7 +63,7 @@ const routes = [
     component: Optimize,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS'],
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
     },
   },
   {
