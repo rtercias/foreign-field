@@ -1,6 +1,6 @@
 <template>
   <div class="territory">
-    <Loading v-if="isLoading || authLoading"></Loading>
+    <Loading v-if="isLoading"></Loading>
     <b-list-group v-else class="columns">
       <b-list-group-item
         class="item col-sm-12 overflow-auto"

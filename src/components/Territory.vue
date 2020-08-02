@@ -1,6 +1,6 @@
 <template>
   <div class="territory h-100">
-    <div v-if="isLoading || authIsLoading" class="font-weight-bold m-0 mr-2 ml-2 medium">
+    <div v-if="isLoading" class="font-weight-bold m-0 mr-2 ml-2 medium">
       Authorizing <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
     </div>
     <div v-else class="h-100">
