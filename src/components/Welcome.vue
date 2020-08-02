@@ -3,6 +3,17 @@
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
+      <div class="new-message align-items-center pt-2 pb-2 w-100 text-white"
+      v-show='msgBoxOpen'>
+        <div class="message text-left col-10">
+          <span class="update-message">App version now available! To download, add this page to your home screen.</span>
+        </div>
+        <div class="col-2">
+          <b-button class="dismiss-btn" pill @click="dismissMsg">
+            <font-awesome-icon icon="times"></font-awesome-icon>
+          </b-button>
+        </div>
+      </div>
       <div class="col-sm-12">
         <h3 class="align-items-center d-flex justify-content-center">
           <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
@@ -54,6 +65,12 @@ export default {
     Reports,
     MyTerritory,
   },
+  data() {
+    return {
+      msgBoxOpen: '',
+      msgDismissed: JSON.parse(localStorage.getItem('updateMsgDismissed')),
+    };
+  },
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
@@ -75,6 +92,22 @@ export default {
       }
       return seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
     },
+  },
+  methods: {
+    advertiseMsg() {
+      if (!this.msgDismissed) {
+        this.msgBoxOpen = true;
+      } else {
+        this.msgBoxOpen = false;
+      }
+    },
+    dismissMsg() {
+      localStorage.setItem('updateMsgDismissed', true);
+      this.msgBoxOpen = false;
+    },
+  },
+  mounted() {
+    this.advertiseMsg();
   },
 };
 </script>
@@ -106,5 +139,17 @@ router-link {
 }
 .main {
   display: flex;
+}
+.new-message {
+  display: flex;
+  flex-direction: row;
+  background-color: #5184B7;
+}
+.update-message {
+  font-size: 0.95rem;
+}
+.dismiss-btn {
+  background-color: #5184B7;
+  border: none;
 }
 </style>
