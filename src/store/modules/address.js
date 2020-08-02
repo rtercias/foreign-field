@@ -2,6 +2,7 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import clone from 'lodash/clone';
+import get from 'lodash/get';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
 const model = gql`fragment Model on Address {
@@ -52,6 +53,8 @@ const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
+const UPDATE_CITY_STATE = 'UPDATE_CITY_STATE';
+const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
 
 const ACTION_BUTTON_LIST = [
   {
@@ -109,6 +112,12 @@ function validateAddress(_address, isNew) {
 
   if (isNew && address.id) {
     throw new InvalidAddressError('Address ID must be empty when adding a new address');
+  }
+  if (!address.congregationId) {
+    throw new InvalidAddressError('Congregation ID is required');
+  }
+  if (!address.territory_id) {
+    throw new InvalidAddressError('Territory ID is required');
   }
   if (!address.addr1) {
     throw new InvalidAddressError('Address 1 is required');
@@ -225,6 +234,20 @@ export const address = {
       const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
       const newTags = arrTags.filter(t => t !== tag);
       state.address.notes = newTags.join(',');
+    },
+
+    UPDATE_CITY_STATE(state, { city, stateProvince }) {
+      if (state.address) {
+        state.address.city = city;
+        state.address.state_province = stateProvince;
+      }
+    },
+
+    UPDATE_GEOCODE(state, { longitude, latitude }) {
+      if (state.address) {
+        state.address.longitude = longitude;
+        state.address.latitude = latitude;
+      }
     },
   },
 
@@ -568,6 +591,44 @@ export const address = {
           commit(REMOVE_TAG, tag);
         }
         commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async cityStateLookupByZip({ commit }, { zip }) {
+      try {
+        const instance = axios.create();
+        const url = `https://api.geocode.earth/v1/search?text=${zip}&api_key=ge-1e618cf3d7bd023d`;
+        const response = await instance.get(url);
+
+        if (response && response.data) {
+          const { properties } = get(response, 'data.features[0]', {});
+          commit(UPDATE_CITY_STATE, {
+            city: properties.locality,
+            stateProvince: properties.region_a,
+          });
+        }
+      } catch (err) {
+        console.error('Unable to get city/state info');
+      }
+    },
+
+    async geoCodeAddress({ commit }, { fullAddress }) {
+      try {
+        const instance = axios.create();
+        const url = `https://api.geocode.earth/v1/search?text=${fullAddress}&api_key=ge-1e618cf3d7bd023d`;
+        const response = await instance.get(url);
+
+        if (response && response.data) {
+          const { geometry } = get(response, 'data.features[0]', {});
+          if (geometry) {
+            commit(UPDATE_GEOCODE, {
+              longitude: geometry.coordinates[0],
+              latitude: geometry.coordinates[1],
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Unable to geocode the address');
       }
     },
   },

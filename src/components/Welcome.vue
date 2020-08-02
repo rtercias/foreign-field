@@ -4,7 +4,7 @@
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
       <div class="new-message align-items-center pt-2 pb-2 w-100 text-white"
-      v-show='msgBoxOpen'>
+      v-show='msgBoxOpen && !isPWA'>
         <div class="message text-left col-10">
           <span class="update-message">App version now available! To download, add this page to your home screen.</span>
         </div>
@@ -91,6 +91,9 @@ export default {
         }
       }
       return seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
+    },
+    isPWA() {
+      return window.matchMedia('(display-mode: standalone)').matches;
     },
   },
   methods: {
