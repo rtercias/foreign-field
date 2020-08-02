@@ -160,6 +160,7 @@ export default {
       this.isLogging = true;
       let value = _value;
       this.resetContainerPosition();
+      this.setAddress(this.address);
 
       if (this.selectedResponse === 'START' && value === 'START') return;
 
@@ -171,9 +172,9 @@ export default {
 
       try {
         await this.addLog({ addressId: this.address.id, value });
-
-        this.selectedResponse = this.lastActivity && this.lastActivity.value;
-        this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp);
+        this.selectedResponse = this.updatedAddress.lastActivity && this.updatedAddress.lastActivity.value;
+        this.selectedResponseTS = this.updatedAddress.lastActivity && Number(this.updatedAddress.lastActivity.timestamp);
+        this.$emit('address-updated', this.updatedAddress);
 
         this.clickedResponse = '';
         this.resetContainerPosition();
@@ -261,6 +262,7 @@ export default {
     ...mapGetters({
       loading: 'auth/loading',
       territory: 'territory/territory',
+      updatedAddress: 'address/address',
       actionButtonList: 'address/actionButtonList',
       user: 'auth/user',
       publisher: 'publisher/publisher',

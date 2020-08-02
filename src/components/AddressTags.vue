@@ -86,7 +86,7 @@ export default {
         await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
       }
 
-      this.$parent.$emit('address-updated');
+      this.$parent.$emit('address-updated', this.updatedAddress);
       this.collapsed = true;
     },
     loadselectedTags() {
@@ -153,6 +153,7 @@ export default {
   computed: {
     ...mapGetters({
       user: 'auth/user',
+      updatedAddress: 'address/address',
     }),
     availableTags() {
       return [

@@ -1,7 +1,7 @@
 <template>
   <div class="territory">
     <Loading v-if="isLoading || authLoading"></Loading>
-    <b-list-group v-else class="columns">
+    <b-list-group class="columns">
       <b-list-group-item
         class="item col-sm-12 overflow-auto"
         v-for="address in territory.addresses"
@@ -72,8 +72,14 @@ export default {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;
     },
 
-    async refreshTerritory() {
-      await this.getTerritory(this.id);
+    async refreshTerritory(_address) {
+      if (_address) {
+        const index = this.territory.addresses.findIndex(a => a.id === _address.id);
+        this.territory.addresses.splice(index, 1, _address);
+        this.territory.lastActivity = { address_id: _address.id, ..._address.lastActivity };
+      } else {
+        await this.getTerritory(this.id);
+      }
     },
 
     async loadTerritory() {
@@ -105,7 +111,7 @@ export default {
     width: 100%;
     float: none;
 }
-.border-medium {
+.list-group-item.item.border-medium {
   border-width: medium;
 }
 ul {
