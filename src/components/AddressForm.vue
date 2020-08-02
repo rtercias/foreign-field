@@ -57,6 +57,7 @@
           </b-form-group>
         </div>
       </div>
+      <AddressMap v-else-if="step === 2"></AddressMap>
       <div class="buttons justify-content-between pt-4">
         <b-button v-if="step == 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
@@ -73,6 +74,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import { TheMask } from 'vue-the-mask';
 import Loading from './Loading';
+import AddressMap from './AddressMap';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 
 const Modes = {
@@ -88,6 +90,7 @@ export default {
   components: {
     Loading,
     TheMask,
+    AddressMap,
   },
   data() {
     return {
