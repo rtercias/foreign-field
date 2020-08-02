@@ -1,6 +1,6 @@
 <template>
   <div class="territory h-100">
-    <div v-if="isLoading" class="font-weight-bold m-0 mr-2 ml-2 medium">
+    <div v-if="isLoading || authIsLoading" class="font-weight-bold m-0 mr-2 ml-2 medium">
       Authorizing <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
     </div>
     <div v-else class="h-100">
@@ -11,7 +11,7 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right">{{getTerritoryName()}}</h4>
+            <h4 class="text-right">{{territoryName}}</h4>
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
@@ -92,6 +92,9 @@ export default {
 
       return '';
     },
+    territoryName() {
+      return this.territory && this.territory.name ? this.territory.name : '';
+    },
     lastActivity() {
       return this.territory.lastActivity;
     },
@@ -101,14 +104,6 @@ export default {
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
     }),
-
-    getTerritoryName() {
-      if (this.territory && this.territory.id === this.id) {
-        return this.territory.name;
-      }
-
-      return '';
-    },
 
     async resetNH() {
       if (window.confirm('Are you sure you want to reset NH records?')) {

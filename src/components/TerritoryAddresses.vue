@@ -1,7 +1,7 @@
 <template>
   <div class="territory">
     <Loading v-if="isLoading || authLoading"></Loading>
-    <b-list-group class="columns">
+    <b-list-group v-else class="columns">
       <b-list-group-item
         class="item col-sm-12 overflow-auto"
         v-for="address in territory.addresses"

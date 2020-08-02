@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-link :to="url(territory)">
+    <b-link :to="url(territory)" @click="() => setTerr(territory)">
       {{territory.name}} ({{territory.city}})
     </b-link>
     <span v-if="territory.status">
@@ -31,6 +31,9 @@ export default {
     },
     url(terr) {
       return `/territories/${terr.group_code}/${terr.id}`;
+    },
+    setTerr(terr) {
+      this.setTerritory(terr);
     },
   },
   computed: {
