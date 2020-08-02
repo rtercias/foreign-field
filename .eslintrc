@@ -51,6 +51,7 @@
     "no-alert": "off",
     "no-plusplus": "off",
     "func-names": "off",
-    "linebreak-style": "off"
+    "linebreak-style": "off",
+    "object-curly-newline": "off"
   }
 }
