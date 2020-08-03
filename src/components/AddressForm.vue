@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
-    <b-form class="pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
+    <b-form class="pl-4 pr-4 pb-4 text-left h-100" @submit.prevent="submitAddress">
       <div v-if="step === 1">
         <div v-if="canWrite">
           <div v-if="isAdmin">
@@ -57,7 +57,7 @@
           </b-form-group>
         </div>
       </div>
-      <AddressMap v-else-if="step === 2"></AddressMap>
+      <AddressMap v-else-if="step === 2" :address="model"></AddressMap>
       <div class="buttons justify-content-between pt-4">
         <b-button v-if="step == 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
@@ -181,7 +181,7 @@ export default {
 
     async geocode() {
       const { addr1, addr2, city, state_province: state, postal_code: zip } = this.model;
-      const fullAddress = `${addr1} ${addr2} ${city} ${state} ${zip}`;
+      const fullAddress = `${addr1 || ''} ${addr2 || ''} ${city || ''} ${state || ''} ${zip || ''}`;
       await this.geoCodeAddress({ fullAddress });
 
       this.$set(this.model, 'longitude', this.address.longitude);
@@ -191,6 +191,7 @@ export default {
     next() {
       if (this.step < 3) {
         this.step = this.step + 1;
+        this.geocode();
       }
     },
 

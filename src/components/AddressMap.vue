@@ -7,16 +7,10 @@
       :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
-        v-for="(x, i) in (addresses || territory.addresses)"
-        :key="i"
-        @click="() => centerMarker(x)"
-        :lat-lng="getLatLng(x)">
-        <l-icon v-if="mapOptions.showSortOrder">
-          <div class="sort-order-icon font-weight-bolder text-primary bg-warning">{{i + 1}}</div>
-        </l-icon>
-        <l-popup>
-          <MapLinks :address='x' :simple="mapOptions.simple"></MapLinks>
-        </l-popup>
+        :lat-lng="getLatLng()"
+        :draggable="true"
+        :options="{ autoPan: true }"
+        @update:latLng="updateLatLng">
       </l-marker>
     </l-map>
   </div>
@@ -46,46 +40,54 @@ export default {
     LControlZoom,
     MapLinks,
   },
-  props: ['coordinates'],
+  props: ['address'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      zoom: 13,
+      zoom: 17,
       showCard: false,
       center: [0, 0],
+      newCoords: [],
     };
+  },
+  mounted() {
+    this.center = this.getLatLng();
   },
   computed: {
     ...mapGetters({
       token: 'auth/token',
     }),
     bounds() {
-      return latLngBounds(this.coordinates);
+      return latLngBounds(this.getLatLng());
     },
     sortDisplay(sort) {
       return !sort ? '' : sort;
     },
   },
   methods: {
-    centerMarker(address) {
-      this.heading = address.addr1;
-      if (address.latitude && address.longitude) {
-        this.center = [address.latitude, address.longitude];
-      }
-    },
-    getLatLng(address) {
-      if (address.latitude && address.longitude) {
-        return [address.latitude, address.longitude];
+    getLatLng() {
+      if (this.address.latitude && this.address.longitude) {
+        return [this.address.latitude, this.address.longitude];
       }
       return [0, 0];
+    },
+    updateLatLng(coordinates) {
+      // eslint-disable-next-line
+      console.log(coordinates);
+      this.newCoords = [coordinates.lat, coordinates.lng];
+    },
+  },
+  watch: {
+    'address.longitude': function () {
+      this.center = this.getLatLng();
     },
   },
 };
 </script>
 
 <style>
-  .territory-map {
-    height: calc(100% - 163px);
+  .address-map {
+    height: calc(100% - 152px);
   }
   .map {
     height: 100%;
