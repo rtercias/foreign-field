@@ -23,7 +23,7 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='address-list'" size="sm">
-              <b-button v-if="canAdmin" variant="danger" @click="resetNH(true)">Reset</b-button>
+              <b-button v-if="canAdmin" variant="danger" @click="resetNH(true)">Check In</b-button>
               <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
@@ -103,6 +103,7 @@ export default {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
+      checkinTerritory: 'territory/checkinTerritory',
     }),
 
     async resetNH() {
@@ -110,8 +111,14 @@ export default {
         this.isLoading = true;
         await this.resetNHRecords(this.id);
         await this.getTerritory(this.id);
+        await this.checkinTerritory({
+          territoryId: this.id,
+          userId: this.user.id,
+          username: this.user.username,
+        });
         this.isLoading = false;
       }
+      this.$router.push({ path: 'home' });
     },
 
     seenTerritories() {
