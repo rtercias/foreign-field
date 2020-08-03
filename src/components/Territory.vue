@@ -117,8 +117,8 @@ export default {
           username: this.user.username,
         });
         this.isLoading = false;
+        await this.$router.push({ name: 'home' });
       }
-      this.$router.push({ path: 'home' });
     },
 
     seenTerritories() {
