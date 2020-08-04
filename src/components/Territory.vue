@@ -109,18 +109,32 @@ export default {
 
     async checkIn() {
       if (window.confirm('Ready to check-in the territory?')) {
-        this.isLoading = true;
-        await this.resetNHRecords(this.id);
-        await this.getTerritory(this.id);
-        await this.checkinTerritory({
-          territoryId: this.id,
-          userId: get(this.territory, this.territory.status.publisher.id),
-          username: this.user.username,
-        });
-        this.isLoading = false;
-        await this.$router.push({ name: 'home' });
+        if (this.user.id === this.territory.status.publisher.id) {
+          this.isLoading = true;
+          await this.resetNHRecords(this.id);
+          await this.getTerritory(this.id);
+          await this.checkinTerritory({
+            territoryId: this.id,
+            userId: get(this.territory, this.territory.status.publisher.id),
+            username: this.user.username,
+          });
+          this.isLoading = false;
+          await this.$router.push({ name: 'home' });
+        } else {
+          // this.makeToast('danger');
+          alert(`Please contact the owner, ${this.territory.status.publisher.firstname} \
+${this.territory.status.publisher.lastname}, to check in the territory!`);
+        }
       }
     },
+
+    // makeToast(variant = null) {
+    //   this.$bvToast.toast(`Please contact ${this.territory.status.publisher.firstname} to return territory`, {
+    //     title: 'Warning',
+    //     variant,
+    //     solid: true,
+    //   });
+    // },
 
     seenTerritories() {
       let seenTerritories = [];
