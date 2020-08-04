@@ -23,7 +23,7 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='address-list'" size="sm">
-              <b-button v-if="canAdmin" variant="danger" @click="resetNH(true)">Check In</b-button>
+              <b-button v-if="canAdmin" variant="danger" @click="checkIn(true)">Check In</b-button>
               <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
@@ -39,6 +39,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import orderBy from 'lodash/orderBy';
+import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
 
@@ -106,14 +107,14 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
     }),
 
-    async resetNH() {
-      if (window.confirm('Are you sure you want to reset NH records?')) {
+    async checkIn() {
+      if (window.confirm('Ready to check-in the territory?')) {
         this.isLoading = true;
         await this.resetNHRecords(this.id);
         await this.getTerritory(this.id);
         await this.checkinTerritory({
           territoryId: this.id,
-          userId: this.user.id,
+          userId: get(this.territory, this.territory.status.publisher.id),
           username: this.user.username,
         });
         this.isLoading = false;
@@ -172,7 +173,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .list-group {
   display: block;
