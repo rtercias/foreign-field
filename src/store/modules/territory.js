@@ -4,6 +4,7 @@ import { print } from 'graphql/language/printer';
 import { store } from '..';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
+import get from 'lodash/get';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
@@ -26,8 +27,7 @@ export const territory = {
       const user = rootGetters['auth/user'];
 
       if (user) {
-        const owner = state.territory && state.territory.status && state.territory.status.publisher;
-        return owner && user.username === owner.username;
+        return get(state.territory, 'status.publisher.username');
       }
 
       return false;
