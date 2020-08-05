@@ -120,12 +120,13 @@ export default {
         });
         this.isLoading = false;
         await this.$router.push({ name: 'home' });
+        this.checkInToast('success');
       }
     },
 
-    makeToast(variant = null) {
-      this.$bvToast.toast(`Please contact ${this.territory.status.publisher.firstname} to return territory`, {
-        title: 'Warning',
+    checkInToast(variant = null) {
+      this.$bvToast.toast('Territory checked in.', {
+        title: 'Nice Work!',
         variant,
         solid: true,
       });
