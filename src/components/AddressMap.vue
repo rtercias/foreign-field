@@ -7,7 +7,7 @@
       :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
-        :lat-lng="getLatLng()"
+        :lat-lng="center"
         :draggable="true"
         :options="{ autoPan: true }"
         @update:latLng="updateLatLng">
@@ -40,11 +40,10 @@ export default {
     LControlZoom,
     MapLinks,
   },
-  props: ['address'],
+  props: ['address', 'zoom'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      zoom: 17,
       showCard: false,
       center: [0, 0],
       newCoords: [],
@@ -72,9 +71,7 @@ export default {
       return [0, 0];
     },
     updateLatLng(coordinates) {
-      // eslint-disable-next-line
-      console.log(coordinates);
-      this.newCoords = [coordinates.lat, coordinates.lng];
+      this.center = [coordinates.lat, coordinates.lng];
     },
   },
   watch: {
@@ -87,7 +84,7 @@ export default {
 
 <style>
   .address-map {
-    height: calc(100% - 152px);
+    height: calc(100% - 60px);
   }
   .map {
     height: 100%;

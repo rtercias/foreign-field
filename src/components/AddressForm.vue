@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
-    <b-form class="pl-4 pr-4 pb-4 text-left h-100" @submit.prevent="submitAddress">
+    <b-form class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
         <div v-if="canWrite">
           <div v-if="isAdmin">
@@ -57,8 +57,19 @@
           </b-form-group>
         </div>
       </div>
-      <AddressMap v-else-if="step === 2" :address="model"></AddressMap>
-      <div class="buttons justify-content-between pt-4">
+      <div v-else-if="step === 2" class="h-100">
+        <p>
+          Check the address location. Drag-and-drop the marker to make adjustments.
+        </p>
+        <AddressMap :address="model" :zoom="17"></AddressMap>
+      </div>
+      <div v-else-if="step === 3" class="h-100">
+        <p>
+          Select the territory for this address.
+        </p>
+        <AddressMap :address="model" :zoom="13"></AddressMap>
+      </div>
+      <div class="buttons justify-content-between pt-4 pb-4">
         <b-button v-if="step == 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
         <b-button v-if="!step < 3" type="button" variant="light" @click="next">Next</b-button>
@@ -191,7 +202,9 @@ export default {
     next() {
       if (this.step < 3) {
         this.step = this.step + 1;
-        this.geocode();
+        if (!this.model.longitude || !this.model.latitude) {
+          this.geocode();
+        }
       }
     },
 
@@ -237,6 +250,9 @@ export default {
 };
 </script>
 <style>
+  .address-form .form {
+    height: calc(100% - 150px);
+  }
   .buttons {
     display: flex;
   }
