@@ -24,6 +24,7 @@
     "graphql": "^15.2.0",
     "graphql-tag": "^2.10.3",
     "gsap": "^3.2.6",
+    "haversine-geolocation": "^1.5.0",
     "leaflet": "^1.6.0",
     "lodash": "^4.17.19",
     "pusher-js": "^6.0.3",
