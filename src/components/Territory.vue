@@ -109,21 +109,20 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
     }),
 
-    checkIn() {
-      this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
+    async checkIn() {
+      const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
         title: `${this.territory.name}`,
         centered: true,
-      }).then((value) => {
-        if (value) {
-          this.checkInandReset();
-        }
       });
+
+      if (response) {
+        this.checkInandReset();
+      }
     },
 
     async checkInandReset() {
       this.isLoading = true;
       await this.resetNHRecords(this.id);
-      await this.getTerritory(this.id);
       await this.checkinTerritory({
         territoryId: this.id,
         userId: get(this.territory, 'status.publisher.id'),
