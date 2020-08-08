@@ -23,7 +23,7 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='address-list'" size="sm">
-              <b-button v-if="canAdmin" variant="danger" @click="resetNH(true)">Reset</b-button>
+              <b-button v-if="canWrite || isOwnedByUser" variant="danger" @click="checkIn(true)">Check In</b-button>
               <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
@@ -39,6 +39,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import orderBy from 'lodash/orderBy';
+// eslint-disable-next-line
+import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
 
@@ -69,6 +71,7 @@ export default {
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       canAdmin: 'auth/canAdmin',
+      isOwnedByUser: 'territory/isOwnedByUser',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -103,15 +106,39 @@ export default {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
+      checkinTerritory: 'territory/checkinTerritory',
     }),
 
-    async resetNH() {
-      if (window.confirm('Are you sure you want to reset NH records?')) {
-        this.isLoading = true;
-        await this.resetNHRecords(this.id);
-        await this.getTerritory(this.id);
-        this.isLoading = false;
+    async checkIn() {
+      const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
+        title: `${this.territory.name}`,
+        centered: true,
+      });
+
+      if (response) {
+        this.checkInandReset();
       }
+    },
+
+    async checkInandReset() {
+      this.isLoading = true;
+      await this.resetNHRecords(this.id);
+      await this.checkinTerritory({
+        territoryId: this.id,
+        userId: get(this.territory, 'status.publisher.id'),
+        username: this.user.username,
+      });
+      this.isLoading = false;
+      await this.$router.push({ name: 'home' });
+      this.checkInToast('success');
+    },
+
+    checkInToast(variant = null) {
+      this.$bvToast.toast('Territory checked in.', {
+        title: 'Nice Work!',
+        variant,
+        solid: true,
+      });
     },
 
     seenTerritories() {
@@ -165,7 +192,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .list-group {
   display: block;
