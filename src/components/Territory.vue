@@ -39,6 +39,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import orderBy from 'lodash/orderBy';
+// eslint-disable-next-line
 import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -108,20 +109,29 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
     }),
 
-    async checkIn() {
-      if (window.confirm('Ready to check-in the territory?')) {
-        this.isLoading = true;
-        await this.resetNHRecords(this.id);
-        await this.getTerritory(this.id);
-        await this.checkinTerritory({
-          territoryId: this.id,
-          userId: get(this.territory, 'status.publisher.id'),
-          username: this.user.username,
-        });
-        this.isLoading = false;
-        await this.$router.push({ name: 'home' });
-        this.checkInToast('success');
-      }
+    checkIn() {
+      this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
+        title: `${this.territory.name}`,
+        centered: true,
+      }).then((value) => {
+        if (value) {
+          this.checkInandReset();
+        }
+      });
+    },
+
+    async checkInandReset() {
+      this.isLoading = true;
+      await this.resetNHRecords(this.id);
+      await this.getTerritory(this.id);
+      await this.checkinTerritory({
+        territoryId: this.id,
+        userId: get(this.territory, 'status.publisher.id'),
+        username: this.user.username,
+      });
+      this.isLoading = false;
+      await this.$router.push({ name: 'home' });
+      this.checkInToast('success');
     },
 
     checkInToast(variant = null) {
