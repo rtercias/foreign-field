@@ -1,7 +1,7 @@
 <template>
   <div class="territory h-100">
-    <div v-if="isLoading" class="font-weight-bold m-0 mr-2 ml-2 medium">
-      Authorizing <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+    <div v-if="isLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
+      Please wait <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
     </div>
     <div v-else class="h-100">
       <header class="w-100 pl-2 pr-2">
@@ -23,7 +23,9 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='address-list'" size="sm">
-              <b-button v-if="canWrite || isOwnedByUser" variant="danger" @click="checkIn(true)">Check In</b-button>
+              <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="danger" @click="checkIn(true)">
+                Check In
+              </b-button>
               <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
