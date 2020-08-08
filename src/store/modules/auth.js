@@ -3,6 +3,8 @@ import firebase from 'firebase/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import uniqBy from 'lodash/uniqBy';
+import get from 'lodash/get';
+import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
 import { IncompleteRegistrationError, UnauthorizedUserError } from '../exceptions/custom-errors';
@@ -45,13 +47,11 @@ export const auth = {
     groupCodes: state => state.groupCodes,
     isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
-    canAdmin: state => state.user && (state.user.role === 'Admin' || state.user.role === 'TS'),
-    canWrite: state => state.user && (state.user.role === 'Admin'
-      || state.user.role === 'TS'
-      || state.user.role === 'SO'
-      || state.user.role === 'GO'),
-    canRead: (state, getters) => getters.canWrite
-      || (state.user && (state.user.role === 'RP' || state.user.role === 'TS')),
+    canAdmin: state => state.user && ['Admin', 'TS'].includes(state.user.role),
+    canViewReports: state => state.user && ['Admin', 'TS', 'SO', 'GO'].includes(state.user.role),
+    canCheckout: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
+    canWrite: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
+    canRead: (state, getters) => getters.canWrite || state.user && ['RP', 'RP-E', 'TS'].includes(state.user.role),
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
   },
@@ -172,8 +172,9 @@ export const auth = {
         }
 
         const { user } = (response && response.data && response.data.data) || {};
+        const userRoles = get(user, 'role', '').split(',');
         const { permissions = [] } = router.currentRoute.meta;
-        const hasPermission = permissions.length === 0 || permissions.includes(user.role);
+        const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
         if (hasPermission) {
           commit(AUTHORIZE, user);
           resolve();
