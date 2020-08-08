@@ -40,7 +40,11 @@ export default {
         this.$set(address, 'incomingResponse', log);
       }
     });
-    this.setLeftNavRoute(`/territories/${this.group}`);
+    if (this.canCheckout) {
+      this.setLeftNavRoute(`/territories/${this.group}`);
+    } else {
+      this.setLeftNavRoute('/');
+    }
     await this.loadTerritory();
   },
   data() {
@@ -56,6 +60,7 @@ export default {
       user: 'auth/user',
       token: 'auth/token',
       authLoading: 'auth/loading',
+      canCheckout: 'auth/canCheckout',
     }),
     lastActivity() {
       return this.territory.lastActivity;
