@@ -28,7 +28,7 @@ const routes = [
     component: Territories,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'GO', 'SO'],
+      permissions: ['TS', 'GO', 'SO', 'RP-E'],
     },
   },
   {
@@ -37,7 +37,7 @@ const routes = [
     component: Territory,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
     },
     children: [{
       name: 'address-list',
@@ -45,7 +45,7 @@ const routes = [
       component: TerritoryAddresses,
       props: true,
       meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       },
     }, {
       name: 'map-view',
@@ -53,7 +53,7 @@ const routes = [
       component: TerritoryMap,
       props: true,
       meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       },
     }],
   },
@@ -72,7 +72,7 @@ const routes = [
     component: Dnc,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
     },
   },
   {
@@ -90,7 +90,7 @@ const routes = [
     component: AddressLinks,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
     },
   },
   {
@@ -99,7 +99,7 @@ const routes = [
     component: ActivityHistory,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
     },
   },
   {
@@ -117,7 +117,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
     },
   },
 ];
