@@ -14,9 +14,9 @@ module.exports = {
       new WebpackPwaManifest({
         name: 'Foreign Field',
         background_color: '#f2faff',
-        display: "standalone",
+        display: 'standalone',
         fingerprints: false,
-        crossorigin: 'use-credentials', //can be null, use-credentials or anonymous
+        crossorigin: 'use-credentials', // can be null, use-credentials or anonymous
         ios: {
           'apple-mobile-web-app-title': 'Foreign Field',
           'apple-mobile-web-app-status-bar-style': 'default',
@@ -39,8 +39,8 @@ module.exports = {
             sizes: ['828x1792', '1125x2436', '750x1334', '1242x2208', '640x1136', '1536x2048', '1668x2224', '2048x2732'],
             ios: 'startup',
           },
-        ]
+        ],
       }),
-    ]
-  }
+    ],
+  },
 };

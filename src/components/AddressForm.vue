@@ -11,31 +11,23 @@
     <b-form class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
         <div v-if="canWrite">
-          <div v-if="isAdmin">
-            <b-form-group label="Congregation ID" class="mt-3">
-              <b-form-input v-model="model.congregationId"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Territory ID" class="mt-3">
-              <b-form-input v-model="model.territory_id"></b-form-input>
-            </b-form-group>
-            <b-form-group label="Status" class="mt-3">
-              <b-form-input v-model="model.status" :readonly="readOnly"></b-form-input>
-            </b-form-group>
-          </div>
+          <b-form-group>
+            <b-form-checkbox v-model="useGeocodedAddress">Use geocoded address</b-form-checkbox>
+          </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
-            <b-form-input v-model="model.addr1" :readonly="readOnly"></b-form-input>
+            <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
           </b-form-group>
           <b-form-group label="Address 2" class="mt-3">
             <b-form-input v-model="model.addr2" :readonly="readOnly"></b-form-input>
           </b-form-group>
-          <b-form-group label="Zip" class="mt-3">
-            <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="getCityState"></b-form-input>
-          </b-form-group>
           <b-form-group label="City" class="mt-3">
-            <b-form-input v-model="model.city" :readonly="readOnly"></b-form-input>
+            <b-form-input v-model="model.city" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
           </b-form-group>
           <b-form-group label="State" class="mt-3">
-            <b-form-input v-model="model.state_province" :readonly="readOnly"></b-form-input>
+            <b-form-input v-model="model.state_province" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
+          </b-form-group>
+          <b-form-group label="Zip" class="mt-3">
+            <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
           </b-form-group>
         </div>
         <b-form-group label="Phone" class="mt-3 position-relative">
@@ -48,7 +40,18 @@
             :disabled="readOnly">
           </the-mask>
         </b-form-group>
-        <div v-if="isAdmin">
+        <div v-if="isAdmin" class="mt-5">
+          <hr />
+          <label class="mb-0">ADMIN ONLY</label>
+          <b-form-group label="Congregation ID" class="mt-3">
+            <b-form-input v-model="model.congregationId"></b-form-input>
+          </b-form-group>
+          <b-form-group label="Territory ID" class="mt-3">
+            <b-form-input v-model="model.territory_id"></b-form-input>
+          </b-form-group>
+          <b-form-group label="Status" class="mt-3">
+            <b-form-input v-model="model.status" :readonly="readOnly"></b-form-input>
+          </b-form-group>
           <b-form-group label="Notes" class="mt-3">
             <b-form-input v-model="model.notes"></b-form-input>
           </b-form-group>
@@ -72,8 +75,10 @@
       <div class="buttons justify-content-between pt-4 pb-4">
         <b-button v-if="step == 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
-        <b-button v-if="!step < 3" type="button" variant="light" @click="next">Next</b-button>
-        <b-button v-if="isFormComplete" class="submit-button" type="submit" variant="primary" :disabled="isSaving">
+        <b-button v-if="!step < 3 && isAddressComplete" type="button" variant="light" @click="applyGeocode">
+          Locate on Map
+        </b-button>
+        <b-button :disabled="!isFormComplete || isSaving" class="submit-button" type="submit" variant="primary">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
@@ -83,6 +88,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import startCase from 'lodash/startCase';
 import { TheMask } from 'vue-the-mask';
 import Loading from './Loading';
 import AddressMap from './AddressMap';
@@ -94,6 +100,7 @@ const Modes = {
 };
 
 const required = ['congregationId', 'territory_id', 'addr1', 'city', 'state_province'];
+const requiredAddress = ['addr1', 'city', 'state_province'];
 
 export default {
   name: 'AddressForm',
@@ -118,6 +125,8 @@ export default {
       returnRoute: this.mode === Modes.add
         ? `/territories/${this.group}/${this.territoryId}`
         : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail`,
+      useGeocodedAddress: true,
+      geocodedAddress: {},
     };
   },
   async mounted() {
@@ -129,15 +138,16 @@ export default {
       addAddress: 'address/addAddress',
       updateAddress: 'address/updateAddress',
       fetchAddress: 'address/fetchAddress',
-      cityStateLookupByZip: 'address/cityStateLookupByZip',
-      geoCodeAddress: 'address/geoCodeAddress',
+      addressLookup: 'address/addressLookup',
       getTerritory: 'territory/getTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
     }),
     async submitAddress() {
       try {
-        await this.geocode();
+        if (!this.model.longitude || !this.model.latitude) {
+          await this.geocode();
+        }
         this.isSaving = true;
 
         if (this.mode === Modes.add) {
@@ -173,38 +183,40 @@ export default {
         this.model.sort = this.maxSort + 1;
       }
     },
-    async getCityState() {
-      let response = true;
+    async geocodeAddress() {
+      if (!this.model.addr1) return;
+      if (!this.model.city && !this.model.state_province && !this.model.postal_code) return;
+      if (this.model.city && !this.model.state_province && !this.model.postal_code) return;
+      if (this.model.state_province && !this.model.city && !this.model.postal_code) return;
 
-      if (this.model.city || this.model.state_province) {
-        response = await this.$bvModal.msgBoxConfirm('Replace existing city and state/province?', {
-          title: `${this.model.addr1} ${this.model.addr2}`,
-          centered: true,
-        });
-      }
-
-      if (response) {
-        await this.cityStateLookupByZip({ zip: this.model.postal_code });
-        this.$set(this.model, 'city', this.address.city);
-        this.$set(this.model, 'state_province', this.address.state_province);
-      }
-    },
-
-    async geocode() {
       const { addr1, addr2, city, state_province: state, postal_code: zip } = this.model;
-      const fullAddress = `${addr1 || ''} ${addr2 || ''} ${city || ''} ${state || ''} ${zip || ''}`;
-      await this.geoCodeAddress({ fullAddress });
+      const fullAddress = `${addr1 || ''}+${addr2 || ''}+${city || ''}+${state || ''}+${zip || ''}`;
 
-      this.$set(this.model, 'longitude', this.address.longitude);
-      this.$set(this.model, 'latitude', this.address.latitude);
+      await this.addressLookup(fullAddress);
+      this.geocodedAddress = {
+        addr1: startCase(this.address.addr1),
+        city: startCase(this.address.city),
+        state_province: startCase(this.address.state_province),
+        postal_code: startCase(this.address.postal_code),
+        longitude: this.address.longitude,
+        latitude: this.address.latitude,
+      };
+
+      if (this.useGeocodedAddress) {
+        this.model.addr1 = this.geocodedAddress.addr1;
+        this.model.city = this.geocodedAddress.city;
+        this.model.state_province = this.geocodedAddress.state_province;
+        this.model.postal_code = this.geocodedAddress.postal_code;
+        this.model.longitude = this.geocodedAddress.longitude;
+        this.model.latitude = this.geocodedAddress.latitude;
+      }
     },
 
-    next() {
+    async applyGeocode() {
       if (this.step < 3) {
         this.step = this.step + 1;
-        if (!this.model.longitude || !this.model.latitude) {
-          this.geocode();
-        }
+        this.model.longitude = this.geocodedAddress.longitude;
+        this.model.latitude = this.geocodedAddress.latitude;
       }
     },
 
@@ -227,6 +239,14 @@ export default {
 
     isFormComplete() {
       for (const field of required) {
+        if (!this.model[field]) return false;
+      }
+
+      return true;
+    },
+
+    isAddressComplete() {
+      for (const field of requiredAddress) {
         if (!this.model[field]) return false;
       }
 
