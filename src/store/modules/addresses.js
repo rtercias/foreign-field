@@ -86,26 +86,19 @@ export const addresses = {
         if (!territoryId) {
           return;
         }
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
-            query: print(gql`query optimize($territoryId: Int!) {
-              optimize(territoryId:$territoryId) { id sort }
-            }`),
-            variables: {
-              territoryId,
-            },
-          },
-        });
 
-        if (response && response.data && response.data.data) {
-          const { optimize } = response.data.data;
-          commit(OPTIMIZE_SUCCESS, optimize);
-        }
+        const url = `https://admin.foreignfield.com/api/addresses/getOptimizedRouteForTerritory?territoryId=${territoryId}`;
+        const proxy = 'https://cors-anywhere.herokuapp.com';
+        const response = await axios.get(`${proxy}/${url}`);
+        const { data } = response;
+        commit(OPTIMIZE_SUCCESS, data.map(d => ({
+          id: d.Id,
+          addr1: d.Address1,
+          addr2: d.Address2,
+          city: d.City,
+          state_province: d.StateProvince,
+          sort: d.Sort,
+        })));
       } catch (exception) {
         commit(OPTIMIZE_FAIL, exception);
       }

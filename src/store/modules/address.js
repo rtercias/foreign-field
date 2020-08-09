@@ -53,7 +53,6 @@ const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
-const UPDATE_CITY_STATE = 'UPDATE_CITY_STATE';
 const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
 
 const ACTION_BUTTON_LIST = [
@@ -236,17 +235,14 @@ export const address = {
       state.address.notes = newTags.join(',');
     },
 
-    UPDATE_CITY_STATE(state, { city, stateProvince }) {
-      if (state.address) {
-        state.address.city = city;
-        state.address.state_province = stateProvince;
-      }
-    },
-
-    UPDATE_GEOCODE(state, { longitude, latitude }) {
+    UPDATE_GEOCODE(state, { longitude, latitude, addr1, city, stateProvince, zip }) {
       if (state.address) {
         state.address.longitude = longitude;
         state.address.latitude = latitude;
+        state.address.addr1 = addr1;
+        state.address.city = city;
+        state.address.state_province = stateProvince;
+        state.address.postal_code = zip;
       }
     },
   },
@@ -594,36 +590,32 @@ export const address = {
       }
     },
 
-    async cityStateLookupByZip({ commit }, { zip }) {
+    async addressLookup({ commit }, fullAddress) {
       try {
         const instance = axios.create();
-        const url = `https://api.geocode.earth/v1/search?text=${zip}&api_key=ge-1e618cf3d7bd023d`;
+        const key = process.env.VUE_APP_GOOGLE_MAPS_API;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${fullAddress}&key=${key}`;
         const response = await instance.get(url);
 
         if (response && response.data) {
-          const { properties } = get(response, 'data.features[0]', {});
-          commit(UPDATE_CITY_STATE, {
-            city: properties.locality,
-            stateProvince: properties.region_a,
-          });
-        }
-      } catch (err) {
-        console.error('Unable to get city/state info');
-      }
-    },
-
-    async geoCodeAddress({ commit }, { fullAddress }) {
-      try {
-        const instance = axios.create();
-        const url = `https://api.geocode.earth/v1/search?text=${fullAddress}&api_key=ge-1e618cf3d7bd023d`;
-        const response = await instance.get(url);
-
-        if (response && response.data) {
-          const { geometry } = get(response, 'data.features[0]', {});
+          const { geometry, address_components: addressComponent } = get(response, 'data.results[0]', {});
           if (geometry) {
+            const country = addressComponent.find(c => c.types[0] === 'country') || {};
+            const streetNumber = addressComponent.find(c => c.types[0] === 'street_number') || {};
+            const route = addressComponent.find(c => c.types[0] === 'route') || {};
+            const city = addressComponent.find(c => c.types[0] === 'locality') || {};
+            const stateProvince = addressComponent.find(c => c.types[0] === 'administrative_area_level_1') || {};
+            const zip = addressComponent.find(c => c.types[0] === 'postal_code') || {};
+            const longitude = get(geometry, 'location.lng');
+            const latitude = get(geometry, 'location.lat');
+
             commit(UPDATE_GEOCODE, {
-              longitude: geometry.coordinates[0],
-              latitude: geometry.coordinates[1],
+              longitude,
+              latitude,
+              addr1: `${streetNumber.long_name || ''} ${route.short_name}`,
+              city: city.long_name,
+              stateProvince: country.short_name === 'US' ? stateProvince.short_name : stateProvince.long_name,
+              zip: zip.long_name,
             });
           }
         }
