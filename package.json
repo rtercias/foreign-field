@@ -26,6 +26,7 @@
     "gsap": "^3.2.6",
     "haversine-geolocation": "^1.5.0",
     "leaflet": "^1.6.0",
+    "leaflet.markercluster": "^1.4.1",
     "lodash": "^4.17.19",
     "pusher-js": "^6.0.3",
     "vue": "^2.6.11",
@@ -35,6 +36,7 @@
     "vue-the-mask": "^0.11.1",
     "vue-touch": "^2.0.0-beta.4",
     "vue2-leaflet": "^2.5.2",
+    "vue2-leaflet-markercluster": "^3.1.0",
     "vuedraggable": "^2.24.0",
     "vuex": "^3.3.0",
     "vuex-cache": "^3.1.1"
