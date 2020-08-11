@@ -64,20 +64,24 @@
         <p>
           Check the address location. Drag-and-drop the marker to make adjustments.
         </p>
-        <AddressMap :address="model" :zoom="17"></AddressMap>
+        <AddressMap :address="model" :zoom="17" :step="step" :key="step"></AddressMap>
       </div>
       <div v-else-if="step === 3" class="h-100">
         <p>
-          Select the territory for this address.
+          Select the territory for this address by clicking on one of the yellow markers.
+          <b-form-select v-model="model.territory_id"
+            :options="territories.map(t => ({ value: t.id, text: `${t.city} (${t.name})` }))" required>
+          </b-form-select>
         </p>
-        <AddressMap :address="model" :zoom="13"></AddressMap>
+        <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
       </div>
       <div class="buttons justify-content-between pt-4 pb-4">
-        <b-button v-if="step == 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
+        <b-button v-if="step === 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
-        <b-button v-if="!step < 3 && isAddressComplete" type="button" variant="light" @click="applyGeocode">
+        <b-button v-if="step === 1 && isAddressComplete" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
+        <b-button v-if="step === 2" type="button" variant="light" @click="selectTerritory">Select Territory</b-button>
         <b-button :disabled="!isFormComplete || isSaving" class="submit-button" type="submit" variant="primary">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
@@ -142,6 +146,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
+      fetchTerritories: 'territories/fetchTerritories',
     }),
     async submitAddress() {
       try {
@@ -169,6 +174,7 @@ export default {
     },
 
     async refresh() {
+      await this.fetchTerritories(this.congId);
       if (this.mode === Modes.edit) {
         await this.fetchAddress(this.addressId);
         this.model = this.address;
@@ -212,18 +218,24 @@ export default {
       }
     },
 
-    async applyGeocode() {
-      if (this.step < 3) {
-        this.step = this.step + 1;
-        this.model.longitude = this.geocodedAddress.longitude;
-        this.model.latitude = this.geocodedAddress.latitude;
-      }
+    applyGeocode() {
+      this.step = 2;
+      this.model.longitude = this.geocodedAddress.longitude;
+      this.model.latitude = this.geocodedAddress.latitude;
+    },
+
+    selectTerritory() {
+      this.step = 3;
     },
 
     prev() {
       if (this.step > 0) {
         this.step = this.step - 1;
       }
+    },
+
+    updateTerritory(territoryId) {
+      this.$set(this.model, 'territory_id', territoryId);
     },
   },
   computed: {
@@ -235,6 +247,7 @@ export default {
       address: 'address/address',
       territory: 'territory/territory',
       maxSort: 'territory/maxSort',
+      territories: 'territories/territories',
     }),
 
     isFormComplete() {
