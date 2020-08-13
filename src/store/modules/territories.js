@@ -15,6 +15,7 @@ const RESET_TERRITORIES = 'RESET_TERRITORIES';
 const SET_LOADING = 'SET_LOADING';
 const SET_ERROR = 'SET_ERROR';
 const SET_NEAREST_TERRITORIES = 'SET_NEAREST_TERRITORIES';
+const SET_LAST_ACTIVITY = 'SET_LAST_ACTIVITY';
 
 export const territories = {
   namespaced: true,
@@ -25,7 +26,7 @@ export const territories = {
     nearestTerritories: [],
   },
   getters: {
-    territories: state => orderBy(state.territories, 'city', 'name'),
+    territories: state => orderBy(state.territories, 'description', 'name'),
     loading: state => state.loading,
     error: state => state.error,
     nearestTerritories: state => state.nearestTerritories,
@@ -40,10 +41,16 @@ export const territories = {
       state.nearestTerritories = toArray(nearestTerritories).map(group => ({
         ...group[0],
         name: group[0].territory.name,
-        city: group[0].territory.city,
+        description: group[0].territory.description,
         coordinates: [group[0].latitude, group[0].longitude],
         count: get(group[0], 'territory.addresses.length'),
       }));
+    },
+    SET_LAST_ACTIVITY: (state, { id, lastActivity }) => {
+      const territory = state.territories.find(t => t.id === id);
+      if (territory) {
+        territory.lastActivity = lastActivity;
+      }
     },
   },
   actions: {
@@ -63,13 +70,10 @@ export const territories = {
           data: {
             query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
               territories (congId: $congId, group_code: $groupCode) { 
-                id 
-                name 
-                type 
-                city 
-                lastActivity {
-                  timestamp
-                }
+                id
+                name
+                description
+                type
                 status {
                   status
                   date
@@ -99,6 +103,44 @@ export const territories = {
       }
     },
 
+    async fetchAllTerritories({ commit }, params) {
+      if (!params || !params.congId) {
+        return;
+      }
+
+      commit(SET_LOADING, true);
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`query TerritoriesByCong($congId: Int) {
+              territories (congId: $congId) {
+                id
+                name
+                description
+                type
+              }
+            }`),
+            variables: {
+              congId: params.congId,
+            },
+          },
+        });
+
+        if (response && response.data && response.data.data) {
+          commit(SET_TERRITORIES, response.data.data.territories);
+          commit(SET_LOADING, false);
+        }
+      } catch (e) {
+        commit(SET_LOADING, false);
+        commit(SET_ERROR, e);
+      }
+    },
+
     resetTerritories({ commit }) {
       commit(RESET_TERRITORIES);
     },
@@ -112,8 +154,6 @@ export const territories = {
         commit(SET_ERROR, 'coordinates required');
         return;
       }
-
-      commit(SET_LOADING, true);
 
       try {
         const response = await axios({
@@ -129,7 +169,7 @@ export const territories = {
                 longitude
                 territory {
                   name
-                  city
+                  description
                   addresses {
                     latitude
                     longitude
@@ -149,11 +189,40 @@ export const territories = {
 
         if (response && response.data && response.data.data) {
           commit(SET_NEAREST_TERRITORIES, response.data.data.nearestAddresses);
-          commit(SET_LOADING, false);
         }
       } catch (e) {
-        commit(SET_LOADING, false);
         commit(SET_ERROR, e);
+      }
+    },
+
+    async fetchLastActivity({ commit }, id) {
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Territory($terrId: Int) { 
+              territory (id: $terrId) {
+                id
+                lastActivity {
+                  address_id
+                  timestamp
+                }
+              }
+            }`),
+            variables: {
+              terrId: id,
+            },
+          },
+        });
+
+        if (!response || !response.data || !response.data.data || !response.data.data.territory) {
+          return;
+        }
+        const { territory: terr } = response.data.data;
+        commit(SET_LAST_ACTIVITY, terr);
+      } catch (exception) {
+        console.error('Unable to get last activity', exception);
       }
     },
   },

@@ -2,7 +2,6 @@ import axios from 'axios';
 import firebase from 'firebase/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
-import uniqBy from 'lodash/uniqBy';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
@@ -219,15 +218,12 @@ export const auth = {
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         data: {
-          query: print(gql`{ territories (congId: ${congId}) { group_code }}`),
+          query: print(gql`{ congregation (id: ${congId}) { groups }}`),
         },
       });
 
-      const { territories } = (response && response.data && response.data.data) || [];
-      // const group = sessionStorage.getItem('group-code');
-      // if (group) this.setGroupCode(group);
-
-      const groupCodes = uniqBy(territories, 'group_code').map(g => g.group_code).sort();
+      const { congregation } = (response && response.data && response.data.data) || [];
+      const groupCodes = congregation.groups.sort();
       commit(SET_GROUP_CODES, groupCodes);
     },
 
