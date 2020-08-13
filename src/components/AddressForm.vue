@@ -40,14 +40,19 @@
             :disabled="readOnly">
           </the-mask>
         </b-form-group>
+        <div v-if="canAdmin" class="mt-5">
+          <hr />
+          <b-form-group label="Territory" class="mt-3">
+            <b-form-select v-model="model.territory_id"
+              :options="territoryOptions" required>
+            </b-form-select>
+          </b-form-group>
+        </div>
         <div v-if="isAdmin" class="mt-5">
           <hr />
           <label class="mb-0">ADMIN ONLY</label>
           <b-form-group label="Congregation ID" class="mt-3">
             <b-form-input v-model="model.congregationId"></b-form-input>
-          </b-form-group>
-          <b-form-group label="Territory ID" class="mt-3">
-            <b-form-input v-model="model.territory_id"></b-form-input>
           </b-form-group>
           <b-form-group label="Status" class="mt-3">
             <b-form-input v-model="model.status" :readonly="readOnly"></b-form-input>
@@ -60,17 +65,20 @@
           </b-form-group>
         </div>
       </div>
-      <div v-else-if="step === 2" class="h-100">
+      <div v-else-if="step === 2" class="step-2 h-100">
         <p>
           Check the address location. Drag-and-drop the marker to make adjustments.
         </p>
         <AddressMap :address="model" :zoom="17" :step="step" :key="step"></AddressMap>
       </div>
-      <div v-else-if="step === 3" class="h-100">
-        <p>
+      <div v-else-if="step === 3" class="step-3 h-100">
+        <div v-if="territoriesLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
+          Loading territories... <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+        </div>
+        <p v-else>
           Select the territory for this address by clicking on one of the yellow markers.
           <b-form-select v-model="model.territory_id"
-            :options="territories.map(t => ({ value: t.id, text: `${t.city} (${t.name})` }))" required>
+            :options="territoryOptions" required>
           </b-form-select>
         </p>
         <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
@@ -94,7 +102,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import startCase from 'lodash/startCase';
 import { TheMask } from 'vue-the-mask';
-import Loading from './Loading';
 import AddressMap from './AddressMap';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 
@@ -110,7 +117,6 @@ export default {
   name: 'AddressForm',
   props: ['group', 'territoryId', 'addressId', 'mode', 'phone'],
   components: {
-    Loading,
     TheMask,
     AddressMap,
   },
@@ -146,7 +152,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
-      fetchTerritories: 'territories/fetchTerritories',
+      fetchAllTerritories: 'territories/fetchAllTerritories',
     }),
     async submitAddress() {
       try {
@@ -174,7 +180,7 @@ export default {
     },
 
     async refresh() {
-      await this.fetchTerritories(this.congId);
+      await this.fetchAllTerritories({ congId: this.congId });
       if (this.mode === Modes.edit) {
         await this.fetchAddress(this.addressId);
         this.model = this.address;
@@ -183,7 +189,9 @@ export default {
         }
         delete this.model.activityLogs;
       } else {
-        await this.getTerritory(this.territoryId);
+        if (this.user) {
+          await this.getTerritory(this.territoryId);
+        }
         await this.setAddress({});
         this.model.congregationId = this.congId;
         this.model.sort = this.maxSort + 1;
@@ -243,11 +251,13 @@ export default {
       user: 'auth/user',
       congId: 'auth/congId',
       canWrite: 'auth/canWrite',
+      canAdmin: 'auth/canAdmin',
       isAdmin: 'auth/isAdmin',
       address: 'address/address',
       territory: 'territory/territory',
       maxSort: 'territory/maxSort',
       territories: 'territories/territories',
+      territoriesLoading: 'territories/loading',
     }),
 
     isFormComplete() {
@@ -264,6 +274,10 @@ export default {
       }
 
       return true;
+    },
+
+    territoryOptions() {
+      return this.territories.map(t => ({ value: t.id, text: `${t.description} (${t.name})` }));
     },
   },
   watch: {
@@ -284,7 +298,7 @@ export default {
 </script>
 <style>
   .address-form .form {
-    height: calc(100% - 150px);
+    height: calc(100% - 123px);
   }
   .buttons {
     display: flex;

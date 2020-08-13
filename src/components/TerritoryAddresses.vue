@@ -83,7 +83,9 @@ export default {
     },
 
     async loadTerritory() {
-      await this.getTerritory(this.id);
+      if (this.token) {
+        await this.getTerritory(this.id);
+      }
       this.isLoading = false;
     },
   },

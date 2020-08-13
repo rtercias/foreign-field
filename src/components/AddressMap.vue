@@ -23,7 +23,7 @@
         }"
         v-for="(terr, terrIndex) in nearestTerritories"
         :key="terrIndex"
-        :name="`${terr.city} (${terr.name})`"
+        :name="`${terr.description} (${terr.name})`"
         :id="terr.territory_id">
         <l-marker
           v-for="(addr, addrIndex) in terr.territory.addresses"
@@ -89,7 +89,8 @@ export default {
           c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
         });
 
-        cluster.mapObject.on('clusterclick', () => {
+        cluster.mapObject.on('clusterclick', (c) => {
+          c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
           vm.$emit('territory-selected', cluster.$attrs.id);
         });
       }
@@ -148,8 +149,11 @@ export default {
 </script>
 
 <style>
-  .address-map {
+  .step-2 .address-map {
     height: calc(100% - 60px);
+  }
+  .step-3 .address-map {
+    height: calc(100% - 98px);
   }
   .map {
     height: 100%;
