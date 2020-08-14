@@ -2,6 +2,7 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import clone from 'lodash/clone';
+import get from 'lodash/get';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
 const model = gql`fragment Model on Address {
@@ -52,6 +53,7 @@ const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
+const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
 
 const ACTION_BUTTON_LIST = [
   {
@@ -109,6 +111,12 @@ function validateAddress(_address, isNew) {
 
   if (isNew && address.id) {
     throw new InvalidAddressError('Address ID must be empty when adding a new address');
+  }
+  if (!address.congregationId) {
+    throw new InvalidAddressError('Congregation ID is required');
+  }
+  if (!address.territory_id) {
+    throw new InvalidAddressError('Territory ID is required');
   }
   if (!address.addr1) {
     throw new InvalidAddressError('Address 1 is required');
@@ -225,6 +233,17 @@ export const address = {
       const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
       const newTags = arrTags.filter(t => t !== tag);
       state.address.notes = newTags.join(',');
+    },
+
+    UPDATE_GEOCODE(state, { longitude, latitude, addr1, city, stateProvince, zip }) {
+      if (state.address) {
+        state.address.longitude = longitude;
+        state.address.latitude = latitude;
+        state.address.addr1 = addr1;
+        state.address.city = city;
+        state.address.state_province = stateProvince;
+        state.address.postal_code = zip;
+      }
     },
   },
 
@@ -568,6 +587,40 @@ export const address = {
           commit(REMOVE_TAG, tag);
         }
         commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async addressLookup({ commit }, fullAddress) {
+      try {
+        const instance = axios.create();
+        const key = process.env.VUE_APP_GOOGLE_MAPS_API;
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${fullAddress}&key=${key}`;
+        const response = await instance.get(url);
+
+        if (response && response.data) {
+          const { geometry, address_components: addressComponent } = get(response, 'data.results[0]', {});
+          if (geometry) {
+            const country = addressComponent.find(c => c.types[0] === 'country') || {};
+            const streetNumber = addressComponent.find(c => c.types[0] === 'street_number') || {};
+            const route = addressComponent.find(c => c.types[0] === 'route') || {};
+            const city = addressComponent.find(c => c.types[0] === 'locality') || {};
+            const stateProvince = addressComponent.find(c => c.types[0] === 'administrative_area_level_1') || {};
+            const zip = addressComponent.find(c => c.types[0] === 'postal_code') || {};
+            const longitude = get(geometry, 'location.lng');
+            const latitude = get(geometry, 'location.lat');
+
+            commit(UPDATE_GEOCODE, {
+              longitude,
+              latitude,
+              addr1: `${streetNumber.long_name || ''} ${route.short_name}`,
+              city: city.long_name,
+              stateProvince: country.short_name === 'US' ? stateProvince.short_name : stateProvince.long_name,
+              zip: zip.long_name,
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Unable to geocode the address');
       }
     },
   },

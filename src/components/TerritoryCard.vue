@@ -3,8 +3,12 @@
     <div class="row justify-content-between pl-2 pr-2">
       <div>
         <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4 column">
-          <h5 class="mb-0">{{`${primaryCity}${cityNames.length > 1 ? ` +${cityNames.length-1}` : ''}` || terr.name}}</h5>
-          <span class="terr-name">{{primaryCity && terr.name}}</span>
+          <h5 class="mb-0">
+            {{`${primaryDescription}${territoryDescriptions.length > 1
+              ? ` +${territoryDescriptions.length-1}`
+              : ''}` || terr.name}}
+          </h5>
+          <span class="terr-name">{{primaryDescription && terr.name}}</span>
         </b-link>
       </div>
       <div class="check-in-out" size="small" role="group">
@@ -30,7 +34,15 @@
     <div class="text-right">
       <hr class="mb-2 mt-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
-      <div class="last-worked" v-if="lastWorked">Last worked: {{lastWorked}}</div>
+      <div class="last-worked" v-if="terr.lastActivity">Last worked: {{lastWorked}}</div>
+      <div v-else class="loading">
+        <div v-if="terr.lastActivityLoading" class="font-weight-bold m-0 medium">
+          <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+        </div>
+        <b-button v-else class="get-last-activity p-0" variant="link" @click="() => fetchLastWorked(terr.id)">
+          Get last activity
+        </b-button>
+      </div>
     </div>
   </div>
 </template>
@@ -53,6 +65,7 @@ export default {
       resetTerritory: 'territory/resetTerritory',
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
+      fetchLastActivity: 'territories/fetchLastActivity',
     }),
     async checkin(territory) {
       const publisher = territory.status && territory.status.publisher || {};
@@ -71,11 +84,19 @@ export default {
 
       this.fetch();
     },
+    async fetchLastWorked(territoryId) {
+      this.$set(this.terr, 'lastActivityLoading', true);
+      await this.fetchLastActivity(territoryId);
+      const vuexTerritory = this.territories.find(t => t.id === this.terr.id);
+      this.$set(this.terr, 'lastActivity', vuexTerritory.lastActivity);
+      this.$set(this.terr, 'lastActivityLoading', false);
+    },
   },
   computed: {
     ...mapGetters({
       user: 'auth/user',
       canWrite: 'auth/canWrite',
+      territories: 'territories/territories',
     }),
 
     isRecentlyWorked() {
@@ -96,15 +117,15 @@ export default {
     status() {
       return this.terr && this.terr.status && this.terr.status.status || 'Available';
     },
-    cityNames() {
-      return this.terr && this.terr.city ? this.terr.city.split(',') : [];
+    territoryDescriptions() {
+      return this.terr && this.terr.description ? this.terr.description.split(',') : [];
     },
-    primaryCity() {
-      return this.cityNames[0];
+    primaryDescription() {
+      return this.territoryDescriptions[0];
     },
     lastWorked() {
-      const timestamp = Number(this.terr.lastActivity.timestamp);
-      if (timestamp === 0) {
+      const timestamp = this.terr.lastActivity && Number(this.terr.lastActivity.timestamp);
+      if (!timestamp || timestamp === 0) {
         return '';
       }
 
@@ -120,7 +141,7 @@ export default {
   .check-in-out .btn {
     min-width: 100px;
   }
-  .assigned-to-info, .last-worked {
+  .assigned-to-info, .last-worked, .loading, .get-last-activity {
     font-size: 12px;
   }
 </style>

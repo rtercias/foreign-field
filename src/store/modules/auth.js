@@ -2,7 +2,6 @@ import axios from 'axios';
 import firebase from 'firebase/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
-import uniqBy from 'lodash/uniqBy';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
@@ -47,11 +46,11 @@ export const auth = {
     groupCodes: state => state.groupCodes,
     isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
-    canAdmin: state => state.user && ['Admin', 'TS'].includes(state.user.role),
     canViewReports: state => state.user && ['Admin', 'TS', 'SO', 'GO'].includes(state.user.role),
     canCheckout: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canWrite: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canRead: (state, getters) => getters.canWrite || state.user && ['RP', 'RP-E', 'TS'].includes(state.user.role),
+    canManage: state => state.user && (state.user.role === 'Admin' || state.user.role === 'TS'),
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
   },
@@ -219,15 +218,12 @@ export const auth = {
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         data: {
-          query: print(gql`{ territories (congId: ${congId}) { group_code }}`),
+          query: print(gql`{ congregation (id: ${congId}) { groups }}`),
         },
       });
 
-      const { territories } = (response && response.data && response.data.data) || [];
-      // const group = sessionStorage.getItem('group-code');
-      // if (group) this.setGroupCode(group);
-
-      const groupCodes = uniqBy(territories, 'group_code').map(g => g.group_code).sort();
+      const { congregation } = (response && response.data && response.data.data) || [];
+      const groupCodes = congregation.groups.sort();
       commit(SET_GROUP_CODES, groupCodes);
     },
 

@@ -18,7 +18,7 @@
               <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
                 List
               </b-button>
-              <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map'">
+              <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
@@ -26,8 +26,13 @@
               <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="danger" @click="checkIn(true)">
                 Check In
               </b-button>
-              <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
+              <b-button v-if="canManage" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+              </b-button>
+            </b-button-group>
+            <b-button-group v-if="viewMode==='map-view'" size="sm">
+              <b-button variant="primary" :to="`/territories/${group}/${id}/optimize`">
+                Optimize
               </b-button>
             </b-button-group>
           </div>
@@ -72,7 +77,7 @@ export default {
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
-      canAdmin: 'auth/canAdmin',
+      canManage: 'auth/canManage',
       isOwnedByUser: 'territory/isOwnedByUser',
     }),
     isCheckedOut() {

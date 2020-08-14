@@ -1,47 +1,23 @@
 <template>
   <div id="app" class="d-flex flex-column h-100">
-    <vue-pull-refresh :on-refresh="onRefresh" :config="refreshOptions">
-      <Masthead></Masthead>
-      <router-view class="view"></router-view>
-    </vue-pull-refresh>
+    <Masthead></Masthead>
+    <router-view class="view"></router-view>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import VuePullRefresh from 'vue-pull-refresh';
 import Masthead from './components/Masthead';
 
 export default {
   name: 'app',
   components: {
-    VuePullRefresh,
     Masthead,
-  },
-  data() {
-    return {
-      refreshOptions: {
-        errorLabel: 'Unable to reload',
-        startLabel: 'Starting reload',
-        readyLabel: 'Ready',
-        loadingLabel: 'Reloading',
-      },
-    };
   },
   computed: {
     ...mapGetters({
       isForcedOut: 'auth/isForcedOut',
     }),
-  },
-  methods: {
-    async onRefresh() {
-      this.$router.go();
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 1000);
-      });
-    },
   },
 };
 

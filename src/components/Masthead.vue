@@ -1,40 +1,47 @@
 <template>
   <div class="lead">
-    <b-navbar type="dark" variant="primary" toggleable fill>
-      <b-link class="button text-white-50" :to="leftNavRoute">
-        <font-awesome-icon icon="chevron-left" v-show="showLeftNav"></font-awesome-icon>
-      </b-link>
-      <b-navbar-toggle target="nav_dropdown_collapse"></b-navbar-toggle>
-      <b-collapse is-nav id="nav_dropdown_collapse">
-        <b-navbar-nav>
-          <b-nav-item to="/">Home</b-nav-item>
-          <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
-            <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
-              <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
-            </b-dropdown-item>
-          </b-nav-item-dropdown>
-          <b-nav-item
-            v-if="canWrite && matchingRouteNames.includes('territory')"
-            :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
-            Optimize
-          </b-nav-item>
-          <b-nav-item v-if="canRead" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
-        </b-navbar-nav>
-        <b-navbar-nav class="ml-auto">
-          <b-nav-item-dropdown v-if="isAuthenticated" right>
-            <span slot="text">{{name}}</span>
-            <b-dropdown-item @click="logout">Logout</b-dropdown-item>
-          </b-nav-item-dropdown>
-        </b-navbar-nav>
-      </b-collapse>
-    </b-navbar>
+    <vue-pull-refresh :on-refresh="onRefresh" :config="refreshOptions">
+      <b-navbar type="dark" variant="primary" toggleable fill>
+        <b-link class="button text-white-50" :to="leftNavRoute">
+          <font-awesome-icon icon="chevron-left" v-show="showLeftNav"></font-awesome-icon>
+        </b-link>
+        <b-navbar-toggle target="nav_dropdown_collapse"></b-navbar-toggle>
+        <b-collapse is-nav id="nav_dropdown_collapse">
+          <b-navbar-nav>
+            <b-nav-item to="/">Home</b-nav-item>
+            <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
+              <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
+                <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
+              </b-dropdown-item>
+            </b-nav-item-dropdown>
+            <b-nav-item
+              v-if="canWrite && matchingRouteNames.includes('territory')"
+              :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
+              Optimize
+            </b-nav-item>
+            <b-nav-item v-if="canRead" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
+          </b-navbar-nav>
+          <b-navbar-nav class="ml-auto">
+            <b-nav-item-dropdown v-if="isAuthenticated" right>
+              <span slot="text">{{name}}</span>
+              <b-dropdown-item @click="logout">Logout</b-dropdown-item>
+            </b-nav-item-dropdown>
+          </b-navbar-nav>
+        </b-collapse>
+      </b-navbar>
+    </vue-pull-refresh>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import VuePullRefresh from 'vue-pull-refresh';
 
 export default {
+  name: 'Masthead',
+  components: {
+    VuePullRefresh,
+  },
   watch: {
     $route(to) {
       if (to.params.group) {
@@ -48,12 +55,26 @@ export default {
       permissions: {
         territories: ['Admin', 'TS', 'GO', 'SO'],
       },
+      refreshOptions: {
+        errorLabel: 'Unable to reload',
+        startLabel: 'Starting reload',
+        readyLabel: 'Ready',
+        loadingLabel: 'Reloading',
+      },
     };
   },
   methods: {
     logout() {
       this.$store.dispatch('auth/logout');
       this.$router.push('/signout');
+    },
+    async onRefresh() {
+      this.$router.go();
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1000);
+      });
     },
   },
 
@@ -67,7 +88,7 @@ export default {
       terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
-      canAdmin: 'auth/canAdmin',
+      canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
       canRead: 'auth/canRead',
       territory: 'territory/territory',
