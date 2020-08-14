@@ -88,7 +88,7 @@ export default {
       terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
-      canAdmin: 'auth/canAdmin',
+      canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
       canRead: 'auth/canRead',
       territory: 'territory/territory',
