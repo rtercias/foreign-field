@@ -372,7 +372,7 @@ export default {
 </script>
 <style>
   .address-form .form {
-    height: calc(100% - 123px);
+    height: calc(100% - 150px);
   }
   .buttons {
     display: flex;
