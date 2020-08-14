@@ -104,6 +104,15 @@ const routes = [
   },
   {
     name: 'address-new',
+    path: '/addresses/:mode',
+    component: AddressForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS'],
+    },
+  },
+  {
+    name: 'address-new-terr',
     path: '/territories/:group/:territoryId/addresses/:mode',
     component: AddressForm,
     props: true,
