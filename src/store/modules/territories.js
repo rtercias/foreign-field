@@ -74,6 +74,7 @@ export const territories = {
                 name
                 description
                 type
+                congregationid
                 status {
                   status
                   date
@@ -123,6 +124,7 @@ export const territories = {
                 name
                 description
                 type
+                congregationid
               }
             }`),
             variables: {
@@ -164,7 +166,8 @@ export const territories = {
           data: {
             query: print(gql`query NearestAddresses($congId: Int $coordinates: [Float] $radius: Int, $unit: String) { 
               nearestAddresses (congId: $congId, coordinates: $coordinates, radius: $radius, unit: $unit) { 
-                territory_id 
+                territory_id
+                congregationid
                 latitude
                 longitude
                 territory {
