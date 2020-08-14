@@ -96,8 +96,10 @@
         <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
       </div>
       <div v-else-if="step === 4" class="step-4 h-100">
-        <div>{{model.addr1}} {{model.addr2}}</div>
-        <div>{{model.city}} {{model.state_province}} {{model.postal_code}}</div>
+        <div v-if="mode === 'add'">
+          <div>{{model.addr1}} {{model.addr2}}</div>
+          <div>{{model.city}} {{model.state_province}} {{model.postal_code}}</div>
+        </div>
         <hr />
         <div>Selected territory: {{selectedTerritory.text}}</div>
         <hr />
@@ -267,12 +269,15 @@ export default {
       }
     },
 
-    applyGeocode() {
+    async applyGeocode() {
       if (!this.isAddressComplete) {
         this.$bvToast.toast('Complete the address fields first', {
           variant: 'danger',
         });
         return;
+      }
+      if (!this.geocodedAddress.latitude || !this.geocodedAddress.longitude) {
+        await this.geocodeAddress();
       }
       this.step = 2;
       this.model.longitude = this.geocodedAddress.longitude;
