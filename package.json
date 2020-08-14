@@ -29,6 +29,7 @@
     "leaflet.markercluster": "^1.4.1",
     "lodash": "^4.17.19",
     "pusher-js": "^6.0.3",
+    "serialize-javascript": "^3.1.0",
     "vue": "^2.6.11",
     "vue-axios": "^2.1.5",
     "vue-pull-refresh": "^0.2.7",
