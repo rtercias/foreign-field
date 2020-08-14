@@ -18,7 +18,7 @@
               <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
                 List
               </b-button>
-              <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map'">
+              <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
@@ -28,6 +28,11 @@
               </b-button>
               <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+              </b-button>
+            </b-button-group>
+            <b-button-group v-if="viewMode==='map-view'" size="sm">
+              <b-button variant="primary" :to="`/territories/${group}/${id}/optimize`">
+                Optimize
               </b-button>
             </b-button-group>
           </div>
