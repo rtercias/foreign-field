@@ -9,6 +9,7 @@ import get from 'lodash/get';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
+const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
 
 export const territory = {
@@ -38,6 +39,7 @@ export const territory = {
       return max && max.sort || 0;
     },
     address: state => id => state.territory.addresses.find(a => a.id === id),
+    error: state => state.error,
   },
 
   mutations: {
@@ -51,6 +53,9 @@ export const territory = {
     GET_TERRITORY_FAIL(state, exception) {
       state.error = exception;
       console.error(GET_TERRITORY_FAIL, exception);
+    },
+    GET_TERRITORY_SUCCESS(state) {
+      state.error = null;
     },
     RESET_TERRITORY(state) {
       state.territory = {};
@@ -127,7 +132,18 @@ export const territory = {
       }
     },
 
-    async getTerritory({ commit }, id) {
+    async getTerritory({ commit, getters, rootGetters }, id) {
+      if (!id) throw new Error('id is required');
+      const token = rootGetters['auth/token'];
+      if (!token) {
+        commit(GET_TERRITORY_FAIL, 'Token is missing');
+        return;
+      }
+
+      if (getters.error) {
+        console.warn('Token is ready');
+      }
+
       try {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -176,6 +192,7 @@ export const territory = {
         const { territory: terr } = response.data.data;
         terr.addresses = orderBy(terr.addresses, 'sort');
         commit(SET_TERRITORY, terr);
+        commit(GET_TERRITORY_SUCCESS);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
       }

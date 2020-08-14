@@ -105,15 +105,19 @@
           <span v-if="mode === 'add'">the addition of this new address.</span>
           <span v-if="mode === 'edit'">this address update.</span>
         </p>
-        <b-button variant="info" :to="`/territories/${territory.group_code}/${territory.id}/optimize`">Optimize</b-button>
+        <b-button v-if="canManage" variant="info" :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
+          Optimize
+        </b-button>
       </div>
       <div class="buttons justify-content-between pt-4 pb-4">
         <b-button v-if="step === 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
-        <b-button v-if="step === 1" type="button" variant="light" @click="applyGeocode">
+        <b-button v-if="canManage && step === 1" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
-        <b-button v-if="step === 2" type="button" variant="light" @click="goToSelectTerritory">Select Territory</b-button>
+        <b-button v-if="canManage && step === 2" type="button" variant="light" @click="goToSelectTerritory">
+          Select Territory
+        </b-button>
         <b-button
           v-if="step !== 4"
           :disabled="!isFormComplete || isSaving"
@@ -348,7 +352,8 @@ export default {
     async user() {
       await this.refresh();
       const unauthAddressCongId = this.mode === Modes.edit && this.congId !== this.address.congregationId;
-      const unauthTerritoryCongId = this.mode === Modes.add && this.congId !== this.territory.congregationid;
+      const unauthTerritoryCongId = this.mode === Modes.add && this.territory && this.territory.congregationid
+        && this.congId !== this.territory.congregationid;
 
       if (unauthAddressCongId || unauthTerritoryCongId) {
         this.$router.push('/unauthorized');

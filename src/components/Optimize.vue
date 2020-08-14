@@ -8,21 +8,20 @@
           <font-awesome-icon class="help ml-1 text-info" icon="question-circle" @click="showHelp=!showHelp">
           </font-awesome-icon>
         </div>
+        <hr class="mt-0" />
         <div class="text-left" v-if="showHelp">
-          <hr/>
           <p>
             Use <b>Manual Sort</b><span v-if="canManage"> or <b>Optimize</b></span> to sort addresses.
           </p>
         </div>
-        <hr/>
-        <div v-if="state===''" class="d-flex justify-content-between">
-          <b-button variant="outline-primary" @click="switchToManual">Manual Sort</b-button>
+        <b-button-group v-if="state===''" size="sm" class="w-100">
+          <b-button variant="outline-success" @click="switchToManual">Manual Sort</b-button>
           <b-button variant="primary" @click="runOptimizer" v-if="canManage">Optimize</b-button>
-        </div>
-        <div v-else class="d-flex justify-content-between">
+        </b-button-group>
+        <b-button-group v-else size="sm" class="w-100">
           <b-button variant="outline-secondary" @click="reset">Cancel</b-button>
           <b-button variant="primary" @click="finalize" :disabled="!hasChanges">Finalize</b-button>
-        </div>
+        </b-button-group>
         <div v-if="isManual">
           <div v-if="hasChanges">
             <hr/>
@@ -48,13 +47,20 @@
         </div>
       </div>
       <Loading v-if="optimizing"></Loading>
-      <div class="optimize-body h-50 row" v-else>
+      <div class="optimize-body h-50" v-else>
+        <div class="d-flex justify-content-end pt-2 pr-2 small">
+          <span class="toggle-map" @click="toggleMap">
+            <span v-if="showMap">hide</span><span v-else>show</span> map
+            <font-awesome-icon :icon="mapToggleIcon"></font-awesome-icon>
+          </span>
+        </div>
         <TerritoryMap
-          class="optimize-map col-md-6"
+          class="optimize-map col-md-6 p-0"
+          v-show="showMap"
           :addresses="mappedAddresses"
           :options="{ showSortOrder: true, simple: true }">
         </TerritoryMap>
-        <div class="d-flex col-md-6">
+        <div class="d-flex col-md-6 p-0">
           <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-5': isOptimize }">
             <div v-if="isOptimize" class="bg-secondary text-white">Old Position</div>
             <draggable
@@ -125,6 +131,8 @@ export default {
       hasChanges: false,
       showHelp: false,
       mappedAddresses: [],
+      showMap: true,
+      mapToggleIcon: 'chevron-up',
     };
   },
   async mounted() {
@@ -147,15 +155,6 @@ export default {
       this.hasChanges = true;
     },
     async runOptimizer() {
-      const value = await this.$bvModal.msgBoxConfirm('Are you sure you want to optimize this territory?', {
-        title: `${this.territory.name}`,
-        centered: true,
-      });
-
-      if (!value) {
-        return;
-      }
-
       this.state = 'optimize';
       this.optimizing = true;
       await this.optimize(this.id);
@@ -203,6 +202,10 @@ export default {
         this.reset();
       }
     },
+    toggleMap() {
+      this.showMap = !this.showMap;
+      this.mapToggleIcon = this.mapToggleIcon === 'chevron-up' ? 'chevron-down' : 'chevron-up';
+    },
   },
   computed: {
     ...mapGetters({
@@ -236,6 +239,9 @@ export default {
   }
   .optimize-map {
     height: 300px;
+  }
+  .toggle-map {
+    cursor: pointer;
   }
   @media (min-width: 769px) {
   .optimize-map {
