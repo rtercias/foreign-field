@@ -133,7 +133,10 @@ export const territory = {
     },
 
     async getTerritory({ commit, getters, rootGetters }, id) {
-      if (!id) throw new Error('id is required');
+      if (!id) {
+        commit(GET_TERRITORY_FAIL, 'id is required');
+        return;
+      }
       const token = rootGetters['auth/token'];
       if (!token) {
         commit(GET_TERRITORY_FAIL, 'Token is missing');

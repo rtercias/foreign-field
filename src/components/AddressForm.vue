@@ -225,7 +225,7 @@ export default {
         }
         delete this.model.activityLogs;
       } else {
-        if (this.user) {
+        if (this.user && this.territoryId) {
           await this.getTerritory(this.territoryId);
         }
         await this.setAddress({});

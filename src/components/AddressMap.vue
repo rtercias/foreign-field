@@ -130,17 +130,6 @@ export default {
     selectTerritory(terr) {
       this.selectedTerritory = terr;
     },
-    async getNearestTerr() {
-      if (this.step === 3) {
-        await this.getNearestTerritories({
-          congId: this.congId,
-          coordinates: [this.address.latitude, this.address.longitude],
-          radius: 3,
-          unit: 'mi',
-        });
-      }
-    },
-
     getRadius() {
       const mapBoundNorthEast = this.$refs.addressMap.mapObject.getBounds().getNorthEast();
       const mapDistance = mapBoundNorthEast.distanceTo(this.$refs.addressMap.mapObject.getCenter());

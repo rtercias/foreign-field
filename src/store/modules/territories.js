@@ -167,7 +167,7 @@ export const territories = {
             query: print(gql`query NearestAddresses($congId: Int $coordinates: [Float] $radius: Int, $unit: String) { 
               nearestAddresses (congId: $congId, coordinates: $coordinates, radius: $radius, unit: $unit) { 
                 territory_id
-                congregationid
+                congregationId
                 latitude
                 longitude
                 territory {
