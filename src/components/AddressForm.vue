@@ -8,7 +8,8 @@
       </div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
-    <b-form class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
+    <Loading v-if="isLoading"></Loading>
+    <b-form v-else class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
         <div v-if="canWrite">
           <b-form-group>
@@ -55,7 +56,9 @@
             <b-form-input v-model="model.congregationId"></b-form-input>
           </b-form-group>
           <b-form-group label="Status" class="mt-3">
-            <b-form-input v-model="model.status" :readonly="readOnly"></b-form-input>
+            <b-form-select v-model="model.status"
+              :options="statusOptions" required>
+            </b-form-select>
           </b-form-group>
           <b-form-group label="Notes" class="mt-3">
             <b-form-input v-model="model.notes"></b-form-input>
@@ -83,17 +86,35 @@
         </p>
         <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
       </div>
+      <div v-else-if="step === 4" class="step-4 h-100">
+        <div>{{model.addr1}} {{model.addr2}}</div>
+        <div>{{model.city}} {{model.state_province}} {{model.postal_code}}</div>
+        <hr />
+        <div>Selected territory: {{selectedTerritory.text}}</div>
+        <hr />
+        <p>It is recommended that the selected territory be re-optimized with
+          <span v-if="mode === 'add'">the addition of this new address.</span>
+          <span v-if="mode === 'edit'">this address update.</span>
+        </p>
+        <b-button variant="info" :to="`/territories/${territory.group_code}/${territory.id}/optimize`">Optimize</b-button>
+      </div>
       <div class="buttons justify-content-between pt-4 pb-4">
         <b-button v-if="step === 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
         <b-button v-if="step === 1 && isAddressComplete" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
-        <b-button v-if="step === 2" type="button" variant="light" @click="selectTerritory">Select Territory</b-button>
-        <b-button :disabled="!isFormComplete || isSaving" class="submit-button" type="submit" variant="primary">
+        <b-button v-if="step === 2" type="button" variant="light" @click="goToSelectTerritory">Select Territory</b-button>
+        <b-button
+          v-if="step !== 4"
+          :disabled="!isFormComplete || isSaving"
+          class="submit-button"
+          type="submit"
+          variant="primary">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
+        <b-button v-if="step === 4" type="button" variant="success" @click="done">Done</b-button>
       </div>
     </b-form>
   </div>
@@ -103,6 +124,7 @@ import { mapGetters, mapActions } from 'vuex';
 import startCase from 'lodash/startCase';
 import { TheMask } from 'vue-the-mask';
 import AddressMap from './AddressMap';
+import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 
 const Modes = {
@@ -119,11 +141,13 @@ export default {
   components: {
     TheMask,
     AddressMap,
+    Loading,
   },
   data() {
     return {
       modes: Modes,
       step: 1,
+      isLoading: false,
       isSaving: false,
       readOnly: false,
       model: {
@@ -132,9 +156,6 @@ export default {
         status: 'Active',
       },
       error: '',
-      returnRoute: this.mode === Modes.add
-        ? `/territories/${this.group}/${this.territoryId}`
-        : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail`,
       useGeocodedAddress: true,
       geocodedAddress: {},
     };
@@ -163,11 +184,11 @@ export default {
 
         if (this.mode === Modes.add) {
           await this.addAddress(this.model);
-          await this.getTerritory(this.territoryId);
+          await this.getTerritory(this.model.territory_id);
         } else if (this.mode === Modes.edit) {
           await this.updateAddress(this.model);
         }
-        this.$router.push(this.returnRoute);
+        this.step = 4;
       } catch (err) {
         if (err instanceof InvalidAddressError) {
           this.error = err.message;
@@ -180,6 +201,7 @@ export default {
     },
 
     async refresh() {
+      this.isLoading = true;
       await this.fetchAllTerritories({ congId: this.congId });
       if (this.mode === Modes.edit) {
         await this.fetchAddress(this.addressId);
@@ -193,9 +215,14 @@ export default {
           await this.getTerritory(this.territoryId);
         }
         await this.setAddress({});
-        this.model.congregationId = this.congId;
-        this.model.sort = this.maxSort + 1;
+        this.model = {
+          congregationId: this.congId,
+          territory_id: this.territoryId,
+          sort: this.territoryId ? this.maxSort + 1 : 0,
+          status: 'Active',
+        };
       }
+      this.isLoading = false;
     },
     async geocodeAddress() {
       if (!this.model.addr1) return;
@@ -232,7 +259,7 @@ export default {
       this.model.latitude = this.geocodedAddress.latitude;
     },
 
-    selectTerritory() {
+    async goToSelectTerritory() {
       this.step = 3;
     },
 
@@ -242,8 +269,13 @@ export default {
       }
     },
 
-    updateTerritory(territoryId) {
+    async updateTerritory(territoryId) {
       this.$set(this.model, 'territory_id', territoryId);
+      await this.getTerritory(territoryId);
+    },
+
+    done() {
+      this.$router.push(this.returnRoute);
     },
   },
   computed: {
@@ -259,6 +291,14 @@ export default {
       territories: 'territories/territories',
       territoriesLoading: 'territories/loading',
     }),
+
+    returnRoute() {
+      const addMode = this.mode === Modes.add
+        ? `/territories/${this.group}/${this.territoryId}`
+        : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail`;
+
+      return this.$route.name === 'address-new' ? '/' : addMode;
+    },
 
     isFormComplete() {
       for (const field of required) {
@@ -278,6 +318,14 @@ export default {
 
     territoryOptions() {
       return this.territories.map(t => ({ value: t.id, text: `${t.description} (${t.name})` }));
+    },
+
+    selectedTerritory() {
+      return this.territoryOptions.find(t => t.value === this.model.territory_id);
+    },
+
+    statusOptions() {
+      return ['Active', 'NF', 'DNC'].map(s => ({ value: s, text: s }));
     },
   },
   watch: {

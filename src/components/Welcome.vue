@@ -46,6 +46,11 @@
       <div v-if="!loading" class="col-sm-12 col-md-6 p-3 pt-5">
         <Reports v-if="canWrite" />
       </div>
+      <div v-if="!loading" class="col-sm-12 col-md-6 p-3 pt-5">
+        <b-button v-if="canAdmin" class="text-white" variant="success" :to="`/addresses/add`">
+          <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+        </b-button>
+      </div>
     </b-row>
   </b-container>
 </template>
@@ -77,6 +82,7 @@ export default {
       user: 'auth/user',
       loading: 'auth/loading',
       canWrite: 'auth/canWrite',
+      canAdmin: 'auth/canAdmin',
     }),
     territories() {
       return this.user && this.user.territories;
