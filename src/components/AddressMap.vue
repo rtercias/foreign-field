@@ -2,6 +2,7 @@
   <div class="address-map">
     <l-map
       class="map"
+      ref="addressMap"
       :zoom="zoom"
       :center="center"
       :draggable="true"
@@ -139,6 +140,12 @@ export default {
         });
       }
     },
+
+    getRadius() {
+      const mapBoundNorthEast = this.$refs.addressMap.mapObject.getBounds().getNorthEast();
+      const mapDistance = mapBoundNorthEast.distanceTo(this.$refs.addressMap.mapObject.getCenter());
+      return Math.ceil(mapDistance / 1000 / 1.6);
+    },
   },
   watch: {
     'address.longitude': function () {
@@ -150,7 +157,7 @@ export default {
 
 <style>
   .step-2 .address-map {
-    height: calc(100% - 60px);
+    height: calc(100% - 84px);
   }
   .step-3 .address-map {
     height: calc(100% - 98px);

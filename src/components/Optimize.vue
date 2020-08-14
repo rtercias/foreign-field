@@ -11,13 +11,13 @@
         <div class="text-left" v-if="showHelp">
           <hr/>
           <p>
-            Use <b>Manual Sort</b><span v-if="canAdmin"> or <b>Optimize</b></span> to sort addresses.
+            Use <b>Manual Sort</b><span v-if="canManage"> or <b>Optimize</b></span> to sort addresses.
           </p>
         </div>
         <hr/>
         <div v-if="state===''" class="d-flex justify-content-between">
           <b-button variant="outline-primary" @click="switchToManual">Manual Sort</b-button>
-          <b-button variant="primary" @click="runOptimizer" v-if="canAdmin">Optimize</b-button>
+          <b-button variant="primary" @click="runOptimizer" v-if="canManage">Optimize</b-button>
         </div>
         <div v-else class="d-flex justify-content-between">
           <b-button variant="outline-secondary" @click="reset">Cancel</b-button>
@@ -208,7 +208,7 @@ export default {
     ...mapGetters({
       territory: 'territory/territory',
       token: 'auth/token',
-      canAdmin: 'auth/canAdmin',
+      canManage: 'auth/canManage',
       optimized: 'addresses/optimized',
     }),
     isManual() {

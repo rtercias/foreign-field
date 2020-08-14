@@ -26,7 +26,7 @@
               <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="danger" @click="checkIn(true)">
                 Check In
               </b-button>
-              <b-button v-if="canAdmin" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
+              <b-button v-if="canManage" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
             </b-button-group>
@@ -77,7 +77,7 @@ export default {
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
-      canAdmin: 'auth/canAdmin',
+      canManage: 'auth/canManage',
       isOwnedByUser: 'territory/isOwnedByUser',
     }),
     isCheckedOut() {

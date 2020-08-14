@@ -41,8 +41,16 @@
             :disabled="readOnly">
           </the-mask>
         </b-form-group>
-        <div v-if="canAdmin" class="mt-5">
-          <hr />
+        <div v-if="canManage" class="mt-5">
+          <div class="text-left" v-if="showTerrHelp">
+            <hr/>
+            <p>
+              <font-awesome-icon class="help ml-1 text-info" icon="info-circle" @click="showTerrHelp=!showTerrHelp">
+              </font-awesome-icon>
+              Select a territory for this address from the dropdown,
+              or click on <b>Locate on Map</b> to find the nearest territories.
+            </p>
+          </div>
           <b-form-group label="Territory" class="mt-3">
             <b-form-select v-model="model.territory_id"
               :options="territoryOptions" required>
@@ -70,7 +78,8 @@
       </div>
       <div v-else-if="step === 2" class="step-2 h-100">
         <p>
-          Check the address location. Drag-and-drop the marker to make adjustments.
+          First, let's check the address location. Drag and drop the marker to make adjustments.
+          Click on <b>Select Territory</b> when finished.
         </p>
         <AddressMap :address="model" :zoom="17" :step="step" :key="step"></AddressMap>
       </div>
@@ -79,7 +88,7 @@
           Loading territories... <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
         </div>
         <p v-else>
-          Select the territory for this address by clicking on one of the yellow markers.
+          Now, select the territory for this address by clicking on one of the circle territory markers.
           <b-form-select v-model="model.territory_id"
             :options="territoryOptions" required>
           </b-form-select>
@@ -101,7 +110,7 @@
       <div class="buttons justify-content-between pt-4 pb-4">
         <b-button v-if="step === 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
-        <b-button v-if="step === 1 && isAddressComplete" type="button" variant="light" @click="applyGeocode">
+        <b-button v-if="step === 1" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
         <b-button v-if="step === 2" type="button" variant="light" @click="goToSelectTerritory">Select Territory</b-button>
@@ -158,6 +167,7 @@ export default {
       error: '',
       useGeocodedAddress: true,
       geocodedAddress: {},
+      showTerrHelp: true,
     };
   },
   async mounted() {
@@ -254,6 +264,12 @@ export default {
     },
 
     applyGeocode() {
+      if (!this.isAddressComplete) {
+        this.$bvToast.toast('Complete the address fields first', {
+          variant: 'danger',
+        });
+        return;
+      }
       this.step = 2;
       this.model.longitude = this.geocodedAddress.longitude;
       this.model.latitude = this.geocodedAddress.latitude;
@@ -283,7 +299,7 @@ export default {
       user: 'auth/user',
       congId: 'auth/congId',
       canWrite: 'auth/canWrite',
-      canAdmin: 'auth/canAdmin',
+      canManage: 'auth/canManage',
       isAdmin: 'auth/isAdmin',
       address: 'address/address',
       territory: 'territory/territory',
