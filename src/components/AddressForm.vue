@@ -204,7 +204,12 @@ export default {
         } else if (this.mode === Modes.edit) {
           await this.updateAddress(this.model);
         }
-        this.step = 4;
+
+        if (this.canManage) {
+          this.step = 4;
+        } else {
+          this.$router.push(this.returnRoute);
+        }
       } catch (err) {
         if (err instanceof InvalidAddressError) {
           this.error = err.message;
