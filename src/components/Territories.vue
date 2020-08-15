@@ -8,6 +8,14 @@
           <font-awesome-icon icon="check" v-if="availability === avail" /> {{avail}}
         </b-dropdown-item>
       </b-dropdown>
+      <br>
+      <b-dropdown>
+        <b-dropdown-header>Sort By</b-dropdown-header>
+        <span slot="button-content">{{sortOption}}</span>
+        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="setSortMethod(option)">
+          {{option}}
+        </b-dropdown-item>
+      </b-dropdown>
     </header>
     <Loading v-if="loading"></Loading>
     <div v-else>
@@ -61,6 +69,11 @@ export default {
         'Checked Out',
         'Recently Worked',
       ],
+      sortOption: '',
+      sortOptions: [
+        'Name',
+        'Description',
+      ],
     };
   },
 
@@ -101,6 +114,22 @@ export default {
       sessionStorage.setItem('availability', value);
     },
 
+    setSortMethod(value) {
+      this.sortOption = value;
+      if (value === 'Name') {
+        this.filteredTerritories.sort(
+          (a, b) => a.name.localeCompare(
+            b.name,
+            // forces system language to use en-us (which represents whole numbers instead of its first value)
+            navigator.languages[0] || navigator.language,
+            // sorts numbers as whole numbers isntead of the first character it sees
+            { numeric: true, ignorePunctuation: true }
+          )
+        );
+      } else if (value === 'Description') {
+        this.filteredTerritories.sort((a, b) => (a.description > b.description ? 1 : -1));
+      }
+    },
     async fetch() {
       const congId = this.congId || (this.user && this.user.congId);
       this.groupCode = this.$route.params.group;
