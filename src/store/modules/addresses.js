@@ -7,6 +7,8 @@ const DNC_FAIL = 'DNC_FAIL';
 const OPTIMIZE_SUCCESS = 'OPTIMIZE_SUCCESS';
 const OPTIMIZE_FAIL = 'OPTIMIZE_FAIL';
 const SORT_UPDATED = 'SORT_UPDATED';
+const ADDRESS_LOOKUP_SUCCESS = 'ADDRESS_LOOKUP_SUCCESS';
+const ADDRESS_LOOKUP_FAIL = 'ADDRESS_LOOKUP_FAIL';
 
 export const addresses = {
   namespaced: true,
@@ -14,10 +16,12 @@ export const addresses = {
     addresses: [],
     dnc: [],
     optimized: [],
+    search: [],
   },
   getters: {
     dnc: state => state.dnc,
     optimized: state => state.optimized,
+    search: state => state.search,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -33,6 +37,12 @@ export const addresses = {
       console.error(OPTIMIZE_FAIL, exception);
     },
     SORT_UPDATED() {},
+    ADDRESS_LOOKUP_SUCCESS(state, search) {
+      state.search = search;
+    },
+    ADDRESS_LOOKUP_FAIL(state, exception) {
+      console.error(ADDRESS_LOOKUP_FAIL, exception);
+    },
   },
   actions: {
     async getDnc({ commit }, id) {
@@ -126,6 +136,51 @@ export const addresses = {
       if (response && response.data && response.data.data) {
         commit(SORT_UPDATED);
         commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async addressSearch({ commit }, { congId, searchTerm }) {
+      try {
+        if (!congId) return;
+        if (!searchTerm) return;
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`query Search($congId: Int, $searchTerm: String) {
+              addresses(congId:$congId, keyword: $searchTerm) {
+                id
+                addr1
+                addr2
+                city
+                state_province
+                territory {
+                  id
+                  name
+                  description
+                  group_code
+                }
+              }
+            }`),
+            variables: {
+              congId,
+              searchTerm,
+            },
+          },
+        });
+
+        if (!response || !response.data || !response.data.data || !response.data.data.addresses) {
+          return;
+        }
+
+        const search = response.data.data.addresses;
+        commit(ADDRESS_LOOKUP_SUCCESS, search);
+      } catch (exception) {
+        commit(ADDRESS_LOOKUP_FAIL, exception);
       }
     },
   },

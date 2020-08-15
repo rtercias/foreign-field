@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
-    <Loading v-if="isLoading"></Loading>
+    <Loading v-if="isLoading || isSearching"></Loading>
     <b-form v-else class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
         <div v-if="canWrite">
@@ -76,6 +76,17 @@
           </b-form-group>
         </div>
       </div>
+      <div v-else-if="step === 1.5">
+        <p>Similar addresses found. Please make sure the address you entered is unique.</p>
+        <b-list-group>
+          <b-list-group-item v-for="(search, index) in searchedAddresses" :key="index">
+            {{search.addr1}} {{search.addr2}} {{search.city}} {{search.state_province}} {{search.postal_code}}
+            <b-link :to="`/territories/${search.territory.group_code}/${search.territory.id}`">
+              Edit
+            </b-link>
+          </b-list-group-item>
+        </b-list-group>
+      </div>
       <div v-else-if="step === 2" class="step-2 h-100">
         <p>
           First, let's check the address location. Drag and drop the marker to make adjustments.
@@ -114,7 +125,7 @@
       <div class="buttons justify-content-between pt-4 pb-4">
         <b-button v-if="step === 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
         <b-button v-else type="button" variant="light" @click="prev">Previous</b-button>
-        <b-button v-if="canManage && step === 1" type="button" variant="light" @click="applyGeocode">
+        <b-button v-if="canManage && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
         <b-button v-if="canManage && step === 2" type="button" variant="light" @click="goToSelectTerritory">
@@ -164,6 +175,7 @@ export default {
       step: 1,
       isLoading: false,
       isSaving: false,
+      isSearching: false,
       readOnly: false,
       model: {
         id: 0,
@@ -190,6 +202,7 @@ export default {
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
       fetchAllTerritories: 'territories/fetchAllTerritories',
+      addressSearch: 'addresses/addressSearch',
     }),
     async submitAddress() {
       try {
@@ -281,6 +294,18 @@ export default {
         });
         return;
       }
+
+      if (this.mode === Modes.add) {
+        this.isSearching = true;
+        await this.addressSearch({ congId: this.congId, searchTerm: this.model.addr1 });
+        if (this.searchedAddresses && this.searchedAddresses.length) {
+          this.step = 1.5;
+          this.isSearching = false;
+          return;
+        }
+        this.isSearching = false;
+      }
+
       if (!this.geocodedAddress.latitude || !this.geocodedAddress.longitude) {
         await this.geocodeAddress();
       }
@@ -320,6 +345,7 @@ export default {
       maxSort: 'territory/maxSort',
       territories: 'territories/territories',
       territoriesLoading: 'territories/loading',
+      searchedAddresses: 'addresses/search',
     }),
 
     returnRoute() {
