@@ -111,7 +111,6 @@ export default {
 
     async setAvailability(value) {
       this.availability = value;
-      this.sortOption = 'Sort By';
       await this.$store.dispatch('territories/fetchTerritories', {
         congId: this.congId,
         groupCode: this.groupCode,
