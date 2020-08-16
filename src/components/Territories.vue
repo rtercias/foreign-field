@@ -10,7 +10,7 @@
       <br>
       <b-dropdown class="sort-btn" right variant="success">
         <span slot="button-content">Sort: {{sortOption}}</span>
-        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => setSortMethod(option)">
+        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
           <font-awesome-icon icon="check" v-if="sortOption === option" /> {{option}}
         </b-dropdown-item>
       </b-dropdown>
@@ -118,10 +118,10 @@ export default {
       sessionStorage.setItem('availability', value);
     },
 
-    setSortMethod(value) {
-      // this.$set(this, 'sortOption', value);
+    sort(value) {
       this.sortOption = value;
     },
+
     async fetch() {
       const congId = this.congId || (this.user && this.user.congId);
       this.groupCode = this.$route.params.group;
