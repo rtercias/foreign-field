@@ -40,7 +40,6 @@ import { mapGetters, mapActions } from 'vuex';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
 import Loading from './Loading.vue';
-// eslint-disable-next-line
 import orderBy from 'lodash/orderBy';
 
 export default {
