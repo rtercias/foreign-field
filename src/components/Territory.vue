@@ -78,7 +78,7 @@ export default {
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
-      isOwnedByUser: 'territory/isOwnedByUser',
+      ownedBy: 'territory/isOwnedByUser',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -107,6 +107,9 @@ export default {
     },
     lastActivity() {
       return this.territory.lastActivity;
+    },
+    isOwnedByUser() {
+      return this.ownedBy === get(this.user, 'username');
     },
   },
   methods: {
