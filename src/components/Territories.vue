@@ -1,19 +1,17 @@
 <template>
   <div class="territories">
     <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
-      <h4 class="text-left">Service Group: {{groupCode}}</h4>
-      <b-dropdown right variant="secondary">
-        <span slot="button-content">{{availability}}</span>
-        <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="setAvailability(avail)">
+      <b-dropdown right variant="success">
+        <span slot="button-content">Filter: {{availability}}</span>
+        <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="() => setAvailability(avail)">
           <font-awesome-icon icon="check" v-if="availability === avail" /> {{avail}}
         </b-dropdown-item>
       </b-dropdown>
       <br>
-      <b-dropdown>
-        <b-dropdown-header>Sort By</b-dropdown-header>
-        <span slot="button-content">{{sortOption}}</span>
-        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="setSortMethod(option)">
-          {{option}}
+      <b-dropdown class="sort-btn" right variant="success">
+        <span slot="button-content">Sort: {{sortOption}}</span>
+        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => setSortMethod(option)">
+          <font-awesome-icon icon="check" v-if="sortOption === option" /> {{option}}
         </b-dropdown-item>
       </b-dropdown>
     </header>
@@ -42,6 +40,8 @@ import { mapGetters, mapActions } from 'vuex';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
 import Loading from './Loading.vue';
+// eslint-disable-next-line
+import orderBy from 'lodash/orderBy';
 
 export default {
   name: 'Territories',
@@ -69,7 +69,7 @@ export default {
         'Checked Out',
         'Recently Worked',
       ],
-      sortOption: '',
+      sortOption: 'Description',
       sortOptions: [
         'Name',
         'Description',
@@ -81,6 +81,7 @@ export default {
     ...mapGetters({
       congId: 'auth/congId',
       user: 'auth/user',
+      token: 'auth/token',
       territories: 'territories/territories',
       loading: 'territories/loading',
     }),
@@ -89,14 +90,17 @@ export default {
       if (this.availability === 'All') {
         return this.territories;
       }
-
-      return this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
+      const filtered = this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
+      return orderBy(filtered, this.sortOption.toLowerCase());
     },
   },
 
   watch: {
     congId() {
       this.fetch();
+    },
+    async token() {
+      await this.fetch();
     },
   },
 
@@ -107,6 +111,7 @@ export default {
 
     async setAvailability(value) {
       this.availability = value;
+      this.sortOption = 'Sort By';
       await this.$store.dispatch('territories/fetchTerritories', {
         congId: this.congId,
         groupCode: this.groupCode,
@@ -115,20 +120,8 @@ export default {
     },
 
     setSortMethod(value) {
+      // this.$set(this, 'sortOption', value);
       this.sortOption = value;
-      if (value === 'Name') {
-        this.filteredTerritories.sort(
-          (a, b) => a.name.localeCompare(
-            b.name,
-            // forces system language to use en-us (which represents whole numbers instead of its first value)
-            navigator.languages[0] || navigator.language,
-            // sorts numbers as whole numbers isntead of the first character it sees
-            { numeric: true, ignorePunctuation: true }
-          )
-        );
-      } else if (value === 'Description') {
-        this.filteredTerritories.sort((a, b) => (a.description > b.description ? 1 : -1));
-      }
     },
     async fetch() {
       const congId = this.congId || (this.user && this.user.congId);
