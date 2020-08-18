@@ -1,11 +1,18 @@
 <template>
   <div class="territories">
+    <h4 class="pt-3 pl-3 w-100 text-left">Service Group: {{groupCode}}</h4>
     <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
-      <h4 class="text-left">Service Group: {{groupCode}}</h4>
-      <b-dropdown right variant="secondary">
-        <span slot="button-content">{{availability}}</span>
-        <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="setAvailability(avail)">
+      <b-dropdown right variant="success">
+        <span slot="button-content">Filter: {{availability}}</span>
+        <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="() => setAvailability(avail)">
           <font-awesome-icon icon="check" v-if="availability === avail" /> {{avail}}
+        </b-dropdown-item>
+      </b-dropdown>
+      <br>
+      <b-dropdown class="sort-btn" right variant="success">
+        <span slot="button-content">Sort: {{sortOption}}</span>
+        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
+          <font-awesome-icon icon="check" v-if="sortOption === option" /> {{option}}
         </b-dropdown-item>
       </b-dropdown>
     </header>
@@ -34,6 +41,7 @@ import { mapGetters, mapActions } from 'vuex';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
 import Loading from './Loading.vue';
+import orderBy from 'lodash/orderBy';
 
 export default {
   name: 'Territories',
@@ -61,6 +69,11 @@ export default {
         'Checked Out',
         'Recently Worked',
       ],
+      sortOption: 'Description',
+      sortOptions: [
+        'Name',
+        'Description',
+      ],
     };
   },
 
@@ -68,22 +81,27 @@ export default {
     ...mapGetters({
       congId: 'auth/congId',
       user: 'auth/user',
+      token: 'auth/token',
       territories: 'territories/territories',
       loading: 'territories/loading',
     }),
 
     filteredTerritories() {
       if (this.availability === 'All') {
-        return this.territories;
+        const allTerrs = this.territories;
+        return orderBy(allTerrs, this.sortOption.toLowerCase());
       }
-
-      return this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
+      const filtered = this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
+      return orderBy(filtered, this.sortOption.toLowerCase());
     },
   },
 
   watch: {
     congId() {
       this.fetch();
+    },
+    async token() {
+      await this.fetch();
     },
   },
 
@@ -99,6 +117,10 @@ export default {
         groupCode: this.groupCode,
       });
       sessionStorage.setItem('availability', value);
+    },
+
+    sort(value) {
+      this.sortOption = value;
     },
 
     async fetch() {
