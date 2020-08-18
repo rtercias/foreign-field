@@ -1,5 +1,6 @@
 <template>
   <div class="territories">
+    <h4 class="pt-3 pl-3 w-100 text-left">Service Group: {{groupCode}}</h4>
     <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
       <b-dropdown right variant="success">
         <span slot="button-content">Filter: {{availability}}</span>
@@ -87,7 +88,8 @@ export default {
 
     filteredTerritories() {
       if (this.availability === 'All') {
-        return this.territories;
+        const allTerrs = this.territories;
+        return orderBy(allTerrs, this.sortOption.toLowerCase());
       }
       const filtered = this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
       return orderBy(filtered, this.sortOption.toLowerCase());
