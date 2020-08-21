@@ -2,14 +2,14 @@
   <div class="territories">
     <h4 class="pt-3 pl-3 w-100 text-left">Service Group: {{groupCode}}</h4>
     <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
-      <b-dropdown right variant="success">
+      <b-dropdown right variant="secondary">
         <span slot="button-content">Filter: {{availability}}</span>
         <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="() => setAvailability(avail)">
           <font-awesome-icon icon="check" v-if="availability === avail" /> {{avail}}
         </b-dropdown-item>
       </b-dropdown>
       <br>
-      <b-dropdown class="sort-btn" right variant="success">
+      <b-dropdown class="sort-btn" right variant="secondary">
         <span slot="button-content">Sort: {{sortOption}}</span>
         <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
           <font-awesome-icon icon="check" v-if="sortOption === option" /> {{option}}
