@@ -173,7 +173,6 @@ li {
   border-width: 2px;
 }
 .list-group-item:hover {
-  background-color: #f8f9fa;
   cursor: pointer;
 }
 .list-group-item a {

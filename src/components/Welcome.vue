@@ -9,7 +9,7 @@
           <span class="update-message">App version now available! To download, add this page to your home screen.</span>
         </div>
         <div class="col-2">
-          <b-button class="dismiss-btn text-light" pill @click="dismissMsg">
+          <b-button class="dismiss-btn bg-primary text-light" pill @click="dismissMsg">
             <font-awesome-icon icon="times"></font-awesome-icon>
           </b-button>
         </div>
@@ -140,9 +140,6 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
-a {
-  color: #42b983;
-}
 router-link {
   cursor: pointer;
 }
@@ -155,9 +152,5 @@ router-link {
 }
 .update-message {
   font-size: 0.95rem;
-}
-.dismiss-btn {
-  background-color: #5184B7;
-  border: none;
 }
 </style>

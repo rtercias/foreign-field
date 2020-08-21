@@ -36,9 +36,6 @@ h3 {
   margin: 40px 0 0;
 }
 
-a {
-  color: #42b983;
-}
 router-link {
   cursor: pointer;
 }
@@ -48,7 +45,7 @@ router-link {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #696969;
+  color: $dark;
 }
 .view {
   height: calc(100% - 1.5em);
