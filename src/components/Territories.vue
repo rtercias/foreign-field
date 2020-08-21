@@ -3,16 +3,27 @@
     <h4 class="pt-3 pl-3 w-100 text-left">Service Group: {{groupCode}}</h4>
     <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
       <b-dropdown right variant="secondary">
-        <span slot="button-content">Filter: {{availability}}</span>
-        <b-dropdown-item v-for="avail in availabilityFilters" v-bind:key="avail" @click="() => setAvailability(avail)">
-          <font-awesome-icon icon="check" v-if="availability === avail" /> {{avail}}
+        <span slot="button-content">
+          <font-awesome-icon icon="filter" />
+          {{availability}}
+        </span>
+        <b-dropdown-item
+          class="availability-filter w-100 p-0"
+          v-for="avail in availabilityFilters"
+          v-bind:key="avail"
+          @click="() => setAvailability(avail)">
+          <font-awesome-icon class="selected" icon="check" v-if="availability === avail" />
+          {{avail}}
         </b-dropdown-item>
       </b-dropdown>
       <br>
       <b-dropdown class="sort-btn" right variant="secondary">
-        <span slot="button-content">Sort: {{sortOption}}</span>
+        <span slot="button-content">
+          <font-awesome-icon icon="sort-amount-down-alt" />
+          {{sortOption}}
+        </span>
         <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
-          <font-awesome-icon icon="check" v-if="sortOption === option" /> {{option}}
+          <font-awesome-icon class="selected" icon="check" v-if="sortOption === option" /> {{option}}
         </b-dropdown-item>
       </b-dropdown>
     </header>
@@ -148,7 +159,12 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.availability-filter, .sort-btn {
+  .selected {
+    margin-left: -20px;
+  }
+}
 header {
   padding: 1.25rem 2rem;
 }
