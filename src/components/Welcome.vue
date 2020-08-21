@@ -3,13 +3,13 @@
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main">
-      <div class="new-message align-items-center pt-2 pb-2 w-100 text-white"
+      <div class="new-message bg-secondary text-dark align-items-center pt-2 pb-2 w-100 text-white"
       v-show='msgBoxOpen && !isPWA'>
         <div class="message text-left col-10">
           <span class="update-message">App version now available! To download, add this page to your home screen.</span>
         </div>
         <div class="col-2">
-          <b-button class="dismiss-btn" pill @click="dismissMsg">
+          <b-button class="dismiss-btn text-light" pill @click="dismissMsg">
             <font-awesome-icon icon="times"></font-awesome-icon>
           </b-button>
         </div>
@@ -152,7 +152,6 @@ router-link {
 .new-message {
   display: flex;
   flex-direction: row;
-  background-color: #5184B7;
 }
 .update-message {
   font-size: 0.95rem;
