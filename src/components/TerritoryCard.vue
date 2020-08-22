@@ -13,6 +13,7 @@
       </div>
       <div class="check-in-out" size="small" role="group">
         <b-btn
+          class="text-light font-weight-bold"
           v-b-modal.checkoutModal
           variant="info"
           v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
@@ -22,6 +23,7 @@
           check out
         </b-btn>
         <b-btn
+          class="font-weight-bold"
           v-if="canWrite && status === 'Checked Out'"
           variant="outline-info"
           @click="checkin(terr)"
