@@ -11,10 +11,11 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right">{{territoryName}}&nbsp;</h4>
-            <b-button @click="openLinkText()">
-              <font-awesome-icon icon="share"></font-awesome-icon>
-            </b-button>
+            <h4 class="text-right">{{territoryName}}
+              <b-button @click="openLinkText">
+                <font-awesome-icon icon="share"></font-awesome-icon>
+              </b-button>
+            </h4>
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
