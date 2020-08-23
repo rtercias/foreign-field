@@ -23,9 +23,6 @@ import App from './App.vue';
 import Pusher from 'pusher-js';
 import { router } from './routes';
 import { store } from './store';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-vue/dist/bootstrap-vue.css';
-import './assets/bootstrap-overrides.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -60,6 +57,8 @@ import {
   faGripLines,
   faQuestionCircle,
   faShare,
+  faFilter,
+  faSortAmountDownAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -92,6 +91,8 @@ library.add(
   faGripLines,
   faQuestionCircle,
   faShare,
+  faFilter,
+  faSortAmountDownAlt,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

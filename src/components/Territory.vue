@@ -26,7 +26,7 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='address-list'" size="sm">
-              <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="danger" @click="checkIn(true)">
+              <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
                 Check In
               </b-button>
               <b-button v-if="canManage" variant="success" :to="`/territories/${group}/${id}/addresses/add`">

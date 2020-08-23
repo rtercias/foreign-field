@@ -1,6 +1,6 @@
 <template>
   <div class="lead">
-    <vue-pull-refresh :on-refresh="onRefresh" :config="refreshOptions">
+    <vue-pull-refresh class="bg-dark" :on-refresh="onRefresh" :config="refreshOptions">
       <b-navbar type="dark" variant="primary" toggleable fill>
         <b-link class="button text-white-50" :to="leftNavRoute">
           <font-awesome-icon icon="chevron-left" v-show="showLeftNav"></font-awesome-icon>
@@ -103,8 +103,8 @@ export default {
 };
 </script>
 
-<style>
-.dropdown-item {
-  color: #696969;
+<style lang="scss">
+.pull-down-header {
+  background-color: unset;
 }
 </style>
