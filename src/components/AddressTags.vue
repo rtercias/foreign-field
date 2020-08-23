@@ -4,9 +4,12 @@
       <b-badge pill class="tag-button-preview mr-1" v-for="(x, i) in preview" :key="i" variant="primary">{{ x }}</b-badge>
     </div>
     <transition name="slide-up">
-      <div v-show="!collapsed" class="tag-selection">
-        <div class="text-secondary bg-light border-bottom font-weight-bold">Address Tags</div>
-        <b-button-group class="pt-2 pb-2 pl-2 pr-2 flex-wrap" size="sm">
+      <div v-show="!collapsed" class="tag-selection w-100">
+        <div class="text-primary bg-light border-bottom font-weight-bold">Address Tags</div>
+        <div v-if="isSaving" class="d-flex justify-content-center align-items-center h-100">
+          <font-awesome-icon class="text-primary" icon="circle-notch" spin></font-awesome-icon>
+        </div>
+        <b-button-group v-else class="pt-2 pb-2 pl-2 pr-2 flex-wrap" size="sm">
           <div class="combined-tags">
             <b-badge
               v-for="(tag, index) in combinedTags"
@@ -46,14 +49,15 @@ import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 
 export default {
+  name: 'AddressTags',
+  props: ['address'],
   data() {
     return {
       collapsed: true,
       language: get(this.user, 'congregation.language', 'Tagalog'),
+      isSaving: false,
     };
   },
-  name: 'AddressTags',
-  props: ['address'],
   methods: {
     ...mapActions({
       setAddress: 'address/setAddress',
@@ -66,7 +70,7 @@ export default {
     }),
     async updateTag(tag) {
       if (this.readOnlyTag(tag)) return;
-
+      this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       this.setAddress(this.address);
 
@@ -90,6 +94,7 @@ export default {
 
       this.$parent.$emit('address-updated', this.updatedAddress);
       this.collapsed = true;
+      this.isSaving = false;
     },
     loadselectedTags() {
       this.availableTags.forEach((e) => {
@@ -234,9 +239,8 @@ export default {
     position: absolute;
     left: 0;
     bottom: 0;
-    height: 100%;
+    height: calc(100% - 2.5rem);
     overflow-y: auto;
-    padding-top: 2.5rem;
     margin-bottom: 2.5rem;
     overflow-x: hidden;
   }
