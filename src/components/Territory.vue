@@ -11,7 +11,10 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right">{{territoryName}}</h4>
+            <h4 class="text-right">{{territoryName}}&nbsp;</h4>
+            <b-button @click="openLinkText()">
+              <font-awesome-icon icon="share"></font-awesome-icon>
+            </b-button>
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
@@ -36,6 +39,12 @@
               </b-button>
             </b-button-group>
           </div>
+          <div class="share-box" v-if="shareBox">
+            <b-form-input id="myLink" ref="myLink" v-model="linkName"></b-form-input>
+            <p class="mt-2">The link to this territory has been copied to the clipboard.
+              Please paste it into a messaging app.</p>
+            <b-button class="mb-2" variant="warning" pill @click='shareBox = false'>Ok</b-button>
+          </div>
         </div>
       </header>
       <router-view></router-view>
@@ -46,8 +55,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import orderBy from 'lodash/orderBy';
-// eslint-disable-next-line
 import get from 'lodash/get';
+// eslint-disable-next-line
+import debounce from 'lodash/debounce';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
 
@@ -69,6 +79,8 @@ export default {
       reset: false,
       workInProgress: {},
       viewMode: 'address-list',
+      shareBox: false,
+      linkName: window.location.href,
     };
   },
   computed: {
@@ -151,6 +163,22 @@ export default {
       });
     },
 
+    async openLinkText() {
+      this.shareBox = await true;
+      await this.$nextTick(() => {
+        const shareableLink = this.$refs.myLink;
+        shareableLink.select();
+        document.execCommand('copy');
+      });
+    },
+
+    // hideLink() {
+    //   const shareableLink = this.$refs.myLink;
+    //   if (!shareableLink.select()) {
+    //     this.shareBox = false;
+    //   }
+    // },
+
     seenTerritories() {
       let seenTerritories = [];
       if (localStorage.getItem('seenTerritories')) {
@@ -162,7 +190,6 @@ export default {
       }
       return seenTerritories;
     },
-
     saveSeenTerritory() {
       // create a basic territory and save it to localstorage
       const city = Array.isArray(this.territory.city) && this.territory.city.length ? this.territory.city.split(',')[0] : '';
@@ -227,6 +254,9 @@ li {
 .add-new {
     font-size: 24px;
   }
+.share-box {
+  background-color: rgb(255, 243, 202);
+}
 @media (min-width: 769px) {
   .columns {
     columns: 2;
