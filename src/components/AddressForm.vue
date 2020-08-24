@@ -207,7 +207,7 @@ export default {
     async submitAddress() {
       try {
         if (!this.model.longitude || !this.model.latitude) {
-          await this.geocode();
+          await this.geocodeAddress();
         }
         this.isSaving = true;
 
