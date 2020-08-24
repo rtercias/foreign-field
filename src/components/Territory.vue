@@ -11,7 +11,14 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right">{{territoryName}}</h4>
+            <h4 class="text-right">
+                <font-awesome-icon
+                  class="text-primary"
+                  icon="sms"
+                  size="sm"
+                  @click="openSMSMobile()">
+                </font-awesome-icon> {{territoryName}}
+            </h4>
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
@@ -46,7 +53,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import orderBy from 'lodash/orderBy';
-// eslint-disable-next-line
 import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -151,6 +157,11 @@ export default {
       });
     },
 
+    openSMSMobile() {
+      window.open(`sms:&body=Work this territory with me!%0a%0a${window.location.href}`, '_self');
+      return false;
+    },
+
     seenTerritories() {
       let seenTerritories = [];
       if (localStorage.getItem('seenTerritories')) {
@@ -162,7 +173,6 @@ export default {
       }
       return seenTerritories;
     },
-
     saveSeenTerritory() {
       // create a basic territory and save it to localstorage
       const city = Array.isArray(this.territory.city) && this.territory.city.length ? this.territory.city.split(',')[0] : '';

@@ -58,6 +58,7 @@ import {
   faQuestionCircle,
   faFilter,
   faSortAmountDownAlt,
+  faSms,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -91,6 +92,7 @@ library.add(
   faQuestionCircle,
   faFilter,
   faSortAmountDownAlt,
+  faSms,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
