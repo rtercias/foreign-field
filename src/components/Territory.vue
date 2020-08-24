@@ -12,7 +12,7 @@
               <span>{{secondaryCities}}</span>
             </div>
             <h4 class="text-right">{{territoryName}}
-              <b-button @click="openLinkText">
+              <b-button @click="openSMSMobile()">
                 <font-awesome-icon icon="share"></font-awesome-icon>
               </b-button>
             </h4>
@@ -39,12 +39,6 @@
                 Optimize
               </b-button>
             </b-button-group>
-          </div>
-          <div class="share-box" v-if="shareBox">
-            <b-form-input id="myLink" ref="myLink" v-model="linkName"></b-form-input>
-            <p class="mt-2">The link to this territory has been copied to the clipboard.
-              Please paste it into a messaging app.</p>
-            <b-button class="mb-2" variant="warning" pill @click='shareBox = false'>Ok</b-button>
           </div>
         </div>
       </header>
@@ -164,21 +158,10 @@ export default {
       });
     },
 
-    async openLinkText() {
-      this.shareBox = await true;
-      await this.$nextTick(() => {
-        const shareableLink = this.$refs.myLink;
-        shareableLink.select();
-        document.execCommand('copy');
-      });
+    openSMSMobile() {
+      window.open(`sms:&body=Work this territory with me!%0a%0a${window.location.href}`, '_self');
+      return false;
     },
-
-    // hideLink() {
-    //   const shareableLink = this.$refs.myLink;
-    //   if (!shareableLink.select()) {
-    //     this.shareBox = false;
-    //   }
-    // },
 
     seenTerritories() {
       let seenTerritories = [];
