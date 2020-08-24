@@ -59,6 +59,8 @@ import {
   faShare,
   faFilter,
   faSortAmountDownAlt,
+  faShareAlt,
+  faSms,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -93,6 +95,8 @@ library.add(
   faShare,
   faFilter,
   faSortAmountDownAlt,
+  faShareAlt,
+  faSms,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

@@ -11,10 +11,13 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right">{{territoryName}}
-              <b-button @click="openSMSMobile()">
-                <font-awesome-icon icon="share"></font-awesome-icon>
-              </b-button>
+            <h4 class="text-right">
+                <font-awesome-icon
+                  class="text-primary"
+                  icon="sms"
+                  size="sm"
+                  @click="openSMSMobile()">
+                </font-awesome-icon> {{territoryName}}
             </h4>
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
@@ -51,8 +54,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
-// eslint-disable-next-line
-import debounce from 'lodash/debounce';
 import TerritoryMap from './TerritoryMap.vue';
 import differenceInDays from 'date-fns/differenceInDays';
 
@@ -238,9 +239,12 @@ li {
 .add-new {
     font-size: 24px;
   }
-.share-box {
-  background-color: rgb(255, 243, 202);
-}
+/* .share-btn {
+  color: gray;
+  border: 1px gray solid;
+  padding: 2px;
+  border-radius: 24%;
+} */
 @media (min-width: 769px) {
   .columns {
     columns: 2;
