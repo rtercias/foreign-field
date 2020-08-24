@@ -1,7 +1,7 @@
 <template>
   <div class="lead">
-    <vue-pull-refresh class="bg-dark" :on-refresh="onRefresh" :config="refreshOptions">
-      <b-navbar type="dark" variant="primary" toggleable fill>
+    <vue-pull-refresh class="bg-primary" :on-refresh="onRefresh" :config="refreshOptions">
+      <b-navbar class="border-warning gold-bottom" type="dark" variant="primary" toggleable fill>
         <b-link class="button text-white-50" :to="leftNavRoute">
           <font-awesome-icon icon="chevron-left" v-show="showLeftNav"></font-awesome-icon>
         </b-link>
@@ -106,5 +106,8 @@ export default {
 <style lang="scss">
 .pull-down-header {
   background-color: unset;
+}
+.gold-bottom {
+  border-bottom: solid 6px;
 }
 </style>
