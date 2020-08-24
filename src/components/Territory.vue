@@ -75,8 +75,6 @@ export default {
       reset: false,
       workInProgress: {},
       viewMode: 'address-list',
-      shareBox: false,
-      linkName: window.location.href,
     };
   },
   computed: {
@@ -239,12 +237,6 @@ li {
 .add-new {
     font-size: 24px;
   }
-/* .share-btn {
-  color: gray;
-  border: 1px gray solid;
-  padding: 2px;
-  border-radius: 24%;
-} */
 @media (min-width: 769px) {
   .columns {
     columns: 2;
