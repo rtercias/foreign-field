@@ -1,5 +1,6 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
+import orderBy from 'lodash/orderBy';
 import { print } from 'graphql/language/printer';
 
 const DNC_SUCCESS = 'DNC_SUCCESS';
@@ -25,7 +26,7 @@ export const addresses = {
     dnc: state => state.dnc,
     optimized: state => state.optimized,
     search: state => state.search,
-    logs: state => state.logs,
+    logs: state => orderBy(state.logs, 'date', 'desc'),
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -242,7 +243,19 @@ export const addresses = {
           return;
         }
 
+        const updateFields = ['update_date', 'update_user'];
         const logs = response.data.data.addressChangeLogs;
+        for (const log of logs) {
+          log.changes = JSON.parse(log.changes);
+          for (const key in log.changes) {
+            const newValue = log.changes[key].new || '';
+            const oldValue = log.changes[key].old || '';
+            if ((!newValue && oldValue.length === newValue.length) || updateFields.includes(key)) {
+              delete log.changes[key];
+            }
+          }
+        }
+
         commit(CHANGE_LOGS_SUCCESS, logs);
       } catch (exception) {
         commit(CHANGE_LOGS_FAIL, exception);
