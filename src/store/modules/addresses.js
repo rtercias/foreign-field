@@ -9,6 +9,8 @@ const OPTIMIZE_FAIL = 'OPTIMIZE_FAIL';
 const SORT_UPDATED = 'SORT_UPDATED';
 const ADDRESS_LOOKUP_SUCCESS = 'ADDRESS_LOOKUP_SUCCESS';
 const ADDRESS_LOOKUP_FAIL = 'ADDRESS_LOOKUP_FAIL';
+const CHANGE_LOGS_SUCCESS = 'CHANGE_LOGS_SUCCESS';
+const CHANGE_LOGS_FAIL = 'CHANGE_LOGS_FAIL';
 
 export const addresses = {
   namespaced: true,
@@ -17,11 +19,13 @@ export const addresses = {
     dnc: [],
     optimized: [],
     search: [],
+    logs: [],
   },
   getters: {
     dnc: state => state.dnc,
     optimized: state => state.optimized,
     search: state => state.search,
+    logs: state => state.logs,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -42,6 +46,12 @@ export const addresses = {
     },
     ADDRESS_LOOKUP_FAIL(state, exception) {
       console.error(ADDRESS_LOOKUP_FAIL, exception);
+    },
+    CHANGE_LOGS_SUCCESS(state, logs) {
+      state.logs = logs;
+    },
+    CHANGE_LOGS_FAIL(state, exception) {
+      console.error(CHANGE_LOGS_FAIL, exception);
     },
   },
   actions: {
@@ -181,6 +191,61 @@ export const addresses = {
         commit(ADDRESS_LOOKUP_SUCCESS, search);
       } catch (exception) {
         commit(ADDRESS_LOOKUP_FAIL, exception);
+      }
+    },
+
+    async getChangeLog({ commit }, { congId, minDate }) {
+      try {
+        if (!congId) return;
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`query AddressChangeLog($congId: Int, $minDate: String) {
+              addressChangeLogs(congId: $congId, minDate: $minDate) {
+                date
+                changes
+                publisher {
+                  id
+                  firstname
+                  lastname
+                  username
+                }
+                address {
+                  id
+                  addr1
+                  addr2
+                  city
+                  state_province
+                  postal_code
+                  territory {
+                    id
+                    name
+                    description
+                    group_code
+                  }
+                }
+              }
+            }`),
+            variables: {
+              congId,
+              minDate,
+            },
+          },
+        });
+
+        if (!response || !response.data || !response.data.data || !response.data.data.addressChangeLogs) {
+          return;
+        }
+
+        const logs = response.data.data.addressChangeLogs;
+        commit(CHANGE_LOGS_SUCCESS, logs);
+      } catch (exception) {
+        commit(CHANGE_LOGS_FAIL, exception);
       }
     },
   },

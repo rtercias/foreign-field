@@ -19,37 +19,48 @@
           <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
           <span class="title w-100">Dashboard</span>
         </h3>
-        <hr />
         <Loading v-if="loading"></Loading>
+        <b-button-group v-if="canManage" class="pt-4">
+          <b-button v-if="canManage" variant="success" size="sm" :to="`/addresses/add`">
+            <font-awesome-icon icon="plus"></font-awesome-icon> Address
+          </b-button>
+          <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+            <font-awesome-icon icon="plus"></font-awesome-icon> Territory
+          </b-button>
+          <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+            <font-awesome-icon icon="plus"></font-awesome-icon> Group
+          </b-button>
+          <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+            <font-awesome-icon icon="plus"></font-awesome-icon> Publisher
+          </b-button>
+        </b-button-group>
       </div>
-      <div v-if="!loading" class="col-sm-12 col-md-6">
-        <span v-if="!(territories && territories.length)">I have no territories checked out.</span>
-        <div v-else>
-          <span>Territories I've checked out:</span>
-          <ul class="d-flex flex-column">
-            <li class="pt-3 m-0 font-weight-bold" v-for="terr in territories" :key="terr.id">
+      <div v-if="!loading" class="col-sm-12 col-md-6 pt-3 pb-3">
+        <span v-if="!(territories && territories.length)" class="text-center">I have no territories checked out.</span>
+        <div v-else class="text-left">
+          <span class="small">Territories I've checked out:</span>
+          <b-list-group>
+            <b-list-group-item v-for="terr in territories" :key="terr.id" class="pl-2 pr-2">
               <MyTerritory :territory="terr"></MyTerritory>
-            </li>
-          </ul>
-          <div v-if="seenTerritories.length">
-            <hr />
-            <span>Other territories I've recently seen:</span>
-            <ul class="d-flex flex-column">
-              <li class="pt-3 m-0 font-weight-bold" v-for="terr in seenTerritories" :key="terr.id">
-                <MyTerritory :territory="terr"></MyTerritory>
-              </li>
-            </ul>
-          </div>
+            </b-list-group-item>
+          </b-list-group>
         </div>
-        <hr />
       </div>
-      <div v-if="!loading" class="col-sm-12 col-md-6 p-3 pt-5">
-        <Reports v-if="canWrite" />
+      <div v-if="!loading" class="col-sm-12 col-md-6 text-left pt-3 pb-3">
+        <div v-if="seenTerritories.length">
+          <span class="small">Other territories I've recently seen:</span>
+          <b-list-group>
+            <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="pl-2 pr-2">
+              <MyTerritory :territory="terr"></MyTerritory>
+            </b-list-group-item>
+          </b-list-group>
+        </div>
       </div>
-      <div v-if="!loading" class="col-sm-12 col-md-6 p-3 pt-5">
-        <b-button v-if="canManage" class="text-white" variant="success" :to="`/addresses/add`">
-          <font-awesome-icon icon="plus"></font-awesome-icon> New Address
-        </b-button>
+      <div v-if="!loading && canManage" class="text-left pt-3 pb-3 col-sm-12 col-md-6">
+        <ChangeLog :type="'addresses'" :fullscreen="false" />
+      </div>
+      <div v-if="!loading && canWrite" class="text-left pt-3 pb-3 scol-sm-12 col-md-6">
+        <Reports />
       </div>
     </b-row>
   </b-container>
@@ -61,6 +72,7 @@ import Auth from './Auth';
 import Loading from './Loading.vue';
 import Reports from './Reports';
 import MyTerritory from './MyTerritory';
+import ChangeLog from './ChangeLog';
 
 export default {
   name: 'Welcome',
@@ -69,6 +81,7 @@ export default {
     Loading,
     Reports,
     MyTerritory,
+    ChangeLog,
   },
   data() {
     return {

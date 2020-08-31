@@ -59,6 +59,7 @@ import {
   faFilter,
   faSortAmountDownAlt,
   faSms,
+  faRedoAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -93,6 +94,7 @@ library.add(
   faFilter,
   faSortAmountDownAlt,
   faSms,
+  faRedoAlt,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
