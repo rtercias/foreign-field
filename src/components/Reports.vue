@@ -1,9 +1,13 @@
 <template>
   <div class="reports">
-    <div class="lead">Available Reports</div>
-    <b-link :to="`/reports/assignment-report/${congId}`" class="pr-4 column">
-      S-13 Assignment Record
-    </b-link>
+    <div class="small">Available Reports:</div>
+    <b-list-group>
+      <b-list-group-item class="pl-2 pr-2">
+        <b-link :to="`/reports/assignment-report/${congId}`" class="pr-4 column">
+          S-13 Assignment Record
+        </b-link>
+      </b-list-group-item>
+    </b-list-group>
   </div>
 </template>
 <script>

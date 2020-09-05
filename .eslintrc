@@ -25,7 +25,6 @@
     "no-await-in-loop": "off",
     "no-restricted-syntax": [
       "error",
-      "ForInStatement",
       "LabeledStatement",
       "WithStatement"
     ],
@@ -53,6 +52,7 @@
     "no-plusplus": "off",
     "func-names": "off",
     "linebreak-style": "off",
-    "object-curly-newline": "off"
+    "object-curly-newline": "off",
+    "guard-for-in": "off"
   }
 }

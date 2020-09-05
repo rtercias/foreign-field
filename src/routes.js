@@ -13,6 +13,7 @@ import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
 import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
+import ChangeLog from './components/ChangeLog';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -79,6 +80,15 @@ const routes = [
     name: 'assignment-report',
     path: '/reports/assignment-report/:id',
     component: AssignmentReport,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'change-logs',
+    path: '/reports/logs/:type',
+    component: ChangeLog,
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],

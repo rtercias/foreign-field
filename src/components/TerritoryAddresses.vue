@@ -22,6 +22,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import differenceInDays from 'date-fns/differenceInDays';
+import orderBy from 'lodash/orderBy';
 import AddressCard from './AddressCard.vue';
 import Loading from './Loading.vue';
 import { channel } from '../main';
@@ -87,9 +89,46 @@ export default {
       }
     },
 
+    seenTerritories() {
+      let seenTerritories = [];
+      if (localStorage.getItem('seenTerritories')) {
+        try {
+          seenTerritories = JSON.parse(localStorage.getItem('seenTerritories'));
+        } catch (e) {
+          localStorage.removeItem('seenTerritories');
+        }
+      }
+      return seenTerritories;
+    },
+    saveSeenTerritory() {
+      // create a basic territory and save it to localstorage
+      const city = Array.isArray(this.territory.city) && this.territory.city.length ? this.territory.city.split(',')[0] : '';
+      const basicTerritory = {
+        name: this.territory.name,
+        city,
+        group_code: this.territory.group_code,
+        id: this.territory.id,
+        lastVisited: (new Date()).toISOString(),
+      };
+      let seenList = this.seenTerritories();
+      const idx = seenList.findIndex(terr => terr.id === this.territory.id);
+      if (idx >= 0) {
+        seenList.splice(idx, 1, basicTerritory);
+      } else {
+        seenList.push(basicTerritory);
+      }
+      // filter out old ones
+      seenList = seenList.filter(terr => differenceInDays(new Date(), new Date(terr.lastVisited)) < 60);
+      seenList = orderBy(seenList, 'lastVisited', 'desc');
+      seenList.length = seenList.length <= 5 ? seenList.length : 5;
+      const parsed = JSON.stringify(seenList);
+      localStorage.setItem('seenTerritories', parsed);
+    },
+
     async loadTerritory() {
       if (this.token) {
         await this.getTerritory(this.id);
+        this.saveSeenTerritory();
       }
       this.isLoading = false;
     },
