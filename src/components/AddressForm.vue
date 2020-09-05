@@ -123,7 +123,7 @@
         </b-button>
       </div>
       <div class="buttons pt-4 pb-4" :class="{ 'justify-content-between': step!==4, 'justify-content-end': step===4 }">
-        <b-button v-if="step === 1" type="button" variant="light" :to="returnRoute">Cancel</b-button>
+        <b-button v-if="step === 1" type="button" variant="light" @click="done">Cancel</b-button>
         <b-button v-else v-show="step !== 4" type="button" variant="light" @click="prev">Previous</b-button>
         <b-button v-if="canManage && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">
           Locate on Map
@@ -349,11 +349,13 @@ export default {
     }),
 
     returnRoute() {
+      const { origin } = this.$route.query;
       const addMode = this.mode === Modes.add
         ? `/territories/${this.group}/${this.territoryId}`
         : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail`;
-
-      return this.$route.name === 'address-new' ? '/' : addMode;
+      if (this.$route.name === 'address-new') return '/';
+      if (origin) return undefined;
+      return addMode;
     },
 
     isFormComplete() {
