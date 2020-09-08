@@ -2,20 +2,31 @@
   <div class="territory">
     <Loading v-if="isLoading"></Loading>
     <b-list-group v-else class="columns">
-      <b-list-group-item
-        class="item col-sm-12 overflow-auto"
-        v-for="address in territory.addresses"
-        :class="isActiveAddress(address.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-        v-bind:key="address.id"
+      <swipe-list
+        ref="list"
+        class="card"
+        :items="territory.addresses"
+        item-key="id"
         data-toggle="collapse">
-        <AddressCard
-          v-bind="{address, reset}"
-          :territoryId="id"
-          :group="group"
-          :incomingResponse="address.incomingResponse"
-          @address-updated="refreshTerritory">
-        </AddressCard>
-      </b-list-group-item>
+        <template v-slot="{ item }">
+          <AddressCard
+            :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+            :address="item"
+            :reset="reset"
+            :territoryId="id"
+            :group="group"
+            :incomingResponse="item.incomingResponse">
+          </AddressCard>
+        </template>
+        <template v-slot:right="{ item, revealRight, close }">
+          <AddressActivityButtons
+            :address="item"
+            :show="() => revealRight()"
+            :isTerritoryCheckedOut="isTerritoryCheckedOut"
+            @update-response="(value) => updateResponse(item, value, close)">
+          </AddressActivityButtons>
+        </template>
+      </swipe-list>
     </b-list-group>
   </div>
 </template>
@@ -24,14 +35,19 @@
 import { mapGetters, mapActions } from 'vuex';
 import differenceInDays from 'date-fns/differenceInDays';
 import orderBy from 'lodash/orderBy';
-import AddressCard from './AddressCard.vue';
+import get from 'lodash/get';
+import { SwipeList } from 'vue-swipe-actions';
+import AddressCard from './AddressCard';
+import AddressActivityButtons from './AddressActivityButtons';
 import Loading from './Loading.vue';
 import { channel } from '../main';
 
 export default {
   name: 'TerritoryAddresses',
   components: {
+    SwipeList,
     AddressCard,
+    AddressActivityButtons,
     Loading,
   },
   props: ['group', 'id'],
@@ -63,6 +79,8 @@ export default {
       token: 'auth/token',
       authLoading: 'auth/loading',
       canCheckout: 'auth/canCheckout',
+      actionButtonList: 'address/actionButtonList',
+      address: 'address/address',
     }),
     lastActivity() {
       return this.territory.lastActivity;
@@ -73,6 +91,8 @@ export default {
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
       setLeftNavRoute: 'auth/setLeftNavRoute',
+      setAddress: 'address/setAddress',
+      addLog: 'address/addLog',
     }),
 
     isActiveAddress(addressId) {
@@ -124,13 +144,42 @@ export default {
       const parsed = JSON.stringify(seenList);
       localStorage.setItem('seenTerritories', parsed);
     },
-
     async loadTerritory() {
       if (this.token) {
         await this.getTerritory(this.id);
         this.saveSeenTerritory();
       }
       this.isLoading = false;
+    },
+    isTerritoryCheckedOut() {
+      return get(this.territory, 'status.status') === 'Checked Out';
+    },
+    async updateResponse(address, _value, close) {
+      this.isLogging = true;
+      let value = _value;
+      this.setAddress(address);
+
+      if (address.selectedResponse === 'START' && value === 'START') return;
+
+      if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
+
+      try {
+        await this.addLog({ addressId: this.address.id, value });
+        if (this.address.lastActivity) {
+          const { lastActivity } = this.address;
+          this.$set(address, 'selectedResponse', lastActivity.value);
+          this.$set(address, 'selectedResponseTS', lastActivity.timestamp);
+        }
+        // this.refreshTerritory(address);
+
+        close();
+      } catch (e) {
+        console.error('Unable to save activity log', e);
+      } finally {
+        this.isLogging = false;
+      }
     },
   },
   watch: {

@@ -1,74 +1,44 @@
 <template>
   <div class="address-card-container">
-    <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}">
-      <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
-        <div class="address col-9">
-          <div>
-            <h5 class="mb-0">
-              <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
-                {{address.addr1}}
-              </b-link>&nbsp;
-            </h5>
-            {{address.addr2}}
-            <div class="mb-2">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
-            </div>
-            <div class="phone">
-              <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
-            </div>
+    <!-- <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}"> -->
+    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
+      <div class="address col-9">
+        <div>
+          <h5 class="mb-0">
+            <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+              {{address.addr1}}
+            </b-link>&nbsp;
+          </h5>
+          {{address.addr2}}
+          <div class="mb-2">
+            {{address.city}} {{address.state_province}} {{address.postal_code}}
           </div>
-        </div>
-        <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
-          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
-          <div :class="{ hidden: selectedResponse === 'START' || isLogging }">
-            <ActivityButton
-              class="selected-response fa-2x pr-2"
-              :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-              :value="selectedResponse"
-              :next="'START'"
-              @button-click="confirmClearStatus">
-            </ActivityButton>
-            <a @click="confirmClearStatus">
-              <div class="last-activity" :class="{ hidden: selectedResponse === 'START' }">
-                {{formattedSelectedResponseTS}}
-              </div>
-            </a>
+          <div class="phone">
+            <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
           </div>
-          <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
-            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-          </font-awesome-layers>
-        </div>
-        <div
-          class="activity-container pl-0 pr-2"
-          ref="activityContainer"
-          :style="{
-            '--x': transform,
-            right: `${containerRight}px`,
-            transition: `${clickedToOpen ? 'right 0.2s linear' : 'none'}`
-          }">
-          <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="openActivityContainer">
-            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-          </font-awesome-layers>
-          <div class="buttons" v-if="isTerritoryCheckedOut">
-            <ActivityButton
-              v-for="(button, index) in containerButtonList"
-              :key="index"
-              class="fa-2x"
-              :value="button.value"
-              @button-click="updateResponse">
-            </ActivityButton>
-          </div>
-          <b-link
-            class="text-info"
-            :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
-            @click="setAddress(address)">
-            <font-awesome-layers class="text-info fa-2x">
-              <font-awesome-icon icon="history"></font-awesome-icon>
-            </font-awesome-layers>
-          </b-link>
         </div>
       </div>
-    </v-touch>
+      <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
+        <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
+        <div :class="{ hidden: address.selectedResponse === 'START' || isLogging }">
+          <ActivityButton
+            class="selected-response fa-2x pr-2"
+            :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
+            :value="address.selectedResponse"
+            :next="'START'"
+            @button-click="confirmClearStatus">
+          </ActivityButton>
+          <a @click="confirmClearStatus">
+            <div class="last-activity" :class="{ hidden: address.selectedResponse === 'START' }">
+              {{formattedSelectedResponseTS}}
+            </div>
+          </a>
+        </div>
+        <!-- <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
+          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+        </font-awesome-layers> -->
+      </div>
+    </div>
     <hr class="m-0 mb-2" />
     <AddressTags :address="address" v-on="$listeners"></AddressTags>
   </div>
@@ -80,26 +50,23 @@ import gsap from 'gsap';
 import format from 'date-fns/format';
 import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
-import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
+import ActivityButton from './ActivityButton';
 
 const DIRECTION_LEFT = 2;
 const DIRECTION_RIGHT = 4;
-const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'AddressCard',
   props: ['address', 'territoryId', 'group', 'incomingResponse'],
   components: {
     AddressLinks,
-    ActivityButton,
     AddressTags,
+    ActivityButton,
   },
   data() {
     return {
       storageId: `foreignfield-${this.address.id}`,
-      selectedResponse: '',
-      selectedResponseTS: null,
       isIncomingResponse: false,
       responseText: '',
       animate: false,
@@ -107,7 +74,6 @@ export default {
       containerRight: 0,
       isContainerVisible: false,
       transform: '',
-      clickedResponse: '',
       clickedToOpen: false,
       isLogging: false,
     };
@@ -156,33 +122,33 @@ export default {
         // do nothing
       }
     },
-    async updateResponse(_value) {
-      this.isLogging = true;
-      let value = _value;
-      this.resetContainerPosition();
-      this.setAddress(this.address);
+    async updateResponse() {
+      // this.isLogging = true;
+      // let value = _value;
+      // this.resetContainerPosition();
+      // this.setAddress(this.address);
 
-      if (this.selectedResponse === 'START' && value === 'START') return;
+      // if (this.selectedResponse === 'START' && value === 'START') return;
 
-      if (!this.actionButtonList.some(b => b.value === value)) {
-        value = 'START';
-      }
+      // if (!this.actionButtonList.some(b => b.value === value)) {
+      //   value = 'START';
+      // }
 
-      this.clickedResponse = value;
+      // this.clickedResponse = value;
 
-      try {
-        await this.addLog({ addressId: this.address.id, value });
-        this.selectedResponse = this.updatedAddress.lastActivity && this.updatedAddress.lastActivity.value;
-        this.selectedResponseTS = this.updatedAddress.lastActivity && Number(this.updatedAddress.lastActivity.timestamp);
-        this.$emit('address-updated', this.updatedAddress);
+      // try {
+      //   await this.addLog({ addressId: this.address.id, value });
+      //   this.selectedResponse = this.updatedAddress.lastActivity && this.updatedAddress.lastActivity.value;
+      //   this.selectedResponseTS = this.updatedAddress.lastActivity && Number(this.updatedAddress.lastActivity.timestamp);
+      //   this.$emit('address-updated', this.updatedAddress);
 
-        this.clickedResponse = '';
-        this.resetContainerPosition();
-      } catch (e) {
-        console.error('Unable to save activity log', e);
-      } finally {
-        this.isLogging = false;
-      }
+      //   this.clickedResponse = '';
+      //   this.resetContainerPosition();
+      // } catch (e) {
+      //   console.error('Unable to save activity log', e);
+      // } finally {
+      //   this.isLogging = false;
+      // }
     },
     slide(e) {
       this.clickedToOpen = false;
@@ -253,10 +219,10 @@ export default {
     },
   },
   mounted() {
-    this.resetContainerPosition();
+    // this.resetContainerPosition();
     this.setAddress(this.address);
-    this.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
-    this.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp) || null;
+    this.address.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
+    this.address.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp) || null;
   },
   computed: {
     ...mapGetters({
@@ -267,10 +233,6 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
     }),
-
-    isTerritoryCheckedOut() {
-      return get(this.territory, 'status.status') === 'Checked Out';
-    },
 
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
@@ -290,16 +252,12 @@ export default {
       return this.getPxValue(width);
     },
 
-    containerButtonList() {
-      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
-    },
-
     formattedPhone() {
       return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
 
     formattedSelectedResponseTS() {
-      return this.selectedResponseTS && format(new Date(this.selectedResponseTS), 'E M/d') || '';
+      return this.address.selectedResponseTS && format(new Date(this.address.selectedResponseTS), 'E M/d') || '';
     },
     lastActivity() {
       return this.address.lastActivity || { value: 'START', timestamp: '' };
@@ -313,8 +271,8 @@ export default {
   watch: {
     incomingResponse(log) {
       if (log) {
-        this.selectedResponse = log.value;
-        this.selectedResponseTS = log.timestamp;
+        this.address.selectedResponse = log.value;
+        this.address.selectedResponseTS = log.timestamp;
         this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
       }
     },
