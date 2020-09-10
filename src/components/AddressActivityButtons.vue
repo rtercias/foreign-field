@@ -1,10 +1,7 @@
 <template>
   <div
-    class="activity-container pl-0 pr-2">
-    <font-awesome-layers class="ellipsis-v text-muted fa-2x mr-8" @click="show">
-      <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-    </font-awesome-layers>
-    <div class="buttons" v-if="isTerritoryCheckedOut">
+    class="activity-container align-items-center d-flex">
+    <div class="buttons h-100" v-if="isTerritoryCheckedOut">
       <ActivityButton
         v-for="(button, index) in containerButtonList"
         :key="index"
@@ -13,14 +10,14 @@
         @button-click="updateResponse">
       </ActivityButton>
     </div>
-    <b-link
+    <!-- <b-link
       class="text-info"
       :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`"
       @click="setAddress(address)">
       <font-awesome-layers class="text-info fa-2x">
         <font-awesome-icon icon="history"></font-awesome-icon>
       </font-awesome-layers>
-    </b-link>
+    </b-link> -->
   </div>
 </template>
 <script>

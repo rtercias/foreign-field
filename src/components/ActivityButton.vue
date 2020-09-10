@@ -1,5 +1,5 @@
 <template>
-  <div class="interaction pl-2 pr-2">
+  <div class="interaction d-flex justify-content-center align-items-center" :class="`bg-${get('color')}`">
     <span class="pl-0" v-if="get('type') === 'link'">
       <b-button
         class="p-0"
@@ -11,12 +11,13 @@
     </span>
     <span class="pl-0" v-else-if="get('type') === 'fa-icon'">
       <font-awesome-layers
-        :class="get('className')"
+        class="text-white"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
-          class="nh-text text-white font-weight-bold">
+          class="nh-text font-weight-bold"
+          :class="`text-${get('color')}`">
         </font-awesome-layers-text>
       </font-awesome-layers>
     </span>

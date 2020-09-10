@@ -18,11 +18,11 @@
           </div>
         </div>
       </div>
-      <div class="static-buttons col-3 pl-0 pr-0" v-show="!isContainerVisible">
+      <div class="static-buttons col-3 pl-0 pr-0">
         <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
         <div :class="{ hidden: address.selectedResponse === 'START' || isLogging }">
           <ActivityButton
-            class="selected-response fa-2x pr-2"
+            class="selected-response fa-2x"
             :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
             :value="address.selectedResponse"
             :next="'START'"
@@ -34,31 +34,25 @@
             </div>
           </a>
         </div>
-        <!-- <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="openActivityContainer">
+        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="toggleRightPanel">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers> -->
+        </font-awesome-layers>
       </div>
     </div>
-    <hr class="m-0 mb-2" />
-    <AddressTags :address="address" v-on="$listeners"></AddressTags>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import gsap from 'gsap';
 import format from 'date-fns/format';
 import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
 import AddressTags from './AddressTags';
 import ActivityButton from './ActivityButton';
 
-const DIRECTION_LEFT = 2;
-const DIRECTION_RIGHT = 4;
-
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse'],
+  props: ['address', 'territoryId', 'group', 'incomingResponse', 'openRight', 'closeRight'],
   components: {
     AddressLinks,
     AddressTags,
@@ -72,7 +66,7 @@ export default {
       animate: false,
       currentOffset: 0,
       containerRight: 0,
-      isContainerVisible: false,
+      isRightPanelVisible: false,
       transform: '',
       clickedToOpen: false,
       isLogging: false,
@@ -86,10 +80,13 @@ export default {
       getTerritory: 'territory/getTerritory',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
-    resetContainerPosition() {
-      const pos = -this.containerWidth;
-      this.containerRight = pos;
-      this.isContainerVisible = false;
+    toggleRightPanel() {
+      if (this.isRightPanelVisible) {
+        this.closeRight();
+      } else {
+        this.openRight();
+      }
+      this.isRightPanelVisible = !this.isRightPanelVisible;
     },
     async confirmClearStatus() {
       try {
@@ -150,68 +147,11 @@ export default {
       //   this.isLogging = false;
       // }
     },
-    slide(e) {
-      this.clickedToOpen = false;
-      if (Number.isNaN(this.transform)) this.transform = 0;
-      const dragOffset = 100 / this.itemWidth * e.deltaX / this.count * this.overflowRatio;
-      if (Math.abs(e.velocityX) > 0.2) {
-        this.transform = this.currentOffset + dragOffset;
-      }
-
-      if (e.isFinal) {
-        this.currentOffset = this.transform;
-        const maxScroll = 100 - this.overflowRatio * 100;
-        let finalOffset = this.currentOffset;
-
-        if (this.currentOffset <= maxScroll) {
-          finalOffset = maxScroll;
-        } else if (this.currentOffset >= 0) {
-          finalOffset = 0;
-        } else {
-          const index = this.currentOffset / this.overflowRatio / 100 * this.count;
-          const nextIndex = e.deltaX <= 0 ? Math.floor(index) : Math.ceil(index);
-          finalOffset = 100 * this.overflowRatio / this.count * nextIndex;
-        }
-
-        gsap.fromTo(
-          this.$refs.activityContainer,
-          0.4,
-          { '--x': this.currentOffset },
-          {
-            '--x': finalOffset,
-            onUpdate: () => {
-              if (e.direction === DIRECTION_LEFT && Math.abs(e.velocityX) > 0.2) {
-                this.containerRight = finalOffset;
-                this.isContainerVisible = true;
-              } else if (e.direction === DIRECTION_RIGHT) {
-                this.resetContainerPosition();
-              }
-            },
-            onComplete: () => {
-              if (Math.abs(e.velocityX) > 0.2) {
-                this.currentOffset = finalOffset;
-              } else {
-                this.currentOffset = 0;
-              }
-            },
-          },
-        );
-      }
-    },
 
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
 
-    openActivityContainer() {
-      this.clickedToOpen = true;
-      if (this.isContainerVisible) {
-        this.resetContainerPosition();
-      } else {
-        this.containerRight = 0;
-        this.isContainerVisible = true;
-      }
-    },
     async getLastActivityPublisher() {
       const id = this.lastActivity.publisher_id;
       const congId = this.user.congregation.id;
@@ -336,9 +276,9 @@ export default {
   justify-content: space-between;
 }
 .selected-response {
-  min-width: 70px;
-  position: relative;
-  top: 9px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
 }
 .selected-response.faded {
   opacity: 0.6;

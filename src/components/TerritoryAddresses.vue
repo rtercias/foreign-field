@@ -1,22 +1,25 @@
 <template>
   <div class="territory">
     <Loading v-if="isLoading"></Loading>
-    <b-list-group v-else class="columns">
+    <b-list-group v-else>
       <swipe-list
         ref="list"
         class="card"
         :items="territory.addresses"
         item-key="id"
         data-toggle="collapse">
-        <template v-slot="{ item }">
+        <template v-slot="{ item, revealRight, close }">
           <AddressCard
             :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
             :address="item"
             :reset="reset"
             :territoryId="id"
             :group="group"
-            :incomingResponse="item.incomingResponse">
+            :incomingResponse="item.incomingResponse"
+            :openRight="revealRight"
+            :closeRight="close">
           </AddressCard>
+          <AddressTags :address="address" v-on="$listeners"></AddressTags>
         </template>
         <template v-slot:right="{ item, revealRight, close }">
           <AddressActivityButtons
@@ -39,6 +42,7 @@ import get from 'lodash/get';
 import { SwipeList } from 'vue-swipe-actions';
 import AddressCard from './AddressCard';
 import AddressActivityButtons from './AddressActivityButtons';
+import AddressTags from './AddressTags';
 import Loading from './Loading.vue';
 import { channel } from '../main';
 
@@ -48,6 +52,7 @@ export default {
     SwipeList,
     AddressCard,
     AddressActivityButtons,
+    AddressTags,
     Loading,
   },
   props: ['group', 'id'],
@@ -191,11 +196,17 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss">
+@import "../assets/foreign-field-theme.scss";
 .list-group {
   display: block;
+
+  .swipeout-list-item {
+    border-top: 1px solid $secondary;
+    border-bottom: 1px solid $secondary;
+  }
 }
+
 .columns {
   columns: 1;
 }
@@ -221,8 +232,20 @@ li {
     font-size: 24px;
   }
 @media (min-width: 769px) {
-  .columns {
-    columns: 2;
+  .list-group {
+    .swipeout-list {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      padding: 5px;
+
+      .swipeout-list-item {
+        width: 49%;
+        flex: auto;
+        margin: 5px;
+        border: 1px solid $secondary;
+      }
+    }
   }
 }
 @media print {
