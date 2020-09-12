@@ -1,5 +1,5 @@
 <template>
-  <div class="address-tags w-100">
+  <div class="address-tags w-100" :class="{ 'h-100': !collapsed }">
     <div class="preview-tags mt-1" :class="{ hidden: !collapsed }">
       <b-badge pill class="tag-button-preview mr-1" v-for="(x, i) in preview" :key="i" variant="primary">{{ x }}</b-badge>
     </div>
@@ -215,11 +215,13 @@ export default {
 <style>
   .address-tags {
     min-height: 18px;
+    position: fixed;
+    bottom: 7px;
   }
   .expand-tags {
     position: absolute;
     right: 26px;
-    bottom: 10px;
+    bottom: 0;
     cursor: pointer;
   }
   .preview-tags {
