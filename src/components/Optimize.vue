@@ -197,7 +197,7 @@ export default {
 
         this.saving = true;
         const addressIds = this.territory.addresses.map(a => a.id);
-        await this.updateSort(addressIds);
+        await this.updateSort({ addressIds, userid: this.user.id });
         await this.getTerritory(this.id);
         this.reset();
       }
@@ -210,6 +210,7 @@ export default {
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
+      user: 'auth/user',
       token: 'auth/token',
       canManage: 'auth/canManage',
       optimized: 'addresses/optimized',

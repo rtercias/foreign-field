@@ -125,7 +125,7 @@ export const addresses = {
       }
     },
 
-    async updateSort({ commit }, addressIds) {
+    async updateSort({ commit }, { addressIds, userid }) {
       commit('auth/LOADING', true, { root: true });
 
       const response = await axios({
@@ -135,11 +135,12 @@ export const addresses = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: print(gql`mutation UpdateSort($addressIds: [Int]!) { 
-            updateSort(addressIds: $addressIds)
+          query: print(gql`mutation UpdateSort($addressIds: [Int]!, $userid: Int) { 
+            updateSort(addressIds: $addressIds, userid: $userid)
           }`),
           variables: {
             addressIds,
+            userid,
           },
         },
       });
