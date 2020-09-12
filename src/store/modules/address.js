@@ -128,7 +128,7 @@ function validateAddress(_address, isNew) {
     throw new InvalidAddressError('State is required');
   }
   if (!Number.isInteger(address.sort)) {
-    throw new InvalidAddressError('Sort is required');
+    address.sort = 0;
   }
 
   // convert nullable fields to empty string when null
