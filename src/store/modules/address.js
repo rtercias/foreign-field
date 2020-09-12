@@ -68,7 +68,7 @@ const ACTION_BUTTON_LIST = [
     value: 'NH',
     text: 'NH',
     icon: 'circle',
-    color: 'danger',
+    color: 'warning',
   },
   {
     type: 'fa-icon',
@@ -89,7 +89,7 @@ const ACTION_BUTTON_LIST = [
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'warning',
+    color: 'info',
   },
 ];
 

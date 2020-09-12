@@ -1,7 +1,7 @@
 <template>
   <div class="address-card-container">
     <!-- <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}"> -->
-    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
+    <div class="address-card row justify-content-between align-items-center pr-2 mb-3 text-black-50">
       <div class="address col-9">
         <div>
           <h5 class="mb-0">
@@ -26,6 +26,7 @@
             :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
             :value="address.selectedResponse"
             :next="'START'"
+            :selected="true"
             @button-click="confirmClearStatus">
           </ActivityButton>
           <a @click="confirmClearStatus">
@@ -39,6 +40,7 @@
         </font-awesome-layers>
       </div>
     </div>
+    <AddressTags :address="address" v-on="$listeners"></AddressTags>
   </div>
 </template>
 
@@ -47,16 +49,16 @@ import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
-import AddressTags from './AddressTags';
 import ActivityButton from './ActivityButton';
+import AddressTags from './AddressTags';
 
 export default {
   name: 'AddressCard',
   props: ['address', 'territoryId', 'group', 'incomingResponse', 'openRight', 'closeRight'],
   components: {
     AddressLinks,
-    AddressTags,
     ActivityButton,
+    AddressTags,
   },
   data() {
     return {
@@ -119,35 +121,6 @@ export default {
         // do nothing
       }
     },
-    async updateResponse() {
-      // this.isLogging = true;
-      // let value = _value;
-      // this.resetContainerPosition();
-      // this.setAddress(this.address);
-
-      // if (this.selectedResponse === 'START' && value === 'START') return;
-
-      // if (!this.actionButtonList.some(b => b.value === value)) {
-      //   value = 'START';
-      // }
-
-      // this.clickedResponse = value;
-
-      // try {
-      //   await this.addLog({ addressId: this.address.id, value });
-      //   this.selectedResponse = this.updatedAddress.lastActivity && this.updatedAddress.lastActivity.value;
-      //   this.selectedResponseTS = this.updatedAddress.lastActivity && Number(this.updatedAddress.lastActivity.timestamp);
-      //   this.$emit('address-updated', this.updatedAddress);
-
-      //   this.clickedResponse = '';
-      //   this.resetContainerPosition();
-      // } catch (e) {
-      //   console.error('Unable to save activity log', e);
-      // } finally {
-      //   this.isLogging = false;
-      // }
-    },
-
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
@@ -159,10 +132,11 @@ export default {
     },
   },
   mounted() {
-    // this.resetContainerPosition();
     this.setAddress(this.address);
-    this.address.selectedResponse = this.lastActivity && this.lastActivity.value || this.START;
-    this.address.selectedResponseTS = this.lastActivity && Number(this.lastActivity.timestamp) || null;
+    if (this.lastActivity) {
+      this.$set(this.address, 'selectedResponse', this.lastActivity.value || this.START);
+      this.$set(this.address, 'selectedResponseTS', Number(this.lastActivity.timestamp) || null);
+    }
   },
   computed: {
     ...mapGetters({
@@ -239,36 +213,8 @@ export default {
 .nh-text {
   font-size: 0.5em;
 }
-.interaction {
-  cursor: pointer;
-  overflow: hidden;
-}
-.activity-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  overflow: hidden;
-  position: absolute;
-  transform: translateX(calc(var(--x, 0) * 1%));
-  background-color: #fff;
-  border-width: 4px 0;
-  border-color: #fff;
-  border-style: solid;
-  width: 100%;
-  height: 100%;
-  min-height: 50px;
-}
 .ellipsis-v, .ellipsis-v-static {
   cursor: pointer;
-}
-.activity-container * {
-  display: block;
-}
-.activity-container .buttons {
-  display: flex;
-  width: 100%;
-  justify-content: space-evenly;
 }
 .static-buttons {
   display: flex;
@@ -277,7 +223,7 @@ export default {
 }
 .selected-response {
   width: 60px;
-  height: 60px;
+  height: 40px;
   border-radius: 50%;
 }
 .selected-response.faded {

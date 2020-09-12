@@ -1,5 +1,7 @@
 <template>
-  <div class="interaction d-flex justify-content-center align-items-center" :class="`bg-${get('color')}`">
+  <div
+    class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
+    :class="{ [`bg-${get('color')}`]: !selected }">
     <span class="pl-0" v-if="get('type') === 'link'">
       <b-button
         class="p-0"
@@ -12,12 +14,13 @@
     <span class="pl-0" v-else-if="get('type') === 'fa-icon'">
       <font-awesome-layers
         class="text-white"
+        :class="{ [`text-${get('color')}`]: selected }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
           class="nh-text font-weight-bold"
-          :class="`text-${get('color')}`">
+          :class="{ [`text-${get('color')}`]: !selected, 'text-white': selected }">
         </font-awesome-layers-text>
       </font-awesome-layers>
     </span>
@@ -38,6 +41,7 @@ export default {
     'className',
     'next',
     'displayOnly',
+    'selected',
   ],
   methods: {
     ...mapActions({
@@ -74,7 +78,6 @@ export default {
 
 .interaction {
   cursor: pointer;
-  overflow: hidden;
 }
 
 @media print {

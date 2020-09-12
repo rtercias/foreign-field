@@ -7,6 +7,7 @@
         class="card"
         :items="territory.addresses"
         item-key="id"
+        :revealed.sync="revealed"
         data-toggle="collapse">
         <template v-slot="{ item, revealRight, close }">
           <AddressCard
@@ -19,15 +20,15 @@
             :openRight="revealRight"
             :closeRight="close">
           </AddressCard>
-          <AddressTags :address="address" v-on="$listeners"></AddressTags>
         </template>
-        <template v-slot:right="{ item, revealRight, close }">
-          <AddressActivityButtons
-            :address="item"
-            :show="() => revealRight()"
-            :isTerritoryCheckedOut="isTerritoryCheckedOut"
-            @update-response="(value) => updateResponse(item, value, close)">
-          </AddressActivityButtons>
+        <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
+          <ActivityButton
+            v-for="(button, index) in containerButtonList"
+            :key="index"
+            class="fa-2x"
+            :value="button.value"
+            @button-click="() => updateResponse(item, button.value, close)">
+          </ActivityButton>
         </template>
       </swipe-list>
     </b-list-group>
@@ -41,17 +42,19 @@ import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import { SwipeList } from 'vue-swipe-actions';
 import AddressCard from './AddressCard';
-import AddressActivityButtons from './AddressActivityButtons';
+import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
 import Loading from './Loading.vue';
 import { channel } from '../main';
+
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'TerritoryAddresses',
   components: {
     SwipeList,
     AddressCard,
-    AddressActivityButtons,
+    ActivityButton,
     AddressTags,
     Loading,
   },
@@ -75,6 +78,7 @@ export default {
       isLoading: true,
       reset: false,
       workInProgress: {},
+      revealed: {},
     };
   },
   computed: {
@@ -89,6 +93,9 @@ export default {
     }),
     lastActivity() {
       return this.territory.lastActivity;
+    },
+    containerButtonList() {
+      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
   },
   methods: {
@@ -229,8 +236,8 @@ li {
   margin: 0 10px;
 }
 .add-new {
-    font-size: 24px;
-  }
+  font-size: 24px;
+}
 @media (min-width: 769px) {
   .list-group {
     .swipeout-list {
