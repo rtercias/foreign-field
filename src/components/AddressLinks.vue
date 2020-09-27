@@ -11,7 +11,6 @@
           <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
         </b-link>
       </div>
-      <AddressTags :address="address" v-on="$listeners"></AddressTags>
       <div class="lead border-top pt-2 pb-2">Link to...</div>
       <b-list-group>
         <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
@@ -46,14 +45,12 @@
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import Loading from './Loading';
-import AddressTags from './AddressTags';
 
 export default {
   name: 'AddressLinks',
   props: ['addressId', 'group', 'territoryId'],
   components: {
     Loading,
-    AddressTags,
   },
   data() {
     return {

@@ -215,13 +215,13 @@ export default {
 <style>
   .address-tags {
     min-height: 18px;
-    position: fixed;
-    bottom: 7px;
+    position: absolute;
+    bottom: 10px;
   }
   .expand-tags {
     position: absolute;
-    right: 26px;
-    bottom: 0;
+    right: 18px;
+    bottom: -1px;
     cursor: pointer;
   }
   .preview-tags {
