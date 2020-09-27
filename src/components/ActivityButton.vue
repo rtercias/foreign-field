@@ -1,8 +1,9 @@
 <template>
   <div
+    v-if="get('type') === 'link'"
     class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
     :class="{ [`bg-${get('color')}`]: !selected }">
-    <span class="pl-0" v-if="get('type') === 'link'">
+    <span class="pl-0">
       <b-button
         class="p-0"
         variant="link"
@@ -11,7 +12,12 @@
         {{ get('text') }}
       </b-button>
     </span>
-    <span class="pl-0" v-else-if="get('type') === 'fa-icon'">
+  </div>
+  <div
+    v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
+    class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
+    :class="{ [`bg-${get('color')}`]: !selected }">
+    <span class="pl-0">
       <font-awesome-layers
         class="text-white"
         :class="{ [`text-${get('color')}`]: selected }"

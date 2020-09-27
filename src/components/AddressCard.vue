@@ -1,8 +1,7 @@
 <template>
-  <div class="address-card-container">
-    <!-- <v-touch class="v-touch-address-card" @pan="slide" :pan-options="{ direction: 'horizontal'}"> -->
-    <div class="address-card row justify-content-between align-items-center pr-2 mb-3 text-black-50">
-      <div class="address col-9">
+  <div class="address-card-container p-2">
+    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
+      <div class="address col-9 flex-column pt-2 pb-4">
         <div>
           <h5 class="mb-0">
             <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
@@ -10,7 +9,7 @@
             </b-link>&nbsp;
           </h5>
           {{address.addr2}}
-          <div class="mb-2">
+          <div class="mb-1">
             {{address.city}} {{address.state_province}} {{address.postal_code}}
           </div>
           <div class="phone">
@@ -20,7 +19,9 @@
       </div>
       <div class="static-buttons col-3 pl-0 pr-0">
         <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
-        <div :class="{ hidden: address.selectedResponse === 'START' || isLogging }">
+        <div
+          :class="{ hidden: address.selectedResponse === 'START' || isLogging }"
+          class="d-flex flex-column">
           <ActivityButton
             class="selected-response fa-2x"
             :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
@@ -29,11 +30,6 @@
             :selected="true"
             @button-click="confirmClearStatus">
           </ActivityButton>
-          <a @click="confirmClearStatus">
-            <div class="last-activity" :class="{ hidden: address.selectedResponse === 'START' }">
-              {{formattedSelectedResponseTS}}
-            </div>
-          </a>
         </div>
         <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="toggleRightPanel">
           <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
@@ -105,7 +101,9 @@ export default {
         const message = h('p', {
           domProps: {
             innerHTML:
-            `<div class="pb-3">${publisherName ? `Updated by: ${publisherName}</div>` : ''}
+            `<div class="pb-3">
+              ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
+            </div>` : ''}
             <div class="fa-lg">Clear the address status?</div>`,
           },
         });
@@ -171,7 +169,7 @@ export default {
     },
 
     formattedSelectedResponseTS() {
-      return this.address.selectedResponseTS && format(new Date(this.address.selectedResponseTS), 'E M/d') || '';
+      return this.address.selectedResponseTS && format(new Date(this.address.selectedResponseTS), 'M/d/yyyy') || '';
     },
     lastActivity() {
       return this.address.lastActivity || { value: 'START', timestamp: '' };
@@ -204,7 +202,7 @@ export default {
   overflow: hidden;
   position: relative;
   transition: ease-in-out 0.3s  ;
-  min-height: 104px;
+  min-height: 60px;
 }
 .address {
   display: flex;
