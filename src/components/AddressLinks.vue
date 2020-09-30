@@ -11,7 +11,7 @@
           <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
         </b-link>
       </div>
-      <div class="lead border-top pt-3 pb-3">Link to...</div>
+      <div class="lead border-top pt-2 pb-2">Link to...</div>
       <b-list-group>
         <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
           <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;
@@ -24,6 +24,11 @@
         <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="lookup411" variant="success">
           <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
           411.com
+        </b-list-group-item>
+        <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="dark"
+          :href="`/territories/${group}/${territoryId}/addresses/${address.id}/history`">
+          <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
+          Activity History
         </b-list-group-item>
         <b-list-group-item
           class="lead p-4 font-weight-bold w-auto"

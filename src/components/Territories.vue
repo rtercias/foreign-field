@@ -35,11 +35,11 @@
           v-bind:key="terr.id"
           data-toggle="collapse"
           class="territory-card col-md-6 pl-4 pr-4">
-          <TerritoryCard v-bind="{ terr, groupCode, selectTerritory, fetch }"></TerritoryCard>
+          <TerritoryCard :terr="terr" :groupCode="groupCode" :selectTerritory="selectTerritory" :fetch="fetch">
+          </TerritoryCard>
         </b-list-group-item>
       </b-list-group>
-      <CheckoutModal v-bind="{ territory: selectedTerritory, fetch }">
-      </CheckoutModal>
+      <CheckoutModal :territory="selectedTerritory" :fetch="fetch"></CheckoutModal>
     </div>
     <span class="p-2" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
       There are no {{availability}} territories

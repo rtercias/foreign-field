@@ -18,7 +18,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
-import VueTouch from 'vue-touch';
 import App from './App.vue';
 import Pusher from 'pusher-js';
 import { router } from './routes';
@@ -104,7 +103,6 @@ Vue.component('font-awesome-layers-text', FontAwesomeLayersText);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
-Vue.use(VueTouch);
 
 /* eslint-disable */
 delete Icon.Default.prototype._getIconUrl;
