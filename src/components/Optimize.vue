@@ -16,7 +16,7 @@
         </div>
         <b-button-group v-if="state===''" size="sm" class="w-100">
           <b-button variant="outline-success" @click="switchToManual">Manual Sort</b-button>
-          <b-button variant="primary" @click="runOptimizer" v-if="canManage">Optimize</b-button>
+          <b-button variant="primary" @click="runOptimizer">Optimize</b-button>
         </b-button-group>
         <b-button-group v-else size="sm" class="w-100">
           <b-button variant="outline-secondary" @click="reset">Cancel</b-button>
