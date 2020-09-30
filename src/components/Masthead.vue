@@ -10,7 +10,7 @@
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
-              <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`" class="w-100">
+              <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`">
                 <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
               </b-dropdown-item>
             </b-nav-item-dropdown>

@@ -2,7 +2,7 @@
   <div class="column">
     <div class="row justify-content-between pl-2 pr-2">
       <div>
-        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="column">
+        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="pr-4 column">
           <h5 class="mb-0">
             {{`${primaryDescription}${territoryDescriptions.length > 1
               ? ` +${territoryDescriptions.length-1}`

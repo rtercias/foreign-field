@@ -1,9 +1,6 @@
 <template>
-  <div
-    v-if="get('type') === 'link'"
-    class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
-    :class="{ [`bg-${get('color')}`]: !invert }">
-    <span class="pl-0">
+  <div class="interaction pl-2 pr-2">
+    <span class="pl-0" v-if="get('type') === 'link'">
       <b-button
         class="p-0"
         variant="link"
@@ -12,21 +9,14 @@
         {{ get('text') }}
       </b-button>
     </span>
-  </div>
-  <div
-    v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
-    class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
-    :class="{ [`bg-${get('color')}`]: !invert }">
-    <span class="pl-0">
+    <span class="pl-0" v-else-if="get('type') === 'fa-icon'">
       <font-awesome-layers
-        class="text-white"
-        :class="{ [`text-${get('color')}`]: invert }"
+        :class="get('className')"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
-          class="nh-text font-weight-bold"
-          :class="{ [`text-${get('color')}`]: !invert, 'text-white': invert }">
+          class="nh-text text-white font-weight-bold">
         </font-awesome-layers-text>
       </font-awesome-layers>
     </span>
@@ -47,7 +37,6 @@ export default {
     'className',
     'next',
     'displayOnly',
-    'selected',
   ],
   methods: {
     ...mapActions({
@@ -74,9 +63,6 @@ export default {
     item() {
       return this.actionButtonList.find(b => b.value === this.value) || {};
     },
-    invert() {
-      return this.displayOnly || this.selected;
-    },
   },
 };
 </script>
@@ -87,6 +73,7 @@ export default {
 
 .interaction {
   cursor: pointer;
+  overflow: hidden;
 }
 
 @media print {
