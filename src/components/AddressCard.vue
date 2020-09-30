@@ -113,7 +113,8 @@ export default {
         });
 
         if (value) {
-          await this.updateResponse();
+          this.$emit('update-response', this.address, 'START');
+          // await this.updateResponse();
         }
       } catch (err) {
         // do nothing

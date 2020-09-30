@@ -82,14 +82,14 @@ const ACTION_BUTTON_LIST = [
     value: 'PH',
     text: '',
     icon: 'phone',
-    color: 'success',
+    color: 'info',
   },
   {
     type: 'fa-icon',
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'info',
+    color: 'primary',
   },
 ];
 

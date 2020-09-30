@@ -18,7 +18,8 @@
             :group="group"
             :incomingResponse="item.incomingResponse"
             :openRight="revealRight"
-            :closeRight="close">
+            :closeRight="close"
+            @update-response="updateResponse">
           </AddressCard>
         </template>
         <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
@@ -188,7 +189,7 @@ export default {
         }
         // this.refreshTerritory(address);
 
-        close();
+        if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
       } finally {
