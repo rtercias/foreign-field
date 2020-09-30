@@ -42,7 +42,7 @@
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
-        <span v-else>edit</span>
+        <span v-else>edit tags</span>
       </b-badge>
     </div>
   </div>
