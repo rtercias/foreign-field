@@ -1,42 +1,45 @@
 <template>
-  <div class="address-card-container p-2">
-    <div class="address-card row justify-content-between align-items-center pr-2 text-black-50">
-      <div class="address col-9 flex-column pt-2 pb-4">
-        <div>
-          <h5 class="mb-0">
-            <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
-              {{address.addr1}}
-            </b-link>&nbsp;
-          </h5>
-          {{address.addr2}}
-          <div class="mb-1">
-            {{address.city}} {{address.state_province}} {{address.postal_code}}
+  <div class="address-card-container p-2 d-flex align-items-center">
+    <div class="w-100">
+      <div class="address-card row justify-content-between align-items-start pr-2 text-black-50">
+        <div class="address col-9 flex-column pt-2 pb-4">
+          <div>
+            <h5 class="mb-0">
+              <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+                {{address.addr1}}
+              </b-link>&nbsp;
+            </h5>
+            {{address.addr2}}
+            <div class="mb-1">
+              {{address.city}} {{address.state_province}} {{address.postal_code}}
+            </div>
+            <div class="phone">
+              <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
+            </div>
           </div>
-          <div class="phone">
-            <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
+        </div>
+        <div class="static-buttons col-3 pt-3 pr-2 justify-content-end">
+          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
+          <div
+            :class="{ hidden: address.selectedResponse === 'START' || isLogging }"
+            class="d-flex flex-column">
+            <ActivityButton
+              class="selected-response fa-2x"
+              :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
+              :value="address.selectedResponse"
+              :next="'START'"
+              :selected="true"
+              @button-click="confirmClearStatus">
+            </ActivityButton>
           </div>
         </div>
       </div>
-      <div class="static-buttons col-3 pl-0 pr-0">
-        <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
-        <div
-          :class="{ hidden: address.selectedResponse === 'START' || isLogging }"
-          class="d-flex flex-column">
-          <ActivityButton
-            class="selected-response fa-2x"
-            :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-            :value="address.selectedResponse"
-            :next="'START'"
-            :selected="true"
-            @button-click="confirmClearStatus">
-          </ActivityButton>
-        </div>
-        <font-awesome-layers class="ellipsis-v-static text-muted fa-2x" @click="toggleRightPanel">
-          <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-        </font-awesome-layers>
-      </div>
+      <hr class="m-2 mr-0 w-100" />
+      <AddressTags :address="address" v-on="$listeners"></AddressTags>
     </div>
-    <AddressTags :address="address" v-on="$listeners"></AddressTags>
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
+      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
+    </font-awesome-layers>
   </div>
 </template>
 
@@ -113,8 +116,10 @@ export default {
         });
 
         if (value) {
-          this.$emit('update-response', this.address, 'START');
-          // await this.updateResponse();
+          this.isLogging = true;
+          this.$emit('update-response', this.address, 'START', () => {
+            this.isLogging = false;
+          });
         }
       } catch (err) {
         // do nothing
@@ -236,7 +241,7 @@ export default {
 .logging-spinner {
   font-size: 30px;
   position: absolute;
-  right: 47px;
+  right: 21px;
 }
 
 @media print {

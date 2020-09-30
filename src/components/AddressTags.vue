@@ -1,39 +1,53 @@
 <template>
-  <div class="address-tags w-100" :class="{ 'h-100': !collapsed }">
-    <div class="preview-tags mt-1" :class="{ hidden: !collapsed }">
-      <b-badge pill class="tag-button-preview mr-1" v-for="(x, i) in preview" :key="i" variant="primary">{{ x }}</b-badge>
-    </div>
-    <transition name="slide-up">
-      <div v-show="!collapsed" class="tag-selection w-100">
-        <div class="text-primary bg-light border-bottom font-weight-bold">Address Tags</div>
-        <div v-if="isSaving" class="d-flex justify-content-center align-items-center h-100">
-          <font-awesome-icon class="text-primary" icon="circle-notch" spin></font-awesome-icon>
+  <div class="address-tags w-100">
+    <div class="preview-tags mt-1" :class="{ 'd-none': !collapsed }">
+      <!-- <b-button-group class="flex-wrap" size="sm">
+        <b-badge pill class="tag-button mr-1 mb-1 border-primary" v-for="(x, i) in preview" :key="i" variant="primary">
+          {{ x }}
+        </b-badge>
+      </b-button-group> -->
+      <b-button-group class="flex-wrap" size="sm">
+        <div class="text-left">
+          <b-badge
+            v-for="(tag, index) in preview"
+            pill
+            class="tag-button mr-1 mb-1 border-primary text-white"
+            size='sm'
+            :key="index"
+            variant="primary">
+              {{ tag }}
+          </b-badge>
         </div>
-        <b-button-group v-else class="pt-2 pb-2 pl-2 pr-2 flex-wrap" size="sm">
-          <div class="combined-tags">
-            <b-badge
-              v-for="(tag, index) in combinedTags"
-              pill
-              class="tag-button mr-1 mb-1 border-primary"
-              :class="{ active: false, 'd-none': readOnlyTag(tag), 'text-primary': !tag.state }"
-              size='sm'
-              :key="index"
-              @click="() => updateTag(tag)"
-              :variant="tag.state ? 'primary' : 'outline-primary'">
-              <span v-if="tag.state && !readOnlyTag(tag)">
-                <font-awesome-icon icon="times"></font-awesome-icon>
-              </span>
-                {{ tag.caption.toLowerCase() }}
-            </b-badge>
-          </div>
-        </b-button-group>
+      </b-button-group>
+    </div>
+    <div v-show="!collapsed" class="tag-selection w-100">
+      <div v-if="isSaving" class="d-flex justify-content-center align-items-center h-100">
+        <font-awesome-icon class="text-primary" icon="circle-notch" spin size='sm'></font-awesome-icon>
       </div>
-    </transition>
+      <b-button-group v-else class="flex-wrap" size="sm">
+        <div class="combined-tags text-left">
+          <b-badge
+            v-for="(tag, index) in combinedTags"
+            pill
+            class="tag-button mr-1 mb-1 border-primary"
+            :class="{ active: false, 'd-none': readOnlyTag(tag), 'text-primary': !tag.state }"
+            size='sm'
+            :key="index"
+            @click="() => updateTag(tag)"
+            :variant="tag.state ? 'primary' : 'outline-primary'">
+            <span v-if="tag.state && !readOnlyTag(tag)">
+              <font-awesome-icon icon="times"></font-awesome-icon>
+            </span>
+              {{ tag.caption.toLowerCase() }}
+          </b-badge>
+        </div>
+      </b-button-group>
+    </div>
     <div class="expand-tags">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
-        <span v-if="!collapsed">close</span>
+        <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
-        <span v-else>...</span>
+        <span v-else>edit</span>
       </b-badge>
     </div>
   </div>
@@ -200,7 +214,7 @@ export default {
         || [];
     },
     preview() {
-      return [...this.selectedTags].reverse();
+      return this.selectedTags.sort();
     },
     formattedPhone() {
       const { phone } = this.address;
@@ -216,20 +230,18 @@ export default {
 <style>
   .address-tags {
     min-height: 18px;
-    position: absolute;
     bottom: 10px;
   }
   .expand-tags {
     position: absolute;
-    right: 18px;
-    bottom: -1px;
+    right: 13px;
+    bottom: -3px;
     cursor: pointer;
   }
   .preview-tags {
     display: flex;
     flex-direction: row;
-    white-space: nowrap;
-    width: 90%;
+    flex-wrap: wrap;
     overflow: hidden;
     font-size: large;
   }
@@ -239,13 +251,6 @@ export default {
   }
   .tag-selection {
     background-color: white;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    height: calc(100% - 2.5rem);
-    overflow-y: auto;
-    margin-bottom: 2.5rem;
-    overflow-x: hidden;
   }
   .slide-up-enter-active, .slide-up-leave-active {
     transition: all .3s ease-in-out;

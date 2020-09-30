@@ -170,7 +170,6 @@ export default {
       return get(this.territory, 'status.status') === 'Checked Out';
     },
     async updateResponse(address, _value, close) {
-      this.isLogging = true;
       let value = _value;
       this.setAddress(address);
 
@@ -187,7 +186,7 @@ export default {
           this.$set(address, 'selectedResponse', lastActivity.value);
           this.$set(address, 'selectedResponseTS', lastActivity.timestamp);
         }
-        // this.refreshTerritory(address);
+        this.refreshTerritory(address);
 
         if (typeof close === 'function') close();
       } catch (e) {
