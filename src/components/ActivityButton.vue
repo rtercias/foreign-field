@@ -2,7 +2,7 @@
   <div
     v-if="get('type') === 'link'"
     class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
-    :class="{ [`bg-${get('color')}`]: !selected }">
+    :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <b-button
         class="p-0"
@@ -16,17 +16,17 @@
   <div
     v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
-    :class="{ [`bg-${get('color')}`]: !selected }">
+    :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <font-awesome-layers
         class="text-white"
-        :class="{ [`text-${get('color')}`]: selected }"
+        :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
           class="nh-text font-weight-bold"
-          :class="{ [`text-${get('color')}`]: !selected, 'text-white': selected }">
+          :class="{ [`text-${get('color')}`]: !invert, 'text-white': invert }">
         </font-awesome-layers-text>
       </font-awesome-layers>
     </span>
@@ -73,6 +73,9 @@ export default {
     }),
     item() {
       return this.actionButtonList.find(b => b.value === this.value) || {};
+    },
+    invert() {
+      return this.displayOnly || this.selected;
     },
   },
 };
