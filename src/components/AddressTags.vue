@@ -1,11 +1,6 @@
 <template>
   <div class="address-tags w-100">
     <div class="preview-tags mt-1" :class="{ 'd-none': !collapsed }">
-      <!-- <b-button-group class="flex-wrap" size="sm">
-        <b-badge pill class="tag-button mr-1 mb-1 border-primary" v-for="(x, i) in preview" :key="i" variant="primary">
-          {{ x }}
-        </b-badge>
-      </b-button-group> -->
       <b-button-group class="flex-wrap" size="sm">
         <div class="text-left">
           <b-badge
