@@ -171,13 +171,14 @@ export default {
     availableTags() {
       return [
         'verify',
+        'confirmed phone',
         'day sleeper',
         `wife speaks ${this.language}`,
         `husband speaks ${this.language}`,
-        `does not speak ${this.language}`,
-        'do not call',
-        'deaf/mute',
-        'blind',
+        // `does not speak ${this.language}`,
+        // 'do not call',
+        // 'deaf/mute',
+        // 'blind',
         'business',
         'invalid phone#',
       ];
