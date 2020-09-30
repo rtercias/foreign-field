@@ -1,5 +1,5 @@
 <template>
-  <div class="territory">
+  <div class="territory-addresses pb-5">
     <Loading v-if="isLoading"></Loading>
     <b-list-group v-else>
       <swipe-list
@@ -180,13 +180,13 @@ export default {
       }
 
       try {
-        await this.addLog({ addressId: this.address.id, value });
-        if (this.address.lastActivity) {
-          const { lastActivity } = this.address;
-          this.$set(address, 'selectedResponse', lastActivity.value);
-          this.$set(address, 'selectedResponseTS', lastActivity.timestamp);
-        }
-        this.refreshTerritory(address);
+        await this.addLog({ addressId: address.id, value });
+        const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
+        updatedAddress.lastActivity = {
+          publisher_id: this.user.id,
+          timestamp: Date.now(),
+          value,
+        };
 
         if (typeof close === 'function') close();
       } catch (e) {
