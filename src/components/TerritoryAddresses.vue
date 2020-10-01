@@ -1,21 +1,37 @@
 <template>
-  <div class="territory">
+  <div class="territory-addresses pb-5">
     <Loading v-if="isLoading"></Loading>
-    <b-list-group v-else class="columns">
-      <b-list-group-item
-        class="item col-sm-12 overflow-auto"
-        v-for="address in territory.addresses"
-        :class="isActiveAddress(address.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-        v-bind:key="address.id"
+    <b-list-group v-else>
+      <swipe-list
+        ref="list"
+        class="card"
+        :items="territory.addresses"
+        item-key="id"
+        :revealed.sync="revealed"
         data-toggle="collapse">
-        <AddressCard
-          v-bind="{address, reset}"
-          :territoryId="id"
-          :group="group"
-          :incomingResponse="address.incomingResponse"
-          @address-updated="refreshTerritory">
-        </AddressCard>
-      </b-list-group-item>
+        <template v-slot="{ item, revealRight, close }">
+          <AddressCard
+            :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+            :address="item"
+            :reset="reset"
+            :territoryId="id"
+            :group="group"
+            :incomingResponse="item.incomingResponse"
+            :openRight="revealRight"
+            :closeRight="close"
+            @update-response="updateResponse">
+          </AddressCard>
+        </template>
+        <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
+          <ActivityButton
+            v-for="(button, index) in containerButtonList"
+            :key="index"
+            class="fa-2x"
+            :value="button.value"
+            @button-click="() => updateResponse(item, button.value, close)">
+          </ActivityButton>
+        </template>
+      </swipe-list>
     </b-list-group>
   </div>
 </template>
@@ -24,22 +40,33 @@
 import { mapGetters, mapActions } from 'vuex';
 import differenceInDays from 'date-fns/differenceInDays';
 import orderBy from 'lodash/orderBy';
-import AddressCard from './AddressCard.vue';
+import get from 'lodash/get';
+import { SwipeList } from 'vue-swipe-actions';
+import AddressCard from './AddressCard';
+import ActivityButton from './ActivityButton';
+import AddressTags from './AddressTags';
 import Loading from './Loading.vue';
 import { channel } from '../main';
+
+const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 
 export default {
   name: 'TerritoryAddresses',
   components: {
+    SwipeList,
     AddressCard,
+    ActivityButton,
+    AddressTags,
     Loading,
   },
   props: ['group', 'id'],
   async mounted() {
     channel.bind('add-log', (log) => {
-      const address = this.territory.addresses.find(a => a.id === log.address_id);
-      if (address) {
-        this.$set(address, 'incomingResponse', log);
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === log.address_id);
+        if (address) {
+          this.$set(address, 'incomingResponse', log);
+        }
       }
     });
     if (this.canCheckout) {
@@ -54,6 +81,7 @@ export default {
       isLoading: true,
       reset: false,
       workInProgress: {},
+      revealed: {},
     };
   },
   computed: {
@@ -63,9 +91,14 @@ export default {
       token: 'auth/token',
       authLoading: 'auth/loading',
       canCheckout: 'auth/canCheckout',
+      actionButtonList: 'address/actionButtonList',
+      address: 'address/address',
     }),
     lastActivity() {
       return this.territory.lastActivity;
+    },
+    containerButtonList() {
+      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
   },
   methods: {
@@ -73,6 +106,8 @@ export default {
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
       setLeftNavRoute: 'auth/setLeftNavRoute',
+      setAddress: 'address/setAddress',
+      addLog: 'address/addLog',
     }),
 
     isActiveAddress(addressId) {
@@ -124,13 +159,41 @@ export default {
       const parsed = JSON.stringify(seenList);
       localStorage.setItem('seenTerritories', parsed);
     },
-
     async loadTerritory() {
       if (this.token) {
         await this.getTerritory(this.id);
         this.saveSeenTerritory();
       }
       this.isLoading = false;
+    },
+    isTerritoryCheckedOut() {
+      return get(this.territory, 'status.status') === 'Checked Out';
+    },
+    async updateResponse(address, _value, close) {
+      let value = _value;
+      this.setAddress(address);
+
+      if (address.selectedResponse === 'START' && value === 'START') return;
+
+      if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
+
+      try {
+        await this.addLog({ addressId: address.id, value });
+        const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
+        updatedAddress.lastActivity = {
+          publisher_id: this.user.id,
+          timestamp: Date.now(),
+          value,
+        };
+
+        if (typeof close === 'function') close();
+      } catch (e) {
+        console.error('Unable to save activity log', e);
+      } finally {
+        this.isLogging = false;
+      }
     },
   },
   watch: {
@@ -142,11 +205,17 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="scss">
+@import "../assets/foreign-field-theme.scss";
 .list-group {
   display: block;
+
+  .swipeout-list-item {
+    border-top: 1px solid $secondary;
+    border-bottom: 1px solid $secondary;
+  }
 }
+
 .columns {
   columns: 1;
 }
@@ -169,11 +238,23 @@ li {
   margin: 0 10px;
 }
 .add-new {
-    font-size: 24px;
-  }
+  font-size: 24px;
+}
 @media (min-width: 769px) {
-  .columns {
-    columns: 2;
+  .list-group {
+    .swipeout-list {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      padding: 5px;
+
+      .swipeout-list-item {
+        width: 49%;
+        flex: auto;
+        margin: 5px;
+        border: 1px solid $secondary;
+      }
+    }
   }
 }
 @media print {
