@@ -34,7 +34,6 @@
           </div>
         </div>
       </div>
-      <hr class="m-2 mr-0 w-100" />
       <AddressTags :address="address" v-on="$listeners"></AddressTags>
     </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
