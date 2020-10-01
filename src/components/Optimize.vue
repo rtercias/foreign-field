@@ -55,12 +55,12 @@
           </span>
         </div>
         <TerritoryMap
-          class="optimize-map col-md-6 p-0"
+          class="optimize-map p-0"
           v-show="showMap"
           :addresses="mappedAddresses"
           :options="{ showSortOrder: true, simple: true }">
         </TerritoryMap>
-        <div class="d-flex col-md-6 p-0">
+        <div class="d-flex p-0">
           <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-5': isOptimize }">
             <div v-if="isOptimize" class="bg-secondary text-white">Old Position</div>
             <draggable

@@ -118,7 +118,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
     },
   },
   {

@@ -33,7 +33,7 @@
               <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
                 Check In
               </b-button>
-              <b-button v-if="canManage" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
+              <b-button v-if="canWrite" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
             </b-button-group>
