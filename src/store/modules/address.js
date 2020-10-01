@@ -156,6 +156,18 @@ function validateAddress(_address, isNew) {
     delete address.lastActivity;
   }
 
+  if (address.incomingResponse) {
+    delete address.incomingResponse;
+  }
+
+  if (address.selectedResponse) {
+    delete address.selectedResponse;
+  }
+
+  if (address.selectedResponseTS) {
+    delete address.selectedResponseTS;
+  }
+
   return address;
 }
 
