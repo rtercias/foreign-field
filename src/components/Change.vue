@@ -1,7 +1,7 @@
 <template>
   <div class="w-100 d-flex justify-content-between">
     <div>
-      <span>Changed</span>&nbsp;
+      <span>changed</span>&nbsp;
       <span>{{field}}</span>&nbsp;
       <span v-if="!!change.old">from <b-badge>{{oldValue}}</b-badge></span>&nbsp;
       <span>to <b-badge>{{newValue}}</b-badge></span>
@@ -44,5 +44,8 @@ export default {
       width: 35px;
       height: 35px;
     }
+  }
+  .badge {
+    white-space: normal;
   }
 </style>

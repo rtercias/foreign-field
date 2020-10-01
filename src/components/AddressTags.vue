@@ -81,6 +81,8 @@ export default {
       if (this.readOnlyTag(tag)) return;
       this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag.caption);
+      let cancel;
+
       this.setAddress(this.address);
 
       if (index !== -1 && tag.state) {
@@ -96,12 +98,20 @@ export default {
         await this.notForeign(tag);
       } else if (startsWith(tag.caption, 'invalid phone#')) {
         await this.invalidPhoneNumber(tag);
+      } else if (startsWith(tag.caption, 'confirmed phone')) {
+        if (this.hasPhone()) {
+          await this.addAddressTag(tag);
+        } else {
+          tag.state = false;
+        }
       } else {
-        this.$set(this.selectedTags, this.selectedTags.length, tag);
-        await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
+        await this.addAddressTag(tag);
       }
 
-      this.$parent.$emit('address-updated', this.updatedAddress);
+      if (!cancel) {
+        this.$parent.$emit('address-updated', this.updatedAddress);
+      }
+
       this.collapsed = true;
       this.isSaving = false;
     },
@@ -111,6 +121,12 @@ export default {
           e.state = true;
         }
       });
+    },
+    async addAddressTag(tag) {
+      if (this.user && this.address && this.selectedTags) {
+        this.$set(this.selectedTags, this.selectedTags.length, tag);
+        await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
+      }
     },
     async confirmRemoveTag(tag) {
       const response = await this.$bvModal.msgBoxConfirm(`Remove "${tag.caption}" tag?`, {
@@ -145,9 +161,20 @@ export default {
         await this.getTerritory(this.address.territory_id);
       }
     },
-    async invalidPhoneNumber(tag) {
+    hasPhone() {
       if (!this.address.phone) {
-        this.$bvToast.toast('There is no phone number on record');
+        this.$bvToast.toast('There is no phone number on record', {
+          variant: 'danger',
+          solid: true,
+          toaster: 'b-toaster-top-full',
+        });
+        return false;
+      }
+
+      return true;
+    },
+    async invalidPhoneNumber(tag) {
+      if (!this.hasPhone()) {
         return;
       }
 

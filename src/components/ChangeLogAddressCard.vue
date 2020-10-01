@@ -13,6 +13,7 @@
       </div>
     </div>
     <div>
+      <span>{{log.publisher.firstname}} {{log.publisher.lastname}}&nbsp;</span>
       <b-list-group>
         <b-list-group-item
           class="p-2 d-flex flex-column justify-content-between align-items-start"
