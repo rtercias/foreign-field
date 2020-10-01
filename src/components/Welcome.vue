@@ -21,16 +21,16 @@
         </h3>
         <Loading v-if="loading"></Loading>
         <b-button-group class="pt-4">
-          <b-button v-if="false" variant="success" size="sm" :to="`/addresses/add`">
+          <b-button v-if="canWrite" variant="success" size="sm" :to="`/addresses/add`">
             <font-awesome-icon icon="plus"></font-awesome-icon> Address
           </b-button>
-          <b-button v-if="false" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+          <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
             <font-awesome-icon icon="plus"></font-awesome-icon> Territory
           </b-button>
-          <b-button v-if="false" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+          <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
             <font-awesome-icon icon="plus"></font-awesome-icon> Group
           </b-button>
-          <b-button v-if="false" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+          <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
             <font-awesome-icon icon="plus"></font-awesome-icon> Publisher
           </b-button>
         </b-button-group>
