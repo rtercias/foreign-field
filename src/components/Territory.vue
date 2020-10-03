@@ -25,6 +25,9 @@
               <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
                 List
               </b-button>
+              <b-button variant="info" :to="`/territories/${group}/${id}/phone`" :pressed="viewMode==='phone-list'">
+                Phone
+              </b-button>
               <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
