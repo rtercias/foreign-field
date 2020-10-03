@@ -148,23 +148,23 @@ function validateAddress(_address, isNew) {
     address.notes = '';
   }
 
-  if (address.activityLogs) {
+  if ('activityLogs' in address) {
     delete address.activityLogs;
   }
 
-  if (address.lastActivity) {
+  if ('lastActivity' in address) {
     delete address.lastActivity;
   }
 
-  if (address.incomingResponse) {
+  if ('incomingResponse' in address) {
     delete address.incomingResponse;
   }
 
-  if (address.selectedResponse) {
+  if ('selectedResponse' in address) {
     delete address.selectedResponse;
   }
 
-  if (address.selectedResponseTS) {
+  if ('selectedResponseTS' in address) {
     delete address.selectedResponseTS;
   }
 

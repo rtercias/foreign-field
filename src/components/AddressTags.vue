@@ -9,7 +9,7 @@
             class="tag-button mr-1 mb-1 border-primary text-white"
             size='sm'
             :key="index"
-            variant="primary">
+            :variant="highlight(tag) ? 'danger' : 'primary'">
               {{ tag }}
           </b-badge>
         </div>
@@ -17,7 +17,7 @@
     </div>
     <div v-show="!collapsed" class="tag-selection w-100">
       <div v-if="isSaving" class="d-flex justify-content-center align-items-center h-100">
-        <font-awesome-icon class="text-primary" icon="circle-notch" spin size='sm'></font-awesome-icon>
+        <font-awesome-icon class="text-primary" icon="circle-notch" spin></font-awesome-icon>
       </div>
       <b-button-group v-else class="flex-wrap" size="sm">
         <div class="combined-tags text-left">
@@ -96,7 +96,7 @@ export default {
         await this.doNotCall(tag);
       } else if (startsWith(tag.caption, 'does not speak')) {
         await this.notForeign(tag);
-      } else if (startsWith(tag.caption, 'invalid phone#')) {
+      } else if (startsWith(tag.caption, 'invalid #')) {
         await this.invalidPhoneNumber(tag);
       } else if (startsWith(tag.caption, 'confirmed phone')) {
         if (this.hasPhone()) {
@@ -198,6 +198,9 @@ export default {
       // Temporarily commented out this code to allow for user cleanup
       // return !this.availableTags.some(t => tag.caption.toLowerCase() === t.toLowerCase());
     },
+    highlight(tag) {
+      return startsWith(tag, 'invalid');
+    },
   },
   computed: {
     ...mapGetters({
@@ -216,7 +219,7 @@ export default {
         // 'deaf/mute',
         // 'blind',
         'business',
-        'invalid phone#',
+        'invalid #',
       ];
     },
     combinedTags() {
