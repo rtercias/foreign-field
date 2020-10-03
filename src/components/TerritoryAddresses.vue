@@ -184,15 +184,16 @@ export default {
         const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
         updatedAddress.lastActivity = {
           publisher_id: this.user.id,
+          address_id: address.id,
           timestamp: Date.now(),
           value,
         };
 
+        this.territory.lastActivity = updatedAddress.lastActivity;
+
         if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
-      } finally {
-        this.isLogging = false;
       }
     },
   },
