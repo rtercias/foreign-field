@@ -213,6 +213,11 @@ export default {
   .swipeout-list-item {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
+
+    .border-medium {
+      border-style: solid;
+      border-width: medium;
+    }
   }
 }
 
@@ -225,9 +230,6 @@ export default {
     break-inside: avoid;
     width: 100%;
     float: none;
-}
-.list-group-item.item.border-medium {
-  border-width: medium;
 }
 ul {
   list-style-type: none;
