@@ -16,7 +16,7 @@
       <v-marker-cluster
         class="marker-cluster"
         ref="markerCluster"
-        v-if="step===3"
+        v-show="step===3"
         :options="{
           maxClusterRadius: 4000,
           zoomToBoundsOnClick: false,
