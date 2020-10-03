@@ -13,7 +13,7 @@
     <Loading v-if="isLoading || isSearching"></Loading>
     <b-form v-else class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
-        <div v-if="canWrite">
+        <div v-if="canWrite && mode !== modes.phoneAdd && mode !== modes.phoneEdit">
           <b-form-group>
             <b-form-checkbox v-model="useGeocodedAddress">Use geocoded address</b-form-checkbox>
           </b-form-group>
