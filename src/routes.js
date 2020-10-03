@@ -14,6 +14,7 @@ import ActivityHistory from './components/ActivityHistory';
 import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
+import PhoneWitnessing from './components/PhoneWitnessing';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -52,6 +53,14 @@ const routes = [
       name: 'map-view',
       path: 'map',
       component: TerritoryMap,
+      props: true,
+      meta: {
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      },
+    }, {
+      name: 'phone-list',
+      path: 'phone',
+      component: PhoneWitnessing,
       props: true,
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
@@ -142,6 +151,24 @@ const routes = [
   {
     name: 'address-edit',
     path: '/territories/:group/:territoryId/addresses/:addressId/:mode',
+    component: AddressForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+    },
+  },
+  {
+    name: 'phone-new',
+    path: '/phones/:mode',
+    component: AddressForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
+    },
+  },
+  {
+    name: 'phone-edit',
+    path: '/territories/:group/:territoryId/addresses/:addressId/phones/:phoneId/:mode',
     component: AddressForm,
     props: true,
     meta: {
