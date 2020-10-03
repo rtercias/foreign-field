@@ -8,7 +8,8 @@
               <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
               <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
             </div>
-            <b-button variant="success" :to="`/phones/phone-add`">
+            <b-button variant="success"
+              :to="`/territories/${group}/${territoryId}/addresses/${address.id}/phones/phone-add`">
               <font-awesome-icon icon="plus"></font-awesome-icon> New Phone
             </b-button>
             <PhoneCard :phoneRecord="address" :addressId="address.id"></PhoneCard>

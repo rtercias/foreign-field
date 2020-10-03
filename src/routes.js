@@ -159,7 +159,7 @@ const routes = [
   },
   {
     name: 'phone-new',
-    path: '/phones/:mode',
+    path: '/territories/:group/:territoryId/addresses/:addressId/phones/:mode',
     component: AddressForm,
     props: true,
     meta: {
