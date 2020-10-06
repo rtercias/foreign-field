@@ -51,7 +51,13 @@
           <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
             <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="pl-2 pr-2">
-              <MyTerritory :territory="terr"></MyTerritory>
+              <div class="seen-territory">
+                <MyTerritory :territory="terr"></MyTerritory>
+                      <b-button class="text-light" pill variant="danger" id="delete">
+                      <font-awesome-icon icon="times"></font-awesome-icon>
+          </b-button>
+              </div>
+
             </b-list-group-item>
           </b-list-group>
         </div>
@@ -127,6 +133,10 @@ export default {
       localStorage.setItem('updateMsgDismissed', true);
       this.msgBoxOpen = false;
     },
+    // removeTerrFromSeenTerritories(id)
+    // {
+    //   localStorage.getItem('seenTerritories')
+    // }
   },
   mounted() {
     this.advertiseMsg();
@@ -168,5 +178,13 @@ router-link {
 }
 .firebaseui-list-item {
   width: 100%;
+}
+
+.seen-territory {
+  display: flex;
+  justify-content: space-between;
+}
+.seen-territory #delete{
+  margin: 10px 0px;
 }
 </style>
