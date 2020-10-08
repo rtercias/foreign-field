@@ -47,14 +47,14 @@
         </div>
       </div>
       <div v-if="!loading" class="col-sm-12 col-md-6 text-left pt-3 pb-3">
+        <span class="small">Other territories I've recently seen:</span>
         <div v-if="seenTerritories.length">
-          <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
             <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="pl-2 pr-2">
-              <div class="d-flex justify-content-between">
+              <div class="d-flex justify-content-between align-items-center">
                 <MyTerritory :territory="terr"></MyTerritory>
-                <b-button class="text-danger h-50" pill
-                  variant="outline-danger" @click="removeSeenTerritory(terr.id)"
+                <b-button class="text-danger"
+                  variant="link" @click="removeSeenTerritory(terr.id)"
                   >
                   <font-awesome-icon icon="times"></font-awesome-icon>
                 </b-button>
@@ -118,7 +118,7 @@ export default {
     getSeenTerritories() {
       if (localStorage.getItem('seenTerritories')) {
         try {
-          this.seenTerritories = JSON.parse(localStorage.getItem('seenTerritories'));
+          this.seenTerritories = JSON.parse(localStorage.getItem('seenTerritories')).filter(s => 'id' in s);
         } catch (e) {
           localStorage.removeItem('seenTerritories');
         }
