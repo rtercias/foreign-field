@@ -51,9 +51,11 @@
           <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
             <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="pl-2 pr-2">
-              <div class="seen-territory">
+              <div class="d-flex justify-content-between">
                 <MyTerritory :territory="terr"></MyTerritory>
-                <b-button pill id="delete" @click="removeTerrFromSeenTerritories(terr.id)">
+                <b-button class="text-danger h-50" pill
+                  variant="outline-danger" @click="removeSeenTerritory(terr.id)"
+                  >
                   <font-awesome-icon icon="times"></font-awesome-icon>
                 </b-button>
               </div>
@@ -134,7 +136,7 @@ export default {
       localStorage.setItem('updateMsgDismissed', true);
       this.msgBoxOpen = false;
     },
-    removeTerrFromSeenTerritories(id) {
+    removeSeenTerritory(id) {
       const filtered = this.seenTerritories.filter(t => t.id !== id);
       localStorage.setItem('seenTerritories', JSON.stringify(filtered));
       this.seenTerritories = filtered;
@@ -183,13 +185,4 @@ router-link {
   width: 100%;
 }
 
-.seen-territory {
-  display: flex;
-  justify-content: space-between;
-}
-.seen-territory #delete{
-  margin: 14px 0px;
-  background: red;
-  color: white;
-}
 </style>
