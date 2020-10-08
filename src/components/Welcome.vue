@@ -47,11 +47,19 @@
         </div>
       </div>
       <div v-if="!loading" class="col-sm-12 col-md-6 text-left pt-3 pb-3">
+        <span class="small">Other territories I've recently seen:</span>
         <div v-if="seenTerritories.length">
-          <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
             <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="pl-2 pr-2">
-              <MyTerritory :territory="terr"></MyTerritory>
+              <div class="d-flex justify-content-between align-items-center">
+                <MyTerritory :territory="terr"></MyTerritory>
+                <b-button class="text-danger"
+                  variant="link" @click="removeSeenTerritory(terr.id)"
+                  >
+                  <font-awesome-icon icon="times"></font-awesome-icon>
+                </b-button>
+              </div>
+
             </b-list-group-item>
           </b-list-group>
         </div>
@@ -87,6 +95,8 @@ export default {
     return {
       msgBoxOpen: '',
       msgDismissed: JSON.parse(localStorage.getItem('updateMsgDismissed')),
+      seenTerritories: [],
+
     };
   },
   computed: {
@@ -100,22 +110,21 @@ export default {
     territories() {
       return this.user && this.user.territories;
     },
-    seenTerritories() {
-      let seenTerritories = [];
-      if (localStorage.getItem('seenTerritories')) {
-        try {
-          seenTerritories = JSON.parse(localStorage.getItem('seenTerritories'));
-        } catch (e) {
-          localStorage.removeItem('seenTerritories');
-        }
-      }
-      return seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
-    },
     isPWA() {
       return window.matchMedia('(display-mode: standalone)').matches;
     },
   },
   methods: {
+    getSeenTerritories() {
+      if (localStorage.getItem('seenTerritories')) {
+        try {
+          this.seenTerritories = JSON.parse(localStorage.getItem('seenTerritories')).filter(s => 'id' in s);
+        } catch (e) {
+          localStorage.removeItem('seenTerritories');
+        }
+      }
+      return this.seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
+    },
     advertiseMsg() {
       if (!this.msgDismissed) {
         this.msgBoxOpen = true;
@@ -127,9 +136,15 @@ export default {
       localStorage.setItem('updateMsgDismissed', true);
       this.msgBoxOpen = false;
     },
+    removeSeenTerritory(id) {
+      const filtered = this.seenTerritories.filter(t => t.id !== id);
+      localStorage.setItem('seenTerritories', JSON.stringify(filtered));
+      this.seenTerritories = filtered;
+    },
   },
   mounted() {
     this.advertiseMsg();
+    this.getSeenTerritories();
   },
 };
 </script>
@@ -169,4 +184,5 @@ router-link {
 .firebaseui-list-item {
   width: 100%;
 }
+
 </style>
