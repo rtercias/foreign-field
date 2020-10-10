@@ -36,7 +36,9 @@
       </div>
       <AddressTags :address="address" v-on="$listeners"></AddressTags>
     </div>
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x"
+    @click="toggleRightPanel" v-clickedOutside="closePanel"
+    >
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
   </div>
@@ -80,6 +82,11 @@ export default {
       getTerritory: 'territory/getTerritory',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
+    closePanel() {
+      // eslint-disable-next-line no-console
+      this.closeRight();
+      this.isRightPanelVisible = false;
+    },
     toggleRightPanel() {
       if (this.isRightPanelVisible) {
         this.closeRight();
@@ -192,6 +199,26 @@ export default {
         this.address.selectedResponseTS = log.timestamp;
         this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
       }
+    },
+  },
+  directives: {
+    clickedOutside: {
+      bind(el, binding, vnode) {
+        const vm = vnode.context;
+        const callback = binding.value;
+
+        // eslint-disable-next-line consistent-return
+        el.clickOutsideEvent = (event) => {
+          // eslint-disable-next-line eqeqeq
+          if (!(el == event.target || el.contains(event.target))) {
+            return callback.call(vm, event);
+          }
+        };
+        document.body.addEventListener('click', el.clickOutsideEvent);
+      },
+      unbind(el) {
+        document.body.removeEventListener('click', el.clickOutsideEvent);
+      },
     },
   },
 };
