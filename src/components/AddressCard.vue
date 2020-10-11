@@ -84,7 +84,6 @@ export default {
     closePanel() {
       if (this.revealed === 'right') {
         this.closeRight();
-        this.isRightPanelVisible = false;
       }
     },
     toggleRightPanel() {
@@ -212,9 +211,11 @@ export default {
           return null;
         };
         document.body.addEventListener('mousedown', el.clickOutsideEvent);
+        document.body.addEventListener('touchmove', el.clickOutsideEvent);
       },
       unbind(el) {
         document.body.removeEventListener('mousedown', el.clickOutsideEvent);
+        document.body.removeEventListener('touchmove', el.clickOutsideEvent);
       },
     },
   },
