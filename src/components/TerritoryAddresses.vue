@@ -9,7 +9,7 @@
         item-key="id"
         :revealed.sync="revealed"
         data-toggle="collapse">
-        <template v-slot="{ item, revealRight, close }">
+        <template v-slot="{ item, revealRight, close, revealed }">
           <AddressCard
             :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
             :address="item"
@@ -19,6 +19,7 @@
             :incomingResponse="item.incomingResponse"
             :openRight="revealRight"
             :closeRight="close"
+            :revealed="revealed"
             @update-response="updateResponse">
           </AddressCard>
         </template>
