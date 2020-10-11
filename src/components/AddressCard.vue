@@ -211,10 +211,10 @@ export default {
           }
           return null;
         };
-        document.body.addEventListener('click', el.clickOutsideEvent);
+        document.body.addEventListener('mousedown', el.clickOutsideEvent);
       },
       unbind(el) {
-        document.body.removeEventListener('click', el.clickOutsideEvent);
+        document.body.removeEventListener('mousedown', el.clickOutsideEvent);
       },
     },
   },
