@@ -54,7 +54,7 @@ import AddressTags from './AddressTags';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse', 'openRight', 'closeRight'],
+  props: ['address', 'territoryId', 'group', 'incomingResponse', 'openRight', 'closeRight', 'revealed'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -68,7 +68,6 @@ export default {
       animate: false,
       currentOffset: 0,
       containerRight: 0,
-      isRightPanelVisible: false,
       transform: '',
       clickedToOpen: false,
       isLogging: false,
@@ -83,17 +82,17 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     closePanel() {
-      // eslint-disable-next-line no-console
-      this.closeRight();
-      this.isRightPanelVisible = false;
+      if (this.revealed === 'right') {
+        this.closeRight();
+        this.isRightPanelVisible = false;
+      }
     },
     toggleRightPanel() {
-      if (this.isRightPanelVisible) {
+      if (this.revealed === 'right') {
         this.closeRight();
       } else {
         this.openRight();
       }
-      this.isRightPanelVisible = !this.isRightPanelVisible;
     },
     async confirmClearStatus() {
       try {
@@ -157,7 +156,6 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
     }),
-
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
     },
@@ -207,12 +205,11 @@ export default {
         const vm = vnode.context;
         const callback = binding.value;
 
-        // eslint-disable-next-line consistent-return
         el.clickOutsideEvent = (event) => {
-          // eslint-disable-next-line eqeqeq
-          if (!(el == event.target || el.contains(event.target))) {
+          if (!(el === event.target || el.contains(event.target))) {
             return callback.call(vm, event);
           }
+          return null;
         };
         document.body.addEventListener('click', el.clickOutsideEvent);
       },
