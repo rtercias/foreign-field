@@ -1,5 +1,5 @@
 <template>
-  <div class="address-card-container p-2 d-flex align-items-center">
+  <div class="address-card-container p-2 d-flex align-items-center" >
     <div class="w-100">
       <div class="address-card row justify-content-between align-items-start pr-2 text-black-50">
         <div class="address col-9 flex-column pt-2 pb-4">
@@ -37,7 +37,7 @@
       <AddressTags :address="address" v-on="$listeners"></AddressTags>
     </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x"
-    @click="toggleRightPanel" v-clickedOutside="closePanel"
+    @click="toggleRightPanel"
     >
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
@@ -54,7 +54,7 @@ import AddressTags from './AddressTags';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse', 'openRight', 'closeRight', 'revealed'],
+  props: ['address', 'territoryId', 'group', 'incomingResponse', 'revealed', 'index'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -81,17 +81,8 @@ export default {
       getTerritory: 'territory/getTerritory',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
-    closePanel() {
-      if (this.revealed === 'right') {
-        this.closeRight();
-      }
-    },
     toggleRightPanel() {
-      if (this.revealed === 'right') {
-        this.closeRight();
-      } else {
-        this.openRight();
-      }
+      this.$emit('togglePanel', this.index, this.revealed);
     },
     async confirmClearStatus() {
       try {
@@ -196,27 +187,6 @@ export default {
         this.address.selectedResponseTS = log.timestamp;
         this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
       }
-    },
-  },
-  directives: {
-    clickedOutside: {
-      bind(el, binding, vnode) {
-        const vm = vnode.context;
-        const callback = binding.value;
-
-        el.clickOutsideEvent = (event) => {
-          if (!(el === event.target || el.contains(event.target))) {
-            return callback.call(vm, event);
-          }
-          return null;
-        };
-        document.body.addEventListener('mousedown', el.clickOutsideEvent);
-        document.body.addEventListener('touchmove', el.clickOutsideEvent);
-      },
-      unbind(el) {
-        document.body.removeEventListener('mousedown', el.clickOutsideEvent);
-        document.body.removeEventListener('touchmove', el.clickOutsideEvent);
-      },
     },
   },
 };
