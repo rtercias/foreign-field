@@ -8,18 +8,20 @@
         :items="territory.addresses"
         item-key="id"
         :revealed.sync="revealed"
-        data-toggle="collapse">
-        <template v-slot="{ item, revealRight, close }">
+        data-toggle="collapse"
+        @active="closeSwipes">
+        <template v-slot="{ item, index, revealed}">
           <AddressCard
+            :index="index"
             :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
             :address="item"
             :reset="reset"
             :territoryId="id"
             :group="group"
             :incomingResponse="item.incomingResponse"
-            :openRight="revealRight"
-            :closeRight="close"
-            @update-response="updateResponse">
+            :revealed="revealed"
+            @update-response="updateResponse"
+            @togglePanel="openSwipe">
           </AddressCard>
         </template>
         <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
@@ -109,6 +111,18 @@ export default {
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
     }),
+
+    openSwipe(index, revealed) {
+      if (revealed) {
+        this.$refs.list.closeActions(index);
+      } else {
+        this.$refs.list.closeActions();
+        this.$refs.list.revealRight(index);
+      }
+    },
+    closeSwipes() {
+      this.$refs.list.closeActions();
+    },
 
     isActiveAddress(addressId) {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;

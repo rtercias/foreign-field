@@ -52,7 +52,7 @@ import AddressTags from './AddressTags';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse', 'openRight', 'closeRight'],
+  props: ['address', 'territoryId', 'group', 'incomingResponse', 'revealed', 'index'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -66,7 +66,6 @@ export default {
       animate: false,
       currentOffset: 0,
       containerRight: 0,
-      isRightPanelVisible: false,
       transform: '',
       clickedToOpen: false,
       isLogging: false,
@@ -81,12 +80,7 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
-      if (this.isRightPanelVisible) {
-        this.closeRight();
-      } else {
-        this.openRight();
-      }
-      this.isRightPanelVisible = !this.isRightPanelVisible;
+      this.$emit('togglePanel', this.index, this.revealed);
     },
     async confirmClearStatus() {
       try {
@@ -150,7 +144,6 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
     }),
-
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
     },
