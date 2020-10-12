@@ -1,5 +1,5 @@
 <template>
-  <div class="address-card-container p-2 d-flex align-items-center">
+  <div class="address-card-container p-2 d-flex align-items-center" >
     <div class="w-100">
       <div class="address-card row justify-content-between align-items-start pr-2 text-black-50">
         <div class="address col-9 flex-column pt-2 pb-4">
@@ -36,7 +36,9 @@
       </div>
       <AddressTags :address="address" v-on="$listeners"></AddressTags>
     </div>
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x"
+    @click="toggleRightPanel"
+    >
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
   </div>
