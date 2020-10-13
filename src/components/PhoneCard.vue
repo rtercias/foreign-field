@@ -1,35 +1,8 @@
 <template>
   <div class="phone-card-container p-2 d-flex align-items-center">
     <div class="w-100">
-      <div class="phone-card row justify-content-between align-items-start pr-2 text-black-50">
-        <div class="phone col-9 flex-column pt-2 pb-4">
-          <div>
-            <!-- TODO: refactor markup to support phone numbers grouped by address -->
-            <h5 class="mb-0"><a :href="`tel:${address.phone}`">{{ formattedPhone }}</a></h5>&nbsp;
-            <b-link>Edit</b-link>
-          </div>
-        </div>
-        <div class="static-buttons col-3 pt-3 pr-2 justify-content-end">
-          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
-          <div
-            :class="{ hidden: phoneRecord.selectedResponse === 'START' || isLogging }"
-            class="d-flex flex-column">
-            <ActivityButton
-              class="selected-response fa-2x"
-              :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-              :value="phoneRecord.selectedResponse"
-              :next="'START'"
-              :selected="true"
-              @button-click="confirmClearStatus">
-            </ActivityButton>
-          </div>
-        </div>
-      </div>
-      <AddressTags :address="phoneRecord" v-on="$listeners" :isPhone="true"></AddressTags>
+        <h1>{{ phoneRecord.phone }}</h1>
     </div>
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
-      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
-    </font-awesome-layers>
   </div>
 </template>
 
