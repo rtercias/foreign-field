@@ -77,12 +77,10 @@ export default {
   position: absolute;
   right: 21px;
 }
-
 @media print {
   .interaction {
     display: none;
   }
-
   .address a {
     text-decoration: none;
   }

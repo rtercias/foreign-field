@@ -42,7 +42,6 @@ import Loading from './Loading.vue';
 import { channel } from '../main';
 
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
-
 export default {
   name: 'PhoneWitnessing',
   components: {
@@ -114,7 +113,6 @@ export default {
         await this.getTerritory(this.id);
       }
     },
-
     seenTerritories() {
       let seenTerritories = [];
       if (localStorage.getItem('seenTerritories')) {
@@ -178,7 +176,6 @@ export default {
           timestamp: Date.now(),
           value,
         };
-
         if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
@@ -211,7 +208,6 @@ export default {
     }
   }
 }
-
 .columns {
   columns: 1;
 }
@@ -240,7 +236,6 @@ li {
       flex-wrap: wrap;
       flex-direction: row;
       padding: 5px;
-
       .swipeout-list-item {
         width: 49%;
         flex: auto;
