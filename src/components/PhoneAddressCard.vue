@@ -17,13 +17,19 @@
             class="card"
             :items="phones"
             item-key="id"
+            @active="closeSwipes">
         >
             <template v-slot="{ item }">
                 <PhoneCard :phoneRecord="item" :addressId="item.id"></PhoneCard>
             </template>
             <template v-slot:right="{ }">
-                <h1>Menu</h1>
-                <h1>Menu</h1>
+            <ActivityButton
+                v-for="(button, index) in ACTION_BUTTON_LIST"
+                :key="index"
+                class="fa-2x"
+                :value="button.value"
+                >
+            </ActivityButton>
             </template>
         </swipe-list>
         </b-list-group>
@@ -34,8 +40,11 @@
 </template>
 
 <script>
+// eslint-disable-next-line no-unused-vars
+import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
 import { SwipeList } from 'vue-swipe-actions';
+import ActivityButton from './ActivityButton';
 
 export default {
   name: 'PhoneAddressCard',
@@ -43,11 +52,55 @@ export default {
   components: {
     PhoneCard,
     SwipeList,
+    ActivityButton,
   },
+  computed: {
+    ...mapGetters({
+
+      actionButtonList: 'address/actionButtonList',
+
+    }) },
   data() {
     return {
       enabled: true,
       revealed: {},
+      ACTION_BUTTON_LIST: [
+        {
+          type: 'fa-icon',
+          value: 'START',
+          text: 'NA',
+          icon: '',
+          color: 'success',
+        },
+        {
+          type: 'fa-icon',
+          value: 'NH',
+          text: 'NH',
+          icon: 'circle',
+          color: 'warning',
+        },
+        {
+          type: 'fa-icon',
+          value: 'HOME',
+          text: '',
+          icon: 'circle',
+          color: 'primary',
+        },
+        {
+          type: 'fa-icon',
+          value: 'PH',
+          text: '',
+          icon: 'phone',
+          color: 'info',
+        },
+        {
+          type: 'fa-icon',
+          value: 'LW',
+          text: '',
+          icon: 'envelope',
+          color: 'primary',
+        },
+      ],
       phones: [
         {
           id: 0,
@@ -66,6 +119,11 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    closeSwipes() {
+      this.$refs.list.closeActions();
+    },
   },
 };
 </script>
