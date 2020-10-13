@@ -1,37 +1,76 @@
 <template>
   <div class="phone-address-card-container p-2 d-flex align-items-center">
-    <div class="w-100">
       <div class="phone-address-card row justify-content-between align-items-start pr-2 text-black-50">
-        <div class="address col-9 flex-column pt-2 pb-4">
-          <div>
+          <div class="d-flex justify-content-between align-items-center pc-header-font border px-2 w-100">
             <div class="mb-1">
               <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
               <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
             </div>
-            <b-button variant="success"
+            <b-button variant="success text-white pc-header-font"
               :to="`/territories/${group}/${territoryId}/addresses/${address.id}/phones/phone-add`">
-              <font-awesome-icon icon="plus"></font-awesome-icon> New Phone
+              Add Number
             </b-button>
-            <PhoneCard :phoneRecord="address" :addressId="address.id"></PhoneCard>
           </div>
-        </div>
+        <b-list-group>
+        <swipe-list
+            ref="list"
+            class="card"
+            :items="phones"
+            item-key="id"
+        >
+            <template v-slot="{ item }">
+                <PhoneCard :phoneRecord="item" :addressId="item.id"></PhoneCard>
+            </template>
+            <template v-slot:right="{ }">
+                <h1>Menu</h1>
+                <h1>Menu</h1>
+            </template>
+        </swipe-list>
+        </b-list-group>
+
+
       </div>
     </div>
-  </div>
 </template>
 
 <script>
 import PhoneCard from './PhoneCard';
+import { SwipeList } from 'vue-swipe-actions';
 
 export default {
   name: 'PhoneAddressCard',
   props: ['address', 'territoryId', 'group'],
   components: {
     PhoneCard,
+    SwipeList,
+  },
+  data() {
+    return {
+      enabled: true,
+      revealed: {},
+      phones: [
+        {
+          id: 0,
+          phone: '111-111-1111',
+          description: 'some description',
+        },
+        {
+          id: 1,
+          phone: '222-222-2222',
+          description: 'some description',
+        },
+        {
+          id: 2,
+          phone: '222-222-2222',
+          description: 'some description',
+        },
+      ],
+    };
   },
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
+@import "../assets/foreign-field-theme.scss";
 .v-touch-address-card {
   touch-action: pan-y;
   height: 100%;
@@ -77,12 +116,44 @@ export default {
   position: absolute;
   right: 21px;
 }
+.pc-header-font {
+    font-size:.7rem;
+}
 @media print {
   .interaction {
     display: none;
   }
   .address a {
     text-decoration: none;
+  }
+}
+.list-group {
+  display: block;
+    width: 100%;
+  .swipeout-list-item {
+    border-top: 1px solid $secondary;
+    border-bottom: 1px solid $secondary;
+
+    .border-medium {
+      border-style: solid;
+      border-width: medium;
+    }
+  }
+}
+@media (min-width: 769px) {
+  .list-group {
+    .swipeout-list {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: row;
+      padding: 5px;
+      .swipeout-list-item {
+        width: 49%;
+        flex: auto;
+        margin: 5px;
+        border: 1px solid $secondary;
+      }
+    }
   }
 }
 </style>

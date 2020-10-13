@@ -1,33 +1,16 @@
 <template>
-  <div class="phone-witnessing pb-5">
+  <div class="phone-witnessing pb-5" v-on:click="printTerritory">
     <Loading v-if="isLoading"></Loading>
-    <b-list-group v-else>
-      <swipe-list
-        ref="list"
-        class="card"
-        :items="territory.addresses"
-        item-key="id"
-        :revealed.sync="revealed"
-        data-toggle="collapse">
-        <template v-slot="{ item }">
-          <PhoneAddressCard
-            :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-            :address="item"
-            :territoryId="id"
-            :group="group">
-          </PhoneAddressCard>
-        </template>
-        <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
-          <ActivityButton
-            v-for="(button, index) in containerButtonList"
-            :key="index"
-            class="fa-2x"
-            :value="button.value"
-            @button-click="() => updateResponse(item, button.value, close)">
-          </ActivityButton>
-        </template>
-      </swipe-list>
-    </b-list-group>
+    <ul id="example-1">
+        <li v-for="a in territory.addresses" :key="a.id">
+            <PhoneAddressCard
+                :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+                :address="a"
+                :territoryId="484"
+                :group="group">
+            </PhoneAddressCard>
+        </li>
+    </ul>
   </div>
 </template>
 
@@ -36,7 +19,6 @@ import { mapGetters, mapActions } from 'vuex';
 import differenceInDays from 'date-fns/differenceInDays';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
-import { SwipeList } from 'vue-swipe-actions';
 import PhoneAddressCard from './PhoneAddressCard';
 import Loading from './Loading.vue';
 import { channel } from '../main';
@@ -45,7 +27,6 @@ const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 export default {
   name: 'PhoneWitnessing',
   components: {
-    SwipeList,
     PhoneAddressCard,
     Loading,
   },
@@ -71,7 +52,6 @@ export default {
       isLoading: true,
       reset: false,
       workInProgress: {},
-      revealed: {},
     };
   },
   computed: {
@@ -99,7 +79,10 @@ export default {
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
     }),
-
+    printTerritory() {
+      // eslint-disable-next-line no-console
+      console.log(this.territory);
+    },
     isActiveAddress(addressId) {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;
     },
@@ -195,19 +178,6 @@ export default {
 
 <style lang="scss">
 @import "../assets/foreign-field-theme.scss";
-.list-group {
-  display: block;
-
-  .swipeout-list-item {
-    border-top: 1px solid $secondary;
-    border-bottom: 1px solid $secondary;
-
-    .border-medium {
-      border-style: solid;
-      border-width: medium;
-    }
-  }
-}
 .columns {
   columns: 1;
 }
@@ -228,22 +198,6 @@ li {
 }
 .add-new {
   font-size: 24px;
-}
-@media (min-width: 769px) {
-  .list-group {
-    .swipeout-list {
-      display: flex;
-      flex-wrap: wrap;
-      flex-direction: row;
-      padding: 5px;
-      .swipeout-list-item {
-        width: 49%;
-        flex: auto;
-        margin: 5px;
-        border: 1px solid $secondary;
-      }
-    }
-  }
 }
 @media print {
   .columns {
