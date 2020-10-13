@@ -87,7 +87,6 @@ export default {
           publisherName = this.publisher.firstname && this.publisher.lastname
             && `${this.publisher.firstname} ${this.publisher.lastname}`;
         }
-
         const message = h('p', {
           domProps: {
             innerHTML:
@@ -101,7 +100,6 @@ export default {
           title: this.phoneRecord.phone,
           centered: true,
         });
-
         if (value) {
           this.isLogging = true;
           this.$emit('update-response', this.phoneRecord, 'START', () => {
@@ -115,7 +113,6 @@ export default {
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
-
     async getLastActivityPublisher() {
       const id = this.lastActivity.publisher_id;
       const congId = this.user.congregation.id;
@@ -156,12 +153,10 @@ export default {
       const width = styles.getPropertyValue('width');
       return this.getPxValue(width);
     },
-
     formattedPhone() {
       return this.phoneRecord && this.phoneRecord.phone
         && this.phoneRecord.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
-
     formattedSelectedResponseTS() {
       return this.phoneRecord.selectedResponseTS && format(new Date(this.phoneRecord.selectedResponseTS), 'M/d/yyyy') || '';
     },
@@ -173,7 +168,6 @@ export default {
       return publisherId.toString() === get(this.user, 'id', '').toString();
     },
   },
-
   watch: {
     incomingResponse(log) {
       if (log) {
@@ -231,12 +225,10 @@ export default {
   position: absolute;
   right: 21px;
 }
-
 @media print {
   .interaction {
     display: none;
   }
-
   .address a {
     text-decoration: none;
   }
