@@ -1,16 +1,18 @@
 <template>
   <div class="phone-witnessing pb-5" v-on:click="printTerritory">
     <Loading v-if="isLoading"></Loading>
+    <div class="w-100">
     <ul id="example-1">
         <li v-for="a in territory.addresses" :key="a.id">
             <PhoneAddressCard
                 :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
                 :address="a"
-                :territoryId="484"
+                :territoryId="territory.id"
                 :group="group">
             </PhoneAddressCard>
         </li>
     </ul>
+    </div>
   </div>
 </template>
 
