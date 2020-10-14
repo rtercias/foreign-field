@@ -1,9 +1,7 @@
 <template>
-  <div class="phone-card-container p-2 d-flex align-items-center">
-    <div class="w-100">
-        <h1>{{ phoneRecord.phone }}</h1>
+    <div class="px-4 py-2 d-flex align-items-center">
+        <h4 class="m-auto">{{ phoneRecord.phone }}</h4>
     </div>
-  </div>
 </template>
 
 <script>
