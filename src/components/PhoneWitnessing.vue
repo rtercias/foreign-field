@@ -1,17 +1,14 @@
 <template>
-  <div class="phone-witnessing pb-5" v-on:click="printTerritory">
+  <div class="phone-witnessing" v-on:click="printTerritory">
     <Loading v-if="isLoading"></Loading>
     <div class="w-100">
-    <ul id="example-1">
-        <li v-for="a in territory.addresses" :key="a.id">
-            <PhoneAddressCard
-                :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-                :address="a"
-                :territoryId="territory.id"
-                :group="group">
-            </PhoneAddressCard>
-        </li>
-    </ul>
+    <PhoneAddressCard
+          v-for="a in territory.addresses" :key="a.id"
+        :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+        :address="a"
+        :territoryId="territory.id"
+        :group="group">
+    </PhoneAddressCard>
     </div>
   </div>
 </template>
