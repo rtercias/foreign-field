@@ -63,7 +63,6 @@ export default {
       token: 'auth/token',
       authLoading: 'auth/loading',
       canCheckout: 'auth/canCheckout',
-      actionButtonList: 'address/actionButtonList',
       address: 'address/address',
     }),
     lastActivity() {

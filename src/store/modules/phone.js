@@ -59,7 +59,6 @@ export const phone = {
 
   getters: {
     phone: state => state.phone,
-
     actionButtonList: () => ACTION_BUTTON_LIST,
 
   },
