@@ -2,7 +2,23 @@
 // import gql from 'graphql-tag';
 // import orderBy from 'lodash/orderBy';
 // import { print } from 'graphql/language/printer';
-
+const PHONES = [
+  {
+    id: 0,
+    phone: '111-111-1111',
+    description: 'some description',
+  },
+  {
+    id: 1,
+    phone: '222-222-2222',
+    description: 'some description',
+  },
+  {
+    id: 2,
+    phone: '510-222-2222',
+    description: 'some description',
+  },
+];
 
 export const phones = {
   namespaced: true,
@@ -10,7 +26,7 @@ export const phones = {
     phones: [],
   },
   getters: {
-
+    phones: () => PHONES,
   },
   mutations: {
   },

@@ -24,7 +24,7 @@
             </template>
             <template v-slot:right="{ }">
             <ActivityButton
-                v-for="(button, index) in ACTION_BUTTON_LIST"
+                v-for="(button, index) in actionButtonList"
                 :key="index"
                 class="fa-2x"
                 :value="button.value"
@@ -56,68 +56,13 @@ export default {
   },
   computed: {
     ...mapGetters({
-
-      actionButtonList: 'address/actionButtonList',
-
+      actionButtonList: 'phone/actionButtonList',
+      phones: 'phones/phones',
     }) },
   data() {
     return {
       enabled: true,
       revealed: {},
-      ACTION_BUTTON_LIST: [
-        {
-          type: 'fa-icon',
-          value: 'START',
-          text: 'NA',
-          icon: '',
-          color: 'success',
-        },
-        {
-          type: 'fa-icon',
-          value: 'NH',
-          text: 'NH',
-          icon: 'circle',
-          color: 'warning',
-        },
-        {
-          type: 'fa-icon',
-          value: 'HOME',
-          text: '',
-          icon: 'circle',
-          color: 'primary',
-        },
-        {
-          type: 'fa-icon',
-          value: 'PH',
-          text: '',
-          icon: 'phone',
-          color: 'info',
-        },
-        {
-          type: 'fa-icon',
-          value: 'LW',
-          text: '',
-          icon: 'envelope',
-          color: 'primary',
-        },
-      ],
-      phones: [
-        {
-          id: 0,
-          phone: '111-111-1111',
-          description: 'some description',
-        },
-        {
-          id: 1,
-          phone: '222-222-2222',
-          description: 'some description',
-        },
-        {
-          id: 2,
-          phone: '222-222-2222',
-          description: 'some description',
-        },
-      ],
     };
   },
   methods: {
