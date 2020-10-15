@@ -29,6 +29,7 @@
               :value="address.selectedResponse"
               :next="'START'"
               :selected="true"
+              :actionButtonList="actionButtonList"
               @button-click="confirmClearStatus">
             </ActivityButton>
           </div>
@@ -134,6 +135,8 @@ export default {
       this.$set(this.address, 'selectedResponse', this.lastActivity.value || this.START);
       this.$set(this.address, 'selectedResponseTS', Number(this.lastActivity.timestamp) || null);
     }
+    // eslint-disable-next-line no-console
+    console.log(this.actionButtonList);
   },
   computed: {
     ...mapGetters({

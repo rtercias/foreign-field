@@ -30,6 +30,7 @@
             :key="index"
             class="fa-2x"
             :value="button.value"
+            :actionButtonList="actionButtonList"
             @button-click="() => updateResponse(item, button.value, close)">
           </ActivityButton>
         </template>

@@ -48,6 +48,7 @@ export default {
     'next',
     'displayOnly',
     'selected',
+    'actionButtonList',
   ],
   methods: {
     ...mapActions({
@@ -69,7 +70,6 @@ export default {
   computed: {
     ...mapGetters({
       loading: 'auth/loading',
-      actionButtonList: 'address/actionButtonList',
     }),
     item() {
       return this.actionButtonList.find(b => b.value === this.value) || {};

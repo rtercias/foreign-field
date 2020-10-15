@@ -93,7 +93,7 @@ const ACTION_BUTTON_LIST = [
   },
 ];
 
-function createActivityLog(id, addressId, value, checkoutId, user) {
+export function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
     id,
     checkout_id: checkoutId,
