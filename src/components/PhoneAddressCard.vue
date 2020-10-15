@@ -1,5 +1,5 @@
 <template>
-  <div class="phone-address-card-container d-flex align-items-center justify-content-center">
+  <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
       <div class="w-100">
           <div class="d-flex justify-content-between align-items-center pc-header-font border px-4 py-2 w-100">
             <div class="mb-1">
@@ -28,6 +28,7 @@
                 :key="index"
                 class="fa-2x"
                 :value="button.value"
+                :actionButtonList="actionButtonList"
                 >
             </ActivityButton>
             </template>
@@ -120,7 +121,7 @@ export default {
   right: 21px;
 }
 .pc-header-font {
-    font-size:.7rem;
+    font-size:.8rem;
 }
 @media print {
   .interaction {
