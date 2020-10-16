@@ -196,7 +196,7 @@ export const addresses = {
       }
     },
 
-    async getChangeLog({ commit }, { congId, minDate }) {
+    async getChangeLog({ commit }, { congId, minDate, recordId }) {
       try {
         if (!congId) return;
 
@@ -207,8 +207,8 @@ export const addresses = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query AddressChangeLog($congId: Int, $minDate: String) {
-              addressChangeLogs(congId: $congId, minDate: $minDate) {
+            query: print(gql`query AddressChangeLog($congId: Int, $minDate: String, $recordId: Int) {
+              addressChangeLogs(congId: $congId, minDate: $minDate, recordId: $recordId) {
                 date
                 changes
                 publisher {
@@ -236,6 +236,7 @@ export const addresses = {
             variables: {
               congId,
               minDate,
+              recordId,
             },
           },
         });
