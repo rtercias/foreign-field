@@ -95,6 +95,15 @@ const routes = [
     },
   },
   {
+    name: 'address-change-logs',
+    path: '/territories/:group/:territoryId/:type/:recordId/logs',
+    component: ChangeLog,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
     name: 'address-links',
     path: '/territories/:group/:territoryId/addresses/:addressId/detail',
     component: AddressLinks,

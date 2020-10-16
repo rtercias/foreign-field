@@ -30,6 +30,11 @@
           <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
           Activity History
         </b-list-group-item>
+        <b-list-group-item v-if="canWrite" class="lead p-4 font-weight-bold w-auto" variant="danger"
+          :href="`/territories/${group}/${territoryId}/addresses/${address.id}/logs?fullscreen=true`">
+          <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
+          Address Change Log
+        </b-list-group-item>
         <b-list-group-item
           class="lead p-4 font-weight-bold w-auto"
           :to="`/territories/${group}/${territoryId}`"
@@ -67,6 +72,7 @@ export default {
     ...mapGetters({
       address: 'address/address',
       token: 'auth/token',
+      canWrite: 'auth/canWrite',
     }),
     mapsUrl() {
       const addr1 = this.address.addr1 || '';
