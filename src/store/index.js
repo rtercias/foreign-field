@@ -9,7 +9,7 @@ import { address } from './modules/address';
 import { addresses } from './modules/addresses';
 import { publisher } from './modules/publisher';
 import { publishers } from './modules/publishers';
-import { phones } from './modules/phones';
+// import { phones } from './modules/phones';
 import { phone } from './modules/phone';
 import { reports } from './modules/reports';
 import '../../node_modules/firebaseui/dist/firebaseui.css';
@@ -31,7 +31,7 @@ export const store = new Store({
     publisher,
     publishers,
     phone,
-    phones,
+    // phones,
     reports,
   },
 });

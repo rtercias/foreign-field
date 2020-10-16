@@ -15,7 +15,7 @@
         <swipe-list
             ref="list"
             class=""
-            :items="phones"
+            :items="address.phones"
             item-key="id"
             @active="closeSwipes">
         >
@@ -70,6 +70,10 @@ export default {
     closeSwipes() {
       this.$refs.list.closeActions();
     },
+  },
+  mounted() {
+    // eslint-disable-next-line no-console
+    console.log(this.address);
   },
 };
 </script>

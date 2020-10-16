@@ -99,6 +99,7 @@ const ACTION_BUTTON_LIST = [
 ];
 
 
+// eslint-disable-next-line no-unused-vars
 function validatePhone(_phone, isNew) {
   const phone = clone(_phone);
 
@@ -234,7 +235,7 @@ export const phone = {
 
   actions: {
     setAddress({ commit }, addr) {
-      commit(SET_ADDRESS, addr);
+      commit(SET_PHONE, addr);
     },
 
     async fetchAddress({ commit }, addressId) {
@@ -261,7 +262,7 @@ export const phone = {
 
       if (response && response.data && response.data.data) {
         const { address: addr } = response.data.data;
-        commit(SET_ADDRESS, addr);
+        commit(SET_PHONE, addr);
         commit('auth/LOADING', false, { root: true });
       }
     },
@@ -383,6 +384,7 @@ export const phone = {
       commit('auth/LOADING', true, { root: true });
 
       const user = rootGetters['auth/user'];
+      // eslint-disable-next-line no-undef
       const addr = validateAddress(_address, true);
       addr.create_user = user.id;
 
@@ -410,7 +412,7 @@ export const phone = {
           throw new Error(response.data.errors[0].message);
         }
         const { addAddress } = response.data.data;
-        commit(ADD_ADDRESS, addAddress);
+        commit(ADD_PHONE, addAddress);
         commit('auth/LOADING', false, { root: true });
       }
     },
@@ -419,6 +421,7 @@ export const phone = {
       commit('auth/LOADING', true, { root: true });
 
       const user = rootGetters['auth/user'];
+      // eslint-disable-next-line no-undef
       const addr = validateAddress(_address);
 
       if (!user) {
@@ -448,7 +451,7 @@ export const phone = {
 
       if (response && response.data && response.data.data) {
         const { updateAddress } = response.data.data;
-        commit(UPDATE_ADDRESS, updateAddress);
+        commit(UPDATE_PHONE, updateAddress);
         commit('auth/LOADING', false, { root: true });
       }
     },
@@ -468,7 +471,7 @@ export const phone = {
           }`),
           variables: {
             addressId,
-            status: ADDRESS_STATUS.NF,
+            status: PHONE_STATUS.NF,
             userid,
             tag,
           },
@@ -478,7 +481,7 @@ export const phone = {
       if (response && response.data && response.data.data) {
         const changeAddressStatus = response.data.data;
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.NF);
+          commit(CHANGE_STATUS, PHONE_STATUS.NF);
         }
         commit('auth/LOADING', false, { root: true });
       }
@@ -499,7 +502,7 @@ export const phone = {
           }`),
           variables: {
             addressId,
-            status: ADDRESS_STATUS.DNC,
+            status: PHONE_STATUS.DNC,
             userid,
             tag,
           },
@@ -509,7 +512,7 @@ export const phone = {
       if (response && response.data && response.data.data) {
         const changeAddressStatus = response.data.data;
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.DNC);
+          commit(CHANGE_STATUS, PHONE_STATUS.DNC);
         }
         commit('auth/LOADING', false, { root: true });
       }
