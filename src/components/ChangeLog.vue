@@ -1,20 +1,23 @@
 <template>
   <div class="change-log" :class="{ 'text-left': isFullScreen }">
     <div
-      class="d-flex justify-content-between align-items-center pb-0"
+      class="d-flex justify-content-between align-items-center pb-0 text-center"
       :class="{ 'p-3': isFullScreen, 'flex-column': isSingleRecord }">
-      <span
+      <div
         v-if="isSingleRecord"
         :class="{
           small: !isFullScreen,
           lead: isFullScreen,
           'font-weight-bold': isFullScreen
-        }">{{title}}</span>
-      <span
+        }">
+        <div>{{title1}}</div>
+        <div>{{title2}}</div>
+      </div>
+      <div
         :class="{
           small: !isFullScreen,
           lead: isFullScreen,
-        }">{{subtitle}}</span>
+        }">{{subtitle}}</div>
       <b-dropdown v-if="showDateFilter" class="date-filter" right variant="secondary">
         <span slot="button-content">Range: {{selectedRange.text}}</span>
         <b-dropdown-item v-for='(range, index) in dateRanges' :key="index" @click="() => selectRange(range)">
@@ -117,9 +120,14 @@ export default {
       user: 'auth/user',
       storeLogs: 'addresses/logs',
     }),
-    title() {
+    title1() {
       return this.isSingleRecord && this.logs && this.logs.length
         ? `${this.logs[0].address.addr1} ${this.logs[0].address.addr2}`
+        : '';
+    },
+    title2() {
+      return this.isSingleRecord && this.logs && this.logs.length
+        ? `${this.logs[0].address.city}, ${this.logs[0].address.state_province}`
         : '';
     },
     subtitle() {
