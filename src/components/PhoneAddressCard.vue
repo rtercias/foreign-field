@@ -6,17 +6,26 @@
           <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
           <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
         </div>
-        <b-button variant="success text-white pc-header-font"
-          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/phones/phone-add`">
-          Add Number
-        </b-button>
       </div>
       <b-list-group>
+        <b-list-group-item class="d-flex">
+          <the-mask
+            class="form-control mr-2"
+            type="tel"
+            :mask="'###-###-####'"
+            :masked="false"
+            v-model="newPhone">
+          </the-mask>
+          <b-button variant="success text-white" @click="addNewPhone">
+            <font-awesome-icon icon="plus"></font-awesome-icon>
+          </b-button>
+        </b-list-group-item>
         <swipe-list
           ref="list"
           class=""
-          :items="storeAddress.phones || []"
+          :items="address.phones || []"
           item-key="id"
+          @swipeout:click="itemClick"
           @active="closeSwipes">
           <template v-slot="{ item }">
             <PhoneCard :phoneRecord="item" :addressId="item.id"></PhoneCard>
@@ -42,6 +51,9 @@ import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
 import { SwipeList } from 'vue-swipe-actions';
 import ActivityButton from './ActivityButton';
+import { TheMask } from 'vue-the-mask';
+import { AddressType, AddressStatus } from '../store';
+import get from 'lodash/get';
 
 export default {
   name: 'PhoneAddressCard',
@@ -50,29 +62,47 @@ export default {
     PhoneCard,
     SwipeList,
     ActivityButton,
+    TheMask,
   },
   computed: {
     ...mapGetters({
       actionButtonList: 'phone/actionButtonList',
-      phones: 'phones/phones',
-      storeAddress: 'address/address',
+      user: 'auth/user',
+      congId: 'auth/congId',
     }) },
   data() {
     return {
       enabled: true,
       revealed: {},
+      newPhone: '',
     };
   },
   methods: {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
+      addPhone: 'phone/addPhone',
     }),
     closeSwipes() {
       this.$refs.list.closeActions();
     },
-  },
-  async mounted() {
-    await this.fetchAddress(this.address.id);
+    itemClick() {
+    },
+    async addNewPhone() {
+      const sort = get(this.storeAddress, 'phones.length', 0);
+      const phone = {
+        congregationId: this.congId,
+        parent_id: this.address.id,
+        territory_id: this.territoryId,
+        type: AddressType.Phone,
+        status: AddressStatus.Active,
+        phone: this.newPhone,
+        notes: '',
+        sort,
+      };
+
+      await this.addPhone(phone);
+      this.$emit('new-phone-added', phone);
+    },
   },
 };
 </script>
