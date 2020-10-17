@@ -7,7 +7,8 @@
         :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
         :address="a"
         :territoryId="territory.id"
-        :group="group">
+        :group="group"
+        @new-phone-added="refreshTerritory">
     </PhoneAddressCard>
     </div>
   </div>
@@ -79,17 +80,21 @@ export default {
     }),
     printTerritory() {
       // eslint-disable-next-line no-console
-      console.log(this.territory);
+      // console.log(this.territory);
     },
     isActiveAddress(addressId) {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;
     },
 
-    async refreshTerritory(_address) {
-      if (_address) {
-        const index = this.territory.addresses.findIndex(a => a.id === _address.id);
-        this.territory.addresses.splice(index, 1, _address);
-        this.territory.lastActivity = { address_id: _address.id, ..._address.lastActivity };
+    async refreshTerritory(phone) {
+      if (phone) {
+        const address = this.territory.addresses.find(a => a.id === phone.parent_id || phone.territory_id);
+        const index = address.phones.findIndex(p => p.id === phone.id);
+        if (index >= 0) {
+          address.phones.splice(index, 1, phone);
+        } else {
+          address.phones.push(phone);
+        }
       } else {
         await this.getTerritory(this.id);
       }
