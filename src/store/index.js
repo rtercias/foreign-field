@@ -20,6 +20,17 @@ axios.defaults.baseURL = process.env.VUE_APP_ROOT_API;
 axios.defaults.method = 'post';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
+export const AddressType = {
+  Regular: 'Regular',
+  Phone: 'Phone',
+};
+
+export const AddressStatus = {
+  Active: 'Active',
+  NF: 'NF',
+  DNC: 'DNC',
+};
+
 export const store = new Store({
   plugins: [createCache()],
   modules: {
