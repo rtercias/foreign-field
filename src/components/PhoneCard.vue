@@ -1,6 +1,6 @@
 <template>
     <div class="px-4 py-2 d-flex align-items-center">
-        <h4 class="m-auto">{{ phoneRecord.phone }}</h4>
+        <h4 class="m-auto">{{ formattedPhone }}</h4>
     </div>
 </template>
 
