@@ -20,7 +20,12 @@ const model = gql`fragment Model on Address {
   notes
   status
   sort
-  phones
+  phones {
+    id
+    phone
+    notes
+    sort 
+  }
   activityLogs {
     id
     checkout_id

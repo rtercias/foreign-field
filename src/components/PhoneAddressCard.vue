@@ -1,47 +1,43 @@
 <template>
   <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
-      <div class="w-100">
-          <div class="d-flex justify-content-between align-items-center pc-header-font border px-4 py-2 w-100">
-            <div class="mb-1">
-              <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
-              <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
-            </div>
-            <b-button variant="success text-white pc-header-font"
-              :to="`/territories/${group}/${territoryId}/addresses/${address.id}/phones/phone-add`">
-              Add Number
-            </b-button>
-          </div>
-        <b-list-group>
-        <swipe-list
-            ref="list"
-            class=""
-            :items="address.phones"
-            item-key="id"
-            @active="closeSwipes">
-        >
-            <template v-slot="{ item }">
-                <PhoneCard :phoneRecord="item" :addressId="item.id"></PhoneCard>
-            </template>
-            <template v-slot:right="{ }">
-            <ActivityButton
-                v-for="(button, index) in actionButtonList"
-                :key="index"
-                class="fa-2x"
-                :value="button.value"
-                :actionButtonList="actionButtonList"
-                >
-            </ActivityButton>
-            </template>
-        </swipe-list>
-        </b-list-group>
-
-
+    <div class="w-100">
+      <div class="d-flex justify-content-between align-items-center pc-header-font border px-4 py-2 w-100">
+        <div class="mb-1">
+          <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
+          <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
+        </div>
+        <b-button variant="success text-white pc-header-font"
+          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/phones/phone-add`">
+          Add Number
+        </b-button>
       </div>
+      <b-list-group>
+        <swipe-list
+          ref="list"
+          class=""
+          :items="storeAddress.phones || []"
+          item-key="id"
+          @active="closeSwipes">
+          <template v-slot="{ item }">
+            <PhoneCard :phoneRecord="item" :addressId="item.id"></PhoneCard>
+          </template>
+          <template v-slot:right="{ }">
+            <ActivityButton
+              v-for="(button, index) in actionButtonList"
+              :key="index"
+              class="fa-2x"
+              :value="button.value"
+              :actionButtonList="actionButtonList"
+              >
+            </ActivityButton>
+          </template>
+        </swipe-list>
+      </b-list-group>
     </div>
+  </div>
 </template>
 
 <script>
-// eslint-disable-next-line no-unused-vars
 import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
 import { SwipeList } from 'vue-swipe-actions';
@@ -59,6 +55,7 @@ export default {
     ...mapGetters({
       actionButtonList: 'phone/actionButtonList',
       phones: 'phones/phones',
+      storeAddress: 'address/address',
     }) },
   data() {
     return {
@@ -67,13 +64,15 @@ export default {
     };
   },
   methods: {
+    ...mapActions({
+      fetchAddress: 'address/fetchAddress',
+    }),
     closeSwipes() {
       this.$refs.list.closeActions();
     },
   },
-  mounted() {
-    // eslint-disable-next-line no-console
-    console.log(this.address);
+  async mounted() {
+    await this.fetchAddress(this.address.id);
   },
 };
 </script>
