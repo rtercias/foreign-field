@@ -1,9 +1,23 @@
 <template>
   <div class="change-log" :class="{ 'text-left': isFullScreen }">
     <div
-      class="d-flex justify-content-between align-items-center pb-0"
-      :class="{ 'p-3': isFullScreen }">
-      <span :class="{ small: !isFullScreen, lead: isFullScreen }">{{title}}</span>
+      class="d-flex justify-content-between align-items-center pb-0 text-center"
+      :class="{ 'p-3': isFullScreen, 'flex-column': isSingleRecord }">
+      <div
+        v-if="isSingleRecord"
+        :class="{
+          small: !isFullScreen,
+          lead: isFullScreen,
+          'font-weight-bold': isFullScreen
+        }">
+        <div>{{title1}}</div>
+        <div>{{title2}}</div>
+      </div>
+      <div
+        :class="{
+          small: !isFullScreen,
+          lead: isFullScreen,
+        }">{{subtitle}}</div>
       <b-dropdown v-if="showDateFilter" class="date-filter" right variant="secondary">
         <span slot="button-content">Range: {{selectedRange.text}}</span>
         <b-dropdown-item v-for='(range, index) in dateRanges' :key="index" @click="() => selectRange(range)">
@@ -13,13 +27,13 @@
     </div>
     <font-awesome-icon v-if="loading" class="loading text-info text-center w-100 mt-5" icon="circle-notch" :spin="true" />
     <div v-else>
-      <div class="mx-3 mb-3">
-        <b-form-input v-model="keywordFilter" placeholder="Filter" />
+      <div v-if="isFullScreen" class="mx-3 mb-3">
+        <b-form-input v-model="keywordFilter" placeholder="Filter by address, publisher, or territory" />
         <span class="d-block small pt-1 text-right">Count: {{logs.length}}</span>
       </div>
       <b-list-group>
         <b-list-group-item class="pl-3 pr-3" :class="{ small: !isFullScreen }" v-for="log in logs" :key="log.id">
-          <ChangeLogAddressCard :log="log" />
+          <ChangeLogAddressCard :log="log" :is-single-record="isSingleRecord" />
         </b-list-group-item>
         <b-link
           v-if="!isFullScreen"
@@ -106,21 +120,35 @@ export default {
       user: 'auth/user',
       storeLogs: 'addresses/logs',
     }),
-    title() {
-      return 'Recent Updates:';
+    title1() {
+      return this.isSingleRecord && this.logs && this.logs.length
+        ? `${this.logs[0].address.addr1} ${this.logs[0].address.addr2}`
+        : '';
+    },
+    title2() {
+      return this.isSingleRecord && this.logs && this.logs.length
+        ? `${this.logs[0].address.city}, ${this.logs[0].address.state_province}`
+        : '';
+    },
+    subtitle() {
+      return 'Recent Updates';
+    },
+    cleanLogs() {
+      return this.storeLogs.filter(log => !log.address.territory.name.includes('TEST'));
     },
     preview() {
-      return this.storeLogs.slice(0, 3);
+      return this.cleanLogs.slice(0, 3);
     },
     logs() {
       if (this.keywordFilter) {
-        return this.storeLogs.filter(log => this.compareToKeyword(log.address.addr1)
+        return this.cleanLogs.filter(log => this.compareToKeyword(log.address.addr1)
           || this.compareToKeyword(log.address.addr2)
           || this.compareToKeyword(log.publisher.firstname)
-          || this.compareToKeyword(log.publisher.lastname));
+          || this.compareToKeyword(log.publisher.lastname)
+          || this.compareToKeyword(log.address.territory.name));
       }
 
-      return this.isFullScreen ? this.storeLogs : this.preview;
+      return this.isFullScreen ? this.cleanLogs : this.preview;
     },
     isFullScreen() {
       return this.$route.query.fullscreen;
@@ -138,7 +166,7 @@ export default {
       ];
     },
     showDateFilter() {
-      return this.isFullScreen && !this.recordId && !this.publisherId;
+      return this.isFullScreen && !this.isSingleRecord;
     },
     returnRoute() {
       if (this.recordId && this.type === 'addresses') {
@@ -146,6 +174,9 @@ export default {
       }
 
       return '/';
+    },
+    isSingleRecord() {
+      return !!this.recordId || !!this.publisherId;
     },
   },
   watch: {

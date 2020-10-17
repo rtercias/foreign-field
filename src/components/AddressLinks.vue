@@ -64,8 +64,8 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
     await this.fetchAddress(this.addressId);
+    this.setLeftNavRoute(this.returnRoute);
     this.isLoading = false;
   },
   computed: {
@@ -92,6 +92,15 @@ export default {
       const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
       return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
+    returnRoute() {
+      const { origin } = this.$route.query;
+      if (origin === 'change-logs') {
+        return '/reports/logs/addresses?fullscreen=true';
+      }
+
+      return `/territories/${this.group}/${this.territoryId}`;
+    },
+
   },
   methods: {
     ...mapActions({

@@ -2,7 +2,7 @@
   <b-container class="dashboard lead">
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
-    <b-row v-else class="main">
+    <b-row v-else class="main justify-content-center">
       <div class="new-message bg-secondary text-dark align-items-center pt-2 pb-2 w-100 text-white"
       v-show='msgBoxOpen && !isPWA'>
         <div class="message text-left col-10">
@@ -14,7 +14,7 @@
           </b-button>
         </div>
       </div>
-      <div class="col-sm-12">
+      <div class="col-sm-12 mb-3">
         <h3 class="align-items-center d-flex justify-content-center">
           <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
           <span class="title w-100">Dashboard</span>
@@ -35,7 +35,7 @@
           </b-button>
         </b-button-group>
       </div>
-      <div v-if="!loading" class="col-sm-12 col-md-6 pt-3 pb-3">
+      <div v-if="!loading" class="panel col-sm-12 col-md-5 pt-3 pb-3 border-info m-2">
         <span v-if="!(territories && territories.length)" class="text-center">I have no territories checked out.</span>
         <div v-else class="text-left">
           <span class="small">Territories I've checked out:</span>
@@ -46,7 +46,7 @@
           </b-list-group>
         </div>
       </div>
-      <div v-if="!loading" class="col-sm-12 col-md-6 text-left pt-3 pb-3">
+      <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left pt-3 pb-3 border-info m-2">
         <span class="small">Other territories I've recently seen:</span>
         <div v-if="seenTerritories.length">
           <b-list-group>
@@ -64,10 +64,10 @@
           </b-list-group>
         </div>
       </div>
-      <div v-if="!loading && canManage" class="text-left pt-3 pb-3 col-sm-12 col-md-6">
+      <div v-if="!loading && canManage" class="panel text-left pt-3 pb-3 col-sm-12 col-md-5 border-info m-2">
         <ChangeLog :type="'addresses'" :fullscreen="false" />
       </div>
-      <div v-if="!loading && canWrite" class="text-left pt-3 pb-3 scol-sm-12 col-md-6">
+      <div v-if="!loading && canWrite" class="panel text-left pt-3 pb-3 scol-sm-12 col-md-5 border-info m-2">
         <Reports />
       </div>
     </b-row>
@@ -150,7 +150,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
+<style lang="scss" scoped>
 h3 {
   margin: 40px 0 0;
 }
@@ -183,6 +183,10 @@ router-link {
 }
 .firebaseui-list-item {
   width: 100%;
+}
+.panel {
+  border-radius: 10px;
+  border-style: double;
 }
 
 </style>
