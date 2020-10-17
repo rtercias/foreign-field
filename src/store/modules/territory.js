@@ -172,6 +172,12 @@ export const territory = {
                     value
                     publisher_id
                   }
+                  phones {
+                    id
+                    phone
+                    notes
+                    sort
+                  }
                 }
                 status {
                   checkout_id
