@@ -78,7 +78,7 @@ const ACTION_BUTTON_LIST = [
     value: 'VM',
     text: '',
     icon: 'voicemail',
-    color: 'info',
+    color: 'primary',
     description: 'Voicemail',
   },
   {
@@ -88,6 +88,14 @@ const ACTION_BUTTON_LIST = [
     icon: 'envelope',
     color: 'primary',
     description: 'Letter',
+  },
+  {
+    type: 'fa-icon',
+    value: 'REMOVE',
+    text: '',
+    icon: 'trash-alt',
+    color: 'danger',
+    description: 'Remove',
   },
   {
     type: 'fa-icon',
