@@ -10,7 +10,7 @@
         :revealed.sync="revealed"
         data-toggle="collapse"
         @active="closeSwipes">
-        <template v-slot="{ item, index, revealed}">
+        <template v-slot="{ item, index, revealed }">
           <AddressCard
             :index="index"
             :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"

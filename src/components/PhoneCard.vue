@@ -1,6 +1,12 @@
 <template>
-  <div class="px-4 py-2 d-flex align-items-center">
-    <h5><a :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a></h5>
+  <div class="phone-card p-2 d-flex align-items-center justify-content-between">
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
+      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
+    </font-awesome-layers>
+    <h5 class="mb-0 mr-auto ml-2"><a :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a></h5>
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
+      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
+    </font-awesome-layers>
   </div>
 </template>
 
@@ -13,7 +19,7 @@ import AddressTags from './AddressTags';
 
 export default {
   name: 'PhoneCard',
-  props: ['phoneRecord', 'addressId', 'incomingResponse', 'openRight', 'closeRight'],
+  props: ['phoneRecord', 'addressId', 'incomingResponse', 'revealed', 'index'],
   components: {
     ActivityButton,
     AddressTags,
@@ -27,6 +33,7 @@ export default {
       currentOffset: 0,
       containerRight: 0,
       isRightPanelVisible: false,
+      isLeftPanelVisible: false,
       transform: '',
       clickedToOpen: false,
       isLogging: false,
@@ -40,12 +47,10 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
-      if (this.isRightPanelVisible) {
-        this.closeRight();
-      } else {
-        this.openRight();
-      }
-      this.isRightPanelVisible = !this.isRightPanelVisible;
+      this.$emit('toggle-right-panel', this.index, this.revealed);
+    },
+    toggleLeftPanel() {
+      this.$emit('toggle-left-panel', this.index, this.revealed);
     },
     async confirmClearStatus() {
       try {
@@ -151,21 +156,8 @@ export default {
 };
 </script>
 <style scoped>
-.v-touch-address-card {
-  touch-action: pan-y;
-  height: 100%;
-}
-.address-card {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  position: relative;
-  transition: ease-in-out 0.3s  ;
-  min-height: 60px;
-}
-.address {
-  display: flex;
-  text-align: left;
+.phone-card {
+  min-height: 80px;
 }
 .nh-text {
   font-size: 0.5em;

@@ -1,16 +1,52 @@
 <template>
   <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
     <div class="w-100">
-      <div class="d-flex bg-light justify-content-between align-items-center pc-header-font border px-4 py-2 w-100">
-        <div class="mb-1">
-          <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
-          <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
-        </div>
+      <div class="small text-left bg-light py-2 px-4 w-100 h-100">
+        <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
+        <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
       </div>
       <b-list-group>
-        <b-list-group-item class="d-flex">
+        <swipe-list
+          ref="list"
+          :items="address.phones || []"
+          item-key="id"
+          :revealed.sync="revealed"
+          @active="onActive">
+          <template v-slot="{ item, index, revealed }">
+            <PhoneCard
+              :class="'h-100'"
+              :index="index"
+              :phoneRecord="item"
+              :addressId="item.id"
+              :revealed="revealed"
+              @toggle-right-panel="toggleRightPanel"
+              @toggle-left-panel="toggleLeftPanel">
+            </PhoneCard>
+          </template>
+          <template v-slot:right="{ }">
+            <ActivityButton
+              v-for="(button, index) in rightButtonList"
+              :key="index"
+              class="fa-2x"
+              :value="button.value"
+              :actionButtonList="actionButtonList"
+              >
+            </ActivityButton>
+          </template>
+          <template v-slot:left="{ }">
+            <ActivityButton
+              v-for="(button, index) in leftButtonList"
+              :key="index"
+              class="fa-2x"
+              :value="button.value"
+              :actionButtonList="actionButtonList"
+              >
+            </ActivityButton>
+          </template>
+        </swipe-list>
+        <b-list-group-item class="d-flex py-3">
           <the-mask
-            class="form-control mr-2 py-3"
+            class="form-control mr-2"
             type="tel"
             :mask="'###-###-####'"
             :masked="false"
@@ -20,27 +56,6 @@
             <font-awesome-icon icon="plus"></font-awesome-icon>
           </b-button>
         </b-list-group-item>
-        <swipe-list
-          ref="list"
-          class="py-2"
-          :items="address.phones || []"
-          item-key="id"
-          @swipeout:click="itemClick"
-          @active="closeSwipes">
-          <template v-slot="{ item }">
-            <PhoneCard :phoneRecord="item" :addressId="item.id"></PhoneCard>
-          </template>
-          <template v-slot:right="{ }">
-            <ActivityButton
-              v-for="(button, index) in buttonList"
-              :key="index"
-              class="fa-2x"
-              :value="button.value"
-              :actionButtonList="actionButtonList"
-              >
-            </ActivityButton>
-          </template>
-        </swipe-list>
       </b-list-group>
     </div>
   </div>
@@ -55,7 +70,8 @@ import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 
-const BUTTON_LIST = ['NA', 'CONFIRMED', 'VM', 'DNC', 'LW'];
+const RIGHT_BUTTON_LIST = ['NA', 'CONFIRMED', 'VM', 'LW'];
+const LEFT_BUTTON_LIST = ['REMOVE', 'DNC', 'INVALID'];
 
 export default {
   name: 'PhoneAddressCard',
@@ -72,8 +88,11 @@ export default {
       user: 'auth/user',
       congId: 'auth/congId',
     }),
-    buttonList() {
-      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
+    rightButtonList() {
+      return this.actionButtonList.filter(b => RIGHT_BUTTON_LIST.includes(b.value));
+    },
+    leftButtonList() {
+      return this.actionButtonList.filter(b => LEFT_BUTTON_LIST.includes(b.value));
     },
   },
   data() {
@@ -88,11 +107,24 @@ export default {
       fetchAddress: 'address/fetchAddress',
       addPhone: 'phone/addPhone',
     }),
-    closeSwipes() {
+    onActive() {
       this.$refs.list.closeActions();
     },
-    itemClick() {
-      this.$refs.list.closeActions();
+    toggleRightPanel(index, revealed) {
+      if (revealed) {
+        this.$refs.list.closeActions(index);
+      } else {
+        this.$refs.list.closeActions();
+        this.$refs.list.revealRight(index);
+      }
+    },
+    toggleLeftPanel(index, revealed) {
+      if (revealed) {
+        this.$refs.list.closeActions(index);
+      } else {
+        this.$refs.list.closeActions();
+        this.$refs.list.revealLeft(index);
+      }
     },
     async addNewPhone() {
       const sort = get(this.storeAddress, 'phones.length', 0);
@@ -115,24 +147,13 @@ export default {
 </script>
 <style scoped lang="scss">
 @import "../assets/foreign-field-theme.scss";
-.v-touch-address-card {
-  touch-action: pan-y;
-  height: 100%;
-}
-.address-card {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  position: relative;
-  transition: ease-in-out 0.3s  ;
-  min-height: 60px;
-}
-.address {
-  display: flex;
-  text-align: left;
-}
 .nh-text {
   font-size: 0.5em;
+}
+.swipeout-left, .swipeout-right {
+  .interaction:nth-child(even) {
+    opacity: 0.9;
+  }
 }
 .ellipsis-v, .ellipsis-v-static {
   cursor: pointer;
