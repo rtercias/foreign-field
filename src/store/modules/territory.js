@@ -174,9 +174,15 @@ export const territory = {
                   }
                   phones {
                     id
+                    congregationId
+                    territory_id
+                    parent_id
+                    type
+                    status
                     phone
                     notes
                     sort
+                    create_user
                   }
                 }
                 status {
