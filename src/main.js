@@ -60,6 +60,13 @@ import {
   faSortAmountDownAlt,
   faSms,
   faRedoAlt,
+  faComment,
+  faSmile,
+  faVoicemail,
+  faCommentSlash,
+  faPhoneSlash,
+  faTrashAlt,
+  faMinusCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -95,6 +102,13 @@ library.add(
   faSortAmountDownAlt,
   faSms,
   faRedoAlt,
+  faComment,
+  faSmile,
+  faVoicemail,
+  faCommentSlash,
+  faPhoneSlash,
+  faTrashAlt,
+  faMinusCircle,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

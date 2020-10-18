@@ -15,20 +15,28 @@
   </div>
   <div
     v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
-    class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
+    class="interaction d-flex flex-column justify-content-center align-items-center pl-3 pr-3"
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <font-awesome-layers
-        class="text-white"
+        class="text-white fa-fw"
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
+        <font-awesome-icon :icon="get('icon2')" v-if="!!get('icon2')" :class="`fa-xs text-${get('color')}`">
+        </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
           class="nh-text font-weight-bold"
           :class="{ [`text-${get('color')}`]: !invert, 'text-white': invert }">
         </font-awesome-layers-text>
       </font-awesome-layers>
+    </span>
+    <span
+      v-if="!selected && !!get('description')"
+      class="description"
+      :class="{ [`text-${get('color')}`]: invert, 'text-white': !invert }">
+      {{get('description')}}
     </span>
   </div>
 </template>
@@ -80,13 +88,18 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss">
 .nh-text {
   font-size: 0.5em;
 }
 
 .interaction {
   cursor: pointer;
+
+  .description {
+    font-size: 7pt;
+    white-space: nowrap;
+  }
 }
 
 @media print {

@@ -229,6 +229,7 @@ export default {
   .swipeout-list-item {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
+    min-height: 80px;
 
     .border-medium {
       border-style: solid;

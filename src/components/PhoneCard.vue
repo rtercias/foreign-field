@@ -1,7 +1,7 @@
 <template>
-    <div class="px-4 py-2 d-flex align-items-center">
-        <h4 class="m-auto">{{ formattedPhone }}</h4>
-    </div>
+  <div class="px-4 py-2 d-flex align-items-center">
+    <h5><a :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a></h5>
+  </div>
 </template>
 
 <script>
