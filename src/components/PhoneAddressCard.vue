@@ -33,7 +33,18 @@
               >
             </ActivityButton>
           </template>
-          <template v-slot:left="{ }">
+          <template v-slot:left="{ item }">
+            <div
+              class="interaction fa-2x d-flex flex-column justify-content-center align-items-center pl-3 pr-3 bg-danger">
+              <span class="pl-0">
+                <font-awesome-layers
+                  class="remove-number text-white fa-fw"
+                  @click="() => removePhone(item)">
+                  <font-awesome-icon icon="trash-alt"></font-awesome-icon>
+                </font-awesome-layers>
+              </span>
+              <span class="description text-white">Remove</span>
+            </div>
             <ActivityButton
               v-for="(button, index) in leftButtonList"
               :key="index"
@@ -71,7 +82,7 @@ import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 
 const RIGHT_BUTTON_LIST = ['NA', 'CONFIRMED', 'VM', 'LW'];
-const LEFT_BUTTON_LIST = ['REMOVE', 'DNC', 'INVALID'];
+const LEFT_BUTTON_LIST = ['DNC', 'INVALID'];
 
 export default {
   name: 'PhoneAddressCard',
@@ -106,6 +117,7 @@ export default {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
       addPhone: 'phone/addPhone',
+      updatePhone: 'phone/updatePhone',
     }),
     onActive() {
       this.$refs.list.closeActions();
@@ -141,6 +153,20 @@ export default {
 
       await this.addPhone(phone);
       this.$emit('new-phone-added', phone);
+    },
+    async removePhone(phone) {
+      const response = await this.$bvModal.msgBoxConfirm(`Remove "${this.formatPhone(phone.phone)}" from the list?`, {
+        title: 'Remove Phone',
+        centered: true,
+      });
+
+      if (response) {
+        await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
+        this.$emit('phone-removed', phone);
+      }
+    },
+    formatPhone(phone) {
+      return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
   },
 };
@@ -183,6 +209,10 @@ export default {
 }
 .pc-header-font {
     font-size:.8rem;
+}
+.description {
+  font-size: 7pt;
+  white-space: nowrap;
 }
 @media print {
   .interaction {

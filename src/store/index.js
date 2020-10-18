@@ -29,6 +29,7 @@ export const AddressStatus = {
   Active: 'Active',
   NF: 'NF',
   DNC: 'DNC',
+  Inactive: 'Inactive',
 };
 
 export const store = new Store({

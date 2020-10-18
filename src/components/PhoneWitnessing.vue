@@ -8,7 +8,8 @@
         :address="a"
         :territoryId="territory.id"
         :group="group"
-        @new-phone-added="refreshTerritory">
+        @new-phone-added="refreshTerritory"
+        @phone-removed="removePhone">
     </PhoneAddressCard>
     </div>
   </div>
@@ -88,7 +89,9 @@ export default {
 
     async refreshTerritory(phone) {
       if (phone) {
-        const address = this.territory.addresses.find(a => a.id === phone.parent_id || phone.territory_id);
+        const address = this.territory.addresses.find(a => a.id === phone.parent_id || this.id);
+        if (!address) return;
+
         const index = address.phones.findIndex(p => p.id === phone.id);
         if (index >= 0) {
           address.phones.splice(index, 1, phone);
@@ -97,6 +100,14 @@ export default {
         }
       } else {
         await this.getTerritory(this.id);
+      }
+    },
+    async removePhone(phone) {
+      const address = this.territory.addresses.find(a => a.id === phone.parent_id || this.id);
+      if (!address) return;
+      const index = address.phones.findIndex(p => p.id === phone.id);
+      if (index >= 0) {
+        address.phones.splice(index, 1);
       }
     },
     seenTerritories() {

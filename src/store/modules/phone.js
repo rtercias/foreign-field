@@ -91,14 +91,6 @@ const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
-    value: 'REMOVE',
-    text: '',
-    icon: 'trash-alt',
-    color: 'danger',
-    description: 'Remove',
-  },
-  {
-    type: 'fa-icon',
     value: 'INVALID',
     text: '',
     icon: 'phone-slash',
@@ -327,7 +319,7 @@ export const phone = {
         },
         data: {
           query: print(gql`mutation UpdatePhone($phone: PhoneInput!) { 
-            updatePhones(phone: $phone) { 
+            updatePhone(phone: $phone) { 
               ...Model
             }
           }

@@ -3,7 +3,10 @@
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <h5 class="mb-0 mr-auto ml-2"><a :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a></h5>
+    <h5 class="mb-0 mr-auto ml-2">
+      <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
+      <span v-else>{{ formattedPhone }}</span>
+    </h5>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
@@ -142,6 +145,11 @@ export default {
     isMySelectedResponse() {
       const publisherId = get(this.phoneRecord.lastActivity, 'publisher_id', '') || '';
       return publisherId.toString() === get(this.user, 'id', '').toString();
+    },
+    allowedToCall() {
+      const notAllowed = ['INVALID', 'DNC'];
+      const lastActivity = this.lastActivity || {};
+      return !notAllowed.includes(lastActivity.value);
     },
   },
   watch: {
