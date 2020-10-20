@@ -66,7 +66,7 @@ const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
-    value: 'CONFIRMED',
+    value: 'CNFRM',
     text: '',
     icon: 'comment',
     icon2: 'check',
@@ -91,7 +91,7 @@ const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
-    value: 'INVALID',
+    value: 'INVLD',
     text: '',
     icon: 'phone-slash',
     color: 'danger',

@@ -19,17 +19,20 @@
               :phoneRecord="item"
               :addressId="item.id"
               :revealed="revealed"
+              :incomingResponse="item.incomingResponse"
+              @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
               @toggle-left-panel="toggleLeftPanel">
             </PhoneCard>
           </template>
-          <template v-slot:right="{ }">
+          <template v-slot:right="{ item, close }">
             <ActivityButton
               v-for="(button, index) in rightButtonList"
               :key="index"
               class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList"
+              @button-click="() => updateResponse(item, button.value, close)"
               >
             </ActivityButton>
           </template>
@@ -81,17 +84,24 @@ import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 
-const RIGHT_BUTTON_LIST = ['NA', 'CONFIRMED', 'VM', 'LW'];
-const LEFT_BUTTON_LIST = ['DNC', 'INVALID'];
+const RIGHT_BUTTON_LIST = ['NA', 'CNFRM', 'VM', 'LW'];
+const LEFT_BUTTON_LIST = ['DNC', 'INVLD'];
 
 export default {
   name: 'PhoneAddressCard',
-  props: ['address', 'territoryId', 'group'],
+  props: ['address', 'territory'],
   components: {
     PhoneCard,
     SwipeList,
     ActivityButton,
     TheMask,
+  },
+  data() {
+    return {
+      enabled: true,
+      revealed: {},
+      newPhone: '',
+    };
   },
   computed: {
     ...mapGetters({
@@ -106,18 +116,13 @@ export default {
       return this.actionButtonList.filter(b => LEFT_BUTTON_LIST.includes(b.value));
     },
   },
-  data() {
-    return {
-      enabled: true,
-      revealed: {},
-      newPhone: '',
-    };
-  },
   methods: {
     ...mapActions({
-      fetchAddress: 'address/fetchAddress',
+      fetchPhone: 'phone/fetchPhone',
       addPhone: 'phone/addPhone',
       updatePhone: 'phone/updatePhone',
+      setPhone: 'phone/setPhone',
+      addLog: 'address/addLog',
     }),
     onActive() {
       this.$refs.list.closeActions();
@@ -155,10 +160,12 @@ export default {
       this.$emit('new-phone-added', phone);
     },
     async removePhone(phone) {
-      const response = await this.$bvModal.msgBoxConfirm(`Remove "${this.formatPhone(phone.phone)}" from the list?`, {
-        title: 'Remove Phone',
-        centered: true,
-      });
+      const response = await this.$bvModal.msgBoxConfirm(
+        `Remove "${this.formatPhone(phone.phone)}" from the list?`, {
+          title: 'Remove Phone',
+          centered: true,
+        }
+      );
 
       if (response) {
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
@@ -167,6 +174,39 @@ export default {
     },
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+    },
+    async updateResponse(phone, _value, close) {
+      let value = _value;
+      this.setPhone(phone);
+
+      if (phone.selectedResponse === 'START' && value === 'START') return;
+
+      if (!this.rightButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
+
+      try {
+        await this.addLog({ entityId: phone.id, value });
+        await this.fetchPhone(phone.id);
+        const address = this.territory.addresses.find(a => a.id === phone.parent_id);
+        const updatedPhone = address.phones.find(p => p.id === phone.id);
+        const timestamp = Date.now();
+
+        this.$set(updatedPhone, 'selectedResponse', value);
+        this.$set(updatedPhone, 'selectedResponseTS', timestamp);
+        this.$set(updatedPhone, 'lastActivity', {
+          publisher_id: this.user.id,
+          address_id: address.id,
+          timestamp,
+          value,
+        });
+
+        this.$set(this.territory, 'lastActivity', updatedPhone.lastActivity);
+
+        if (typeof close === 'function') close();
+      } catch (e) {
+        console.error('Unable to save activity log', e);
+      }
     },
   },
 };

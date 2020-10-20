@@ -183,6 +183,11 @@ export const territory = {
                     notes
                     sort
                     create_user
+                    lastActivity {
+                      address_id
+                      value
+                      timestamp
+                    }
                   }
                 }
                 status {

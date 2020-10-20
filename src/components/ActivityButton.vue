@@ -23,7 +23,11 @@
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
-        <font-awesome-icon :icon="get('icon2')" v-if="!!get('icon2')" :class="`fa-xs text-${get('color')}`">
+        <font-awesome-icon :icon="get('icon2')" v-if="!!get('icon2')" :class="{
+          'fa-xs p-1': true,
+          [`text-${get('color')}`]: !invert,
+          'text-white': invert
+          }">
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
