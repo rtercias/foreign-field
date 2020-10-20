@@ -1,13 +1,12 @@
 <template>
-  <div class="phone-witnessing" v-on:click="printTerritory">
+  <div class="phone-witnessing">
     <Loading v-if="isLoading"></Loading>
     <div class="w-100">
     <PhoneAddressCard
           v-for="a in territory.addresses" :key="a.id"
         :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
         :address="a"
-        :territoryId="territory.id"
-        :group="group"
+        :territory="territory"
         @new-phone-added="refreshTerritory"
         @phone-removed="removePhone">
     </PhoneAddressCard>
@@ -33,11 +32,17 @@ export default {
   },
   props: ['group', 'id'],
   async mounted() {
-    channel.bind('add-log', (log) => {
-      if (this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === log.address_id);
+    channel.bind('add-log', async (log) => {
+      const id = log.address_id;
+      // TODO: parent_id to pushed log, then remove fetchPhone and async
+      await this.fetchPhone(id);
+      if (this.territory && this.territory.addresses && this.phone) {
+        const address = this.territory.addresses.find(a => a.id === this.phone.parent_id);
         if (address) {
-          this.$set(address, 'incomingResponse', log);
+          const phone = address.phones.find(p => p.id === id);
+          if (phone) {
+            this.$set(phone, 'incomingResponse', log);
+          }
         }
       }
     });
@@ -62,7 +67,7 @@ export default {
       token: 'auth/token',
       authLoading: 'auth/loading',
       canCheckout: 'auth/canCheckout',
-      address: 'address/address',
+      phone: 'phone/phone',
     }),
     lastActivity() {
       return this.territory.lastActivity;
@@ -76,13 +81,8 @@ export default {
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
       setLeftNavRoute: 'auth/setLeftNavRoute',
-      setAddress: 'address/setAddress',
-      addLog: 'address/addLog',
+      fetchPhone: 'phone/fetchPhone',
     }),
-    printTerritory() {
-      // eslint-disable-next-line no-console
-      // console.log(this.territory);
-    },
     isActiveAddress(addressId) {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;
     },
@@ -154,31 +154,6 @@ export default {
     },
     isTerritoryCheckedOut() {
       return get(this.territory, 'status.status') === 'Checked Out';
-    },
-    async updateResponse(address, _value, close) {
-      let value = _value;
-      this.setAddress(address);
-
-      if (address.selectedResponse === 'START' && value === 'START') return;
-
-      if (!this.actionButtonList.some(b => b.value === value)) {
-        value = 'START';
-      }
-
-      try {
-        await this.addLog({ addressId: address.id, value });
-        const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
-        updatedAddress.lastActivity = {
-          publisher_id: this.user.id,
-          timestamp: Date.now(),
-          value,
-        };
-        if (typeof close === 'function') close();
-      } catch (e) {
-        console.error('Unable to save activity log', e);
-      } finally {
-        this.isLogging = false;
-      }
     },
   },
   watch: {

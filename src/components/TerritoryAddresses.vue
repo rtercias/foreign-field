@@ -111,6 +111,7 @@ export default {
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
+      fetchAddress: 'address/fetchAddress',
     }),
 
     openSwipe(index, revealed) {
@@ -195,7 +196,8 @@ export default {
       }
 
       try {
-        await this.addLog({ addressId: address.id, value });
+        await this.addLog({ entityId: address.id, value });
+        await this.fetchAddress(address.id);
         const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
         updatedAddress.lastActivity = {
           publisher_id: this.user.id,

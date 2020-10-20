@@ -7,6 +7,23 @@
       <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
       <span v-else>{{ formattedPhone }}</span>
     </h5>
+    <div class="static-buttons col-3 pr-2 justify-content-end">
+      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging">
+      </font-awesome-icon>
+      <div
+        :class="{ hidden: phoneRecord.selectedResponse === 'START' || isLogging }"
+        class="d-flex flex-column">
+        <ActivityButton
+          class="selected-response fa-2x"
+          :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
+          :value="phoneRecord.selectedResponse"
+          :next="'START'"
+          :selected="true"
+          :actionButtonList="actionButtonList"
+          @button-click="confirmClearStatus">
+        </ActivityButton>
+      </div>
+    </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
@@ -45,8 +62,7 @@ export default {
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
-      setAddress: 'address/setAddress',
-      fetchAddress: 'address/fetchAddress',
+      setPhone: 'phone/setPhone',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
@@ -72,7 +88,7 @@ export default {
             `<div class="pb-3">
               ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
             </div>` : ''}
-            <div class="fa-lg">Clear the phone status?</div>`,
+            <div class="fa-lg">Clear the status?</div>`,
           },
         });
         const value = await this.$bvModal.msgBoxConfirm([message], {
@@ -99,7 +115,7 @@ export default {
     },
   },
   mounted() {
-    this.setAddress(this.phoneRecord);
+    this.setPhone(this.phoneRecord);
     if (this.lastActivity) {
       this.$set(this.phoneRecord, 'selectedResponse', this.lastActivity.value || this.START);
       this.$set(this.phoneRecord, 'selectedResponseTS', Number(this.lastActivity.timestamp) || null);
@@ -108,9 +124,7 @@ export default {
   computed: {
     ...mapGetters({
       loading: 'auth/loading',
-      territory: 'territory/territory',
-      updatedAddress: 'address/address',
-      actionButtonList: 'address/actionButtonList',
+      actionButtonList: 'phone/actionButtonList',
       user: 'auth/user',
       publisher: 'publisher/publisher',
     }),
