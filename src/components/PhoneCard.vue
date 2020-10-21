@@ -4,7 +4,7 @@
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
     <div class="d-flex flex-column pl-0 col-8">
-      <h5 class="mb-0 mr-auto ml-2">
+      <h5 class="mb-0 mr-auto">
         <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
       </h5>
@@ -170,8 +170,8 @@ export default {
   watch: {
     incomingResponse(log) {
       if (log) {
-        this.phoneRecord.selectedResponse = log.value;
-        this.phoneRecord.selectedResponseTS = log.timestamp;
+        this.$set(this.phoneRecord, 'selectedResponse', log.value);
+        this.$set(this.phoneRecord, 'selectedResponseTS', log.timestamp);
         this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
       }
     },
