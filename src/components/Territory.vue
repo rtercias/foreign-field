@@ -25,7 +25,11 @@
               <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
                 List
               </b-button>
-              <b-button variant="info" :to="`/territories/${group}/${id}/phone`" :pressed="viewMode==='phone-list'">
+              <b-button
+                v-if="canViewReports"
+                variant="info"
+                :to="`/territories/${group}/${id}/phone`"
+                :pressed="viewMode==='phone-list'">
                 Phone
               </b-button>
               <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
@@ -83,6 +87,7 @@ export default {
       territory: 'territory/territory',
       authIsLoading: 'auth/loading',
       user: 'auth/user',
+      canViewReports: 'auth/canViewReports',
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
       ownedBy: 'territory/isOwnedByUser',

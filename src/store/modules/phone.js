@@ -33,6 +33,7 @@ const model = gql`fragment Model on Phone {
     value
     timestamp
     publisher_id
+    address_id
   }
 }`;
 
@@ -149,6 +150,10 @@ function validatePhone(_phone, isNew) {
     delete phone.selectedResponseTS;
   }
 
+  if ('isBusy' in phone) {
+    delete phone.isBusy;
+  }
+
   return phone;
 }
 
@@ -178,30 +183,6 @@ export const phone = {
   mutations: {
     SET_PHONE(state, _phone) {
       state.phone = _phone;
-    },
-
-    ADD_LOG(state, log) {
-      if (state.phone.id === log.address_id) {
-        state.phone.activityLogs.push(log);
-      }
-    },
-
-    UPDATE_LOG(state, log) {
-      if (state.phone.id === log.address_id) {
-        const index = state.phone.activityLogs.findIndex(a => a.id === log.id);
-        if (index !== -1) {
-          state.phone.activityLogs.splice(index, 1, log);
-        }
-      }
-    },
-
-    REMOVE_LOG(state, { id, addressId }) {
-      if (state.phone.id === addressId) {
-        const index = state.phone.activityLogs.findIndex(a => a.id === id);
-        if (index !== -1) {
-          state.phone.activityLogs.splice(index, 1);
-        }
-      }
     },
 
     ADD_PHONE(state, _phone) {

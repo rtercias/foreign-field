@@ -3,20 +3,23 @@
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <h5 class="mb-0 mr-auto ml-2">
-      <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
-      <span v-else>{{ formattedPhone }}</span>
-    </h5>
+    <div class="d-flex flex-column pl-0 col-8">
+      <h5 class="mb-0 mr-auto ml-2">
+        <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
+        <span v-else>{{ formattedPhone }}</span>
+      </h5>
+      <PhoneTags :phone="phoneRecord"></PhoneTags>
+    </div>
     <div class="static-buttons col-3 pr-2 justify-content-end">
-      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging">
+      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isBusy">
       </font-awesome-icon>
       <div
-        :class="{ hidden: phoneRecord.selectedResponse === 'START' || isLogging }"
+        :class="{ hidden: selectedResponse === 'START' || isBusy }"
         class="d-flex flex-column">
         <ActivityButton
           class="selected-response fa-2x"
           :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-          :value="phoneRecord.selectedResponse"
+          :value="selectedResponse"
           :next="'START'"
           :selected="true"
           :actionButtonList="actionButtonList"
@@ -35,14 +38,14 @@ import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
-import AddressTags from './AddressTags';
+import PhoneTags from './PhoneTags';
 
 export default {
   name: 'PhoneCard',
   props: ['phoneRecord', 'addressId', 'incomingResponse', 'revealed', 'index'],
   components: {
     ActivityButton,
-    AddressTags,
+    PhoneTags,
   },
   data() {
     return {
@@ -56,7 +59,7 @@ export default {
       isLeftPanelVisible: false,
       transform: '',
       clickedToOpen: false,
-      isLogging: false,
+      isBusy: false,
     };
   },
   methods: {
@@ -78,9 +81,11 @@ export default {
         if (this.lastActivity.publisher_id === this.user.id) {
           publisherName = 'you';
         } else {
+          this.phoneRecord.isBusy = true;
           await this.getLastActivityPublisher();
           publisherName = this.publisher.firstname && this.publisher.lastname
             && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          this.phoneRecord.isBusy = false;
         }
         const message = h('p', {
           domProps: {
@@ -96,9 +101,9 @@ export default {
           centered: true,
         });
         if (value) {
-          this.isLogging = true;
+          this.isBusy = true;
           this.$emit('update-response', this.phoneRecord, 'START', () => {
-            this.isLogging = false;
+            this.isBusy = false;
           });
         }
       } catch (err) {
@@ -113,13 +118,6 @@ export default {
       const congId = this.user.congregation.id;
       await this.fetchPublisher({ id, congId });
     },
-  },
-  mounted() {
-    this.setPhone(this.phoneRecord);
-    if (this.lastActivity) {
-      this.$set(this.phoneRecord, 'selectedResponse', this.lastActivity.value || this.START);
-      this.$set(this.phoneRecord, 'selectedResponseTS', Number(this.lastActivity.timestamp) || null);
-    }
   },
   computed: {
     ...mapGetters({
@@ -155,6 +153,9 @@ export default {
     },
     lastActivity() {
       return this.phoneRecord.lastActivity || { value: 'START', timestamp: '' };
+    },
+    selectedResponse() {
+      return this.lastActivity.value;
     },
     isMySelectedResponse() {
       const publisherId = get(this.phoneRecord.lastActivity, 'publisher_id', '') || '';

@@ -1,9 +1,10 @@
 <template>
   <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
     <div class="w-100">
-      <div class="small text-left bg-light py-2 px-4 w-100 h-100">
-        <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
-        <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
+      <div class="small text-left bg-light py-2 px-4 w-100 h-100 d-flex align-items-center">
+        <span class="address">{{address.addr1}} {{address.addr2}}&nbsp;
+        {{address.city}} {{address.state_province}} {{address.postal_code}}</span>
+        <font-awesome-icon class="text-info fa-2x" icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
       </div>
       <b-list-group>
         <swipe-list
@@ -32,11 +33,10 @@
               class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList"
-              @button-click="() => updateResponse(item, button.value, close)"
-              >
+              @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
-          <template v-slot:left="{ item }">
+          <template v-slot:left="{ item, close }">
             <div
               class="interaction fa-2x d-flex flex-column justify-content-center align-items-center pl-3 pr-3 bg-danger">
               <span class="pl-0">
@@ -54,6 +54,7 @@
               class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList"
+              @button-click="(value, button) => applyTag(item, button, close)"
               >
             </ActivityButton>
           </template>
@@ -64,7 +65,8 @@
             type="tel"
             :mask="'###-###-####'"
             :masked="false"
-            v-model="newPhone">
+            v-model="newPhone"
+            @mousedown.native="onActive">
           </the-mask>
           <b-button variant="success text-white" @click="addNewPhone">
             <font-awesome-icon icon="plus"></font-awesome-icon>
@@ -101,6 +103,7 @@ export default {
       enabled: true,
       revealed: {},
       newPhone: '',
+      isAddressBusy: false,
     };
   },
   computed: {
@@ -122,6 +125,8 @@ export default {
       addPhone: 'phone/addPhone',
       updatePhone: 'phone/updatePhone',
       setPhone: 'phone/setPhone',
+      addTag: 'phone/addTag',
+      removeTag: 'phone/removeTag',
       addLog: 'address/addLog',
     }),
     onActive() {
@@ -144,11 +149,14 @@ export default {
       }
     },
     async addNewPhone() {
+      if (!this.newPhone) return;
+
+      this.isAddressBusy = true;
       const sort = get(this.storeAddress, 'phones.length', 0);
       const phone = {
         congregationId: this.congId,
         parent_id: this.address.id,
-        territory_id: this.territoryId,
+        territory_id: this.territory.id,
         type: AddressType.Phone,
         status: AddressStatus.Active,
         phone: this.newPhone,
@@ -157,7 +165,9 @@ export default {
       };
 
       await this.addPhone(phone);
-      this.$emit('new-phone-added', phone);
+      this.address.phones.push(phone);
+      this.newPhone = '';
+      this.isAddressBusy = false;
     },
     async removePhone(phone) {
       const response = await this.$bvModal.msgBoxConfirm(
@@ -168,8 +178,11 @@ export default {
       );
 
       if (response) {
+        this.isAddressBusy = true;
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
-        this.$emit('phone-removed', phone);
+        const index = this.address.phones.findIndex(p => p.id === phone.id);
+        this.address.phones.splice(index, 1);
+        this.isAddressBusy = false;
       }
     },
     formatPhone(phone) {
@@ -188,24 +201,51 @@ export default {
       try {
         await this.addLog({ entityId: phone.id, value });
         await this.fetchPhone(phone.id);
-        const address = this.territory.addresses.find(a => a.id === phone.parent_id);
-        const updatedPhone = address.phones.find(p => p.id === phone.id);
+        const updatedPhone = this.address.phones.find(p => p.id === phone.id);
         const timestamp = Date.now();
 
         this.$set(updatedPhone, 'selectedResponse', value);
         this.$set(updatedPhone, 'selectedResponseTS', timestamp);
         this.$set(updatedPhone, 'lastActivity', {
           publisher_id: this.user.id,
-          address_id: address.id,
+          address_id: this.address.id,
           timestamp,
           value,
         });
 
         this.$set(this.territory, 'lastActivity', updatedPhone.lastActivity);
-
         if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
+      }
+    },
+    async applyTag(phone, item, close) {
+      const exclusiveTags = ['invalid', 'do not call'];
+      const newTag = item.description.toLowerCase();
+
+      try {
+        const model = this.address.phones.find(p => p.id === phone.id);
+        const oldArray = model.notes ? model.notes.split(',') : [];
+        let newArray = [...oldArray];
+
+        if (exclusiveTags.includes(newTag)) {
+          // if new tag is exclusive, then remove all other exclusive tags
+          for (const tag of exclusiveTags) {
+            await this.removeTag({ phoneId: phone.id, userid: this.user.id, tag });
+          }
+          newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+        }
+
+        // add new tag
+        await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
+        newArray.push(newTag);
+
+        // update model
+        const updatedNotes = newArray.join(',');
+        this.$set(model, 'notes', `${updatedNotes}`);
+        if (typeof close === 'function') close();
+      } catch (e) {
+        console.error('Unable to apply tag', e);
       }
     },
   },
@@ -213,6 +253,11 @@ export default {
 </script>
 <style scoped lang="scss">
 @import "../assets/foreign-field-theme.scss";
+.address {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
+}
 .nh-text {
   font-size: 0.5em;
 }
@@ -241,11 +286,6 @@ export default {
   font-size: small;
   position: relative;
   bottom: 2px;
-}
-.logging-spinner {
-  font-size: 30px;
-  position: absolute;
-  right: 21px;
 }
 .pc-header-font {
     font-size:.8rem;

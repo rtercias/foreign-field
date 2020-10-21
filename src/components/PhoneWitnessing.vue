@@ -1,16 +1,13 @@
 <template>
   <div class="phone-witnessing">
     <Loading v-if="isLoading"></Loading>
-    <div class="w-100">
     <PhoneAddressCard
-          v-for="a in territory.addresses" :key="a.id"
-        :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-        :address="a"
-        :territory="territory"
-        @new-phone-added="refreshTerritory"
-        @phone-removed="removePhone">
+      v-else
+      v-for="a in territory.addresses" :key="a.id"
+      :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+      :address="a"
+      :territory="territory">
     </PhoneAddressCard>
-    </div>
   </div>
 </template>
 
@@ -86,30 +83,6 @@ export default {
     isActiveAddress(addressId) {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;
     },
-
-    async refreshTerritory(phone) {
-      if (phone) {
-        const address = this.territory.addresses.find(a => a.id === phone.parent_id || this.id);
-        if (!address) return;
-
-        const index = address.phones.findIndex(p => p.id === phone.id);
-        if (index >= 0) {
-          address.phones.splice(index, 1, phone);
-        } else {
-          address.phones.push(phone);
-        }
-      } else {
-        await this.getTerritory(this.id);
-      }
-    },
-    async removePhone(phone) {
-      const address = this.territory.addresses.find(a => a.id === phone.parent_id || this.id);
-      if (!address) return;
-      const index = address.phones.findIndex(p => p.id === phone.id);
-      if (index >= 0) {
-        address.phones.splice(index, 1);
-      }
-    },
     seenTerritories() {
       let seenTerritories = [];
       if (localStorage.getItem('seenTerritories')) {
@@ -158,6 +131,7 @@ export default {
   },
   watch: {
     async token() {
+      this.isLoading = true;
       await this.loadTerritory();
     },
     immediate: true,

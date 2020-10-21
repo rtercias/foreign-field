@@ -185,6 +185,7 @@ export const territory = {
                     create_user
                     lastActivity {
                       address_id
+                      publisher_id
                       value
                       timestamp
                     }
