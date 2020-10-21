@@ -7,7 +7,7 @@ import { InvalidPhoneError } from '../exceptions/custom-errors';
 const model = gql`fragment Model on Phone {
   id
   congregationId
-  parentId: parent_id
+  parent_id
   territory_id
   type
   status

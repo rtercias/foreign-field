@@ -30,15 +30,14 @@ export default {
   props: ['group', 'id'],
   async mounted() {
     channel.bind('add-log', async (log) => {
-      const id = log.address_id;
-      // TODO: parent_id to pushed log, then remove fetchPhone and async
-      await this.fetchPhone(id);
-      if (this.territory && this.territory.addresses && this.phone) {
-        const address = this.territory.addresses.find(a => a.id === this.phone.parent_id);
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === log.parent_id);
         if (address) {
+          const id = log.address_id;
           const phone = address.phones.find(p => p.id === id);
           if (phone) {
-            this.$set(phone, 'incomingResponse', log);
+            this.$set(phone, 'incomingResponse', log.value);
+            this.$set(phone, 'lastActivity', log);
           }
         }
       }
