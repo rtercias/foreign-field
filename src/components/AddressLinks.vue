@@ -58,8 +58,9 @@ export default {
     };
   },
   async mounted() {
+    const { origin } = this.$route.query;
     this.isLoading = true;
-    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
+    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}/${origin}`);
     await this.fetchAddress(this.addressId);
     this.isLoading = false;
   },

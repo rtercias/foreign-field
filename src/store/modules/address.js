@@ -178,6 +178,10 @@ function validateAddress(_address, isNew) {
     delete address.selectedResponseTS;
   }
 
+  if ('phones' in address) {
+    delete address.phones;
+  }
+
   return address;
 }
 
