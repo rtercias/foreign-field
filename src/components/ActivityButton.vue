@@ -61,6 +61,7 @@ export default {
     'displayOnly',
     'selected',
     'actionButtonList',
+    'spin',
   ],
   methods: {
     ...mapActions({
@@ -69,9 +70,9 @@ export default {
 
     click: debounce(async function (value) {
       if (this.displayOnly) {
-        this.$emit('display-click', value);
+        this.$emit('display-click', value, this.item);
       } else {
-        this.$emit('button-click', value);
+        this.$emit('button-click', value, this.item);
       }
     }, 500, { leading: true, trailing: false }),
 

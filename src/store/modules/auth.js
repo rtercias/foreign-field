@@ -25,6 +25,7 @@ function initialState() {
     user: undefined,
     photoUrl: '',
     congId: 0,
+    congregation: {},
     groupCodes: [],
     loading: false,
     mastheadLeftNavRoute: '/',
@@ -43,6 +44,7 @@ export const auth = {
     isForcedOut: state => state.isForcedOut,
     user: state => state.user,
     congId: state => state.congId,
+    congregation: state => state.congregation,
     groupCodes: state => state.groupCodes,
     isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
@@ -73,6 +75,7 @@ export const auth = {
     AUTHORIZE(state, user) {
       state.user = user;
       state.congId = state.user && state.user.congregation && state.user.congregation.id || 0;
+      state.congregation = state.user && state.user.congregation;
     },
 
     FORCEOUT(state) {
@@ -131,6 +134,8 @@ export const auth = {
                   id
                   name
                   description
+                  language
+                  options
                 }
                 territories {
                   id
