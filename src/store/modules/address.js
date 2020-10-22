@@ -20,6 +20,12 @@ const model = gql`fragment Model on Address {
   notes
   status
   sort
+  phones {
+    id
+    phone
+    notes
+    sort 
+  }
   activityLogs {
     id
     checkout_id
@@ -69,6 +75,7 @@ const ACTION_BUTTON_LIST = [
     text: 'NH',
     icon: 'circle',
     color: 'warning',
+    // description: 'Not Home',
   },
   {
     type: 'fa-icon',
@@ -76,6 +83,7 @@ const ACTION_BUTTON_LIST = [
     text: '',
     icon: 'house-user',
     color: 'primary',
+    // description: 'Home',
   },
   {
     type: 'fa-icon',
@@ -83,6 +91,7 @@ const ACTION_BUTTON_LIST = [
     text: '',
     icon: 'phone',
     color: 'info',
+    // description: 'Phone',
   },
   {
     type: 'fa-icon',
@@ -90,10 +99,11 @@ const ACTION_BUTTON_LIST = [
     text: '',
     icon: 'envelope',
     color: 'primary',
+    // description: 'Letter',
   },
 ];
 
-function createActivityLog(id, addressId, value, checkoutId, user) {
+export function createActivityLog(id, addressId, value, checkoutId, user) {
   return {
     id,
     checkout_id: checkoutId,
@@ -166,6 +176,10 @@ function validateAddress(_address, isNew) {
 
   if ('selectedResponseTS' in address) {
     delete address.selectedResponseTS;
+  }
+
+  if ('phones' in address) {
+    delete address.phones;
   }
 
   return address;
@@ -293,18 +307,15 @@ export const address = {
       }
     },
 
-    async addLog({
-      commit, dispatch, getters, rootGetters,
-    }, { addressId, value }) {
+    async addLog({ commit, getters, rootGetters }, { entityId, value }) {
       try {
         const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
         const user = rootGetters['auth/user'];
-        const activityLog = createActivityLog(0, addressId, value, checkoutId, user);
+        const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
 
         commit('auth/LOADING', true, { root: true });
-        commit(ADD_LOG, activityLog);
 
-        const response = await axios({
+        await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -323,11 +334,7 @@ export const address = {
           },
         });
 
-        if (response && response.data && response.data.data) {
-          dispatch('fetchAddress', addressId);
-        }
-
-        return response;
+        commit(ADD_LOG, activityLog);
       } catch (e) {
         console.error('Unable to add an activityLog', e);
         throw e;
@@ -336,18 +343,15 @@ export const address = {
       }
     },
 
-    async updateLog({
-      commit, dispatch, getters, rootGetters,
-    }, { id, addressId, value }) {
+    async updateLog({ commit, getters, rootGetters }, { id, entityId, value }) {
       try {
         const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
         const user = rootGetters['auth/user'];
-        const activityLog = createActivityLog(id, addressId, value, checkoutId, user);
+        const activityLog = createActivityLog(id, entityId, value, checkoutId, user);
 
         commit('auth/LOADING', true, { root: true });
-        commit(UPDATE_LOG, activityLog);
 
-        const response = await axios({
+        await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -366,9 +370,7 @@ export const address = {
           },
         });
 
-        if (response && response.data && response.data.data) {
-          dispatch('fetchAddress', addressId);
-        }
+        commit(UPDATE_LOG, activityLog);
       } catch (e) {
         console.error('Unable to update an activityLog', e);
       }
@@ -376,12 +378,11 @@ export const address = {
       commit('auth/LOADING', false, { root: true });
     },
 
-    async removeLog({ commit, dispatch }, { id, addressId }) {
+    async removeLog({ commit }, { id, entityId }) {
       try {
         commit('auth/LOADING', true, { root: true });
-        commit(REMOVE_LOG, { id, addressId });
 
-        const response = await axios({
+        await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -397,9 +398,7 @@ export const address = {
           },
         });
 
-        if (response && response.data && response.data.data) {
-          dispatch('fetchAddress', addressId);
-        }
+        commit(REMOVE_LOG, { id, entityId });
       } catch (e) {
         console.error('Unable to remove an activityLog', e);
       }

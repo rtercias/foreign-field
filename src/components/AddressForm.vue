@@ -2,16 +2,18 @@
   <div class="address-form">
     <div class="address-header justify-content-around align-items-center lead pt-3 pb-3">
       <span v-if="mode===modes.add" class="lead font-weight-bold w-100">Add New Address</span>
-      <div v-else class="lead font-weight-bold w-100">
+      <div v-else-if="mode===modes.edit" class="lead font-weight-bold w-100">
         <div>{{address.addr1}} {{address.addr2}}</div>
         <div>{{address.city}} {{address.state_province}} {{address.postal_code}}</div>
       </div>
+      <span v-else-if="mode===modes.phoneAdd" class="lead font-weight-bold w-100">Add New Phone</span>
+      <div v-else-if="mode===modes.phoneEdit">{{address.phone}}</div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <Loading v-if="isLoading || isSearching"></Loading>
     <b-form v-else class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
-        <div v-if="canWrite">
+        <div v-if="canWrite && mode !== modes.phoneAdd && mode !== modes.phoneEdit">
           <b-form-group>
             <b-form-checkbox v-model="useGeocodedAddress">Use geocoded address</b-form-checkbox>
           </b-form-group>
@@ -156,6 +158,8 @@ import { InvalidAddressError } from '../store/exceptions/custom-errors';
 const Modes = {
   add: 'add',
   edit: 'edit',
+  phoneAdd: 'phone-add',
+  phoneEdit: 'phone-edit',
 };
 
 const required = ['congregationId', 'territory_id', 'addr1', 'city', 'state_province'];
@@ -163,7 +167,7 @@ const requiredAddress = ['addr1', 'city', 'state_province'];
 
 export default {
   name: 'AddressForm',
-  props: ['group', 'territoryId', 'addressId', 'mode', 'phone'],
+  props: ['group', 'territoryId', 'addressId', 'mode', 'phoneId'],
   components: {
     TheMask,
     AddressMap,

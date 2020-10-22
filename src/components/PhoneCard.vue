@@ -1,41 +1,37 @@
 <template>
-  <div class="address-card-container p-2 d-flex align-items-center">
-    <div class="w-100">
-      <div class="address-card row justify-content-between align-items-start pr-2 text-black-50">
-        <div class="address col-9 flex-column pt-2 pb-4">
-          <div>
-            <h5 class="mb-0">
-              <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
-                {{address.addr1}}
-              </b-link>&nbsp;
-            </h5>
-            {{address.addr2}}
-            <div class="mb-1">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
-            </div>
-            <div class="phone">
-              <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
-            </div>
-          </div>
-        </div>
-        <div class="static-buttons col-3 pt-3 pr-2 justify-content-end">
-          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
-          <div
-            :class="{ hidden: address.selectedResponse === 'START' || isLogging }"
-            class="d-flex flex-column">
-            <ActivityButton
-              class="selected-response fa-2x"
-              :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-              :value="address.selectedResponse"
-              :next="'START'"
-              :selected="true"
-              :actionButtonList="actionButtonList"
-              @button-click="confirmClearStatus">
-            </ActivityButton>
-          </div>
-        </div>
+  <div class="phone-card p-2 d-flex align-items-center justify-content-between">
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
+      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
+    </font-awesome-layers>
+    <div class="d-flex flex-column pl-2 col-8">
+      <h5 class="mb-0 mr-auto">
+        <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
+        <span v-else>{{ formattedPhone }}</span>
+        <font-awesome-icon
+          v-if="lastActivity.value !== 'CNFRM'"
+          class="small text-primary ml-2"
+          icon="pencil-alt"
+          @click="editPhone">
+        </font-awesome-icon>
+      </h5>
+      <PhoneTags :phone="phoneRecord"></PhoneTags>
+    </div>
+    <div class="static-buttons col-3 pr-2 justify-content-end">
+      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
+      </font-awesome-icon>
+      <div
+        :class="{ hidden: selectedResponse === 'START' || phoneRecord.isBusy }"
+        class="d-flex flex-column">
+        <ActivityButton
+          class="selected-response fa-2x"
+          :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
+          :value="selectedResponse"
+          :next="'START'"
+          :selected="true"
+          :actionButtonList="actionButtonList"
+          @button-click="confirmClearStatus">
+        </ActivityButton>
       </div>
-      <AddressTags :address="address" v-on="$listeners"></AddressTags>
     </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
@@ -47,41 +43,44 @@
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
-import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
-import AddressTags from './AddressTags';
+import PhoneTags from './PhoneTags';
 
 export default {
-  name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse', 'revealed', 'index'],
+  name: 'PhoneCard',
+  props: ['phoneRecord', 'addressId', 'incomingResponse', 'revealed', 'index'],
   components: {
-    AddressLinks,
     ActivityButton,
-    AddressTags,
+    PhoneTags,
   },
   data() {
     return {
-      storageId: `foreignfield-${this.address.id}`,
+      storageId: `foreignfield-${this.phoneRecord.id}`,
       isIncomingResponse: false,
       responseText: '',
       animate: false,
       currentOffset: 0,
       containerRight: 0,
+      isRightPanelVisible: false,
+      isLeftPanelVisible: false,
       transform: '',
       clickedToOpen: false,
-      isLogging: false,
     };
+  },
+  mounted() {
+    this.$set(this.phoneRecord, 'isBusy', false);
   },
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
-      setAddress: 'address/setAddress',
-      fetchAddress: 'address/fetchAddress',
-      getTerritory: 'territory/getTerritory',
+      setPhone: 'phone/setPhone',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
-      this.$emit('togglePanel', this.index, this.revealed);
+      this.$emit('toggle-right-panel', this.index, this.revealed);
+    },
+    toggleLeftPanel() {
+      this.$emit('toggle-left-panel', this.index, this.revealed);
     },
     async confirmClearStatus() {
       try {
@@ -90,29 +89,29 @@ export default {
         if (this.lastActivity.publisher_id === this.user.id) {
           publisherName = 'you';
         } else {
+          this.$set(this.phoneRecord, 'isBusy', true);
           await this.getLastActivityPublisher();
           publisherName = this.publisher.firstname && this.publisher.lastname
             && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          this.$set(this.phoneRecord, 'isBusy', false);
         }
-
         const message = h('p', {
           domProps: {
             innerHTML:
             `<div class="pb-3">
               ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
             </div>` : ''}
-            <div class="fa-lg">Clear the address status?</div>`,
+            <div class="fa-lg">Clear the status?</div>`,
           },
         });
         const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: `${this.address.addr1} ${this.address.addr2}`,
+          title: this.phoneRecord.phone,
           centered: true,
         });
-
         if (value) {
-          this.isLogging = true;
-          this.$emit('update-response', this.address, 'START', () => {
-            this.isLogging = false;
+          this.$set(this.phoneRecord, 'isBusy', true);
+          this.$emit('update-response', this.phoneRecord, 'START', () => {
+            this.$set(this.phoneRecord, 'isBusy', false);
           });
         }
       } catch (err) {
@@ -122,29 +121,24 @@ export default {
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
-
     async getLastActivityPublisher() {
       const id = this.lastActivity.publisher_id;
       const congId = this.user.congregation.id;
       await this.fetchPublisher({ id, congId });
     },
-  },
-  mounted() {
-    this.setAddress(this.address);
-    if (this.lastActivity) {
-      this.$set(this.address, 'selectedResponse', this.lastActivity.value || this.START);
-      this.$set(this.address, 'selectedResponseTS', Number(this.lastActivity.timestamp) || null);
-    }
+    editPhone() {
+      this.$set(this.phoneRecord, 'editMode', !this.phoneRecord.editMode);
+      this.$emit('edit-phone', this.phoneRecord.editMode);
+    },
   },
   computed: {
     ...mapGetters({
       loading: 'auth/loading',
-      territory: 'territory/territory',
-      updatedAddress: 'address/address',
-      actionButtonList: 'address/actionButtonList',
+      actionButtonList: 'phone/actionButtonList',
       user: 'auth/user',
       publisher: 'publisher/publisher',
     }),
+
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
     },
@@ -162,28 +156,34 @@ export default {
       const width = styles.getPropertyValue('width');
       return this.getPxValue(width);
     },
-
     formattedPhone() {
-      return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+      return this.phoneRecord && this.phoneRecord.phone
+        && this.phoneRecord.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
-
     formattedSelectedResponseTS() {
-      return this.address.selectedResponseTS && format(new Date(this.address.selectedResponseTS), 'M/d/yyyy') || '';
+      return this.phoneRecord.selectedResponseTS && format(new Date(this.phoneRecord.selectedResponseTS), 'M/d/yyyy') || '';
     },
     lastActivity() {
-      return this.address.lastActivity || { value: 'START', timestamp: '' };
+      return this.phoneRecord.lastActivity || { value: 'START', timestamp: '' };
+    },
+    selectedResponse() {
+      return this.lastActivity.value;
     },
     isMySelectedResponse() {
-      const publisherId = get(this.address.lastActivity, 'publisher_id', '') || '';
+      const publisherId = get(this.phoneRecord.lastActivity, 'publisher_id', '') || '';
       return publisherId.toString() === get(this.user, 'id', '').toString();
     },
+    allowedToCall() {
+      const notAllowed = ['INVALID', 'DNC'];
+      const lastActivity = this.lastActivity || {};
+      return !notAllowed.includes(lastActivity.value);
+    },
   },
-
   watch: {
     incomingResponse(log) {
-      if (log) {
-        this.address.selectedResponse = log.value;
-        this.address.selectedResponseTS = log.timestamp;
+      if (log && log.publisher_id !== this.user.id) {
+        this.$set(this.phoneRecord, 'selectedResponse', log.value);
+        this.$set(this.phoneRecord, 'selectedResponseTS', log.timestamp);
         this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
       }
     },
@@ -191,21 +191,8 @@ export default {
 };
 </script>
 <style scoped>
-.v-touch-address-card {
-  touch-action: pan-y;
-  height: 100%;
-}
-.address-card {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  position: relative;
-  transition: ease-in-out 0.3s  ;
-  min-height: 60px;
-}
-.address {
-  display: flex;
-  text-align: left;
+.phone-card {
+  min-height: 80px;
 }
 .nh-text {
   font-size: 0.5em;
@@ -236,12 +223,10 @@ export default {
   position: absolute;
   right: 21px;
 }
-
 @media print {
   .interaction {
     display: none;
   }
-
   .address a {
     text-decoration: none;
   }

@@ -10,7 +10,7 @@
         :revealed.sync="revealed"
         data-toggle="collapse"
         @active="closeSwipes">
-        <template v-slot="{ item, index, revealed}">
+        <template v-slot="{ item, index, revealed }">
           <AddressCard
             :index="index"
             :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
@@ -30,6 +30,7 @@
             :key="index"
             class="fa-2x"
             :value="button.value"
+            :actionButtonList="actionButtonList"
             @button-click="() => updateResponse(item, button.value, close)">
           </ActivityButton>
         </template>
@@ -110,6 +111,7 @@ export default {
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
+      fetchAddress: 'address/fetchAddress',
     }),
 
     openSwipe(index, revealed) {
@@ -194,7 +196,8 @@ export default {
       }
 
       try {
-        await this.addLog({ addressId: address.id, value });
+        await this.addLog({ entityId: address.id, value });
+        await this.fetchAddress(address.id);
         const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
         updatedAddress.lastActivity = {
           publisher_id: this.user.id,
@@ -228,6 +231,7 @@ export default {
   .swipeout-list-item {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
+    min-height: 80px;
 
     .border-medium {
       border-style: solid;

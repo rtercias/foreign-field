@@ -172,6 +172,24 @@ export const territory = {
                     value
                     publisher_id
                   }
+                  phones {
+                    id
+                    congregationId
+                    territory_id
+                    parent_id
+                    type
+                    status
+                    phone
+                    notes
+                    sort
+                    create_user
+                    lastActivity {
+                      address_id
+                      publisher_id
+                      value
+                      timestamp
+                    }
+                  }
                 }
                 status {
                   checkout_id
