@@ -12,7 +12,7 @@ import { publishers } from './modules/publishers';
 import { phone } from './modules/phone';
 import { reports } from './modules/reports';
 import '../../node_modules/firebaseui/dist/firebaseui.css';
-import { router } from '../routes';
+// import { router } from '../routes';
 
 Vue.use(Vuex);
 
