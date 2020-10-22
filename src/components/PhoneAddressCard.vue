@@ -23,7 +23,7 @@
               :class="'h-100'"
               :index="index"
               :phoneRecord="item"
-              :addressId="item.id"
+              :address="address"
               :revealed="revealed"
               :incomingResponse="item.lastActivity"
               @update-response="updateResponse"
@@ -62,8 +62,9 @@
             </ActivityButton>
           </template>
           <template v-slot:left="{ item, close }">
-            <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
+            <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <div
+              v-show="!item.isBusy"
               class="interaction fa-2x d-flex flex-column justify-content-center align-items-center pl-3 pr-3 bg-danger">
               <span class="pl-0">
                 <font-awesome-layers
@@ -75,6 +76,7 @@
               <span class="description text-white">Remove</span>
             </div>
             <ActivityButton
+              v-show="!item.isBusy"
               v-for="(button, index) in leftButtonList"
               :key="index"
               class="fa-2x"
@@ -113,8 +115,8 @@ import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 import { REJECT_TAGS } from '../store/modules/phone';
 
-const RIGHT_BUTTON_LIST = ['NA', 'CNFRM', 'VM', 'LW'];
-const LEFT_BUTTON_LIST = ['DNC', 'INVLD'];
+const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM', 'LW'];
+const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
 
 export default {
   name: 'PhoneAddressCard',
@@ -234,36 +236,6 @@ export default {
     },
     async updateResponse(phone, _value, close) {
       let value = _value;
-      let confirm = true;
-
-      if (value === 'CNFRM') {
-        const rejectTag = this.getRejectTag(phone);
-        if (rejectTag) {
-          this.$bvModal.msgBoxOk(
-            `You can't confirm phones with "${rejectTag}" tag. Remove the tag first.`,
-            { centered: true }
-          );
-          this.$set(phone, 'isBusy', false);
-          if (typeof close === 'function') close();
-          return;
-        }
-        confirm = await this.$bvModal.msgBoxConfirm('This will update the address phone number', {
-          title: 'Confirm Phone Number',
-          centered: true,
-        });
-      } else if (this.address.phone === phone.phone) {
-        confirm = await this.$bvModal.msgBoxConfirm('This will remove the address phone number', {
-          title: 'Remove Confirmed',
-          centered: true,
-        });
-      }
-
-      if (!confirm) {
-        this.$set(phone, 'isBusy', false);
-        if (typeof close === 'function') close();
-        return;
-      }
-
       this.setPhone(phone);
       if (phone.selectedResponse === 'START' && value === 'START') {
         this.$set(phone, 'isBusy', false);
@@ -292,39 +264,55 @@ export default {
         this.$set(this.territory, 'lastActivity', phone.lastActivity);
         this.$set(phone, 'isBusy', false);
         if (typeof close === 'function') close();
-
-        if (value === 'CNFRM') {
-          await this.updateAddressPhone(phone.phone);
-        } else {
-          await this.updateAddressPhone('');
-        }
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
     },
     async applyTag(phone, item, close) {
       const newTag = item.description.toLowerCase();
-
+      this.$set(phone, 'isBusy', true);
       try {
+        const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
         const model = this.address.phones.find(p => p.id === phone.id);
         const oldArray = model.notes ? model.notes.split(',') : [];
         let newArray = [...oldArray];
 
-        if (REJECT_TAGS.includes(newTag)) {
+        if (exclusiveTags.includes(newTag)) {
           // if new tag is exclusive, then remove all other exclusive tags
-          for (const tag of REJECT_TAGS) {
+          for (const tag of exclusiveTags) {
             await this.removeTag({ phoneId: phone.id, userid: this.user.id, tag });
           }
-          newArray = oldArray.filter(a => !REJECT_TAGS.includes(a));
+          newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+        }
+
+        let confirm = true;
+        if (newTag === 'confirmed') {
+          confirm = await this.$bvModal.msgBoxConfirm(
+            'Add "confirmed" tag? This will also update the address phone number.', {
+              title: 'Confirm Phone Number',
+              centered: true,
+            }
+          );
+        }
+
+        if (!confirm) {
+          this.$set(phone, 'isBusy', false);
+          return;
         }
 
         // add new tag
         await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
         newArray.push(newTag);
 
-        // update model
+        // update address
+        if (newTag === 'confirmed') {
+          await this.updateAddressPhone(phone.phone);
+        }
+
+        // update UI model
         const updatedNotes = newArray.join(',');
         this.$set(model, 'notes', `${updatedNotes}`);
+        this.$set(phone, 'isBusy', false);
         if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to apply tag', e);

@@ -69,12 +69,11 @@ const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
-    value: 'CNFRM',
+    value: 'CT',
     text: '',
     icon: 'comment',
-    icon2: 'check',
     color: 'primary',
-    description: 'Confirmed',
+    description: 'Contacted',
   },
   {
     type: 'fa-icon',
@@ -94,7 +93,7 @@ const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
-    value: 'INVLD',
+    value: 'invalid',
     text: '',
     icon: 'phone-slash',
     color: 'danger',
@@ -102,11 +101,19 @@ const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
-    value: 'DNC',
+    value: 'do not call',
     text: '',
     icon: 'minus-circle',
     color: 'danger',
     description: 'Do Not Call',
+  },
+  {
+    type: 'fa-icon',
+    value: 'confirmed',
+    text: '',
+    icon: 'check',
+    color: 'primary',
+    description: 'Confirmed',
   },
 ];
 

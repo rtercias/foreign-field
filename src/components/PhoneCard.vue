@@ -8,13 +8,13 @@
         <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
         <font-awesome-icon
-          v-if="lastActivity.value !== 'CNFRM'"
+          v-if="!phoneRecord.notes.includes('confirmed')"
           class="small text-primary ml-2"
           icon="pencil-alt"
           @click="edit">
         </font-awesome-icon>
       </h5>
-      <PhoneTags :phone="phoneRecord"></PhoneTags>
+      <PhoneTags :phone="phoneRecord" :address="address"></PhoneTags>
     </div>
     <div class="static-buttons col-3 pr-2 justify-content-end">
       <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
@@ -48,7 +48,7 @@ import PhoneTags from './PhoneTags';
 
 export default {
   name: 'PhoneCard',
-  props: ['phoneRecord', 'addressId', 'incomingResponse', 'revealed', 'index', 'editPhone'],
+  props: ['phoneRecord', 'address', 'incomingResponse', 'revealed', 'index', 'editPhone'],
   components: {
     ActivityButton,
     PhoneTags,
@@ -174,7 +174,7 @@ export default {
       return publisherId.toString() === get(this.user, 'id', '').toString();
     },
     allowedToCall() {
-      const notAllowed = ['INVALID', 'DNC'];
+      const notAllowed = ['invalid', 'do not call'];
       const lastActivity = this.lastActivity || {};
       return !notAllowed.includes(lastActivity.value);
     },

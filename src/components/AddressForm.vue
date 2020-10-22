@@ -353,10 +353,11 @@ export default {
     }),
 
     returnRoute() {
-      const { origin } = this.$route.query;
+      const { origin = '' } = this.$route.query;
+      const queryParam = origin ? `?origin=${origin}` : '';
       const addMode = this.mode === Modes.add
         ? `/territories/${this.group}/${this.territoryId}`
-        : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail`;
+        : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail${queryParam}`;
       if (this.$route.name === 'address-new') return '/';
       if (origin) return undefined;
       return addMode;
