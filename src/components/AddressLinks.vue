@@ -63,9 +63,7 @@ export default {
     };
   },
   async mounted() {
-    const { origin } = this.$route.query;
     this.isLoading = true;
-    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}/${origin}`);
     await this.fetchAddress(this.addressId);
     this.setLeftNavRoute(this.returnRoute);
     this.isLoading = false;
@@ -95,12 +93,16 @@ export default {
       return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
     returnRoute() {
-      const { origin } = this.$route.query;
+      const { origin = '' } = this.$route.query;
       if (origin === 'change-logs') {
         return '/reports/logs/addresses?fullscreen=true';
       }
 
-      return `/territories/${this.group}/${this.territoryId}`;
+      if (origin === 'home') {
+        return '/';
+      }
+
+      return `/territories/${this.group}/${this.territoryId}/${origin}`;
     },
 
   },

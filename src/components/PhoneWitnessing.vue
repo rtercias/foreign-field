@@ -1,6 +1,6 @@
 <template>
   <div class="phone-witnessing d-flex flex-row flex-wrap align-items-baseline">
-    <Loading v-if="isLoading"></Loading>
+    <Loading class="w-100" v-if="isLoading"></Loading>
     <PhoneAddressCard
       v-else
       v-for="a in territory.addresses" :key="a.id"
