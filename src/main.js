@@ -67,6 +67,7 @@ import {
   faPhoneSlash,
   faTrashAlt,
   faMinusCircle,
+  faSave,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -109,6 +110,7 @@ library.add(
   faPhoneSlash,
   faTrashAlt,
   faMinusCircle,
+  faSave,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

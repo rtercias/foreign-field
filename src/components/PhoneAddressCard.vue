@@ -40,22 +40,29 @@
                 v-model="item.phone"
                 @mousedown.native="onActive">
               </the-mask>
-              <b-button variant="success text-white" @click="addNewPhone">
-                <font-awesome-icon icon="plus"></font-awesome-icon>
+              <b-button variant="white" class="cancel text-danger position-absolute" @click="() => cancel(item)">
+                <font-awesome-icon icon="times"></font-awesome-icon>
+              </b-button>
+              <b-button class="ml-1" variant="primary" @click="() => update(item)">
+                <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
+                <font-awesome-icon v-else icon="save"></font-awesome-icon>
               </b-button>
             </b-list-group-item>
           </template>
           <template v-slot:right="{ item, close }">
+            <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <ActivityButton
               v-for="(button, index) in rightButtonList"
               :key="index"
               class="fa-2x"
               :value="button.value"
+              :is-busy="item.isBusy"
               :actionButtonList="actionButtonList"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
           <template v-slot:left="{ item, close }">
+            <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <div
               class="interaction fa-2x d-flex flex-column justify-content-center align-items-center pl-3 pr-3 bg-danger">
               <span class="pl-0">
@@ -73,8 +80,8 @@
               class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList"
-              @button-click="(value, button) => applyTag(item, button, close)"
-              >
+              :is-busy="item.isBusy"
+              @button-click="(value, button) => applyTag(item, button, close)">
             </ActivityButton>
           </template>
         </swipe-list>
@@ -87,7 +94,7 @@
             v-model="newPhone"
             @mousedown.native="onActive">
           </the-mask>
-          <b-button variant="success text-white" @click="addNewPhone">
+          <b-button variant="info text-white" @click="addNewPhone">
             <font-awesome-icon icon="plus"></font-awesome-icon>
           </b-button>
         </b-list-group-item>
@@ -191,7 +198,17 @@ export default {
       this.newPhone = '';
       this.isAddressBusy = false;
     },
+    cancel(phone) {
+      this.$set(phone, 'editMode', false);
+    },
+    async update(phone) {
+      this.$set(phone, 'isBusy', true);
+      await this.updatePhone(phone);
+      this.$set(phone, 'editMode', false);
+      this.$set(phone, 'isBusy', false);
+    },
     async removePhone(phone) {
+      this.$set(phone, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
         `Remove "${this.formatPhone(phone.phone)}" from the list?`, {
           title: 'Remove Phone',
@@ -206,6 +223,7 @@ export default {
         this.address.phones.splice(index, 1);
         this.isAddressBusy = false;
       }
+      this.$set(phone, 'isBusy', false);
     },
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
@@ -224,6 +242,7 @@ export default {
             `You can't confirm phones with "${rejectTag}" tag. Remove the tag first.`,
             { centered: true }
           );
+          this.$set(phone, 'isBusy', false);
           if (typeof close === 'function') close();
           return;
         }
@@ -239,12 +258,14 @@ export default {
       }
 
       if (!confirm) {
+        this.$set(phone, 'isBusy', false);
         if (typeof close === 'function') close();
         return;
       }
 
       this.setPhone(phone);
       if (phone.selectedResponse === 'START' && value === 'START') {
+        this.$set(phone, 'isBusy', false);
         if (typeof close === 'function') close();
         return;
       }
@@ -253,6 +274,7 @@ export default {
       }
 
       try {
+        this.$set(phone, 'isBusy', true);
         await this.addLog({ entityId: phone.id, value });
         await this.fetchPhone(phone.id);
         const timestamp = Date.now();
@@ -267,6 +289,7 @@ export default {
         });
 
         this.$set(this.territory, 'lastActivity', phone.lastActivity);
+        this.$set(phone, 'isBusy', false);
         if (typeof close === 'function') close();
 
         if (value === 'CNFRM') {
@@ -358,6 +381,10 @@ export default {
 .description {
   font-size: 7pt;
   white-space: nowrap;
+}
+.cancel {
+  right: 0;
+  margin-right: 74px;
 }
 @media print {
   .interaction {

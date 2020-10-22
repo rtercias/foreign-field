@@ -3,19 +3,24 @@
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <div class="d-flex flex-column pl-0 col-8">
+    <div class="d-flex flex-column pl-2 col-8">
       <h5 class="mb-0 mr-auto">
         <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
-        <font-awesome-icon class="small text-primary ml-2" icon="pencil-alt" @click="editPhone"></font-awesome-icon>
+        <font-awesome-icon
+          v-if="lastActivity.value !== 'CNFRM'"
+          class="small text-primary ml-2"
+          icon="pencil-alt"
+          @click="editPhone">
+        </font-awesome-icon>
       </h5>
       <PhoneTags :phone="phoneRecord"></PhoneTags>
     </div>
     <div class="static-buttons col-3 pr-2 justify-content-end">
-      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isBusy">
+      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
       </font-awesome-icon>
       <div
-        :class="{ hidden: selectedResponse === 'START' || isBusy }"
+        :class="{ hidden: selectedResponse === 'START' || phoneRecord.isBusy }"
         class="d-flex flex-column">
         <ActivityButton
           class="selected-response fa-2x"
@@ -60,8 +65,10 @@ export default {
       isLeftPanelVisible: false,
       transform: '',
       clickedToOpen: false,
-      isBusy: false,
     };
+  },
+  mounted() {
+    this.$set(this.phoneRecord, 'isBusy', false);
   },
   methods: {
     ...mapActions({
@@ -82,11 +89,11 @@ export default {
         if (this.lastActivity.publisher_id === this.user.id) {
           publisherName = 'you';
         } else {
-          this.phoneRecord.isBusy = true;
+          this.$set(this.phoneRecord, 'isBusy', true);
           await this.getLastActivityPublisher();
           publisherName = this.publisher.firstname && this.publisher.lastname
             && `${this.publisher.firstname} ${this.publisher.lastname}`;
-          this.phoneRecord.isBusy = false;
+          this.$set(this.phoneRecord, 'isBusy', false);
         }
         const message = h('p', {
           domProps: {
@@ -102,9 +109,9 @@ export default {
           centered: true,
         });
         if (value) {
-          this.isBusy = true;
+          this.$set(this.phoneRecord, 'isBusy', true);
           this.$emit('update-response', this.phoneRecord, 'START', () => {
-            this.isBusy = false;
+            this.$set(this.phoneRecord, 'isBusy', false);
           });
         }
       } catch (err) {
