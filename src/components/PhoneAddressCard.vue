@@ -1,7 +1,7 @@
 <template>
   <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
     <div class="w-100">
-      <div class="d-flex justify-content-between align-items-center pc-header-font border px-4 py-2 w-100">
+      <div class="d-flex bg-light justify-content-between align-items-center pc-header-font border px-4 py-2 w-100">
         <div class="mb-1">
           <span>{{address.addr1}} {{address.addr2}}&nbsp;</span>
           <span>{{address.city}} {{address.state_province}} {{address.postal_code}}</span>
@@ -10,7 +10,7 @@
       <b-list-group>
         <b-list-group-item class="d-flex">
           <the-mask
-            class="form-control mr-2"
+            class="form-control mr-2 py-3"
             type="tel"
             :mask="'###-###-####'"
             :masked="false"
@@ -22,7 +22,7 @@
         </b-list-group-item>
         <swipe-list
           ref="list"
-          class=""
+          class="py-2"
           :items="address.phones || []"
           item-key="id"
           @swipeout:click="itemClick"
@@ -32,7 +32,7 @@
           </template>
           <template v-slot:right="{ }">
             <ActivityButton
-              v-for="(button, index) in actionButtonList"
+              v-for="(button, index) in buttonList"
               :key="index"
               class="fa-2x"
               :value="button.value"
@@ -55,6 +55,8 @@ import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 
+const BUTTON_LIST = ['NA', 'CONFIRMED', 'VM', 'DNC', 'LW'];
+
 export default {
   name: 'PhoneAddressCard',
   props: ['address', 'territoryId', 'group'],
@@ -69,7 +71,11 @@ export default {
       actionButtonList: 'phone/actionButtonList',
       user: 'auth/user',
       congId: 'auth/congId',
-    }) },
+    }),
+    buttonList() {
+      return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
+    },
+  },
   data() {
     return {
       enabled: true,
@@ -86,6 +92,7 @@ export default {
       this.$refs.list.closeActions();
     },
     itemClick() {
+      this.$refs.list.closeActions();
     },
     async addNewPhone() {
       const sort = get(this.storeAddress, 'phones.length', 0);
@@ -170,6 +177,7 @@ export default {
   .swipeout-list-item {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
+    min-height: 80px;
 
     .border-medium {
       border-style: solid;
