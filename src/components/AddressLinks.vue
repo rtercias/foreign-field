@@ -106,7 +106,7 @@ export default {
     },
     queryParamOrigin() {
       const { origin = '' } = this.$route.query;
-      return this.$route.query ? `?origin=${origin}` : '';
+      return origin ? `?origin=${origin}` : '';
     },
 
   },
