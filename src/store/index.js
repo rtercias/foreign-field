@@ -19,15 +19,15 @@ Vue.use(Vuex);
 axios.defaults.baseURL = process.env.VUE_APP_ROOT_API;
 axios.defaults.method = 'post';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.interceptors.response.use(
-  response => response,
-  (error) => {
-    if (error.response.status === 403) {
-      return router.push('/unauthorized');
-    }
-    return Promise.reject(error);
-  }
-);
+// axios.interceptors.response.use(
+//   response => response,
+//   (error) => {
+//     if (error.response.status === 403) {
+//       return router.push('/unauthorized');
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export const AddressType = {
   Regular: 'Regular',
