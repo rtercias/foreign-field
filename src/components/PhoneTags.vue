@@ -30,7 +30,7 @@ import { REJECT_TAGS } from '../store/modules/phone';
 
 export default {
   name: 'PhoneTags',
-  props: ['phone'],
+  props: ['phone', 'address'],
   data() {
     return {
       collapsed: true,
@@ -41,6 +41,7 @@ export default {
   methods: {
     ...mapActions({
       removeTag: 'phone/removeTag',
+      updateAddress: 'address/updateAddress',
     }),
     loadselectedTags() {
       this.availableTags.forEach((e) => {
@@ -63,7 +64,9 @@ export default {
       const index = this.selectedTags.findIndex(t => t === tag);
 
       if (index !== -1) {
-        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${tag}" tag?`, {
+        const isAddressPhone = this.address.phone === this.phone.phone;
+        const addrPhoneMsg = isAddressPhone ? 'This will also remove the address phone number.' : '';
+        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${tag}" tag? ${addrPhoneMsg}`, {
           title: `${this.phone.phone}`,
           centered: true,
         });
@@ -71,6 +74,10 @@ export default {
           const arrTags = this.phone.notes ? this.phone.notes.split(',') : [];
           this.$set(this.phone, 'notes', arrTags.filter(t => t !== tag).join(','));
           await this.removeTag({ phoneId: this.phone.id, userid: this.user.id, tag });
+          if (isAddressPhone) {
+            this.$set(this.address, 'phone', '');
+            await this.updateAddress(this.address);
+          }
         }
       }
 

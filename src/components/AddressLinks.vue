@@ -7,7 +7,7 @@
           <div>{{address.addr1}} {{address.addr2}}</div>
           <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
         </div>
-        <b-link class="pr-4" :to="`/territories/${group}/${territoryId}/addresses/${address.id}/edit`">
+        <b-link class="pr-4" :to="`/territories/${group}/${territoryId}/addresses/${address.id}/edit${queryParamOrigin}`">
           <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
         </b-link>
       </div>
@@ -37,7 +37,7 @@
         </b-list-group-item>
         <b-list-group-item
           class="lead p-4 font-weight-bold w-auto"
-          :to="`/territories/${group}/${territoryId}`"
+          :to="`/territories/${group}/${territoryId}/${$route.query.origin || ''}`"
           variant="light">
           Cancel
         </b-list-group-item>
@@ -103,6 +103,10 @@ export default {
       }
 
       return `/territories/${this.group}/${this.territoryId}/${origin}`;
+    },
+    queryParamOrigin() {
+      const { origin = '' } = this.$route.query;
+      return origin ? `?origin=${origin}` : '';
     },
 
   },
