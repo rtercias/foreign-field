@@ -6,11 +6,13 @@
           <b-badge
             v-for="(tag, index) in preview"
             pill
-            class="tag-button mr-1 mb-1 border-primary text-white"
+            class="d-flex tag-button mr-1 mb-1 border-primary text-white"
             size='sm'
             :key="index"
-            :variant="highlight(tag) ? 'danger' : 'primary'">
-              {{ tag }}
+            :variant="highlight(tag) ? 'danger' : 'primary'"
+            @click="() => remove(tag)">
+            <span class="mr-1"><font-awesome-icon icon="times"></font-awesome-icon></span>
+            {{tag}}
           </b-badge>
         </div>
       </b-button-group>
@@ -19,11 +21,12 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import startsWith from 'lodash/startsWith';
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
 import get from 'lodash/get';
+import { REJECT_TAGS } from '../store/modules/phone';
 
 export default {
   name: 'PhoneTags',
@@ -36,6 +39,9 @@ export default {
     };
   },
   methods: {
+    ...mapActions({
+      removeTag: 'phone/removeTag',
+    }),
     loadselectedTags() {
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
@@ -44,14 +50,32 @@ export default {
       });
     },
     highlight(tag) {
-      const tags = ['invalid', 'do not call'];
       let result = false;
-      for (const t of tags) {
+      for (const t of REJECT_TAGS) {
         result = startsWith(tag, t);
         if (result) break;
       }
 
       return result;
+    },
+    async remove(tag) {
+      this.isSaving = true;
+      const index = this.selectedTags.findIndex(t => t === tag);
+
+      if (index !== -1) {
+        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${tag}" tag?`, {
+          title: `${this.phone.phone}`,
+          centered: true,
+        });
+        if (confirm) {
+          const arrTags = this.phone.notes ? this.phone.notes.split(',') : [];
+          this.$set(this.phone, 'notes', arrTags.filter(t => t !== tag).join(','));
+          await this.removeTag({ phoneId: this.phone.id, userid: this.user.id, tag });
+        }
+      }
+
+      this.collapsed = true;
+      this.isSaving = false;
     },
   },
   computed: {

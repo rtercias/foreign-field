@@ -43,6 +43,8 @@ export const PHONE_STATUS = {
   DNC: 'DNC',
 };
 
+export const REJECT_TAGS = ['invalid', 'do not call'];
+
 const SET_PHONE = 'SET_PHONE';
 const ADD_PHONE = 'ADD_PHONE';
 const UPDATE_PHONE = 'UPDATE_PHONE';
@@ -152,6 +154,10 @@ function validatePhone(_phone, isNew) {
 
   if ('isBusy' in phone) {
     delete phone.isBusy;
+  }
+
+  if ('editMode' in phone) {
+    delete phone.editMode;
   }
 
   return phone;

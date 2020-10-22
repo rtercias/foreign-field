@@ -7,6 +7,7 @@
       <h5 class="mb-0 mr-auto">
         <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
+        <font-awesome-icon class="small text-primary ml-2" icon="pencil-alt" @click="editPhone"></font-awesome-icon>
       </h5>
       <PhoneTags :phone="phoneRecord"></PhoneTags>
     </div>
@@ -118,6 +119,10 @@ export default {
       const congId = this.user.congregation.id;
       await this.fetchPublisher({ id, congId });
     },
+    editPhone() {
+      this.$set(this.phoneRecord, 'editMode', !this.phoneRecord.editMode);
+      this.$emit('edit-phone', this.phoneRecord.editMode);
+    },
   },
   computed: {
     ...mapGetters({
@@ -169,7 +174,7 @@ export default {
   },
   watch: {
     incomingResponse(log) {
-      if (log) {
+      if (log && log.publisher_id !== this.user.id) {
         this.$set(this.phoneRecord, 'selectedResponse', log.value);
         this.$set(this.phoneRecord, 'selectedResponseTS', log.timestamp);
         this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();

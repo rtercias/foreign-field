@@ -1,9 +1,13 @@
 <template>
   <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
     <div class="w-100">
-      <div class="small text-left bg-light py-2 px-4 w-100 h-100 d-flex align-items-center">
-        <span class="address">{{address.addr1}} {{address.addr2}}&nbsp;
-        {{address.city}} {{address.state_province}} {{address.postal_code}}</span>
+      <div class="text-left bg-light py-2 px-4 w-100 h-100 d-flex align-items-center overflow-hidden">
+        <b-link
+          class="w-100"
+          :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
+          <span class="address d-block w-100">{{address.addr1}} {{address.addr2}}&nbsp;
+          {{address.city}} {{address.state_province}} {{address.postal_code}}</span>
+        </b-link>
         <font-awesome-icon class="text-info fa-2x" icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
       </div>
       <b-list-group>
@@ -15,16 +19,31 @@
           @active="onActive">
           <template v-slot="{ item, index, revealed }">
             <PhoneCard
+              v-if="!item.editMode"
               :class="'h-100'"
               :index="index"
               :phoneRecord="item"
               :addressId="item.id"
               :revealed="revealed"
-              :incomingResponse="item.incomingResponse"
+              :incomingResponse="item.lastActivity"
               @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
-              @toggle-left-panel="toggleLeftPanel">
+              @toggle-left-panel="toggleLeftPanel"
+              @edit-phone="editPhone">
             </PhoneCard>
+            <b-list-group-item v-else class="d-flex py-3">
+              <the-mask
+                class="form-control mr-2"
+                type="tel"
+                :mask="'###-###-####'"
+                :masked="false"
+                v-model="item.phone"
+                @mousedown.native="onActive">
+              </the-mask>
+              <b-button variant="success text-white" @click="addNewPhone">
+                <font-awesome-icon icon="plus"></font-awesome-icon>
+              </b-button>
+            </b-list-group-item>
           </template>
           <template v-slot:right="{ item, close }">
             <ActivityButton
@@ -59,7 +78,7 @@
             </ActivityButton>
           </template>
         </swipe-list>
-        <b-list-group-item class="d-flex py-3">
+        <b-list-group-item v-if="!hideAdd" class="d-flex py-3">
           <the-mask
             class="form-control mr-2"
             type="tel"
@@ -85,6 +104,7 @@ import ActivityButton from './ActivityButton';
 import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
+import { REJECT_TAGS } from '../store/modules/phone';
 
 const RIGHT_BUTTON_LIST = ['NA', 'CNFRM', 'VM', 'LW'];
 const LEFT_BUTTON_LIST = ['DNC', 'INVLD'];
@@ -104,6 +124,7 @@ export default {
       revealed: {},
       newPhone: '',
       isAddressBusy: false,
+      hideAdd: false,
     };
   },
   computed: {
@@ -128,6 +149,7 @@ export default {
       addTag: 'phone/addTag',
       removeTag: 'phone/removeTag',
       addLog: 'address/addLog',
+      updateAddress: 'address/updateAddress',
     }),
     onActive() {
       this.$refs.list.closeActions();
@@ -188,12 +210,44 @@ export default {
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
+    getRejectTag(phone) {
+      return phone.notes.split(',').find(n => REJECT_TAGS.includes(n));
+    },
     async updateResponse(phone, _value, close) {
       let value = _value;
+      let confirm = true;
+
+      if (value === 'CNFRM') {
+        const rejectTag = this.getRejectTag(phone);
+        if (rejectTag) {
+          this.$bvModal.msgBoxOk(
+            `You can't confirm phones with "${rejectTag}" tag. Remove the tag first.`,
+            { centered: true }
+          );
+          if (typeof close === 'function') close();
+          return;
+        }
+        confirm = await this.$bvModal.msgBoxConfirm('This will update the address phone number', {
+          title: 'Confirm Phone Number',
+          centered: true,
+        });
+      } else if (this.address.phone === phone.phone) {
+        confirm = await this.$bvModal.msgBoxConfirm('This will remove the address phone number', {
+          title: 'Remove Confirmed',
+          centered: true,
+        });
+      }
+
+      if (!confirm) {
+        if (typeof close === 'function') close();
+        return;
+      }
+
       this.setPhone(phone);
-
-      if (phone.selectedResponse === 'START' && value === 'START') return;
-
+      if (phone.selectedResponse === 'START' && value === 'START') {
+        if (typeof close === 'function') close();
+        return;
+      }
       if (!this.rightButtonList.some(b => b.value === value)) {
         value = 'START';
       }
@@ -201,26 +255,30 @@ export default {
       try {
         await this.addLog({ entityId: phone.id, value });
         await this.fetchPhone(phone.id);
-        const updatedPhone = this.address.phones.find(p => p.id === phone.id);
         const timestamp = Date.now();
 
-        this.$set(updatedPhone, 'selectedResponse', value);
-        this.$set(updatedPhone, 'selectedResponseTS', timestamp);
-        this.$set(updatedPhone, 'lastActivity', {
+        this.$set(phone, 'selectedResponse', value);
+        this.$set(phone, 'selectedResponseTS', timestamp);
+        this.$set(phone, 'lastActivity', {
           publisher_id: this.user.id,
           address_id: this.address.id,
           timestamp,
           value,
         });
 
-        this.$set(this.territory, 'lastActivity', updatedPhone.lastActivity);
+        this.$set(this.territory, 'lastActivity', phone.lastActivity);
         if (typeof close === 'function') close();
+
+        if (value === 'CNFRM') {
+          await this.updateAddressPhone(phone.phone);
+        } else {
+          await this.updateAddressPhone('');
+        }
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
     },
     async applyTag(phone, item, close) {
-      const exclusiveTags = ['invalid', 'do not call'];
       const newTag = item.description.toLowerCase();
 
       try {
@@ -228,12 +286,12 @@ export default {
         const oldArray = model.notes ? model.notes.split(',') : [];
         let newArray = [...oldArray];
 
-        if (exclusiveTags.includes(newTag)) {
+        if (REJECT_TAGS.includes(newTag)) {
           // if new tag is exclusive, then remove all other exclusive tags
-          for (const tag of exclusiveTags) {
+          for (const tag of REJECT_TAGS) {
             await this.removeTag({ phoneId: phone.id, userid: this.user.id, tag });
           }
-          newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+          newArray = oldArray.filter(a => !REJECT_TAGS.includes(a));
         }
 
         // add new tag
@@ -248,6 +306,13 @@ export default {
         console.error('Unable to apply tag', e);
       }
     },
+    async updateAddressPhone(phoneNumber) {
+      this.$set(this.address, 'phone', phoneNumber);
+      await this.updateAddress(this.address);
+    },
+    editPhone(editMode) {
+      this.hideAdd = editMode;
+    },
   },
 };
 </script>
@@ -255,8 +320,8 @@ export default {
 @import "../assets/foreign-field-theme.scss";
 .address {
   text-overflow: ellipsis;
-  overflow-x: hidden;
   white-space: nowrap;
+  overflow-x: hidden;
 }
 .nh-text {
   font-size: 0.5em;
