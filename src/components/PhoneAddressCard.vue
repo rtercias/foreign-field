@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-2 phone-address-card-container d-flex align-items-center justify-content-center">
+  <div class="m-0 phone-address-card d-flex align-items-center justify-content-center">
     <div class="w-100">
       <div class="text-left bg-light py-2 px-4 w-100 h-100 d-flex align-items-center overflow-hidden">
         <b-link
@@ -85,9 +85,9 @@
             </ActivityButton>
           </template>
         </swipe-list>
-        <b-list-group-item v-if="!hideAdd" class="d-flex py-3">
+        <b-list-group-item v-if="!hideAdd" class="d-flex p-2">
           <the-mask
-            class="form-control mr-2"
+            class="form-control my-1 mr-2 phone-input w-100"
             type="tel"
             :mask="'###-###-####'"
             :masked="false"
@@ -200,6 +200,7 @@ export default {
     },
     cancel(phone) {
       this.$set(phone, 'editMode', false);
+      this.hideAdd = false;
     },
     async update(phone) {
       this.$set(phone, 'isBusy', true);
@@ -339,8 +340,15 @@ export default {
   },
 };
 </script>
-<style scoped lang="scss">
+<style lang="scss" scoped>
 @import "../assets/foreign-field-theme.scss";
+.phone-address-card {
+  .list-group {
+    .swipeout.swipeout-list-item {
+      width: 100%;
+    }
+  }
+}
 .address {
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -386,6 +394,11 @@ export default {
   right: 0;
   margin-right: 74px;
 }
+@media (max-width: 768px) {
+  .phone-address-card-container {
+    width: 100%;
+  }
+}
 @media print {
   .interaction {
     display: none;
@@ -396,7 +409,7 @@ export default {
 }
 .list-group {
   display: block;
-    width: 100%;
+  width: 100%;
   .swipeout-list-item {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
@@ -405,22 +418,6 @@ export default {
     .border-medium {
       border-style: solid;
       border-width: medium;
-    }
-  }
-}
-@media (min-width: 769px) {
-  .list-group {
-    .swipeout-list {
-      display: flex;
-      flex-wrap: wrap;
-      flex-direction: row;
-      padding: 5px;
-      .swipeout-list-item {
-        width: 49%;
-        flex: auto;
-        margin: 5px;
-        border: 1px solid $secondary;
-      }
     }
   }
 }

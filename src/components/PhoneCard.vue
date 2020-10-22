@@ -11,7 +11,7 @@
           v-if="lastActivity.value !== 'CNFRM'"
           class="small text-primary ml-2"
           icon="pencil-alt"
-          @click="editPhone">
+          @click="edit">
         </font-awesome-icon>
       </h5>
       <PhoneTags :phone="phoneRecord"></PhoneTags>
@@ -48,7 +48,7 @@ import PhoneTags from './PhoneTags';
 
 export default {
   name: 'PhoneCard',
-  props: ['phoneRecord', 'addressId', 'incomingResponse', 'revealed', 'index'],
+  props: ['phoneRecord', 'addressId', 'incomingResponse', 'revealed', 'index', 'editPhone'],
   components: {
     ActivityButton,
     PhoneTags,
@@ -126,7 +126,7 @@ export default {
       const congId = this.user.congregation.id;
       await this.fetchPublisher({ id, congId });
     },
-    editPhone() {
+    edit() {
       this.$set(this.phoneRecord, 'editMode', !this.phoneRecord.editMode);
       this.$emit('edit-phone', this.phoneRecord.editMode);
     },

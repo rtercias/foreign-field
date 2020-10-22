@@ -1,9 +1,10 @@
 <template>
-  <div class="phone-witnessing">
+  <div class="phone-witnessing d-flex flex-row flex-wrap align-items-baseline">
     <Loading v-if="isLoading"></Loading>
     <PhoneAddressCard
       v-else
       v-for="a in territory.addresses" :key="a.id"
+      class="phone-address-card-container"
       :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
       :address="a"
       :territory="territory">
@@ -138,7 +139,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import "../assets/foreign-field-theme.scss";
 .columns {
   columns: 1;
@@ -161,6 +162,15 @@ li {
 .add-new {
   font-size: 24px;
 }
+@media (min-width: 769px) {
+  .phone-address-card-container {
+    width: 49%;
+    flex: auto;
+    margin: 5px;
+    border: 1px solid $secondary;
+  }
+}
+
 @media print {
   .columns {
     columns: 2;
