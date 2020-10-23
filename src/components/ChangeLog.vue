@@ -2,7 +2,7 @@
   <div class="change-log" :class="{ 'text-left': isFullScreen }">
     <div
       class="d-flex justify-content-between align-items-center pb-0 text-center"
-      :class="{ 'p-3': isFullScreen, 'flex-column': isSingleRecord }">
+      :class="{ 'py-3 px-2': isFullScreen, 'flex-column': isSingleRecord }">
       <div
         v-if="isSingleRecord"
         :class="{
@@ -28,10 +28,12 @@
     <Loading v-if="loading && isFullScreen"></Loading>
     <font-awesome-icon v-else-if="loading" class="loading text-info text-center w-100" icon="circle-notch" :spin="true" />
     <div v-else>
-      <div v-if="isFullScreen" class="mx-3 mb-3">
-        <b-form-input v-model="keywordFilter" placeholder="Filter by address, publisher, or territory" />
-        <span class="d-block small pt-1 text-right">Count: {{logs.length}}</span>
-      </div>
+      <SearchBar
+        v-if="isFullScreen"
+        :search-text="'Filter by address, publisher, or territory'"
+        :results="logs"
+        @on-change="filter">
+      </SearchBar>
       <b-list-group>
         <b-list-group-item class="pl-3 pr-3" :class="{ small: !isFullScreen }" v-for="log in logs" :key="log.id">
           <ChangeLogAddressCard :log="log" :is-single-record="isSingleRecord" />
@@ -48,9 +50,9 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { SwipeList, SwipeOut } from 'vue-swipe-actions';
 import ChangeLogAddressCard from './ChangeLogAddressCard';
 import Loading from './Loading';
+import SearchBar from './SearchBar';
 import addDays from 'date-fns/addDays';
 import addWeeks from 'date-fns/addWeeks';
 import addMonths from 'date-fns/addMonths';
@@ -63,8 +65,7 @@ export default {
   components: {
     ChangeLogAddressCard,
     Loading,
-    SwipeOut,
-    SwipeList,
+    SearchBar,
   },
   data() {
     return {
@@ -116,6 +117,9 @@ export default {
     compareToKeyword(text) {
       return String(text).toLowerCase().includes(this.keywordFilter.toLowerCase());
     },
+    filter(value) {
+      this.keywordFilter = value;
+    },
   },
   computed: {
     ...mapGetters({
@@ -146,6 +150,7 @@ export default {
       if (this.keywordFilter) {
         return this.cleanLogs.filter(log => this.compareToKeyword(log.address.addr1)
           || this.compareToKeyword(log.address.addr2)
+          || this.compareToKeyword(log.address.city)
           || this.compareToKeyword(log.publisher.firstname)
           || this.compareToKeyword(log.publisher.lastname)
           || this.compareToKeyword(log.address.territory.name));

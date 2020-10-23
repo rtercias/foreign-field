@@ -11,6 +11,10 @@ html, body { height: 100% }
 .button {
   font-size: 24px;
 }
+.border-medium {
+  border-style: solid;
+  border-width: medium !important;
+}
 
 $primary: #5184B7;
 $secondary: #D4E0ED;

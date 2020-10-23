@@ -43,7 +43,7 @@
               <b-button variant="white" class="cancel text-danger position-absolute" @click="() => cancel(item)">
                 <font-awesome-icon icon="times"></font-awesome-icon>
               </b-button>
-              <b-button class="ml-1" variant="primary" @click="() => update(item)">
+              <b-button class="ml-1 text-primary" variant="light" @click="() => update(item)">
                 <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
                 <font-awesome-icon v-else icon="save"></font-awesome-icon>
               </b-button>
@@ -96,7 +96,7 @@
             v-model="newPhone"
             @mousedown.native="onActive">
           </the-mask>
-          <b-button variant="info text-white" @click="addNewPhone">
+          <b-button class="text-primary" variant="light" @click="addNewPhone">
             <font-awesome-icon icon="plus"></font-awesome-icon>
           </b-button>
         </b-list-group-item>
@@ -260,7 +260,7 @@ export default {
         this.$set(phone, 'selectedResponseTS', timestamp);
         this.$set(phone, 'lastActivity', {
           publisher_id: this.user.id,
-          address_id: this.address.id,
+          address_id: phone.id,
           timestamp,
           value,
         });
@@ -390,11 +390,6 @@ export default {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
     min-height: 80px;
-
-    .border-medium {
-      border-style: solid;
-      border-width: medium;
-    }
   }
 }
 @media (max-width: 768px) {

@@ -1,10 +1,12 @@
 <template>
-  <div class="phone-witnessing d-flex flex-row flex-wrap align-items-baseline">
-    <Loading class="w-100" v-if="isLoading"></Loading>
+  <Loading class="w-100" v-if="isLoading"></Loading>
+  <div v-else class="phone-witnessing d-flex flex-row flex-wrap align-items-baseline">
+    <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search"></SearchBar>
     <PhoneAddressCard
-      v-else
       v-for="a in territory.addresses" :key="a.id"
+      :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"
+      :class="{ 'border-success border-medium': a.id === foundId }"
       :address="a"
       :territory="territory">
     </PhoneAddressCard>
@@ -17,6 +19,7 @@ import differenceInDays from 'date-fns/differenceInDays';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import PhoneAddressCard from './PhoneAddressCard';
+import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 import { channel } from '../main';
 
@@ -25,6 +28,7 @@ export default {
   name: 'PhoneWitnessing',
   components: {
     PhoneAddressCard,
+    SearchBar,
     Loading,
   },
   props: ['group', 'id'],
@@ -54,6 +58,7 @@ export default {
       isLoading: true,
       reset: false,
       workInProgress: {},
+      foundId: 0,
     };
   },
   computed: {
@@ -124,11 +129,33 @@ export default {
     isTerritoryCheckedOut() {
       return get(this.territory, 'status.status') === 'Checked Out';
     },
+    search(_keyword) {
+      if (!_keyword) {
+        this.foundId = 0;
+        return;
+      }
+      const keyword = _keyword.toLowerCase();
+      const foundAddress = this.territory.addresses.find(a => a.addr1.toLowerCase().includes(keyword)
+        || a.addr2.toLowerCase().includes(keyword)
+        || a.city.toLowerCase().includes(keyword)
+        || a.notes.toLowerCase().includes(keyword));
+      const foundPhone = !foundAddress
+        ? this.territory.addresses.find(a => a.phones.find(p => p.phone.toLowerCase().includes(keyword)
+          || p.notes.toLowerCase().includes(keyword)))
+        : null;
+
+      this.foundId = foundAddress && foundAddress.id || foundPhone && foundPhone.id || 0;
+    },
   },
   watch: {
     async token() {
       this.isLoading = true;
       await this.loadTerritory();
+    },
+    foundId(value) {
+      const ref = this.$refs[`phone-address-${value}`];
+      const card = ref && ref.length && ref[0];
+      if (card && card.$el) card.$el.scrollIntoView();
     },
     immediate: true,
   },
