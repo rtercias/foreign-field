@@ -108,7 +108,7 @@ export default {
       canManage: 'auth/canManage',
     }),
     territories() {
-      return this.user && this.user.territories;
+      return this.user && this.user.territories || [];
     },
     isPWA() {
       return window.matchMedia('(display-mode: standalone)').matches;
@@ -118,12 +118,12 @@ export default {
     getSeenTerritories() {
       if (localStorage.getItem('seenTerritories')) {
         try {
-          this.seenTerritories = JSON.parse(localStorage.getItem('seenTerritories')).filter(s => 'id' in s);
+          const seen = JSON.parse(localStorage.getItem('seenTerritories')).filter(s => 'id' in s);
+          this.seenTerritories = seen.filter(s => this.territories.some(t => t.id !== s.id));
         } catch (e) {
           localStorage.removeItem('seenTerritories');
         }
       }
-      return this.seenTerritories.filter(s => !(this.territories && this.territories.some(t => t.id === s.id)));
     },
     advertiseMsg() {
       if (!this.msgDismissed) {
@@ -145,6 +145,11 @@ export default {
   mounted() {
     this.advertiseMsg();
     this.getSeenTerritories();
+  },
+  watch: {
+    territories() {
+      this.getSeenTerritories();
+    },
   },
 };
 </script>
