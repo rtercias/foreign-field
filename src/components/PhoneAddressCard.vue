@@ -20,7 +20,8 @@
           <template v-slot="{ item, index, revealed }">
             <PhoneCard
               v-if="!item.editMode"
-              :class="'h-100'"
+              class="h-100"
+              :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
               :index="index"
               :phoneRecord="item"
               :address="address"
@@ -28,10 +29,9 @@
               :incomingResponse="item.lastActivity"
               @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
-              @toggle-left-panel="toggleLeftPanel"
-              @edit-phone="editPhone">
+              @toggle-left-panel="toggleLeftPanel">
             </PhoneCard>
-            <b-list-group-item v-else class="d-flex py-3">
+            <b-list-group-item v-else class="d-flex py-4 border-0">
               <the-mask
                 class="form-control mr-2"
                 type="tel"
@@ -87,9 +87,9 @@
             </ActivityButton>
           </template>
         </swipe-list>
-        <b-list-group-item v-if="!hideAdd" class="d-flex p-2">
+        <b-list-group-item class="d-flex mx-1 p-2 border-0">
           <the-mask
-            class="form-control my-1 mr-2 phone-input w-100"
+            class="form-control mr-2 phone-input w-100"
             type="tel"
             :mask="'###-###-####'"
             :masked="false"
@@ -133,7 +133,6 @@ export default {
       revealed: {},
       newPhone: '',
       isAddressBusy: false,
-      hideAdd: false,
     };
   },
   computed: {
@@ -162,7 +161,12 @@ export default {
       updateAddress: 'address/updateAddress',
     }),
     onActive() {
+      const phoneEditing = this.address.phones.find(p => p.editMode);
+      if (phoneEditing) this.$set(phoneEditing, 'editMode', false);
       this.$refs.list.closeActions();
+    },
+    isActiveAddress(id) {
+      return this.territory.lastActivity ? id === this.territory.lastActivity.address_id : false;
     },
     toggleRightPanel(index, revealed) {
       if (revealed) {
@@ -203,7 +207,6 @@ export default {
     },
     cancel(phone) {
       this.$set(phone, 'editMode', false);
-      this.hideAdd = false;
     },
     async update(phone) {
       this.$set(phone, 'isBusy', true);
@@ -323,9 +326,6 @@ export default {
       this.$set(this.address, 'phone', phoneNumber);
       await this.updateAddress(this.address);
     },
-    editPhone(editMode) {
-      this.hideAdd = editMode;
-    },
   },
 };
 </script>
@@ -383,19 +383,6 @@ export default {
   right: 0;
   margin-right: 74px;
 }
-@media (max-width: 768px) {
-  .phone-address-card-container {
-    width: 100%;
-  }
-}
-@media print {
-  .interaction {
-    display: none;
-  }
-  .address a {
-    text-decoration: none;
-  }
-}
 .list-group {
   display: block;
   width: 100%;
@@ -410,4 +397,18 @@ export default {
     }
   }
 }
+@media (max-width: 768px) {
+  .phone-address-card-container {
+    width: 100%;
+  }
+}
+@media print {
+  .interaction {
+    display: none;
+  }
+  .address a {
+    text-decoration: none;
+  }
+}
+
 </style>

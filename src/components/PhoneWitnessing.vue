@@ -5,7 +5,6 @@
       v-else
       v-for="a in territory.addresses" :key="a.id"
       class="phone-address-card-container"
-      :class="isActiveAddress(a.id) ? ['bg-white border-warning border-medium', 'active'] : []"
       :address="a"
       :territory="territory">
     </PhoneAddressCard>
@@ -80,9 +79,6 @@ export default {
       setLeftNavRoute: 'auth/setLeftNavRoute',
       fetchPhone: 'phone/fetchPhone',
     }),
-    isActiveAddress(addressId) {
-      return this.lastActivity ? addressId === this.lastActivity.address_id : false;
-    },
     seenTerritories() {
       let seenTerritories = [];
       if (localStorage.getItem('seenTerritories')) {
