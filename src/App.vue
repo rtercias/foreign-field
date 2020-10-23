@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="d-flex h-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
+  <div id="app" class="d-flex min-vh-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
     <Masthead :class="{ 'w-25': isDesktop }"></Masthead>
     <router-view class="view" :class="{ 'w-75': isDesktop }"></router-view>
   </div>

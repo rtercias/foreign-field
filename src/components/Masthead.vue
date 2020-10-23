@@ -2,14 +2,14 @@
   <div class="lead">
     <vue-pull-refresh class="bg-primary" :on-refresh="onRefresh" :config="refreshOptions">
       <b-navbar
-        class="border-warning h-100"
+        class="border-warning"
         :class="{
           'gold-bottom': !isDesktop,
           'font-weight-bold text-left large-font-menu align-items-baseline': isDesktop
         }"
         type="dark"
         variant="primary"
-        toggleable 
+        toggleable
         fill>
         <b-link class="button text-white-50" @click="back">
           <font-awesome-icon icon="chevron-left" v-show="showLeftNav && !isDesktop"></font-awesome-icon>
