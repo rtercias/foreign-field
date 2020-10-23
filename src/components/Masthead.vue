@@ -10,7 +10,7 @@
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
-              <b-dropdown-item v-for="group in groupCodes" v-bind:key="group" :to="`/territories/${group}`" class="w-100">
+              <b-dropdown-item v-for="group in groupCodes" :key="group" :to="`/territories/${group}`" class="m-0 w-100">
                 <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
               </b-dropdown-item>
             </b-nav-item-dropdown>
@@ -24,7 +24,7 @@
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown v-if="isAuthenticated" right>
               <span slot="text">{{name}}</span>
-              <b-dropdown-item @click="logout">Logout</b-dropdown-item>
+              <b-dropdown-item class="m-0 w-100 text-center" @click="logout">Logout</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-collapse>
@@ -110,11 +110,14 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .pull-down-header {
   background-color: unset;
 }
 .gold-bottom {
   border-bottom: solid 6px;
+}
+.dropdown-item {
+  width: 100%;
 }
 </style>
