@@ -1,41 +1,48 @@
 <template>
   <div class="territory-addresses pb-5">
     <Loading v-if="isLoading"></Loading>
-    <b-list-group v-else>
-      <swipe-list
-        ref="list"
-        class="card"
-        :items="territory.addresses"
-        item-key="id"
-        :revealed.sync="revealed"
-        data-toggle="collapse"
-        @active="closeSwipes">
-        <template v-slot="{ item, index, revealed }">
-          <AddressCard
-            :index="index"
-            :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-            :address="item"
-            :reset="reset"
-            :territoryId="id"
-            :group="group"
-            :incomingResponse="item.incomingResponse"
-            :revealed="revealed"
-            @update-response="updateResponse"
-            @togglePanel="openSwipe">
-          </AddressCard>
-        </template>
-        <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
-          <ActivityButton
-            v-for="(button, index) in containerButtonList"
-            :key="index"
-            class="fa-2x"
-            :value="button.value"
-            :actionButtonList="actionButtonList"
-            @button-click="() => updateResponse(item, button.value, close)">
-          </ActivityButton>
-        </template>
-      </swipe-list>
-    </b-list-group>
+    <div v-else>
+      <SearchBar :search-text="'Search this territory'" @on-click="search"></SearchBar>
+      <b-list-group>
+        <swipe-list
+          ref="list"
+          class="card"
+          :items="territory.addresses"
+          item-key="id"
+          :revealed.sync="revealed"
+          data-toggle="collapse"
+          @active="closeSwipes">
+          <template v-slot="{ item, index, revealed }">
+            <AddressCard
+              :ref="`address-${item.id}`"
+              :index="index"
+              :class="{
+                'bg-white border-warning border-medium active': isActiveAddress(item.id),
+                'border-success border-medium': item.id === foundId
+              }"
+              :address="item"
+              :reset="reset"
+              :territoryId="id"
+              :group="group"
+              :incomingResponse="item.incomingResponse"
+              :revealed="revealed"
+              @update-response="updateResponse"
+              @togglePanel="openSwipe">
+            </AddressCard>
+          </template>
+          <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
+            <ActivityButton
+              v-for="(button, index) in containerButtonList"
+              :key="index"
+              class="fa-2x"
+              :value="button.value"
+              :actionButtonList="actionButtonList"
+              @button-click="() => updateResponse(item, button.value, close)">
+            </ActivityButton>
+          </template>
+        </swipe-list>
+      </b-list-group>
+    </div>
   </div>
 </template>
 
@@ -49,6 +56,7 @@ import AddressCard from './AddressCard';
 import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
 import Loading from './Loading.vue';
+import SearchBar from './SearchBar';
 import { channel } from '../main';
 
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
@@ -61,6 +69,7 @@ export default {
     ActivityButton,
     AddressTags,
     Loading,
+    SearchBar,
   },
   props: ['group', 'id'],
   async mounted() {
@@ -85,6 +94,7 @@ export default {
       reset: false,
       workInProgress: {},
       revealed: {},
+      foundId: 0,
     };
   },
   computed: {
@@ -213,10 +223,27 @@ export default {
         console.error('Unable to save activity log', e);
       }
     },
+    search(_keyword) {
+      if (!_keyword) {
+        this.foundId = 0;
+        return;
+      }
+      const keyword = _keyword.toLowerCase();
+      const foundAddress = this.territory.addresses.find(a => a.addr1.toLowerCase().includes(keyword)
+        || a.addr2.toLowerCase().includes(keyword)
+        || a.city.toLowerCase().includes(keyword)
+        || a.notes.toLowerCase().includes(keyword));
+
+      this.foundId = foundAddress && foundAddress.id || 0;
+    },
   },
   watch: {
     async token() {
       await this.loadTerritory();
+    },
+    foundId(value) {
+      const card = this.$refs[`address-${value}`];
+      if (card && card.$el) card.$el.scrollIntoView();
     },
     immediate: true,
   },
@@ -232,11 +259,6 @@ export default {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
     min-height: 80px;
-
-    .border-medium {
-      border-style: solid;
-      border-width: medium;
-    }
   }
 }
 
