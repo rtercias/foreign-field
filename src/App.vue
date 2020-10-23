@@ -29,10 +29,6 @@ export default {
 @import '~bootstrap/scss/bootstrap.scss';
 @import '~bootstrap-vue/src/index.scss';
 
-html, body {
-  height: 100%;
-}
-
 h3 {
   margin: 40px 0 0;
 }

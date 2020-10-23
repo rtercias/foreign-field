@@ -1,9 +1,9 @@
 <template>
-  <div class="territory h-100">
+  <div class="territory">
     <div v-if="isLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
       Please wait <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
     </div>
-    <div v-else class="h-100">
+    <div v-else>
       <header class="w-100 pl-2 pr-2">
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">

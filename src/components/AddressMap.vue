@@ -146,13 +146,12 @@ export default {
 
 <style>
   .step-2 .address-map {
-    height: calc(100% - 84px);
+    height: calc(100vh - 220px);
   }
   .step-3 .address-map {
-    height: calc(100% - 98px);
+    height: calc(100vh - 255px);
   }
   .map {
-    height: 100%;
     width: 100%;
   }
   .marker-cluster {

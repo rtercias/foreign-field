@@ -110,13 +110,13 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss" scoped>
   .territory-map {
-    height: calc(100% - 163px);
-  }
-  .map {
-    height: 100%;
-    width: 100%;
+    height: calc(100vh - 107px);
+
+    .map {
+      width: 100%;
+    }
   }
   .leaflet-popup h2 {
     font-size: 18px;

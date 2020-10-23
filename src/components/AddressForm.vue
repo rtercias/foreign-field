@@ -89,14 +89,14 @@
           </b-list-group-item>
         </b-list-group>
       </div>
-      <div v-else-if="step === 2" class="step-2 h-100">
+      <div v-else-if="step === 2" class="step-2">
         <p>
           First, let's check the address location. Drag and drop the marker to make adjustments.
           Click on <b>Select Territory</b> when finished.
         </p>
         <AddressMap :address="model" :zoom="17" :step="step" :key="step"></AddressMap>
       </div>
-      <div v-else-if="step === 3" class="step-3 h-100">
+      <div v-else-if="step === 3" class="step-3">
         <div v-if="territoriesLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
           Loading territories... <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
         </div>
@@ -108,7 +108,7 @@
         </p>
         <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
       </div>
-      <div v-else-if="step === 4" class="step-4 h-100">
+      <div v-else-if="step === 4" class="step-4">
         <div v-if="mode === 'add'">
           <div>{{model.addr1}} {{model.addr2}}</div>
           <div>{{model.city}} {{model.state_province}} {{model.postal_code}}</div>
@@ -410,7 +410,7 @@ export default {
 </script>
 <style>
   .address-form .form {
-    height: calc(100% - 150px);
+    /* height: calc(100% - 150px); */
   }
   .buttons {
     display: flex;
