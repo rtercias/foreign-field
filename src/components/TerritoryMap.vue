@@ -1,7 +1,7 @@
 <template>
   <div class="territory-map">
     <l-map
-      class="map"
+      class="map min-vh-100"
       :zoom="zoom"
       :center="center"
       :bounds="bounds">
@@ -111,11 +111,8 @@ export default {
 </script>
 
 <style>
-  .territory-map {
-    height: calc(100% - 163px);
-  }
   .map {
-    height: 100%;
+    min-height: 100vh;
     width: 100%;
   }
   .leaflet-popup h2 {

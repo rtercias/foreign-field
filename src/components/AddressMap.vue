@@ -1,7 +1,7 @@
 <template>
   <div class="address-map">
     <l-map
-      class="map"
+      class="map min-vh-100"
       ref="addressMap"
       :zoom="zoom"
       :center="center"
@@ -152,7 +152,6 @@ export default {
     height: calc(100% - 98px);
   }
   .map {
-    height: 100%;
     width: 100%;
   }
   .marker-cluster {
