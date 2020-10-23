@@ -1,7 +1,7 @@
 <template>
-  <div class="optimize h-100">
+  <div class="optimize">
     <Loading v-if="saving"></Loading>
-    <div v-else class="h-100">
+    <div v-else>
       <div class="optimize-header w-100 p-2">
         <div class="d-flex justify-content-center align-items-center">
           <h5>Territory Optimizer</h5>
@@ -246,7 +246,7 @@ export default {
   }
   @media (min-width: 769px) {
   .optimize-map {
-    height: 100%;
+    height: calc(100vh - 450px);
   }
 }
 </style>

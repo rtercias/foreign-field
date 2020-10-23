@@ -410,7 +410,7 @@ export default {
 </script>
 <style>
   .address-form .form {
-    height: calc(100% - 150px);
+    /* height: calc(100% - 150px); */
   }
   .buttons {
     display: flex;
