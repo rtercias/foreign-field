@@ -1,12 +1,21 @@
 <template>
   <div class="lead">
     <vue-pull-refresh class="bg-primary" :on-refresh="onRefresh" :config="refreshOptions">
-      <b-navbar class="border-warning gold-bottom" type="dark" variant="primary" toggleable fill>
+      <b-navbar
+        class="border-warning h-100"
+        :class="{
+          'gold-bottom': !isDesktop,
+          'font-weight-bold text-left large-font-menu align-items-baseline': isDesktop
+        }"
+        type="dark"
+        variant="primary"
+        toggleable 
+        fill>
         <b-link class="button text-white-50" @click="back">
-          <font-awesome-icon icon="chevron-left" v-show="showLeftNav"></font-awesome-icon>
+          <font-awesome-icon icon="chevron-left" v-show="showLeftNav && !isDesktop"></font-awesome-icon>
         </b-link>
-        <b-navbar-toggle target="nav_dropdown_collapse"></b-navbar-toggle>
-        <b-collapse is-nav id="nav_dropdown_collapse">
+        <b-navbar-toggle :class="{ 'd-none': isDesktop }" target="nav_dropdown_collapse"></b-navbar-toggle>
+        <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
@@ -98,6 +107,7 @@ export default {
       canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
       canRead: 'auth/canRead',
+      isDesktop: 'auth/isDesktop',
       territory: 'territory/territory',
     }),
     showLeftNav() {
@@ -116,6 +126,9 @@ export default {
 }
 .gold-bottom {
   border-bottom: solid 6px;
+}
+.large-font-menu {
+  font-size: 24px;
 }
 .dropdown-item {
   width: 100%;

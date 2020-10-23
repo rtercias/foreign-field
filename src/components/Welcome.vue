@@ -15,9 +15,9 @@
         </div>
       </div>
       <div class="col-sm-12 mb-3">
-        <h3 class="align-items-center d-flex justify-content-center">
-          <img class="logo pr-5" :src="require('../assets/wheat-x.png')" />
-          <span class="title w-100">Dashboard</span>
+        <h3 class="align-items-center d-flex justify-content-center" :class="{ 'flex-column': isDesktop }">
+          <img class="logo" :class="{ 'pr-5': !isDesktop }" :src="require('../assets/wheat-x.png')" />
+          <span class="title w-100" :class="{ 'pr-0': isDesktop }">Dashboard</span>
         </h3>
         <Loading v-if="loading"></Loading>
         <b-button-group class="pt-4">
@@ -106,6 +106,7 @@ export default {
       loading: 'auth/loading',
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
+      isDesktop: 'auth/isDesktop',
     }),
     territories() {
       return this.user && this.user.territories || [];
@@ -167,6 +168,9 @@ h3 {
 }
 .logo {
   width: 100px;
+}
+.logo-big {
+  width: 150px;
 }
 .title {
   padding-right: 5.5rem;

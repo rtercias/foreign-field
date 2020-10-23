@@ -1,7 +1,7 @@
 <template>
-  <div id="app" class="d-flex flex-column h-100">
-    <Masthead></Masthead>
-    <router-view class="view"></router-view>
+  <div id="app" class="d-flex h-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
+    <Masthead :class="{ 'w-25': isDesktop }"></Masthead>
+    <router-view class="view" :class="{ 'w-75': isDesktop }"></router-view>
   </div>
 </template>
 
@@ -17,6 +17,7 @@ export default {
   computed: {
     ...mapGetters({
       isForcedOut: 'auth/isForcedOut',
+      isDesktop: 'auth/isDesktop',
     }),
   },
 };

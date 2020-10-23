@@ -55,6 +55,7 @@ export const auth = {
     canManage: state => state.user && (state.user.role === 'Admin' || state.user.role === 'TS'),
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
+    isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
   },
 
   mutations: {
