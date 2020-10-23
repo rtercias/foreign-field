@@ -155,7 +155,13 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss" scoped>
+<style lang="scss">
+.firebaseui-idp-list {
+  text-align: center;
+  .firebaseui-list-item {
+    width: 200px;
+  }
+}
 h3 {
   margin: 40px 0 0;
 }

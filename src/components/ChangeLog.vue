@@ -25,7 +25,8 @@
         </b-dropdown-item>
       </b-dropdown>
     </div>
-    <font-awesome-icon v-if="loading" class="loading text-info text-center w-100 mt-5" icon="circle-notch" :spin="true" />
+    <Loading v-if="loading && isFullScreen"></Loading>
+    <font-awesome-icon v-else-if="loading" class="loading text-info text-center w-100" icon="circle-notch" :spin="true" />
     <div v-else>
       <div v-if="isFullScreen" class="mx-3 mb-3">
         <b-form-input v-model="keywordFilter" placeholder="Filter by address, publisher, or territory" />
@@ -49,6 +50,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import { SwipeList, SwipeOut } from 'vue-swipe-actions';
 import ChangeLogAddressCard from './ChangeLogAddressCard';
+import Loading from './Loading';
 import addDays from 'date-fns/addDays';
 import addWeeks from 'date-fns/addWeeks';
 import addMonths from 'date-fns/addMonths';
@@ -60,6 +62,7 @@ export default {
   props: ['group', 'territoryId', 'type', 'recordId', 'publisherId'],
   components: {
     ChangeLogAddressCard,
+    Loading,
     SwipeOut,
     SwipeList,
   },

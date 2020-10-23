@@ -22,6 +22,7 @@ import App from './App.vue';
 import Pusher from 'pusher-js';
 import { router } from './routes';
 import { store } from './store';
+import '../node_modules/firebaseui/dist/firebaseui.css';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';

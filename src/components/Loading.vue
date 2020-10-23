@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="p-5">
+    <h3 class="p-5 text-center">
       <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
       Please wait...
     </h3>
