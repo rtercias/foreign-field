@@ -141,6 +141,7 @@ export default {
       actionButtonList: 'phone/actionButtonList',
       user: 'auth/user',
       congId: 'auth/congId',
+      phone: 'phone/phone',
     }),
     rightButtonList() {
       return this.actionButtonList.filter(b => RIGHT_BUTTON_LIST.includes(b.value));
@@ -196,7 +197,7 @@ export default {
       };
 
       await this.addPhone(phone);
-      this.address.phones.push(phone);
+      this.address.phones.push(this.phone);
       this.newPhone = '';
       this.isAddressBusy = false;
     },
