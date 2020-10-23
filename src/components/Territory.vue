@@ -22,17 +22,17 @@
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
-              <b-button variant="info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
+              <b-button variant="outline-info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
                 List
               </b-button>
               <b-button
                 v-if="canViewReports"
-                variant="info"
+                variant="outline-info"
                 :to="`/territories/${group}/${id}/phone`"
                 :pressed="viewMode==='phone-list'">
                 Phone
               </b-button>
-              <b-button variant="info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
+              <b-button variant="outline-info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
