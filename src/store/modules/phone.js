@@ -50,6 +50,8 @@ const ADD_PHONE = 'ADD_PHONE';
 const UPDATE_PHONE = 'UPDATE_PHONE';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
+const PHONE_LOOKUP_SUCCESS = 'PHONE_LOOKUP_SUCCESS';
+const PHONE_LOOKUP_FAIL = 'PHONE_LOOKUP_FAIL';
 
 const ACTION_BUTTON_LIST = [
   {
@@ -182,6 +184,7 @@ export const phone = {
   namespaced: true,
   state: {
     phone: {},
+    search: [],
   },
 
   getters: {
@@ -199,6 +202,8 @@ export const phone = {
       .split(',')
       .filter(n => !n.length))
       || []),
+
+    search: state => state.search,
   },
 
   mutations: {
@@ -228,6 +233,13 @@ export const phone = {
       const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
       const newTags = arrTags.filter(t => t !== tag);
       state.phone.notes = newTags.join(',');
+    },
+
+    PHONE_LOOKUP_SUCCESS(state, search) {
+      state.search = search;
+    },
+    PHONE_LOOKUP_FAIL(state, exception) {
+      console.error(PHONE_LOOKUP_FAIL, exception);
     },
   },
 
@@ -396,6 +408,50 @@ export const phone = {
           commit(REMOVE_TAG, tag);
         }
         commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async phoneSearch({ commit }, { congId, searchTerm }) {
+      try {
+        if (!congId) return;
+        if (!searchTerm) return;
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`query Search($congId: Int, $searchTerm: String) {
+              phones(congId:$congId, keyword: $searchTerm) {
+                id
+                phone
+                notes
+                parent_id
+                territory {
+                  id
+                  name
+                  description
+                  group_code
+                }
+              }
+            }`),
+            variables: {
+              congId,
+              searchTerm,
+            },
+          },
+        });
+
+        if (!response || !response.data || !response.data.data || !response.data.data.phones) {
+          return;
+        }
+
+        const search = response.data.data.phones;
+        commit(PHONE_LOOKUP_SUCCESS, search);
+      } catch (exception) {
+        commit(PHONE_LOOKUP_FAIL, exception);
       }
     },
   },
