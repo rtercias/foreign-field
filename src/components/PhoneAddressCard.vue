@@ -29,7 +29,8 @@
               :incomingResponse="item.lastActivity"
               @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
-              @toggle-left-panel="toggleLeftPanel">
+              @toggle-left-panel="toggleLeftPanel"
+              @edit-phone="editPhone">
             </PhoneCard>
             <b-list-group-item v-else class="d-flex py-4 border-0">
               <the-mask
@@ -131,6 +132,7 @@ export default {
       enabled: true,
       revealed: {},
       newPhone: '',
+      oldPhone: '',
       isAddressBusy: false,
     };
   },
@@ -140,6 +142,7 @@ export default {
       user: 'auth/user',
       congId: 'auth/congId',
       phone: 'phone/phone',
+      search: 'phone/search',
     }),
     rightButtonList() {
       return this.actionButtonList.filter(b => RIGHT_BUTTON_LIST.includes(b.value));
@@ -158,6 +161,7 @@ export default {
       removeTag: 'phone/removeTag',
       addLog: 'address/addLog',
       updateAddress: 'address/updateAddress',
+      phoneSearch: 'phone/phoneSearch',
     }),
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
@@ -183,10 +187,19 @@ export default {
         this.$refs.list.revealLeft(index);
       }
     },
+    editPhone(oldPhone) {
+      this.oldPhone = oldPhone;
+    },
     async addNewPhone() {
       if (!this.newPhone) return;
 
       this.isAddressBusy = true;
+
+      const isDuplicate = await this.checkDuplicates(this.newPhone);
+      if (isDuplicate) {
+        this.isAddressBusy = false;
+        return;
+      }
       const sort = get(this.storeAddress, 'phones.length', 0);
       const phone = {
         congregationId: this.congId,
@@ -205,10 +218,44 @@ export default {
       this.isAddressBusy = false;
     },
     cancel(phone) {
+      if (this.oldPhone) this.$set(phone, 'phone', this.formatPhone(this.oldPhone));
       this.$set(phone, 'editMode', false);
+    },
+    async checkDuplicates(phone, id) {
+      const title = this.formatPhone(phone);
+      await this.phoneSearch({ congId: this.congId, searchTerm: phone });
+      if (this.search && this.search.length) {
+        // same record is ok
+        if (id && this.search.some(s => s.id === id)) return false;
+
+        if (this.search.some(s => s.parent_id === this.address.id)) {
+          this.$bvModal.msgBoxOk('This number already exists.', { title, centered: true });
+        } else {
+          const terr = this.search[0].territory;
+          const h = this.$createElement;
+          const message = h('p', {
+            domProps: {
+              innerHTML:
+              `This number already exists in territory
+              <b-link :to="/territories/${terr.group_code}/${terr.id}">
+                ${terr.name}
+              </b-link>`,
+            },
+          });
+          this.$bvModal.msgBoxOk(message, { title, centered: true });
+        }
+        return true;
+      }
+
+      return false;
     },
     async update(phone) {
       this.$set(phone, 'isBusy', true);
+      const duplicates = this.checkDuplicates(phone.phone, phone.id);
+      if (duplicates) {
+        this.$set(phone, 'isBusy', false);
+        return;
+      }
       await this.updatePhone(phone);
       this.$set(phone, 'editMode', false);
       this.$set(phone, 'isBusy', false);

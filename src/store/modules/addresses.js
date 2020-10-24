@@ -170,6 +170,9 @@ export const addresses = {
                 addr2
                 city
                 state_province
+                phone
+                notes
+                parent_id
                 territory {
                   id
                   name

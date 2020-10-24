@@ -128,7 +128,7 @@ export default {
     },
     edit() {
       this.$set(this.phoneRecord, 'editMode', !this.phoneRecord.editMode);
-      this.$emit('edit-phone', this.phoneRecord.editMode);
+      this.$emit('edit-phone', this.phoneRecord.phone);
     },
   },
   computed: {
