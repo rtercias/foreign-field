@@ -167,6 +167,14 @@ function validatePhone(_phone, isNew) {
     delete phone.editMode;
   }
 
+  if ('create_date' in phone) {
+    delete phone.create_date;
+  }
+
+  if ('update_date' in phone) {
+    delete phone.update_date;
+  }
+
   return phone;
 }
 

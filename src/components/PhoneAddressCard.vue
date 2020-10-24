@@ -160,7 +160,7 @@ export default {
       updateAddress: 'address/updateAddress',
     }),
     onActive() {
-      const phoneEditing = this.address.phones.find(p => p.editMode);
+      const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
       if (phoneEditing) this.$set(phoneEditing, 'editMode', false);
       this.$refs.list.closeActions();
     },
