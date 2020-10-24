@@ -16,7 +16,7 @@
       </h5>
       <PhoneTags :phone="phoneRecord" :address="address"></PhoneTags>
     </div>
-    <div class="static-buttons col-3 pr-2 justify-content-end">
+    <div class="static-buttons col-3 pr-0 justify-content-end">
       <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
       </font-awesome-icon>
       <div

@@ -1,14 +1,14 @@
 <template>
   <div class="m-0 phone-address-card d-flex align-items-center justify-content-center">
     <div class="w-100">
-      <div class="text-left bg-light py-2 px-4 w-100 h-100 d-flex align-items-center overflow-hidden">
+      <div class="text-left bg-light py-2 px-3 w-100 h-100 d-flex justify-content-end align-items-center overflow-hidden">
         <b-link
-          class="w-100"
+          class="w-100 pl-3 pr-1"
           :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
           <span class="address d-block w-100">{{address.addr1}} {{address.addr2}}&nbsp;
           {{address.city}} {{address.state_province}} {{address.postal_code}}</span>
         </b-link>
-        <font-awesome-icon class="text-info fa-2x" icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
+        <font-awesome-icon class="text-info" icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
       </div>
       <b-list-group>
         <swipe-list
@@ -37,8 +37,7 @@
                 type="tel"
                 :mask="'###-###-####'"
                 :masked="false"
-                v-model="item.phone"
-                @mousedown.native="onActive">
+                v-model="item.phone">
               </the-mask>
               <b-button variant="white" class="cancel text-danger position-absolute" @click="() => cancel(item)">
                 <font-awesome-icon icon="times"></font-awesome-icon>
@@ -274,7 +273,7 @@ export default {
     },
     async applyTag(phone, item, close) {
       const newTag = item.description.toLowerCase();
-      this.$set(phone, 'isBusy', true);
+      this.isAddressBusy = true;
       try {
         const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
         const model = this.address.phones.find(p => p.id === phone.id);
@@ -300,7 +299,7 @@ export default {
         }
 
         if (!confirm) {
-          this.$set(phone, 'isBusy', false);
+          this.isAddressBusy = false;
           return;
         }
 
@@ -316,7 +315,7 @@ export default {
         // update UI model
         const updatedNotes = newArray.join(',');
         this.$set(model, 'notes', `${updatedNotes}`);
-        this.$set(phone, 'isBusy', false);
+        this.isAddressBusy = false;
         if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to apply tag', e);
