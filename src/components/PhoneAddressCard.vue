@@ -323,8 +323,7 @@ export default {
       this.isAddressBusy = true;
       try {
         const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
-        const model = this.address.phones.find(p => p.id === phone.id);
-        const oldArray = model.notes ? model.notes.split(',') : [];
+        const oldArray = phone.notes ? phone.notes.split(',') : [];
         let newArray = [...oldArray];
 
         if (exclusiveTags.includes(newTag)) {
@@ -351,6 +350,7 @@ export default {
         }
 
         // add new tag
+        await this.setPhone(phone);
         await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
         newArray.push(newTag);
 
@@ -359,9 +359,9 @@ export default {
           await this.updateAddressPhone(phone.phone);
         }
 
-        // update UI model
+        // update UI phone
         const updatedNotes = newArray.join(',');
-        this.$set(model, 'notes', `${updatedNotes}`);
+        this.$set(phone, 'notes', `${updatedNotes}`);
         this.isAddressBusy = false;
         if (typeof close === 'function') close();
       } catch (e) {
