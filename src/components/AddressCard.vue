@@ -50,6 +50,7 @@ import get from 'lodash/get';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'AddressCard',
@@ -164,7 +165,7 @@ export default {
     },
 
     formattedPhone() {
-      return this.address && this.address.phone && this.address.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+      return this.address && this.address.phone && formatPhone(this.address.phone);
     },
 
     formattedSelectedResponseTS() {
