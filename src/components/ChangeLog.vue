@@ -180,7 +180,7 @@ export default {
       ];
     },
     showDateFilter() {
-      return this.isFullScreen && !this.isSingleRecord;
+      return this.isFullScreen;
     },
     returnRoute() {
       if (this.recordId && this.type === 'addresses') {
