@@ -8,7 +8,7 @@
         <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
         <font-awesome-icon
-          v-if="!phoneRecord.notes.includes('confirmed')"
+          v-if="!hasConfirmed"
           class="small text-primary ml-2"
           icon="pencil-alt"
           @click="edit">
@@ -177,6 +177,10 @@ export default {
       const notAllowed = ['invalid', 'do not call'];
       const lastActivity = this.lastActivity || {};
       return !notAllowed.includes(lastActivity.value);
+    },
+    hasConfirmed() {
+      const notes = get(this.phoneRecord, 'notes', '') || '';
+      return notes.includes('confirmed');
     },
   },
   watch: {
