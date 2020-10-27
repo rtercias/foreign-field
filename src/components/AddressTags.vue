@@ -56,6 +56,7 @@ import get from 'lodash/get';
 import startsWith from 'lodash/startsWith';
 import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'AddressTags',
@@ -243,7 +244,7 @@ export default {
     },
     formattedPhone() {
       const { phone } = this.address;
-      return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+      return formatPhone(phone);
     },
   },
   mounted() {

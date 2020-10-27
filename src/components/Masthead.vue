@@ -28,7 +28,7 @@
               :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
               Optimize
             </b-nav-item>
-            <b-nav-item v-if="canRead" :to="`/dnc/${this.user.congregation.id}`">DNC</b-nav-item>
+            <b-nav-item v-if="canRead" :to="`/dnc/${user.congregation.id}`">DNC</b-nav-item>
           </b-navbar-nav>
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown v-if="isAuthenticated" right>

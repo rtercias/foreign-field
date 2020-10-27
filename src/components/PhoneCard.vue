@@ -45,6 +45,7 @@ import format from 'date-fns/format';
 import get from 'lodash/get';
 import ActivityButton from './ActivityButton';
 import PhoneTags from './PhoneTags';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'PhoneCard',
@@ -157,8 +158,8 @@ export default {
       return this.getPxValue(width);
     },
     formattedPhone() {
-      return this.phoneRecord && this.phoneRecord.phone
-        && this.phoneRecord.phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+      const phone = get(this, 'phoneRecord.phone', '');
+      return formatPhone(phone);
     },
     formattedSelectedResponseTS() {
       return this.phoneRecord.selectedResponseTS && format(new Date(this.phoneRecord.selectedResponseTS), 'M/d/yyyy') || '';

@@ -30,7 +30,7 @@
     <div v-else>
       <SearchBar
         v-if="isFullScreen"
-        :search-text="'Filter by address, publisher, or territory'"
+        :search-text="'Filter by address, phone, or publisher'"
         :results="logs"
         @on-change="filter">
       </SearchBar>
@@ -58,6 +58,7 @@ import addWeeks from 'date-fns/addWeeks';
 import addMonths from 'date-fns/addMonths';
 import startOfDay from 'date-fns/startOfDay';
 import format from 'date-fns/format';
+import { unmask } from '../utils/phone';
 
 export default {
   name: 'ChangeLog',
@@ -117,6 +118,10 @@ export default {
     compareToKeyword(text) {
       return String(text).toLowerCase().includes(this.keywordFilter.toLowerCase());
     },
+    compareToUnmaskedKeyword(phone) {
+      const unmaskedFilter = unmask(this.keywordFilter.toLowerCase());
+      return String(phone).toLowerCase().includes(unmaskedFilter);
+    },
     filter(value) {
       this.keywordFilter = value;
     },
@@ -153,7 +158,8 @@ export default {
           || this.compareToKeyword(log.address.city)
           || this.compareToKeyword(log.publisher.firstname)
           || this.compareToKeyword(log.publisher.lastname)
-          || this.compareToKeyword(log.address.territory.name));
+          || this.compareToKeyword(log.address.territory.name)
+          || this.compareToUnmaskedKeyword(log.address.phone));
       }
 
       return this.isFullScreen ? this.cleanLogs : this.preview;

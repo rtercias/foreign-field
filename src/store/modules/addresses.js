@@ -227,6 +227,8 @@ export const addresses = {
                   city
                   state_province
                   postal_code
+                  type
+                  phone
                   territory {
                     id
                     name
