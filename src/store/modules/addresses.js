@@ -235,6 +235,7 @@ export const addresses = {
                     description
                     group_code
                   }
+                  parent_id
                 }
               }
             }`),

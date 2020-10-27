@@ -2,17 +2,19 @@
   <div class="change-log-address-card d-flex flex-column justify-content-between">
     <div class="d-flex justify-content-between pb-3">
       <div>
-        <b-link
-          v-if="!isSingleRecord"
-          :to="`/territories/${group}/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
-          <div v-if="log.address.type === 'Phone'">
+        <div v-if="!isSingleRecord">
+          <b-link
+            v-if="log.address.type === 'Phone'"
+            :to="`/territories/${group}/${territoryId}/addresses/${log.address.parent_id}/detail?origin=${$route.name}`">
             <div>{{formatPhone(log.address.phone)}}</div>
-          </div>
-          <div v-else>
+          </b-link>
+          <b-link
+            v-else
+            :to="`/territories/${group}/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
             <div>{{log.address.addr1}} {{log.address.addr2}}</div>
             <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
-          </div>
-        </b-link>
+          </b-link>
+        </div>
         <div v-else>
           <div v-if="log.address.type === 'Phone'">
             <div>{{formatPhone(log.address.phone)}}</div>
