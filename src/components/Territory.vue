@@ -22,30 +22,31 @@
           </div>
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
+              <b-button variant="outline-info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
+                List
+              </b-button>
               <b-button
+                v-if="canViewReports"
                 variant="outline-info"
-                :to="{ name: viewMode, params: { group, id }}"
-                :pressed="true">
-                {{viewMode === 'phone-list' ? 'Phone' : 'Address'}}
+                :to="`/territories/${group}/${id}/phone`"
+                :pressed="viewMode==='phone-list'">
+                Phone
               </b-button>
               <b-button variant="outline-info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
-            <b-button-group v-if="viewMode==='map-view'" size="sm">
-              <b-button variant="primary" :to="`/territories/${group}/${id}/optimize`">
-                Optimize
-              </b-button>
-            </b-button-group>
-            <b-button-group v-else size="sm">
+            <b-button-group v-if="viewMode==='address-list'" size="sm">
               <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
                 Check In
               </b-button>
-              <b-button
-                v-if="canWrite && viewMode === 'address-list'"
-                variant="success"
-                :to="`/territories/${group}/${id}/addresses/add`">
+              <b-button v-if="canWrite" variant="success" :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+              </b-button>
+            </b-button-group>
+            <b-button-group v-if="viewMode==='map-view'" size="sm">
+              <b-button variant="primary" :to="`/territories/${group}/${id}/optimize`">
+                Optimize
               </b-button>
             </b-button-group>
           </div>
@@ -60,7 +61,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
-import { store, defaultOptions } from '../store';
 
 export default {
   name: 'Territory',
@@ -68,27 +68,19 @@ export default {
     TerritoryMap,
   },
   props: ['group', 'id'],
-  beforeRouteEnter(to, from, next) {
-    const { options = defaultOptions } = store.state.auth;
-    const name = get(options, 'territory.defaultView');
-    const { group, id } = to.params;
-    if (name !== to.name) {
-      next({ name, params: { group, id } });
+  async mounted() {
+    if (this.token) {
+      await this.getTerritory(this.id);
     }
-    next();
+    this.isLoading = false;
   },
   data() {
     return {
       isLoading: true,
       reset: false,
       workInProgress: {},
+      viewMode: 'address-list',
     };
-  },
-  async mounted() {
-    if (this.token) {
-      await this.getTerritory(this.id);
-    }
-    this.isLoading = false;
   },
   computed: {
     ...mapGetters({
@@ -99,7 +91,6 @@ export default {
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
       ownedBy: 'territory/isOwnedByUser',
-      options: 'auth/options',
     }),
     isCheckedOut() {
       return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
@@ -132,16 +123,11 @@ export default {
     isOwnedByUser() {
       return this.ownedBy === get(this.user, 'username');
     },
-    viewMode() {
-      const options = this.options || defaultOptions;
-      return get(options, 'territory.defaultView');
-    },
   },
   methods: {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
-      resetPhoneRecords: 'territory/resetPhoneRecords',
       checkinTerritory: 'territory/checkinTerritory',
     }),
 
@@ -152,17 +138,13 @@ export default {
       });
 
       if (response) {
-        this.checkInAndReset();
+        this.checkInandReset();
       }
     },
 
-    async checkInAndReset() {
+    async checkInandReset() {
       this.isLoading = true;
-      if (this.viewMode === 'phone-list') {
-        await this.resetPhoneRecords(this.id);
-      } else {
-        await this.resetNHRecords(this.id);
-      }
+      await this.resetNHRecords(this.id);
       await this.checkinTerritory({
         territoryId: this.id,
         userId: get(this.territory, 'status.publisher.id'),
@@ -184,6 +166,17 @@ export default {
     openSMSMobile() {
       window.open(`sms:&body=Work this territory with me!%0a%0a${window.location.href}`, '_self');
       return false;
+    },
+  },
+  watch: {
+    '$route.name': {
+      // vue watch handlers does not allow arrow function syntax
+      // eslint-disable-next-line
+      handler: function (value) {
+        this.viewMode = value;
+      },
+      deep: true,
+      immediate: true,
     },
   },
 };

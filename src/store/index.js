@@ -28,15 +28,6 @@ axios.defaults.headers.common['Content-Type'] = 'application/json';
 //   }
 // );
 
-export const defaultOptions = {
-  territory: {
-    defaultView: 'address-list',
-  },
-  territories: {
-    defaultSort: 'Description',
-  },
-};
-
 export const AddressType = {
   Regular: 'Regular',
   Phone: 'Phone',

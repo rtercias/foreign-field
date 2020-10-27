@@ -30,7 +30,6 @@ function initialState() {
     loading: false,
     mastheadLeftNavRoute: '/',
     token: '',
-    options: null,
   };
 }
 
@@ -57,7 +56,6 @@ export const auth = {
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
-    options: state => state.options,
   },
 
   mutations: {
@@ -68,6 +66,7 @@ export const auth = {
 
     AUTHENTICATE_SUCCESS(state, authenticatedUser) {
       state.isAuthenticated = true;
+      state.isPending = false;
       state.isForcedOut = false;
       state.name = authenticatedUser.name;
       state.photoUrl = authenticatedUser.photoUrl;
@@ -78,8 +77,6 @@ export const auth = {
       state.user = user;
       state.congId = state.user && state.user.congregation && state.user.congregation.id || 0;
       state.congregation = state.user && state.user.congregation;
-      state.options = state.congregation && state.congregation.options;
-      state.isPending = false;
     },
 
     FORCEOUT(state) {
@@ -180,13 +177,11 @@ export const auth = {
         }
 
         const { user } = (response && response.data && response.data.data) || {};
-        const options = JSON.parse(get(user, 'congregation.options', '{}'));
-        const congregation = { ...user.congregation, options };
         const userRoles = get(user, 'role', '').split(',');
         const { permissions = [] } = router.currentRoute.meta;
         const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
         if (hasPermission) {
-          commit(AUTHORIZE, { ...user, congregation });
+          commit(AUTHORIZE, user);
           resolve();
         } else {
           reject(new UnauthorizedUserError('Unauthorized'));
@@ -239,34 +234,30 @@ export const auth = {
     },
 
     async firebaseInit({ dispatch, state }) {
-      return new Promise((resolve, reject) => {
-        firebase.initializeApp(config);
-        firebase.auth().onAuthStateChanged(async (user) => {
-          if (user) {
-            user.token = await user.getIdToken();
-            if (!user.token) {
-              throw new Error('Unable to retrieve token from Firebase');
-            }
-
-            axios.interceptors.request.use((cfg) => {
-              cfg.headers.Authorization = `Bearer ${user.token}`;
-              return cfg;
-            });
-
-            await dispatch('login', user);
-            resolve();
-          } else {
-            if (state.isForcedOut) {
-              router.replace({ name: 'signout', params: { unauthorized: true } });
-            }
-
-            const loc = window.location;
-            if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
-              router.replace({ name: 'auth', query: { redirect: loc.pathname } });
-            }
-            reject();
+      firebase.initializeApp(config);
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          user.token = await user.getIdToken();
+          if (!user.token) {
+            throw new Error('Unable to retrieve token from Firebase');
           }
-        });
+
+          axios.interceptors.request.use((cfg) => {
+            cfg.headers.Authorization = `Bearer ${user.token}`;
+            return cfg;
+          });
+
+          await dispatch('login', user);
+        } else {
+          if (state.isForcedOut) {
+            router.replace({ name: 'signout', params: { unauthorized: true } });
+          }
+
+          const loc = window.location;
+          if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
+            router.replace({ name: 'auth', query: { redirect: loc.pathname } });
+          }
+        }
       });
     },
 
