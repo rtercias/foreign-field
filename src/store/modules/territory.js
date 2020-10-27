@@ -237,5 +237,18 @@ export const territory = {
         }
       }
     },
+
+    async resetPhoneRecords({ dispatch, state }, territoryId) {
+      await dispatch('getTerritory', territoryId);
+      const { addresses } = state.territory;
+
+      for (const address of addresses) {
+        for (const phone of address.phones) {
+          if (phone.activityLogs && phone.activityLogs.length > 0) {
+            await dispatch('address/addLog', { addressId: phone.id, value: 'START' }, { root: true });
+          }
+        }
+      }
+    },
   },
 };

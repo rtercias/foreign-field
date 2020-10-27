@@ -2,15 +2,27 @@
   <div class="change-log-address-card d-flex flex-column justify-content-between">
     <div class="d-flex justify-content-between pb-3">
       <div>
-        <b-link
-          v-if="!isSingleRecord"
-          :to="`/territories/${group}/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
-          <div>{{log.address.addr1}} {{log.address.addr2}}</div>
-          <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
-        </b-link>
+        <div v-if="!isSingleRecord">
+          <b-link
+            v-if="log.address.type === 'Phone'"
+            :to="`/territories/${group}/${territoryId}/addresses/${log.address.parent_id}/detail?origin=${$route.name}`">
+            <div>{{formatPhone(log.address.phone)}}</div>
+          </b-link>
+          <b-link
+            v-else
+            :to="`/territories/${group}/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
+            <div>{{log.address.addr1}} {{log.address.addr2}}</div>
+            <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
+          </b-link>
+        </div>
         <div v-else>
-          <div>{{log.address.addr1}} {{log.address.addr2}}</div>
-          <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
+          <div v-if="log.address.type === 'Phone'">
+            <div>{{formatPhone(log.address.phone)}}</div>
+          </div>
+          <div v-else>
+            <div>{{log.address.addr1}} {{log.address.addr2}}</div>
+            <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
+          </div>
         </div>
       </div>
       <div class="text-right">
@@ -34,8 +46,9 @@
 <script>
 import { mapGetters } from 'vuex';
 import get from 'lodash/get';
-import format from 'date-fns/format';
 import Change from './Change';
+import format from 'date-fns/format';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'ChangeLogAddressCard',
@@ -44,6 +57,7 @@ export default {
     Change,
   },
   methods: {
+    formatPhone,
     changeDescription(change, key) {
       return `Changed ${key} ${change.old
         ? `from <b-badge>${this.value(change.old)}</b-badge>`

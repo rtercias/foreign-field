@@ -114,6 +114,7 @@ import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 import { REJECT_TAGS } from '../store/modules/phone';
+import { unmask } from '../utils/phone';
 
 const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM', 'LW'];
 const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
@@ -194,8 +195,9 @@ export default {
       if (!this.newPhone) return;
 
       this.isAddressBusy = true;
+      const rawPhone = unmask(this.newPhone);
 
-      const isDuplicate = await this.checkDuplicates(this.newPhone);
+      const isDuplicate = await this.checkDuplicates(rawPhone);
       if (isDuplicate) {
         this.isAddressBusy = false;
         return;
@@ -207,7 +209,7 @@ export default {
         territory_id: this.territory.id,
         type: AddressType.Phone,
         status: AddressStatus.Active,
-        phone: this.newPhone,
+        phone: rawPhone,
         notes: '',
         sort,
       };
@@ -251,11 +253,12 @@ export default {
     },
     async update(phone) {
       this.$set(phone, 'isBusy', true);
-      const duplicates = this.checkDuplicates(phone.phone, phone.id);
+      const duplicates = await this.checkDuplicates(phone.phone, phone.id);
       if (duplicates) {
         this.$set(phone, 'isBusy', false);
         return;
       }
+      phone.phone = unmask(phone.phone);
       await this.updatePhone(phone);
       this.$set(phone, 'editMode', false);
       this.$set(phone, 'isBusy', false);
