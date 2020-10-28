@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-link :to="url(territory)" @click="() => setTerr(territory)">
-      {{territory.name}} ({{territory.city}})
+      {{territory.name}} ({{firstCity}})
     </b-link>
     <span v-if="territory.status">
       on {{territory.status && checkoutDate(territory.status.date)}}
@@ -51,6 +51,10 @@ export default {
     },
     formattedLastVisited() {
       return formatDistance(new Date(this.territory.lastVisited), new Date(), { addSuffix: true });
+    },
+    firstCity() {
+      const cityArray = this.territory.city.split(',');
+      return cityArray.length && cityArray[0];
     },
   },
   mounted() {

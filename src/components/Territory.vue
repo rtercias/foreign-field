@@ -24,9 +24,15 @@
             <b-button-group size="sm">
               <b-button
                 variant="outline-info"
-                :to="{ name: viewMode, params: { group, id }}"
-                :pressed="true">
-                {{viewMode === 'phone-list' ? 'Phone' : 'Address'}}
+                :to="{ name: 'address-list', params: { group, id }}"
+                :pressed="viewMode === 'address-list'">
+                Address
+              </b-button>
+              <b-button
+                variant="outline-info"
+                :to="{ name: 'phone-list', params: { group, id }}"
+                :pressed="viewMode === 'phone-list'">
+                Phone
               </b-button>
               <b-button variant="outline-info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
@@ -69,6 +75,8 @@ export default {
   },
   props: ['group', 'id'],
   beforeRouteEnter(to, from, next) {
+    if (from.name) next();
+
     const { options = defaultOptions } = store.state.auth;
     const name = get(options, 'territory.defaultView');
     const { group, id } = to.params;
@@ -82,6 +90,7 @@ export default {
       isLoading: true,
       reset: false,
       workInProgress: {},
+      viewMode: this.defaultView,
     };
   },
   async mounted() {
@@ -132,7 +141,7 @@ export default {
     isOwnedByUser() {
       return this.ownedBy === get(this.user, 'username');
     },
-    viewMode() {
+    defaultView() {
       const options = this.options || defaultOptions;
       return get(options, 'territory.defaultView');
     },
@@ -184,6 +193,17 @@ export default {
     openSMSMobile() {
       window.open(`sms:&body=Work this territory with me!%0a%0a${window.location.href}`, '_self');
       return false;
+    },
+  },
+  watch: {
+    '$route.name': {
+      // vue watch handlers does not allow arrow function syntax
+      // eslint-disable-next-line
+      handler: function (value) {
+        this.viewMode = value;
+      },
+      deep: true,
+      immediate: true,
     },
   },
 };
