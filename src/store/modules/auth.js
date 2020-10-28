@@ -239,7 +239,7 @@ export const auth = {
     },
 
     async firebaseInit({ dispatch, state }) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         firebase.initializeApp(config);
         firebase.auth().onAuthStateChanged(async (user) => {
           if (user) {
@@ -254,7 +254,6 @@ export const auth = {
             });
 
             await dispatch('login', user);
-            resolve();
           } else {
             if (state.isForcedOut) {
               router.replace({ name: 'signout', params: { unauthorized: true } });
@@ -264,8 +263,8 @@ export const auth = {
             if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
               router.replace({ name: 'auth', query: { redirect: loc.pathname } });
             }
-            reject();
           }
+          resolve();
         });
       });
     },
