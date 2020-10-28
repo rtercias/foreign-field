@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { reject } from 'core-js/fn/promise';
 import firebase from 'firebase/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
@@ -239,12 +240,13 @@ export const auth = {
     },
 
     async firebaseInit({ dispatch, state }) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         firebase.initializeApp(config);
         firebase.auth().onAuthStateChanged(async (user) => {
           if (user) {
             user.token = await user.getIdToken();
             if (!user.token) {
+              reject();
               throw new Error('Unable to retrieve token from Firebase');
             }
 
