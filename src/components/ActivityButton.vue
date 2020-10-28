@@ -94,6 +94,11 @@ export default {
 };
 </script>
 <style lang="scss">
+.swipeout-left, .swipeout-right {
+  .interaction:nth-child(even) {
+    opacity: 0.9;
+  }
+}
 .nh-text {
   font-size: 0.5em;
 }

@@ -395,11 +395,6 @@ export default {
 .nh-text {
   font-size: 0.5em;
 }
-.swipeout-left, .swipeout-right {
-  .interaction:nth-child(even) {
-    opacity: 0.9;
-  }
-}
 .ellipsis-v, .ellipsis-v-static {
   cursor: pointer;
 }

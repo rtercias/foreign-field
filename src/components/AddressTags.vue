@@ -5,6 +5,7 @@
         <div class="text-left">
           <b-badge
             v-for="(tag, index) in preview"
+            v-show="!hide(tag)"
             pill
             class="tag-button mr-1 mb-1 border-primary text-white"
             size='sm'
@@ -23,6 +24,7 @@
         <div class="combined-tags text-left">
           <b-badge
             v-for="(tag, index) in combinedTags"
+            v-show="!hide(tag.caption)"
             pill
             class="tag-button mr-1 mb-1 border-primary"
             :class="{ active: false, 'd-none': readOnlyTag(tag), 'text-primary': !tag.state }"
@@ -202,6 +204,10 @@ export default {
     highlight(tag) {
       return startsWith(tag, 'invalid');
     },
+    hide(tag) {
+      const hidden = ['invalid #', 'confirmed phone'];
+      return hidden.some(t => startsWith(tag, t));
+    },
   },
   computed: {
     ...mapGetters({
@@ -211,7 +217,6 @@ export default {
     availableTags() {
       return [
         'verify',
-        'confirmed phone',
         'day sleeper',
         `wife speaks ${this.language}`,
         `husband speaks ${this.language}`,
@@ -220,7 +225,6 @@ export default {
         // 'deaf/mute',
         // 'blind',
         'business',
-        'invalid #',
       ];
     },
     combinedTags() {

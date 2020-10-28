@@ -23,7 +23,7 @@
           <div class="w-100 d-flex justify-content-between pb-3 pt-2">
             <b-button-group size="sm">
               <b-button variant="outline-info" :to="`/territories/${group}/${id}`" :pressed="viewMode==='address-list'">
-                List
+                Address
               </b-button>
               <b-button
                 v-if="canViewReports"

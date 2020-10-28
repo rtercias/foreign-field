@@ -13,9 +13,6 @@
             <div class="mb-1">
               {{address.city}} {{address.state_province}} {{address.postal_code}}
             </div>
-            <div class="phone">
-              <a :href="`tel:${address.phone}`">{{ formattedPhone }}</a>
-            </div>
           </div>
         </div>
         <div class="static-buttons col-3 pt-3 pr-2 justify-content-end">

@@ -59,7 +59,7 @@ import Loading from './Loading.vue';
 import SearchBar from './SearchBar';
 import { channel } from '../main';
 
-const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
+const BUTTON_LIST = ['NH', 'HOME', 'LW'];
 
 export default {
   name: 'TerritoryAddresses',
