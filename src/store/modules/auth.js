@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { reject } from 'core-js/fn/promise';
 import firebase from 'firebase/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
