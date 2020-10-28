@@ -6,8 +6,6 @@
         <div>{{address.addr1}} {{address.addr2}}</div>
         <div>{{address.city}} {{address.state_province}} {{address.postal_code}}</div>
       </div>
-      <span v-else-if="mode===modes.phoneAdd" class="lead font-weight-bold w-100">Add New Phone</span>
-      <div v-else-if="mode===modes.phoneEdit">{{address.phone}}</div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <Loading v-if="isLoading || isSearching"></Loading>
@@ -33,16 +31,6 @@
             <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
           </b-form-group>
         </div>
-        <b-form-group label="Phone" class="mt-3 position-relative">
-          <the-mask
-            class="form-control"
-            type="tel"
-            :mask="'###-###-####'"
-            :masked="false"
-            v-model="model.phone"
-            :disabled="readOnly">
-          </the-mask>
-        </b-form-group>
         <div v-if="canManage" class="mt-5">
           <div class="text-left" v-if="showTerrHelp">
             <hr/>
@@ -409,9 +397,6 @@ export default {
 };
 </script>
 <style>
-  .address-form .form {
-    /* height: calc(100% - 150px); */
-  }
   .buttons {
     display: flex;
   }
