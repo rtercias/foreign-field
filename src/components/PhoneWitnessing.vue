@@ -46,6 +46,21 @@ export default {
         }
       }
     });
+    channel.bind('add-phone-tag', (args) => {
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.phones.some(p => p.id === args.phoneId));
+        const phone = address && address.phones.find(p => p.id === args.phoneId);
+        this.$set(phone, 'notes', args.notes);
+      }
+    });
+    channel.bind('remove-phone-tag', (args) => {
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.phones.some(p => p.id === args.phoneId));
+        const phone = address && address.phones.find(p => p.id === args.phoneId);
+        this.$set(phone, 'notes', args.notes);
+      }
+    });
+
     if (this.canCheckout) {
       this.setLeftNavRoute(`/territories/${this.group}`);
     } else {

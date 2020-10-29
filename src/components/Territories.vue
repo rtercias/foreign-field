@@ -8,7 +8,7 @@
           {{availability}}
         </span>
         <b-dropdown-item
-          class="availability-filter w-100 p-0"
+          class="availability-filter p-0"
           v-for="avail in availabilityFilters"
           v-bind:key="avail"
           @click="() => setAvailability(avail)">
@@ -161,6 +161,7 @@ export default {
 
 <style scoped lang="scss">
 .availability-filter, .sort-btn {
+  width: calc(100% - 1rem);
   .selected {
     margin-left: -20px;
   }

@@ -81,6 +81,27 @@ export default {
         }
       }
     });
+    channel.bind('add-note', (args) => {
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === args.addressId);
+        if (address && !address.notes.includes(args.note)) {
+          const notesArray = address.notes ? address.notes.split(',') : [];
+          notesArray.push(args.note);
+          this.$set(address, 'notes', notesArray.join(','));
+        }
+      }
+    });
+    channel.bind('remove-note', (args) => {
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === args.addressId);
+        if (address && address.notes.includes(args.note)) {
+          const notesArray = address.notes ? address.notes.split(',') : [];
+          const filtered = notesArray.filter(n => n !== args.note);
+          this.$set(address, 'notes', filtered.join(','));
+        }
+      }
+    });
+
     if (this.canCheckout) {
       this.setLeftNavRoute(`/territories/${this.group}`);
     } else {
