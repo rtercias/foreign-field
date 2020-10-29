@@ -146,6 +146,9 @@ export default {
       return 'Recent Updates';
     },
     cleanLogs() {
+      if (this.isSingleRecord) {
+        return this.storeLogs;
+      }
       return this.storeLogs.filter(log => !log.address.territory.name.includes('TEST'));
     },
     preview() {

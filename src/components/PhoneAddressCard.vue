@@ -337,30 +337,11 @@ export default {
           newArray = oldArray.filter(a => !exclusiveTags.includes(a));
         }
 
-        let confirm = true;
-        if (newTag === 'confirmed') {
-          confirm = await this.$bvModal.msgBoxConfirm(
-            'Add "confirmed" tag? This will also update the address phone number.', {
-              title: 'Confirm Phone Number',
-              centered: true,
-            }
-          );
-        }
-
-        if (!confirm) {
-          this.isAddressBusy = false;
-          return;
-        }
 
         // add new tag
         await this.setPhone(phone);
         await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
         newArray.push(newTag);
-
-        // update address
-        if (newTag === 'confirmed') {
-          await this.updateAddressPhone(phone.phone);
-        }
 
         // update UI phone
         const updatedNotes = newArray.join(',');
@@ -370,10 +351,6 @@ export default {
       } catch (e) {
         console.error('Unable to apply tag', e);
       }
-    },
-    async updateAddressPhone(phoneNumber) {
-      this.$set(this.address, 'phone', phoneNumber);
-      await this.updateAddress(this.address);
     },
   },
 };

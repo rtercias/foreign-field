@@ -233,7 +233,7 @@ export const territory = {
 
       for (const address of addresses) {
         if (address.activityLogs && address.activityLogs.length > 0) {
-          await dispatch('address/addLog', { addressId: address.id, value: 'START' }, { root: true });
+          await dispatch('address/addLog', { address_id: address.id, value: 'START' }, { root: true });
         }
       }
     },
@@ -245,7 +245,7 @@ export const territory = {
       for (const address of addresses) {
         for (const phone of address.phones) {
           if (phone.activityLogs && phone.activityLogs.length > 0) {
-            await dispatch('address/addLog', { addressId: phone.id, value: 'START' }, { root: true });
+            await dispatch('address/addLog', { address_id: phone.id, value: 'START' }, { root: true });
           }
         }
       }
