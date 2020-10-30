@@ -162,7 +162,11 @@ export default {
       return formatPhone(phone);
     },
     formattedSelectedResponseTS() {
-      return this.phoneRecord.selectedResponseTS && format(new Date(this.phoneRecord.selectedResponseTS), 'M/d/yyyy') || '';
+      const timestamp = Number(this.lastActivity.timestamp);
+      if (!Number.isNaN(timestamp)) {
+        return format(new Date(timestamp), 'MM/dd/yy p');
+      }
+      return '';
     },
     lastActivity() {
       return this.phoneRecord.lastActivity || { value: 'START', timestamp: '' };

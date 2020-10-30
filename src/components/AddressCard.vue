@@ -166,7 +166,11 @@ export default {
     },
 
     formattedSelectedResponseTS() {
-      return this.address.selectedResponseTS && format(new Date(this.address.selectedResponseTS), 'M/d/yyyy') || '';
+      const timestamp = Number(this.lastActivity.timestamp);
+      if (!Number.isNaN(timestamp)) {
+        return format(new Date(timestamp), 'MM/dd/yy p');
+      }
+      return '';
     },
     lastActivity() {
       return this.address.lastActivity || { value: 'START', timestamp: '' };
