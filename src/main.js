@@ -137,17 +137,19 @@ const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
 
 export const channel = pusher.subscribe('foreign-field');
 
-async function init() {
-  try {
-    await store.dispatch('auth/firebaseInit');
-    new Vue({
-      render: h => h(App),
-      router,
-      store,
-    }).$mount('#app');
-  } catch (e) {
-    console.error(e);
-  }
+function init() {
+  new Vue({
+    render: h => h(App),
+    router,
+    store,
+    async created() {
+      try {
+        await this.$store.dispatch('auth/firebaseInit');
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  }).$mount('#app');
 }
 
 init();

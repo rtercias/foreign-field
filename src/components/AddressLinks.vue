@@ -17,11 +17,19 @@
           <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;
           Google Maps
         </b-list-group-item>
-        <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="warning" :href="lookupFastPeopleSearch">
+        <b-list-group-item
+          class="lead p-4 font-weight-bold w-auto"
+          variant="warning"
+          :href="lookupFastPeopleSearch"
+          target="_blank">
           <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
           Fast People Search
         </b-list-group-item>
-        <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="lookup411" variant="success">
+        <b-list-group-item
+          class="lead p-4 font-weight-bold w-auto"
+          :href="lookup411"
+          variant="success"
+          target="_blank">
           <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
           411.com
         </b-list-group-item>

@@ -3,12 +3,13 @@
   <div v-else class="phone-witnessing d-flex flex-row flex-wrap align-items-baseline">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search"></SearchBar>
     <PhoneAddressCard
-      v-for="a in territory.addresses" :key="a.id"
+      v-for="(a, index) in territory.addresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"
       :class="{ 'border-success border-medium': a.id === foundId }"
       :address="a"
-      :territory="territory">
+      :territory="territory"
+      :index="index">
     </PhoneAddressCard>
   </div>
 </template>

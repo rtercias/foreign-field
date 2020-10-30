@@ -1,14 +1,49 @@
 <template>
-  <div class="m-0 phone-address-card d-flex align-items-center justify-content-center">
-    <div class="w-100">
-      <div class="text-left bg-light py-2 px-3 w-100 h-100 d-flex justify-content-end align-items-center overflow-hidden">
-        <b-link
-          class="w-100 pl-3 pr-1"
-          :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
-          <span class="address d-block w-100">{{address.addr1}} {{address.addr2}}&nbsp;
-          {{address.city}} {{address.state_province}} {{address.postal_code}}</span>
-        </b-link>
-        <font-awesome-icon class="text-info" icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
+  <div class="m-0 phone-address-card d-flex align-items-baseline pb-5">
+    <div
+      :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
+      <div class="
+        text-left
+        bg-light
+        py-2
+        px-3
+        w-100
+        d-flex
+        flex-column
+        border-info
+        border
+        ">
+        <div class="w-100 address">
+          <span class="address text-primary font-weight-bold">
+            {{address.addr1}} {{address.addr2}}&nbsp;
+            {{address.city}} {{address.state_province}} {{address.postal_code}}
+          </span>
+          <font-awesome-icon icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
+        </div>
+        <div class="address-buttons d-flex justify-content-between">
+          <b-button
+            variant="outline-info"
+            class="mr-2"
+            :href="lookupFastPeopleSearch()" target="_blank">
+            <font-awesome-icon icon="phone-alt"></font-awesome-icon> Search
+          </b-button>
+          <b-button
+            variant="outline-danger"
+            @click="toggleNoNumberTag"
+            v-if="isEmpty">
+            <font-awesome-icon class="no-phone" icon="phone-slash"></font-awesome-icon>
+          </b-button>
+        </div>
+      </div>
+      <div class="border-bottom d-flex py-1 px-3">
+        <b-badge
+          v-if="hasNoNumberTag"
+          pill
+          class="tag-button mr-1 mb-1 border-primary text-white"
+          size='sm'
+          variant="danger">
+          no number
+        </b-badge>
       </div>
       <b-list-group>
         <swipe-list
@@ -87,7 +122,9 @@
             </ActivityButton>
           </template>
         </swipe-list>
-        <b-list-group-item class="d-flex mx-1 p-2 border-0">
+        <b-list-group-item
+          class="d-flex mx-1 pb-2 px-2 border-0"
+          :class="{ 'pt-0': isDesktop }">
           <the-mask
             class="form-control mr-2 phone-input w-100"
             type="tel"
@@ -113,15 +150,18 @@ import ActivityButton from './ActivityButton';
 import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
+import intersection from 'lodash/intersection';
 import { REJECT_TAGS } from '../store/modules/phone';
 import { unmask } from '../utils/phone';
 
 const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM', 'LW'];
 const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
+const NO_NUMBER = 'no number';
+const PHONE_ADDRESS_TAGS = [NO_NUMBER];
 
 export default {
   name: 'PhoneAddressCard',
-  props: ['address', 'territory'],
+  props: ['address', 'territory', 'index'],
   components: {
     PhoneCard,
     SwipeList,
@@ -135,6 +175,7 @@ export default {
       newPhone: '',
       oldPhone: '',
       isAddressBusy: false,
+      noNumber: NO_NUMBER,
     };
   },
   computed: {
@@ -144,12 +185,26 @@ export default {
       congId: 'auth/congId',
       phone: 'phone/phone',
       search: 'phone/search',
+      isDesktop: 'auth/isDesktop',
     }),
     rightButtonList() {
       return this.actionButtonList.filter(b => RIGHT_BUTTON_LIST.includes(b.value));
     },
     leftButtonList() {
       return this.actionButtonList.filter(b => LEFT_BUTTON_LIST.includes(b.value));
+    },
+    isEmpty() {
+      return !this.address.phones || this.address.phones.length === 0;
+    },
+    hasNoNumberTag() {
+      return this.isEmpty && this.address.notes.includes(this.noNumber);
+    },
+    hasPhoneAddressTags() {
+      const notes = this.address.notes ? this.address.notes.split(',') : [];
+      return intersection(notes, PHONE_ADDRESS_TAGS).length > 0;
+    },
+    isLastRecordAndOdd() {
+      return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
     },
   },
   methods: {
@@ -337,7 +392,6 @@ export default {
           newArray = oldArray.filter(a => !exclusiveTags.includes(a));
         }
 
-
         // add new tag
         await this.setPhone(phone);
         await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
@@ -352,6 +406,23 @@ export default {
         console.error('Unable to apply tag', e);
       }
     },
+    async toggleNoNumberTag() {
+      let notesArray = this.address.notes ? this.address.notes.split(',') : [];
+      if (notesArray.includes(this.noNumber)) {
+        notesArray = notesArray.filter(n => n !== this.noNumber);
+      } else {
+        notesArray.push(this.noNumber);
+      }
+
+      this.$set(this.address, 'notes', notesArray.join(','));
+      await this.updateAddress(this.address);
+    },
+    lookupFastPeopleSearch() {
+      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
+      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
+      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
+    },
   },
 };
 </script>
@@ -362,6 +433,9 @@ export default {
     .swipeout.swipeout-list-item {
       width: 100%;
     }
+  }
+  .last-record {
+    border-right: solid;
   }
 }
 .address {
@@ -412,6 +486,9 @@ export default {
     border-bottom: 1px solid $secondary;
     min-height: 80px;
   }
+}
+.no-phone {
+  cursor: pointer;
 }
 @media (max-width: 768px) {
   .phone-address-card-container {
