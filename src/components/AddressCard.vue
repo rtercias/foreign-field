@@ -98,13 +98,14 @@ export default {
             innerHTML:
             `<div class="pb-3">
               ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}
-            <div class="fa-lg">Clear the address status?</div>`,
+            </div>` : ''}`,
           },
         });
         const value = await this.$bvModal.msgBoxConfirm([message], {
           title: `${this.address.addr1} ${this.address.addr2}`,
           centered: true,
+          okTitle: 'Remove',
+          cancelTitle: 'Close',
         });
 
         if (value) {

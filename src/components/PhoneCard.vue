@@ -101,13 +101,14 @@ export default {
             innerHTML:
             `<div class="pb-3">
               ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}
-            <div class="fa-lg">Clear the status?</div>`,
+            </div>` : ''}`,
           },
         });
         const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: this.phoneRecord.phone,
+          title: this.formattedPhone,
           centered: true,
+          okTitle: 'Remove',
+          cancelTitle: 'Close',
         });
         if (value) {
           this.$set(this.phoneRecord, 'isBusy', true);
