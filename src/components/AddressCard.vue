@@ -98,13 +98,14 @@ export default {
             innerHTML:
             `<div class="pb-3">
               ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}
-            <div class="fa-lg">Clear the address status?</div>`,
+            </div>` : ''}`,
           },
         });
         const value = await this.$bvModal.msgBoxConfirm([message], {
           title: `${this.address.addr1} ${this.address.addr2}`,
           centered: true,
+          okTitle: 'Remove',
+          cancelTitle: 'Close',
         });
 
         if (value) {
@@ -166,7 +167,11 @@ export default {
     },
 
     formattedSelectedResponseTS() {
-      return this.address.selectedResponseTS && format(new Date(this.address.selectedResponseTS), 'M/d/yyyy') || '';
+      const timestamp = Number(this.lastActivity.timestamp);
+      if (!Number.isNaN(timestamp)) {
+        return format(new Date(timestamp), 'MM/dd/yy p');
+      }
+      return '';
     },
     lastActivity() {
       return this.address.lastActivity || { value: 'START', timestamp: '' };

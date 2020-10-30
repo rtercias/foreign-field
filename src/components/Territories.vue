@@ -16,7 +16,6 @@
           {{avail}}
         </b-dropdown-item>
       </b-dropdown>
-      <br>
       <b-dropdown class="sort-btn" right variant="secondary">
         <span slot="button-content">
           <font-awesome-icon icon="sort-amount-down-alt" />
@@ -161,10 +160,12 @@ export default {
 
 <style scoped lang="scss">
 .availability-filter, .sort-btn {
-  width: calc(100% - 1rem);
   .selected {
     margin-left: -20px;
   }
+}
+.availability-filter, .sort-btn li {
+  width: calc(100% - 1rem);
 }
 header {
   padding: 1.25rem 2rem;

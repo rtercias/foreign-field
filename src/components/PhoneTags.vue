@@ -9,7 +9,7 @@
             class="d-flex tag-button mr-1 mb-1 border-primary text-white"
             size='sm'
             :key="index"
-            :variant="highlight(tag) ? 'danger' : 'primary'"
+            :variant="highlight(tag) ? 'success' : 'danger'"
             @click="() => remove(tag)">
             <span class="mr-1"><font-awesome-icon icon="times"></font-awesome-icon></span>
             {{tag}}
@@ -22,11 +22,9 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import startsWith from 'lodash/startsWith';
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
 import get from 'lodash/get';
-import { REJECT_TAGS } from '../store/modules/phone';
 
 export default {
   name: 'PhoneTags',
@@ -51,13 +49,7 @@ export default {
       });
     },
     highlight(tag) {
-      let result = false;
-      for (const t of REJECT_TAGS) {
-        result = startsWith(tag, t);
-        if (result) break;
-      }
-
-      return result;
+      return tag === 'confirmed';
     },
     async remove(tag) {
       this.isSaving = true;
