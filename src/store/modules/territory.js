@@ -63,13 +63,13 @@ export const territory = {
   },
 
   actions: {
-    async checkinTerritory({ commit }, args) {
+    async checkinTerritory(vuex, args) {
       try {
         if (!args) {
           throw new Error('Unable to check in territory because the required arguments were not provided');
         }
 
-        const response = await axios({
+        await axios({
           data: {
             query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user) { 
@@ -87,11 +87,6 @@ export const territory = {
             },
           },
         });
-
-        if (response && response.data && response.data.data) {
-          const { status } = response.data.data;
-          commit(CHANGE_STATUS, status);
-        }
       } catch (e) {
         console.error('Unable to check in territory', e);
       }
@@ -227,27 +222,37 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async resetNHRecords({ dispatch, state }, territoryId) {
-      await dispatch('getTerritory', territoryId);
-      const { addresses } = state.territory;
+    async resetTerritoryActivities({ commit }, { checkoutId, userid, tzOffset, timezone }) {
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation ResetTerritoryActivity(
+              $checkoutId: Int!,
+              $userid: Int!,
+              $tzOffset: String,
+              $timezone: String
+            ) { 
+              resetTerritoryActivity(checkout_id: $checkoutId, userid: $userid, tz_offset: $tzOffset, timezone: $timezone)
+            }`),
+            variables: {
+              checkoutId,
+              userid,
+              tzOffset,
+              timezone,
+            },
+          },
+        });
 
-      for (const address of addresses) {
-        if (address.activityLogs && address.activityLogs.length > 0) {
-          await dispatch('address/addLog', { address_id: address.id, value: 'START' }, { root: true });
+        if (response && response.data && response.data.data && response.data.data.resetTerritoryActivity) {
+          commit(RESET_TERRITORY);
         }
-      }
-    },
-
-    async resetPhoneRecords({ dispatch, state }, territoryId) {
-      await dispatch('getTerritory', territoryId);
-      const { addresses } = state.territory;
-
-      for (const address of addresses) {
-        for (const phone of address.phones) {
-          if (phone.activityLogs && phone.activityLogs.length > 0) {
-            await dispatch('address/addLog', { address_id: phone.id, value: 'START' }, { root: true });
-          }
-        }
+      } catch (e) {
+        console.error('Unable to reset territory activities', e);
       }
     },
   },

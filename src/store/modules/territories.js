@@ -76,6 +76,7 @@ export const territories = {
                 type
                 congregationid
                 status {
+                  checkout_id
                   status
                   date
                   publisher {

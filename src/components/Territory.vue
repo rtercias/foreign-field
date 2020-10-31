@@ -149,9 +149,8 @@ export default {
   methods: {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
-      resetNHRecords: 'territory/resetNHRecords',
-      resetPhoneRecords: 'territory/resetPhoneRecords',
       checkinTerritory: 'territory/checkinTerritory',
+      resetTerritoryActivities: 'territory/resetTerritoryActivities',
     }),
 
     async checkIn() {
@@ -167,16 +166,19 @@ export default {
 
     async checkInAndReset() {
       this.isLoading = true;
-      if (this.viewMode === 'phone-list') {
-        await this.resetPhoneRecords(this.id);
-      } else {
-        await this.resetNHRecords(this.id);
-      }
       await this.checkinTerritory({
         territoryId: this.id,
         userId: get(this.territory, 'status.publisher.id'),
         username: this.user.username,
       });
+
+      await this.resetTerritoryActivities({
+        checkoutId: this.territory.status.checkout_id,
+        userid: this.user.id,
+        tzOffset: new Date().getTimezoneOffset().toString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+
       this.isLoading = false;
       await this.$router.push({ name: 'home' });
       this.checkInToast('success');
