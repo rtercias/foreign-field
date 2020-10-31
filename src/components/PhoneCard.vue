@@ -8,8 +8,7 @@
         <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
         <font-awesome-icon
-          v-if="!hasConfirmed"
-          class="small text-primary ml-2"
+          class="small text-primary ml-3"
           icon="pencil-alt"
           @click="edit">
         </font-awesome-icon>
@@ -43,6 +42,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
+import intersection from 'lodash/intersection';
 import ActivityButton from './ActivityButton';
 import PhoneTags from './PhoneTags';
 import { format as formatPhone } from '../utils/phone';
@@ -181,8 +181,8 @@ export default {
     },
     allowedToCall() {
       const notAllowed = ['invalid', 'do not call'];
-      const lastActivity = this.lastActivity || {};
-      return !notAllowed.includes(lastActivity.value);
+      const tags = this.phoneRecord.notes ? this.phoneRecord.notes.split(',') : [];
+      return intersection(notAllowed, tags).length === 0;
     },
     hasConfirmed() {
       const notes = get(this.phoneRecord, 'notes', '') || '';

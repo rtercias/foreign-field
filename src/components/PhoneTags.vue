@@ -1,6 +1,6 @@
 <template>
   <div class="phone-tags w-100">
-    <div class="preview-tags mt-1" :class="{ 'd-none': !collapsed }">
+    <div class="preview-tags mt-3" :class="{ 'd-none': !collapsed }">
       <b-button-group class="flex-wrap" size="sm">
         <div class="text-left">
           <b-badge
