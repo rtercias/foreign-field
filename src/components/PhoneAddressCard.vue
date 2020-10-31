@@ -6,7 +6,7 @@
         text-left
         bg-light
         py-2
-        px-3
+        px-2
         w-100
         d-flex
         flex-column
@@ -22,7 +22,7 @@
         </div>
         <div class="address-buttons d-flex justify-content-between">
           <b-button
-            variant="outline-info"
+            variant="outline-primary"
             class="mr-2"
             :href="lookupFastPeopleSearch()" target="_blank">
             <font-awesome-icon icon="phone-alt"></font-awesome-icon> Fast People Search
@@ -123,7 +123,7 @@
           </template>
         </swipe-list>
         <b-list-group-item
-          class="d-flex mx-1 pb-2 px-2 border-0"
+          class="d-flex pb-2 px-2 border-0"
           :class="{ 'pt-0': isDesktop }">
           <the-mask
             class="form-control mr-2 phone-input w-100"
