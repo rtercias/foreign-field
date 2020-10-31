@@ -197,7 +197,8 @@ export default {
       return !this.address.phones || this.address.phones.length === 0;
     },
     hasNoNumberTag() {
-      return this.isEmpty && this.address.notes.includes(this.noNumber);
+      const notes = get(this.address, 'notes', '') || '';
+      return this.isEmpty && notes.includes(this.noNumber);
     },
     hasPhoneAddressTags() {
       const notes = this.address.notes ? this.address.notes.split(',') : [];
