@@ -74,7 +74,7 @@ export default {
   props: ['group', 'id'],
   async mounted() {
     channel.bind('add-log', (log) => {
-      if (this.territory && this.territory.addresses) {
+      if (log && this.territory && this.territory.addresses) {
         const address = this.territory.addresses.find(a => a.id === log.address_id);
         if (address) {
           this.$set(address, 'incomingResponse', log);
