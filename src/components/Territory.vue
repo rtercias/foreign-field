@@ -117,7 +117,8 @@ export default {
       return this.territory && this.territory.status && this.territory.status.status === 'Recently Worked';
     },
     cityNames() {
-      return this.territory && this.territory.city ? this.territory.city.split(',') : [];
+      const arr = this.territory && this.territory.city ? this.territory.city.split(',') : [];
+      return arr.filter(city => city.trim() !== '');
     },
     primaryCity() {
       return this.cityNames[0];
