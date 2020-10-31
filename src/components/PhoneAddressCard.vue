@@ -25,7 +25,7 @@
             variant="outline-info"
             class="mr-2"
             :href="lookupFastPeopleSearch()" target="_blank">
-            <font-awesome-icon icon="phone-alt"></font-awesome-icon> Search
+            <font-awesome-icon icon="phone-alt"></font-awesome-icon> Fast People Search
           </b-button>
           <b-button
             variant="outline-danger"
