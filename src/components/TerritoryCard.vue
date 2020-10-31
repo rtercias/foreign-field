@@ -64,27 +64,36 @@ export default {
     ...mapActions({
       fetchTerritories: 'territories/fetchTerritories',
       checkinTerritory: 'territory/checkinTerritory',
-      resetTerritory: 'territory/resetTerritory',
       getTerritory: 'territory/getTerritory',
-      resetNHRecords: 'territory/resetNHRecords',
+      resetTerritoryActivities: 'territory/resetTerritoryActivities',
       fetchLastActivity: 'territories/fetchLastActivity',
     }),
     async checkin(territory) {
-      const publisher = territory.status && territory.status.publisher || {};
-      const { user } = this.$store.state.auth;
-      await this.checkinTerritory({
-        territoryId: territory.id,
-        userId: publisher.id,
-        username: user.username,
+      const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
+        title: `${territory.name}`,
+        centered: true,
       });
 
-      if (window.confirm('Check-in successful. Do you want to reset NH records?')) {
-        this.saving = true;
-        await this.resetNHRecords(territory.id);
-        this.saving = false;
-      }
+      if (response) {
+        const publisher = territory.status && territory.status.publisher || {};
+        const { user } = this.$store.state.auth;
+        await this.checkinTerritory({
+          territoryId: territory.id,
+          userId: publisher.id,
+          username: user.username,
+        });
 
-      this.fetch();
+        this.saving = true;
+        await this.resetTerritoryActivities({
+          checkoutId: territory.status.checkout_id,
+          userid: this.user.id,
+          tzOffset: new Date().getTimezoneOffset().toString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
+        this.saving = false;
+
+        this.fetch();
+      }
     },
     async fetchLastWorked(territoryId) {
       this.$set(this.terr, 'lastActivityLoading', true);
