@@ -14,10 +14,14 @@
         border
         ">
         <div class="w-100 address">
-          <span class="address text-primary font-weight-bold">
-            {{address.addr1}} {{address.addr2}}&nbsp;
-            {{address.city}} {{address.state_province}} {{address.postal_code}}
-          </span>
+          <b-link
+          class="w-100 pl-3 pr-1"
+          :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
+            <span class="address text-primary font-weight-bold">
+              {{address.addr1}} {{address.addr2}}&nbsp;
+              {{address.city}} {{address.state_province}} {{address.postal_code}}
+            </span>
+          </b-link>
           <font-awesome-icon icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
         </div>
         <div class="address-buttons d-flex justify-content-between">
@@ -37,12 +41,13 @@
       </div>
       <div class="border-bottom d-flex py-1 px-3">
         <b-badge
-          v-if="hasNoNumberTag"
+          v-for="tag in phoneAddressTags"
+          :key="tag"
           pill
           class="tag-button mr-1 mb-1 border-primary text-white"
           size='sm'
           variant="danger">
-          no number
+          {{tag}}
         </b-badge>
       </div>
       <b-list-group>
@@ -93,6 +98,8 @@
               :value="button.value"
               :is-busy="item.isBusy"
               :actionButtonList="actionButtonList"
+              :slashed="button.value === 'LW' && doNotMail"
+              :disabled="button.value === 'LW' && doNotMail"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
@@ -157,7 +164,8 @@ import { unmask } from '../utils/phone';
 const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM', 'LW'];
 const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
 const NO_NUMBER = 'no number';
-const PHONE_ADDRESS_TAGS = [NO_NUMBER];
+const DO_NOT_MAIL = 'do not mail';
+const PHONE_ADDRESS_TAGS = [NO_NUMBER, DO_NOT_MAIL];
 
 export default {
   name: 'PhoneAddressCard',
@@ -175,7 +183,6 @@ export default {
       newPhone: '',
       oldPhone: '',
       isAddressBusy: false,
-      noNumber: NO_NUMBER,
     };
   },
   computed: {
@@ -196,13 +203,12 @@ export default {
     isEmpty() {
       return !this.address.phones || this.address.phones.length === 0;
     },
-    hasNoNumberTag() {
-      const notes = get(this.address, 'notes', '') || '';
-      return this.isEmpty && notes.includes(this.noNumber);
-    },
-    hasPhoneAddressTags() {
+    phoneAddressTags() {
       const notes = this.address.notes ? this.address.notes.split(',') : [];
-      return intersection(notes, PHONE_ADDRESS_TAGS).length > 0;
+      return intersection(notes, PHONE_ADDRESS_TAGS);
+    },
+    doNotMail() {
+      return this.phoneAddressTags.includes(DO_NOT_MAIL);
     },
     isLastRecordAndOdd() {
       return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
@@ -273,6 +279,7 @@ export default {
       await this.addPhone(phone);
       this.address.phones.push(this.phone);
       this.newPhone = '';
+      this.toggleNoNumberTag({ forceRemove: true });
       this.isAddressBusy = false;
     },
     cancel(phone) {
@@ -407,12 +414,12 @@ export default {
         console.error('Unable to apply tag', e);
       }
     },
-    async toggleNoNumberTag() {
+    async toggleNoNumberTag({ forceRemove = false }) {
       let notesArray = this.address.notes ? this.address.notes.split(',') : [];
-      if (notesArray.includes(this.noNumber)) {
-        notesArray = notesArray.filter(n => n !== this.noNumber);
+      if (forceRemove || notesArray.includes(NO_NUMBER)) {
+        notesArray = notesArray.filter(n => n !== NO_NUMBER);
       } else {
-        notesArray.push(this.noNumber);
+        notesArray.push(NO_NUMBER);
       }
 
       this.$set(this.address, 'notes', notesArray.join(','));

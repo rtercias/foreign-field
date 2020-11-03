@@ -92,6 +92,7 @@ const ACTION_BUTTON_LIST = [
     icon: 'envelope',
     color: 'primary',
     description: 'Letter',
+    disabledText: 'Do Not Mail',
   },
   {
     type: 'fa-icon',

@@ -220,11 +220,14 @@ export default {
         'day sleeper',
         `wife speaks ${this.language}`,
         `husband speaks ${this.language}`,
+        'business',
+        'no number',
+        'do not mail',
         // `does not speak ${this.language}`,
         // 'do not call',
         // 'deaf/mute',
         // 'blind',
-        'business',
+
       ];
     },
     combinedTags() {
