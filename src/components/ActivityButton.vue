@@ -16,18 +16,19 @@
   <div
     v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction d-flex flex-column justify-content-center align-items-center pl-3 pr-3"
-    :class="{ [`bg-${get('color')}`]: !invert }">
+    :class="{ [`bg-${get('color')}`]: !invert, 'bg-danger disabled': disabled }">
     <span class="pl-0">
       <font-awesome-layers
         class="text-white fa-fw"
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
-        <font-awesome-icon :icon="get('icon2')" v-if="!!get('icon2')" :class="{
-          'fa-xs p-1': true,
-          [`text-${get('color')}`]: !invert,
-          'text-white': invert
-          }">
+        <font-awesome-icon icon="slash" v-if="!!slashed"
+          :class="{ [`text-${get('color')}`]: invert }">
+        </font-awesome-icon>
+        <font-awesome-icon icon="slash" v-if="!!slashed"
+          class="slash-shadow"
+          :class="{ [`text-${get('color')}`]: !invert, 'text-danger': disabled }">
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
@@ -40,7 +41,7 @@
       v-if="!selected && !!get('description')"
       class="description"
       :class="{ [`text-${get('color')}`]: invert, 'text-white': !invert }">
-      {{get('description')}}
+      {{disabled ? get('disabledText') : get('description')}}
     </span>
   </div>
 </template>
@@ -62,6 +63,8 @@ export default {
     'selected',
     'actionButtonList',
     'spin',
+    'slashed',
+    'disabled',
   ],
   methods: {
     ...mapActions({
@@ -69,6 +72,7 @@ export default {
     }),
 
     click: debounce(async function (value) {
+      if (this.disabled) return;
       if (this.displayOnly) {
         this.$emit('display-click', value, this.item);
       } else {
@@ -106,9 +110,15 @@ export default {
 .interaction {
   cursor: pointer;
 
+  &.disabled {
+    cursor: not-allowed;
+  }
   .description {
     font-size: 7pt;
     white-space: nowrap;
+  }
+  .slash-shadow {
+    top: 10px !important;
   }
 }
 
