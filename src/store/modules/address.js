@@ -75,7 +75,7 @@ const ACTION_BUTTON_LIST = [
     text: 'NH',
     icon: 'circle',
     color: 'warning',
-    // description: 'Not Home',
+    description: 'Not Home',
   },
   {
     type: 'fa-icon',
@@ -83,7 +83,7 @@ const ACTION_BUTTON_LIST = [
     text: '',
     icon: 'house-user',
     color: 'primary',
-    // description: 'Home',
+    description: 'Home',
   },
   {
     type: 'fa-icon',
@@ -91,7 +91,7 @@ const ACTION_BUTTON_LIST = [
     text: '',
     icon: 'phone',
     color: 'info',
-    // description: 'Phone',
+    description: 'Phone',
   },
   {
     type: 'fa-icon',
@@ -99,7 +99,8 @@ const ACTION_BUTTON_LIST = [
     text: '',
     icon: 'envelope',
     color: 'primary',
-    // description: 'Letter',
+    description: 'Letter',
+    disabledText: 'Do Not Mail',
   },
 ];
 

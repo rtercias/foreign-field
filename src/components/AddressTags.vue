@@ -202,7 +202,8 @@ export default {
       // return !this.availableTags.some(t => tag.caption.toLowerCase() === t.toLowerCase());
     },
     highlight(tag) {
-      return startsWith(tag, 'invalid');
+      const tagsToHighlight = ['do not mail'];
+      return tagsToHighlight.includes(tag);
     },
     hide(tag) {
       const hidden = ['invalid #', 'confirmed phone'];

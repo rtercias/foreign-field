@@ -37,6 +37,8 @@
               class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList"
+              :slashed="button.value === 'LW' && doNotMail"
+              :disabled="button.value === 'LW' && doNotMail"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
@@ -133,6 +135,9 @@ export default {
     },
     containerButtonList() {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
+    },
+    doNotMail() {
+      return get(this.address, 'notes', '').includes('do not mail');
     },
   },
   methods: {
