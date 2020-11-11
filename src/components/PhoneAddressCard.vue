@@ -2,64 +2,31 @@
   <div class="m-0 phone-address-card d-flex align-items-baseline pb-5">
     <div
       :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
-      <div class="
-        text-left
-        bg-light
-        py-2
-        px-2
-        w-100
-        d-flex
-        flex-column
-        border-info
-        border
-        ">
-        <div class="w-100 address">
-          <b-link
-          class="w-100 pl-3 pr-1"
-          :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
-            <span class="address text-primary font-weight-bold">
-              {{address.addr1}} {{address.addr2}}&nbsp;
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
-            </span>
-          </b-link>
-          <font-awesome-icon icon="circle-notch" spin v-if="isAddressBusy"></font-awesome-icon>
-        </div>
-        <div class="address-buttons d-flex justify-content-between">
-          <b-button
-            variant="outline-primary"
-            class="mr-2"
-            :href="lookupFastPeopleSearch()" target="_blank">
-            <font-awesome-icon icon="phone-alt"></font-awesome-icon> Fast People Search
-          </b-button>
-          <b-button
-            variant="outline-danger"
-            @click="toggleNoNumberTag"
-            v-if="isEmpty">
-            <font-awesome-icon class="no-phone" icon="phone-slash"></font-awesome-icon>
-          </b-button>
-        </div>
-      </div>
-      <div class="border-bottom d-flex py-1 px-3">
-        <b-badge
-          v-for="tag in phoneAddressTags"
-          :key="tag"
-          pill
-          class="tag-button mr-1 mb-1 border-primary text-white"
-          size='sm'
-          variant="danger">
-          {{tag}}
-        </b-badge>
-      </div>
       <b-list-group>
         <swipe-list
           ref="list"
-          :items="address.phones || []"
+          :items="combinedAddressAndPhones || []"
           item-key="id"
           :revealed.sync="revealed"
           @active="onActive">
           <template v-slot="{ item, index, revealed }">
+            <AddressCard
+              v-if="item.type === 'Regular'"
+              mode="phoneAddress"
+              :index="index"
+              class="bg-light border-medium border-light border-right-0 border-left-0"
+              :class="{ 'border-warning active': isActiveAddress(item.id) }"
+              :address="item"
+              :territoryId="territory.id"
+              :group="territory.group"
+              :incomingResponse="item.lastActivity"
+              :revealed="revealed"
+              @update-response="updateResponse"
+              @toggle-right-panel="toggleRightPanel"
+              @toggle-left-panel="toggleLeftPanel">
+            </AddressCard>
             <PhoneCard
-              v-if="!item.editMode"
+              v-else-if="!item.editMode && item.type === 'Phone'"
               class="h-100"
               :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
               :index="index"
@@ -91,23 +58,37 @@
           </template>
           <template v-slot:right="{ item, close }">
             <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
+            <div
+              v-if="item.type === 'Regular'"
+              v-show="!item.isBusy"
+              class="interaction d-flex flex-column justify-content-center align-items-center bg-success px-2">
+              <b-button :href="lookupFastPeopleSearch()" target="_blank" variant="link">
+                <font-awesome-layers
+                  class="text-white fa-fw fa-stack">
+                  <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
+                  <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
+                  <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
+                </font-awesome-layers>
+              </b-button>
+              <span class="description text-white">People Search</span>
+            </div>
             <ActivityButton
-              v-for="(button, index) in rightButtonList"
+              v-for="(button, index) in rightButtonList(item.type)"
               :key="index"
               class="fa-2x"
               :value="button.value"
               :is-busy="item.isBusy"
-              :actionButtonList="actionButtonList"
-              :slashed="button.value === 'LW' && doNotMail"
-              :disabled="button.value === 'LW' && doNotMail"
+              :actionButtonList="actionButtonList(item.type)"
+              :slashed="button.slashed"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <div
+              v-if="item.type === 'Phone'"
               v-show="!item.isBusy"
-              class="interaction fa-2x d-flex flex-column justify-content-center align-items-center pl-3 pr-3 bg-danger">
+              class="interaction fa-2x d-flex flex-column justify-content-center align-items-center px-3 bg-danger">
               <span class="pl-0">
                 <font-awesome-layers
                   class="remove-number text-white fa-fw"
@@ -119,12 +100,13 @@
             </div>
             <ActivityButton
               v-show="!item.isBusy"
-              v-for="(button, index) in leftButtonList"
+              v-for="(button, index) in leftButtonList(item.type)"
               :key="index"
               class="fa-2x"
               :value="button.value"
-              :actionButtonList="actionButtonList"
+              :actionButtonList="actionButtonList(item.type)"
               :is-busy="item.isBusy"
+              :slashed="button.slashed"
               @button-click="(value, button) => applyTag(item, button, close)">
             </ActivityButton>
           </template>
@@ -152,6 +134,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
+import AddressCard from './AddressCard';
 import { SwipeList } from 'vue-swipe-actions';
 import ActivityButton from './ActivityButton';
 import { TheMask } from 'vue-the-mask';
@@ -161,17 +144,20 @@ import intersection from 'lodash/intersection';
 import { REJECT_TAGS } from '../store/modules/phone';
 import { unmask } from '../utils/phone';
 
-const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM', 'LW'];
-const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
 const NO_NUMBER = 'no number';
 const DO_NOT_MAIL = 'do not mail';
-const PHONE_ADDRESS_TAGS = [NO_NUMBER, DO_NOT_MAIL];
+const LETTER_WRITING = 'mail sent';
+const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM'];
+const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
+const ADDRESS_RIGHT_BUTTON_LIST = ['LW'];
+const ADDRESS_LEFT_BUTTON_LIST = [NO_NUMBER, DO_NOT_MAIL];
 
 export default {
   name: 'PhoneAddressCard',
   props: ['address', 'territory', 'index'],
   components: {
     PhoneCard,
+    AddressCard,
     SwipeList,
     ActivityButton,
     TheMask,
@@ -183,35 +169,40 @@ export default {
       newPhone: '',
       oldPhone: '',
       isAddressBusy: false,
+      addressLeftButtonList: ADDRESS_LEFT_BUTTON_LIST,
     };
   },
   computed: {
     ...mapGetters({
-      actionButtonList: 'phone/actionButtonList',
+      phoneButtonList: 'phone/actionButtonList',
+      addressButtonList: 'address/actionButtonList',
       user: 'auth/user',
       congId: 'auth/congId',
       phone: 'phone/phone',
       search: 'phone/search',
       isDesktop: 'auth/isDesktop',
     }),
-    rightButtonList() {
-      return this.actionButtonList.filter(b => RIGHT_BUTTON_LIST.includes(b.value));
-    },
-    leftButtonList() {
-      return this.actionButtonList.filter(b => LEFT_BUTTON_LIST.includes(b.value));
-    },
     isEmpty() {
       return !this.address.phones || this.address.phones.length === 0;
     },
     phoneAddressTags() {
       const notes = this.address.notes ? this.address.notes.split(',') : [];
-      return intersection(notes, PHONE_ADDRESS_TAGS);
+      return intersection(notes, ADDRESS_LEFT_BUTTON_LIST);
     },
     doNotMail() {
       return this.phoneAddressTags.includes(DO_NOT_MAIL);
     },
     isLastRecordAndOdd() {
       return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
+    },
+    addressModel() {
+      const { phones, activityLogs, ...model } = { ...this.address };
+      const notesArray = model.notes ? model.notes.split(',') : [];
+      const notes = notesArray.filter(n => ADDRESS_LEFT_BUTTON_LIST.includes(n)).join(',');
+      return { ...model, notes };
+    },
+    combinedAddressAndPhones() {
+      return [this.addressModel, ...this.address.phones];
     },
   },
   methods: {
@@ -223,9 +214,28 @@ export default {
       addTag: 'phone/addTag',
       removeTag: 'phone/removeTag',
       addLog: 'address/addLog',
+      removeLog: 'address/removeLog',
       updateAddress: 'address/updateAddress',
       phoneSearch: 'phone/phoneSearch',
     }),
+    actionButtonList(type) {
+      if (type === 'Regular') {
+        return this.addressButtonList;
+      }
+      return this.phoneButtonList;
+    },
+    rightButtonList(type) {
+      if (type === 'Regular') {
+        return this.actionButtonList(type).filter(b => ADDRESS_RIGHT_BUTTON_LIST.includes(b.value));
+      }
+      return this.actionButtonList(type).filter(b => RIGHT_BUTTON_LIST.includes(b.value));
+    },
+    leftButtonList(type) {
+      if (type === 'Regular') {
+        return this.actionButtonList(type).filter(b => ADDRESS_LEFT_BUTTON_LIST.includes(b.value));
+      }
+      return this.actionButtonList(type).filter(b => LEFT_BUTTON_LIST.includes(b.value));
+    },
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
       if (phoneEditing) this.$set(phoneEditing, 'editMode', false);
@@ -425,6 +435,13 @@ export default {
       this.$set(this.address, 'notes', notesArray.join(','));
       await this.updateAddress(this.address);
     },
+    async toggleLetterWriting() {
+      if (this.address.lastActivity.value === 'LW') {
+        await this.removeLog({ id: this.address.lastActivity.id, entityId: this.address.id });
+      } else {
+        await this.addLog({ entityId: this.address.id, value: LETTER_WRITING });
+      }
+    },
     lookupFastPeopleSearch() {
       const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
       const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
@@ -444,6 +461,10 @@ export default {
   }
   .last-record {
     border-right: solid;
+  }
+  .search-shadow {
+    top: 1px;
+    right: 1px;
   }
 }
 .address {
