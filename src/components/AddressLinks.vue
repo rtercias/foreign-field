@@ -2,7 +2,7 @@
   <div class="address-links">
     <Loading v-if="isLoading"></Loading>
     <div v-else>
-      <div class="address-header justify-content-around align-items-center pt-3 pb-3">
+      <div class="address-header justify-content-around align-items-center py-3">
         <div class="lead font-weight-bold w-100 pl-5">
           <div>{{address.addr1}} {{address.addr2}}</div>
           <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
@@ -11,7 +11,7 @@
           <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
         </b-link>
       </div>
-      <div class="lead border-top pt-2 pb-2">Link to...</div>
+      <div class="lead border-top py-2">Link to...</div>
       <b-list-group>
         <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
           <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;

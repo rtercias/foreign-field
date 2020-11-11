@@ -35,7 +35,7 @@
         @on-change="filter">
       </SearchBar>
       <b-list-group>
-        <b-list-group-item class="pl-3 pr-3" :class="{ small: !isFullScreen }" v-for="log in logs" :key="log.id">
+        <b-list-group-item class="px-3" :class="{ small: !isFullScreen }" v-for="log in logs" :key="log.id">
           <ChangeLogAddressCard :log="log" :is-single-record="isSingleRecord" />
         </b-list-group-item>
         <b-link
