@@ -1,6 +1,6 @@
 <template>
   <div class="column">
-    <div class="row justify-content-between pl-2 pr-2">
+    <div class="row justify-content-between px-2">
       <div>
         <b-link :to="`/territories/${groupCode}/${terr.id}`" class="column">
           <h5 class="mb-0">
