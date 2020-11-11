@@ -157,12 +157,13 @@ export const territory = {
                 addresses {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
-                  territory_id congregationId status
+                  territory_id congregationId status type
                   activityLogs {
                     id checkout_id address_id value tz_offset
                     timestamp timezone publisher_id notes
                   }
                   lastActivity {
+                    id
                     timestamp
                     value
                     publisher_id

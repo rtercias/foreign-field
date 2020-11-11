@@ -1,8 +1,21 @@
 <template>
   <div class="address-card-container p-2 d-flex align-items-center">
+    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
+      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
+    </font-awesome-layers>
     <div class="w-100">
-      <div class="address-card row justify-content-between align-items-start pr-2 text-black-50">
-        <div class="address col-9 flex-column pt-2 pb-4">
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50">
+        <div v-if="mode==='phoneAddress'" class="col-10 pt-2 pb-4">
+          <b-link
+            class="w-100"
+            :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
+            <span class="address text-primary font-weight-bold" :class="{ 'phone-address': mode === 'phoneAddress' }">
+              {{address.addr1}} {{address.addr2}}&nbsp;
+              {{address.city}} {{address.state_province}} {{address.postal_code}}
+            </span>
+          </b-link>
+        </div>
+        <div v-else class="address col-10 flex-column pt-2 pb-4">
           <div>
             <h5 class="mb-0">
               <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
@@ -15,7 +28,9 @@
             </div>
           </div>
         </div>
-        <div class="static-buttons col-3 pt-3 pr-2 justify-content-end">
+        <div
+          class="static-buttons col-2 pr-2 justify-content-end"
+          :class="{ 'pt-3 pr-0': mode !== 'phoneAddress', 'align-self-center': mode === 'phoneAddress' }">
           <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
           <div
             :class="{ hidden: address.selectedResponse === 'START' || isLogging }"
@@ -32,7 +47,7 @@
           </div>
         </div>
       </div>
-      <AddressTags :address="address" v-on="$listeners"></AddressTags>
+      <AddressTags v-if="mode !== 'phoneAddress'" :address="address" v-on="$listeners"></AddressTags>
     </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
@@ -51,7 +66,7 @@ import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse', 'revealed', 'index'],
+  props: ['address', 'territoryId', 'group', 'incomingResponse', 'revealed', 'index', 'mode'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -79,7 +94,13 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
+      if (this.mode === 'phoneAddress') {
+        this.$emit('toggle-right-panel', this.index, this.revealed);
+      }
       this.$emit('togglePanel', this.index, this.revealed);
+    },
+    toggleLeftPanel() {
+      this.$emit('toggle-left-panel', this.index, this.revealed);
     },
     async confirmClearStatus() {
       try {
@@ -209,6 +230,12 @@ export default {
 .address {
   display: flex;
   text-align: left;
+}
+.phone-address {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
 }
 .nh-text {
   font-size: 0.5em;

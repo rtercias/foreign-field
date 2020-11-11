@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="get('type') === 'link'"
-    class="interaction d-flex justify-content-center align-items-center pl-3 pr-3"
+    class="interaction d-flex justify-content-center align-items-center px-3"
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <b-button
@@ -15,7 +15,7 @@
   </div>
   <div
     v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
-    class="interaction d-flex flex-column justify-content-center align-items-center pl-3 pr-3"
+    class="interaction d-flex flex-column justify-content-center align-items-center px-3"
     :class="{ [`bg-${get('color')}`]: !invert, 'bg-danger disabled': disabled }">
     <span class="pl-0">
       <font-awesome-layers
@@ -23,12 +23,12 @@
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
-        <font-awesome-icon icon="slash" v-if="!!slashed"
+        <font-awesome-icon icon="slash" v-if="isSlashed"
           :class="{ [`text-${get('color')}`]: invert }">
         </font-awesome-icon>
-        <font-awesome-icon icon="slash" v-if="!!slashed"
+        <font-awesome-icon icon="slash" v-if="isSlashed"
           class="slash-shadow"
-          :class="{ [`text-${get('color')}`]: !invert, 'text-danger': disabled }">
+          :class="{ 'text-danger': disabled, [`text-${get('color')}`]: !invert }">
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
@@ -93,6 +93,9 @@ export default {
     },
     invert() {
       return this.displayOnly || this.selected;
+    },
+    isSlashed() {
+      return this.slashed || this.get('slashed');
     },
   },
 };
