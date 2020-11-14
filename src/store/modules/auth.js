@@ -249,7 +249,8 @@ export const auth = {
               throw new Error('Unable to retrieve token from Firebase');
             }
 
-            axios.interceptors.request.use((cfg) => {
+            axios.interceptors.request.use(async (cfg) => {
+              user.token = await user.getIdToken();
               cfg.headers.Authorization = `Bearer ${user.token}`;
               return cfg;
             });
