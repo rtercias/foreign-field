@@ -15,6 +15,7 @@ const SET_GROUP_CODES = 'SET_GROUP_CODES';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
+const UPDATE_TOKEN = 'UPDATE_TOKEN';
 
 function initialState() {
   return {
@@ -103,6 +104,10 @@ export const auth = {
 
     MASTHEAD_LEFT_NAV_ROUTE(state, value) {
       state.mastheadLeftNavRoute = value;
+    },
+
+    UPDATE_TOKEN(state, value) {
+      state.token = value;
     },
   },
 
@@ -238,7 +243,7 @@ export const auth = {
       commit(SET_GROUP_CODES, groupCodes);
     },
 
-    async firebaseInit({ dispatch, state }) {
+    async firebaseInit({ dispatch, state, commit }) {
       return new Promise((resolve, reject) => {
         firebase.initializeApp(config);
         firebase.auth().onAuthStateChanged(async (user) => {
@@ -250,8 +255,9 @@ export const auth = {
             }
 
             axios.interceptors.request.use(async (cfg) => {
-              user.token = await user.getIdToken();
-              cfg.headers.Authorization = `Bearer ${user.token}`;
+              const token = await user.getIdToken();
+              commit(UPDATE_TOKEN, token);
+              cfg.headers.Authorization = `Bearer ${token}`;
               return cfg;
             });
 
