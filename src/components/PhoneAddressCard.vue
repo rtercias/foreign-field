@@ -401,7 +401,7 @@ export default {
         }
 
         // add new tag
-        await this.setPhone(phone);
+        // await this.setPhone(phone);
         await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
         newArray.push(newTag);
 
