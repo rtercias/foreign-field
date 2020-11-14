@@ -11,7 +11,7 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right">
+            <h4 class="text-right d-xl-none">
                 <font-awesome-icon
                   class="text-primary"
                   icon="sms"
