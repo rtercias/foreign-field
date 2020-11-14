@@ -10,7 +10,11 @@
             class="tag-button mr-1 mb-1 border-primary text-white"
             size='sm'
             :key="index"
-            :variant="highlight(tag) ? 'danger' : 'primary'">
+            :variant="highlight(tag) ? 'danger' : 'primary'"
+            @click="() => updateTag(tag)">
+            <span v-if="tag.state && !readOnlyTag(tag)">
+              <font-awesome-icon icon="times"></font-awesome-icon>
+            </span>>
               {{ tag }}
           </b-badge>
         </div>
