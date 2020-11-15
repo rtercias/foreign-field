@@ -130,7 +130,7 @@
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
-        <b-button v-if="step === 4" type="button" variant="success" @click="done">Done</b-button>
+        <b-button v-if="step === 4" type="button" variant="success" @click="gotoPhoneHome">Done</b-button>
       </div>
     </b-form>
   </div>
@@ -323,6 +323,10 @@ export default {
 
     done() {
       this.$router.push(this.returnRoute);
+    },
+
+    gotoPhoneHome() {
+      this.$router.push(`/territories/${this.group}/${this.territoryId}`);
     },
   },
   computed: {
