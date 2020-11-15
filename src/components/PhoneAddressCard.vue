@@ -77,7 +77,6 @@
               :key="index"
               class="fa-2x"
               :value="button.value"
-              :is-busy="item.isBusy"
               :actionButtonList="actionButtonList(item.type)"
               :slashed="button.slashed"
               @button-click="() => updateResponse(item, button.value, close)">
@@ -105,7 +104,6 @@
               class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
-              :is-busy="item.isBusy"
               :slashed="button.slashed"
               @button-click="(value, button) => applyTag(item, button, close)">
             </ActivityButton>
@@ -195,24 +193,21 @@ export default {
     isLastRecordAndOdd() {
       return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
     },
-    addressModel() {
-      const { phones, activityLogs, ...model } = { ...this.address };
-      const notesArray = model.notes ? model.notes.split(',') : [];
-      const notes = notesArray.filter(n => ADDRESS_LEFT_BUTTON_LIST.includes(n)).join(',');
-      return { ...model, notes };
-    },
     combinedAddressAndPhones() {
-      return [this.addressModel, ...this.address.phones];
+      return [this.address, ...this.address.phones];
     },
   },
   methods: {
     ...mapActions({
       fetchPhone: 'phone/fetchPhone',
+      fetchAddress: 'address/fetchAddress',
       addPhone: 'phone/addPhone',
       updatePhone: 'phone/updatePhone',
       setPhone: 'phone/setPhone',
-      addTag: 'phone/addTag',
-      removeTag: 'phone/removeTag',
+      addPhoneTag: 'phone/addTag',
+      addAddressTag: 'address/addTag',
+      removePhoneTag: 'phone/removeTag',
+      removeAddressTag: 'phone/removeTag',
       addLog: 'address/addLog',
       removeLog: 'address/removeLog',
       updateAddress: 'address/updateAddress',
@@ -360,69 +355,95 @@ export default {
     getRejectTag(phone) {
       return phone.notes.split(',').find(n => REJECT_TAGS.includes(n));
     },
-    async updateResponse(phone, _value, close) {
+
+    // update NH status for address or phone
+    async updateResponse(entity, _value, close) {
       let value = _value;
-      this.setPhone(phone);
-      if (phone.selectedResponse === 'START' && value === 'START') {
-        this.$set(phone, 'isBusy', false);
+      if (entity.selectedResponse === 'START' && value === 'START') {
+        this.$set(entity, 'isBusy', false);
         if (typeof close === 'function') close();
         return;
       }
-      if (!this.rightButtonList.some(b => b.value === value)) {
+      if (!this.rightButtonList(entity.type).some(b => b.value === value)) {
         value = 'START';
       }
 
       try {
-        this.$set(phone, 'isBusy', true);
-        await this.addLog({ entityId: phone.id, value });
-        await this.fetchPhone(phone.id);
+        this.$set(entity, 'isBusy', true);
+        await this.addLog({ entityId: entity.id, value });
+        if (entity.type === 'Phone') {
+          await this.fetchPhone(entity.id);
+        } else {
+          await this.fetchAddress(entity.id);
+        }
         const timestamp = Date.now();
 
-        this.$set(phone, 'selectedResponse', value);
-        this.$set(phone, 'selectedResponseTS', timestamp);
-        this.$set(phone, 'lastActivity', {
+        this.$set(entity, 'selectedResponse', value);
+        this.$set(entity, 'selectedResponseTS', timestamp);
+        this.$set(entity, 'lastActivity', {
           publisher_id: this.user.id,
-          address_id: phone.id,
+          address_id: entity.id,
           timestamp,
           value,
         });
 
-        this.$set(this.territory, 'lastActivity', phone.lastActivity);
-        this.$set(phone, 'isBusy', false);
+        this.$set(this.territory, 'lastActivity', entity.lastActivity);
+        this.$set(entity, 'isBusy', false);
         if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
     },
-    async applyTag(phone, item, close) {
+
+    // apply tag to address of phone
+    async applyTag(entity, item, close) {
+      if (typeof close === 'function') close();
       const newTag = item.description.toLowerCase();
       this.isAddressBusy = true;
+      this.$set(entity, 'isBusy', true);
       try {
-        const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
-        const oldArray = phone.notes ? phone.notes.split(',') : [];
-        let newArray = [...oldArray];
-
-        if (exclusiveTags.includes(newTag)) {
-          // if new tag is exclusive, then remove all other exclusive tags
-          for (const tag of exclusiveTags) {
-            await this.removeTag({ phoneId: phone.id, userid: this.user.id, tag });
-          }
-          newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+        const notesArray = entity.notes ? entity.notes.split(',') : [];
+        // check if new tag already exists
+        if (notesArray.includes(newTag)) {
+          this.isAddressBusy = false;
+          this.$set(entity, 'isBusy', false);
+          return;
         }
 
+        const newArray = entity.type === 'Phone' ? await this.tagAndExclude(entity, newTag) : notesArray;
+
         // add new tag
-        // await this.setPhone(phone);
-        await this.addTag({ phoneId: phone.id, userid: this.user.id, tag: newTag });
+        if (entity.type === 'Phone') {
+          await this.addPhoneTag({ phoneId: entity.id, userid: this.user.id, tag: newTag });
+        } else {
+          await this.addAddressTag({ addressId: entity.id, userid: this.user.id, tag: newTag });
+        }
         newArray.push(newTag);
 
         // update UI phone
         const updatedNotes = newArray.join(',');
-        this.$set(phone, 'notes', `${updatedNotes}`);
+        this.$set(entity, 'notes', `${updatedNotes}`);
+        this.$set(entity, 'isBusy', false);
         this.isAddressBusy = false;
-        if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to apply tag', e);
       }
+    },
+
+    async tagAndExclude(phone, newTag) {
+      // if new tag is exclusive, then remove all other exclusive tags
+      const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
+      const oldArray = phone.notes ? phone.notes.split(',') : [];
+      let newArray = [...oldArray];
+
+      if (exclusiveTags.includes(newTag)) {
+        for (const tag of exclusiveTags) {
+          await this.removePhoneTag({ phoneId: phone.id, userid: this.user.id, tag });
+        }
+        newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+      }
+
+      return newArray;
     },
     async toggleNoNumberTag({ forceRemove = false }) {
       let notesArray = this.address.notes ? this.address.notes.split(',') : [];

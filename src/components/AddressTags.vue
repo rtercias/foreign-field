@@ -1,20 +1,20 @@
 <template>
   <div class="address-tags w-100">
-    <div class="preview-tags mt-1 mb-2" :class="{ 'd-none': !collapsed }">
-      <b-button-group class="flex-wrap" size="sm">
-        <div class="text-left">
+    <div class="preview-tags" :class="{ 'd-none': !collapsed }">
+      <b-button-group size="sm">
+        <div class="d-flex">
           <b-badge
             v-for="(tag, index) in preview"
             v-show="!hide(tag)"
             pill
-            class="tag-button mr-1 mb-1 border-primary text-white"
+            class="tag-button mr-1 mb-1 border-primary text-white d-flex "
             size='sm'
             :key="index"
             :variant="highlight(tag) ? 'danger' : 'primary'"
-            @click="() => updateTag(tag)">
-            <span v-if="tag.state && !readOnlyTag(tag)">
+            @click="() => mode === 'phoneAddress' && updateTag({ caption: tag, state: true })">
+            <span v-if="mode === 'phoneAddress'" class="mr-1">
               <font-awesome-icon icon="times"></font-awesome-icon>
-            </span>>
+            </span>
               {{ tag }}
           </b-badge>
         </div>
@@ -35,7 +35,7 @@
             size='sm'
             :key="index"
             @click="() => updateTag(tag)"
-            :variant="tag.state ? 'primary' : 'outline-primary'">
+            :variant="tag.state ? (highlight(tag.caption) ? 'danger' : 'primary') : 'outline-primary'">
             <span v-if="tag.state && !readOnlyTag(tag)">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
@@ -44,7 +44,7 @@
         </div>
       </b-button-group>
     </div>
-    <div class="expand-tags">
+    <div class="expand-tags" v-if="mode !== 'phoneAddress'">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
@@ -64,9 +64,11 @@ import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
 
+const PHONE_ADDRESS_TAGS = ['no number', 'do not mail'];
+
 export default {
   name: 'AddressTags',
-  props: ['address'],
+  props: ['address', 'mode'],
   data() {
     return {
       collapsed: true,
@@ -95,6 +97,7 @@ export default {
       if (index !== -1 && tag.state) {
         const confirm = await this.confirmRemoveTag(tag);
         if (confirm) {
+          this.$set(this.address, 'isBusy', true);
           this.setAddress(this.address);
           this.$set(this.selectedTags, index, tag);
           await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
@@ -121,6 +124,7 @@ export default {
 
       this.collapsed = true;
       this.isSaving = false;
+      this.$set(this.address, 'isBusy', false);
     },
     loadselectedTags() {
       this.availableTags.forEach((e) => {
@@ -206,7 +210,7 @@ export default {
       // return !this.availableTags.some(t => tag.caption.toLowerCase() === t.toLowerCase());
     },
     highlight(tag) {
-      const tagsToHighlight = ['do not mail'];
+      const tagsToHighlight = ['no number', 'do not mail'];
       return tagsToHighlight.includes(tag);
     },
     hide(tag) {
@@ -220,7 +224,7 @@ export default {
       updatedAddress: 'address/address',
     }),
     availableTags() {
-      return [
+      const all = [
         'verify',
         'day sleeper',
         `wife speaks ${this.language}`,
@@ -228,12 +232,17 @@ export default {
         'business',
         'no number',
         'do not mail',
-        // `does not speak ${this.language}`,
-        // 'do not call',
+        `does not speak ${this.language}`,
+        'do not call',
         // 'deaf/mute',
         // 'blind',
-
       ];
+
+      if (this.mode === 'phoneAddress') {
+        return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
+      }
+
+      return all;
     },
     combinedTags() {
       const newArr = unionWith(this.selectedTags, this.availableTags,
@@ -252,7 +261,12 @@ export default {
         || [];
     },
     preview() {
-      return this.selectedTags.sort();
+      const all = this.selectedTags.sort();
+      if (this.mode === 'phoneAddress') {
+        return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
+      }
+
+      return all;
     },
     formattedPhone() {
       const { phone } = this.address;

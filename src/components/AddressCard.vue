@@ -1,11 +1,12 @@
 <template>
-  <div class="address-card-container p-2 d-flex align-items-center">
+  <div class="address-card-container p-2 d-flex align-items-center" :class="{ 'min-height': mode === 'phoneAddress' }">
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
     <div class="w-100">
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50">
-        <div v-if="mode==='phoneAddress'" class="col-10 pt-2 pb-4">
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+        :class="{ 'min-height': mode !== 'phoneAddress' }">
+        <div v-if="mode==='phoneAddress'" class="col-10 pb-2">
           <b-link
             class="w-100"
             :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
@@ -29,11 +30,12 @@
           </div>
         </div>
         <div
-          class="static-buttons col-2 pr-2 justify-content-end"
-          :class="{ 'pt-3 pr-0': mode !== 'phoneAddress', 'align-self-center': mode === 'phoneAddress' }">
-          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging"></font-awesome-icon>
+          class="static-buttons col-2 justify-content-end"
+          :class="{ 'pt-3 pr-0': mode !== 'phoneAddress', 'align-self-center, pr-1': mode === 'phoneAddress' }">
+          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging || address.isBusy">
+          </font-awesome-icon>
           <div
-            :class="{ hidden: address.selectedResponse === 'START' || isLogging }"
+            :class="{ hidden: address.selectedResponse === 'START' || isLogging || address.isBusy }"
             class="d-flex flex-column">
             <ActivityButton
               class="selected-response fa-2x"
@@ -47,7 +49,12 @@
           </div>
         </div>
       </div>
-      <AddressTags v-if="mode !== 'phoneAddress'" :address="address" v-on="$listeners"></AddressTags>
+      <AddressTags
+        :address="address"
+        :mode="mode"
+        v-on="$listeners"
+        :class="{ 'pl-3': mode === 'phoneAddress'}">
+      </AddressTags>
     </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
@@ -214,18 +221,26 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
 .v-touch-address-card {
   touch-action: pan-y;
   height: 100%;
 }
-.address-card {
-  display: flex;
-  flex-direction: row;
-  overflow: hidden;
-  position: relative;
-  transition: ease-in-out 0.3s  ;
-  min-height: 60px;
+.address-card-container {
+  &.min-height {
+    min-height: 91px;
+  }
+  .address-card {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    position: relative;
+    transition: ease-in-out 0.3s;
+
+    &.min-height {
+      min-height: 60px;
+    }
+  }
 }
 .address {
   display: flex;
