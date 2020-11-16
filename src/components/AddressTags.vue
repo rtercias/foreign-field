@@ -2,7 +2,7 @@
   <div class="address-tags w-100">
     <div class="preview-tags" :class="{ 'd-none': !collapsed }">
       <b-button-group size="sm">
-        <div class="d-flex">
+        <div class="d-flex flex-wrap">
           <b-badge
             v-for="(tag, index) in preview"
             v-show="!hide(tag)"
@@ -12,7 +12,7 @@
             :key="index"
             :variant="highlight(tag) ? 'danger' : 'primary'"
             @click="() => mode === 'phoneAddress' && updateTag({ caption: tag, state: true })">
-            <span v-if="mode === 'phoneAddress'" class="mr-1">
+            <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag)" class="mr-1">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
               {{ tag }}
@@ -31,7 +31,7 @@
             v-show="!hide(tag.caption)"
             pill
             class="tag-button mr-1 mb-1 border-primary"
-            :class="{ active: false, 'd-none': readOnlyTag(tag), 'text-primary': !tag.state }"
+            :class="{ active: false, 'text-primary': !tag.state }"
             size='sm'
             :key="index"
             @click="() => updateTag(tag)"
@@ -64,7 +64,9 @@ import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
 
-const PHONE_ADDRESS_TAGS = ['no number', 'do not mail'];
+const PHONE_ADDRESS_TAGS = ['no number', 'do not mail', 'verify', 'business'];
+const READ_ONLY_PHONE_ADDRESS_TAGS = ['verify', 'business'];
+const READ_ONLY_ADDRESS_TAGS = [];
 
 export default {
   name: 'AddressTags',
@@ -87,7 +89,7 @@ export default {
       getTerritory: 'territory/getTerritory',
     }),
     async updateTag(tag) {
-      if (this.readOnlyTag(tag)) return;
+      if (this.readOnlyTag(tag.caption)) return;
       this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       let cancel;
@@ -204,10 +206,9 @@ export default {
         await this.getTerritory(this.address.territory_id);
       }
     },
-    readOnlyTag(/* tag */) {
-      return false;
-      // Temporarily commented out this code to allow for user cleanup
-      // return !this.availableTags.some(t => tag.caption.toLowerCase() === t.toLowerCase());
+    readOnlyTag(tag = '') {
+      const readOnlyTags = this.mode === 'phoneAddress' ? READ_ONLY_PHONE_ADDRESS_TAGS : READ_ONLY_ADDRESS_TAGS;
+      return readOnlyTags.some(t => tag === t);
     },
     highlight(tag) {
       const tagsToHighlight = ['no number', 'do not mail'];
