@@ -200,6 +200,10 @@ function validateAddress(_address, isNew) {
     delete address.phones;
   }
 
+  if ('type' in address) {
+    delete address.type;
+  }
+
   return address;
 }
 

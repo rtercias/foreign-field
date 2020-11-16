@@ -358,10 +358,10 @@ export default {
 
     // update NH status for address or phone
     async updateResponse(entity, _value, close) {
+      if (typeof close === 'function') close();
       let value = _value;
       if (entity.selectedResponse === 'START' && value === 'START') {
         this.$set(entity, 'isBusy', false);
-        if (typeof close === 'function') close();
         return;
       }
       if (!this.rightButtonList(entity.type).some(b => b.value === value)) {
@@ -389,7 +389,6 @@ export default {
 
         this.$set(this.territory, 'lastActivity', entity.lastActivity);
         this.$set(entity, 'isBusy', false);
-        if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
