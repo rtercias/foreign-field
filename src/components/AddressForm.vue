@@ -1,6 +1,6 @@
 <template>
   <div class="address-form">
-    <div class="address-header justify-content-around align-items-center lead pt-3 pb-3">
+    <div class="address-header justify-content-around align-items-center lead py-3">
       <span v-if="mode===modes.add" class="lead font-weight-bold w-100">Add New Address</span>
       <div v-else-if="mode===modes.edit" class="lead font-weight-bold w-100">
         <div>{{address.addr1}} {{address.addr2}}</div>
@@ -9,7 +9,7 @@
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <Loading v-if="isLoading || isSearching"></Loading>
-    <b-form v-else class="form pl-4 pr-4 pb-4 text-left" @submit.prevent="submitAddress">
+    <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submitAddress">
       <div v-if="step === 1">
         <div v-if="canWrite && mode !== modes.phoneAdd && mode !== modes.phoneEdit">
           <b-form-group>
@@ -112,7 +112,7 @@
           Optimize
         </b-button>
       </div>
-      <div class="buttons pt-4 pb-4" :class="{ 'justify-content-between': step!==4, 'justify-content-end': step===4 }">
+      <div class="buttons py-4" :class="{ 'justify-content-between': step!==4, 'justify-content-end': step===4 }">
         <b-button v-if="step === 1" type="button" variant="light" @click="done">Cancel</b-button>
         <b-button v-else v-show="step !== 4" type="button" variant="light" @click="prev">Previous</b-button>
         <b-button v-if="canManage && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">

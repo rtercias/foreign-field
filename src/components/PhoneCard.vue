@@ -159,7 +159,7 @@ export default {
       return this.getPxValue(width);
     },
     formattedPhone() {
-      const phone = get(this, 'phoneRecord.phone', '');
+      const phone = get(this, 'phoneRecord.phone') || '';
       return formatPhone(phone);
     },
     formattedSelectedResponseTS() {
@@ -176,8 +176,9 @@ export default {
       return this.lastActivity.value;
     },
     isMySelectedResponse() {
-      const publisherId = get(this.phoneRecord.lastActivity, 'publisher_id', '') || '';
-      return publisherId.toString() === get(this.user, 'id', '').toString();
+      const publisherId = get(this.phoneRecord.lastActivity, 'publisher_id') || '';
+      const userId = get(this.user, 'id') || '';
+      return publisherId.toString() === userId.toString();
     },
     allowedToCall() {
       const notAllowed = ['invalid', 'do not call'];
@@ -194,7 +195,7 @@ export default {
       if (log && log.publisher_id !== this.user.id) {
         this.$set(this.phoneRecord, 'selectedResponse', log.value);
         this.$set(this.phoneRecord, 'selectedResponseTS', log.timestamp);
-        this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
+        this.isIncomingResponse = (get(log, 'publisher_id') || '').toString() !== (get(this.user, 'id') || '').toString();
       }
     },
   },

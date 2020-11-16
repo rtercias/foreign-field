@@ -1,6 +1,6 @@
 <template>
   <div class="address-links">
-    <div class="address-header d-flex justify-content-between align-items-center text-center pt-3 pb-3">
+    <div class="address-header d-flex justify-content-between align-items-center text-center py-3">
       <div :class="{ 'lead font-weight-bold w-100': !simple, 'simple m-auto': simple }">
         <div>{{address.addr1}} {{address.addr2}}</div>
         <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
