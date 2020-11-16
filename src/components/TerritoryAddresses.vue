@@ -137,7 +137,7 @@ export default {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
     doNotMail() {
-      return get(this.address, 'notes', '').includes('do not mail');
+      return (get(this.address, 'notes') || '').includes('do not mail');
     },
   },
   methods: {

@@ -269,7 +269,7 @@ export default {
         this.isAddressBusy = false;
         return;
       }
-      const sort = get(this.storeAddress, 'phones.length', 0);
+      const sort = get(this.storeAddress, 'phones.length') || 0;
       const phone = {
         congregationId: this.congId,
         parent_id: this.address.id,

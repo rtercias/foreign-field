@@ -72,7 +72,7 @@ export default {
   data() {
     return {
       collapsed: true,
-      language: get(this.user, 'congregation.language', 'Tagalog'),
+      language: get(this.user, 'congregation.language') || 'Tagalog',
       isSaving: false,
     };
   },

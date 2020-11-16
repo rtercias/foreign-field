@@ -89,15 +89,15 @@ export default {
       return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
     },
     lookup411() {
-      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
-      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
-      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
       return `https://www.411.com/address/${addr1}/${city}-${state}`;
     },
     lookupFastPeopleSearch() {
-      const addr1 = `${get(this.address, 'addr1', '').trim().replace(/\s+/g, '-')}`;
-      const city = `${get(this.address, 'city', '').trim().replace(/\s+/g, '-')}`;
-      const state = `${get(this.address, 'state_province', '').trim().replace(/\s+/g, '-')}`;
+      const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
       return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
     returnRoute() {

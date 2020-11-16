@@ -205,8 +205,9 @@ export default {
       return this.address.lastActivity || { value: 'START', timestamp: '' };
     },
     isMySelectedResponse() {
-      const publisherId = get(this.address.lastActivity, 'publisher_id', '') || '';
-      return publisherId.toString() === get(this.user, 'id', '').toString();
+      const publisherId = get(this.address.lastActivity, 'publisher_id') || '';
+      const userId = get(this.user, 'id') || '';
+      return publisherId.toString() === userId.toString();
     },
   },
 
@@ -215,7 +216,10 @@ export default {
       if (log) {
         this.address.selectedResponse = log.value;
         this.address.selectedResponseTS = log.timestamp;
-        this.isIncomingResponse = get(log, 'publisher_id', '').toString() !== get(this.user, 'id', '').toString();
+
+        const publisherId = get(log, 'publisher_id') || '';
+        const userId = get(this.user, 'id') || '';
+        this.isIncomingResponse = publisherId.toString() !== userId.toString();
       }
     },
   },
