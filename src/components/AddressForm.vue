@@ -130,7 +130,7 @@
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
-        <b-button v-if="step === 4" type="button" variant="success" @click="gotoPhoneHome">Done</b-button>
+        <b-button v-if="step === 4" type="button" variant="success" @click="done">Done</b-button>
       </div>
     </b-form>
   </div>
@@ -324,10 +324,6 @@ export default {
     done() {
       this.$router.push(this.returnRoute);
     },
-
-    gotoPhoneHome() {
-      this.$router.push(`/territories/${this.group}/${this.territoryId}`);
-    },
   },
   computed: {
     ...mapGetters({
@@ -351,7 +347,6 @@ export default {
         ? `/territories/${this.group}/${this.territoryId}`
         : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail${queryParam}`;
       if (this.$route.name === 'address-new') return '/';
-      if (origin) return undefined;
       return addMode;
     },
 
