@@ -24,13 +24,13 @@
             <b-button-group size="sm">
               <b-button
                 variant="outline-info"
-                :to="{ name: 'address-list', params: { group, id }}"
+                :to="{ name: 'address-list', params: { group, id } }"
                 :pressed="viewMode === 'address-list'">
                 Address
               </b-button>
               <b-button
                 variant="outline-info"
-                :to="{ name: 'phone-list', params: { group, id }}"
+                :to="{ name: 'phone-list', params: { group, id } }"
                 :pressed="viewMode === 'phone-list'">
                 Phone
               </b-button>
@@ -57,7 +57,7 @@
           </div>
         </div>
       </header>
-      <router-view></router-view>
+      <router-view :disabled="!isCheckedOut"></router-view>
     </div>
   </div>
 </template>
@@ -111,7 +111,9 @@ export default {
       options: 'auth/options',
     }),
     isCheckedOut() {
-      return this.territory && this.territory.status && this.territory.status.status === 'Checked Out';
+      return this.canViewReports
+        || (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
+        || false;
     },
     isRecentlyWorked() {
       return this.territory && this.territory.status && this.territory.status.status === 'Recently Worked';

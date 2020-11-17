@@ -44,7 +44,7 @@
         </div>
       </b-button-group>
     </div>
-    <div class="expand-tags" v-if="mode !== 'phoneAddress'">
+    <div class="expand-tags" v-if="mode !== 'phoneAddress' && !this.disabled">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
@@ -70,7 +70,7 @@ const READ_ONLY_ADDRESS_TAGS = [];
 
 export default {
   name: 'AddressTags',
-  props: ['address', 'mode'],
+  props: ['address', 'mode', 'disabled'],
   data() {
     return {
       collapsed: true,
