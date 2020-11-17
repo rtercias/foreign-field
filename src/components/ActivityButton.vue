@@ -1,14 +1,14 @@
 <template>
+  <div v-if="disabled"></div>
   <div
-    v-if="get('type') === 'link'"
+    v-else-if="get('type') === 'link'"
     class="interaction d-flex justify-content-center align-items-center px-3"
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <b-button
         class="p-0"
         variant="link"
-        @click="click(value)"
-        :disabled="loading">
+        @click="click(value)">
         {{ get('text') }}
       </b-button>
     </span>
@@ -16,7 +16,7 @@
   <div
     v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction d-flex flex-column justify-content-center align-items-center px-3"
-    :class="{ [`bg-${get('color')}`]: !invert, 'bg-danger disabled': disabled }">
+    :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <font-awesome-layers
         class="text-white fa-fw"
@@ -28,7 +28,7 @@
         </font-awesome-icon>
         <font-awesome-icon icon="slash" v-if="isSlashed"
           class="slash-shadow"
-          :class="{ 'text-danger': disabled, [`text-${get('color')}`]: !invert }">
+          :class="{ [`text-${get('color')}`]: !invert }">
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"

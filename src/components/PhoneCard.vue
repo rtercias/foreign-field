@@ -5,15 +5,16 @@
     </font-awesome-layers>
     <div class="d-flex flex-column pl-2 col-8">
       <h5 class="mb-0 mr-auto">
-        <a v-if="allowedToCall" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
+        <a v-if="allowedToCall && !disabled" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
         <font-awesome-icon
+          v-if="!disabled"
           class="small text-primary ml-3"
           icon="pencil-alt"
           @click="edit">
         </font-awesome-icon>
       </h5>
-      <PhoneTags :phone="phoneRecord" :address="address"></PhoneTags>
+      <PhoneTags :phone="phoneRecord" :address="address" :disabled="disabled"></PhoneTags>
     </div>
     <div class="static-buttons col-3 pr-0 justify-content-end">
       <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
@@ -49,7 +50,7 @@ import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'PhoneCard',
-  props: ['phoneRecord', 'address', 'incomingResponse', 'revealed', 'index', 'editPhone'],
+  props: ['phoneRecord', 'address', 'incomingResponse', 'revealed', 'index', 'editPhone', 'disabled'],
   components: {
     ActivityButton,
     PhoneTags,

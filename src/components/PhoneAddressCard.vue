@@ -1,5 +1,5 @@
 <template>
-  <div class="m-0 phone-address-card d-flex align-items-baseline pb-5">
+  <div class="m-0 phone-address-card d-flex align-items-baseline" :class="{ 'pb-5': !disabled }">
     <div
       :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
       <b-list-group>
@@ -8,6 +8,7 @@
           :items="combinedAddressAndPhones || []"
           item-key="id"
           :revealed.sync="revealed"
+          :disabled="disabled"
           @active="onActive">
           <template v-slot="{ item, index, revealed }">
             <AddressCard
@@ -34,6 +35,7 @@
               :address="address"
               :revealed="revealed"
               :incomingResponse="item.lastActivity"
+              :disabled="disabled"
               @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
               @toggle-left-panel="toggleLeftPanel"
@@ -110,6 +112,7 @@
           </template>
         </swipe-list>
         <b-list-group-item
+          v-if="!disabled"
           class="d-flex pb-2 px-2 border-0"
           :class="{ 'pt-0': isDesktop }">
           <the-mask
@@ -152,7 +155,7 @@ const ADDRESS_LEFT_BUTTON_LIST = [NO_NUMBER, DO_NOT_MAIL];
 
 export default {
   name: 'PhoneAddressCard',
-  props: ['address', 'territory', 'index'],
+  props: ['address', 'territory', 'index', 'disabled'],
   components: {
     PhoneCard,
     AddressCard,
@@ -240,6 +243,7 @@ export default {
       return this.territory.lastActivity ? id === this.territory.lastActivity.address_id : false;
     },
     toggleRightPanel(index, revealed) {
+      if (this.disabled) return;
       if (revealed) {
         this.$refs.list.closeActions(index);
       } else {
@@ -248,6 +252,7 @@ export default {
       }
     },
     toggleLeftPanel(index, revealed) {
+      if (this.disabled) return;
       if (revealed) {
         this.$refs.list.closeActions(index);
       } else {
