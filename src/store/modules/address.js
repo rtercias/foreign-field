@@ -102,6 +102,23 @@ const ACTION_BUTTON_LIST = [
     description: 'Letter',
     disabledText: 'Do Not Mail',
   },
+  {
+    type: 'fa-icon',
+    value: 'no number',
+    text: '',
+    icon: 'phone-slash',
+    color: 'danger',
+    description: 'No Number',
+  },
+  {
+    type: 'fa-icon',
+    value: 'do not mail',
+    text: '',
+    icon: 'envelope',
+    color: 'danger',
+    description: 'Do Not Mail',
+    slashed: true,
+  },
 ];
 
 export function createActivityLog(id, addressId, value, checkoutId, user) {
@@ -181,6 +198,10 @@ function validateAddress(_address, isNew) {
 
   if ('phones' in address) {
     delete address.phones;
+  }
+
+  if ('type' in address) {
+    delete address.type;
   }
 
   return address;

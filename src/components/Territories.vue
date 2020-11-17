@@ -33,7 +33,7 @@
           v-for="terr in filteredTerritories"
           v-bind:key="terr.id"
           data-toggle="collapse"
-          class="territory-card col-md-6 pl-4 pr-4">
+          class="territory-card col-md-6 px-4">
           <TerritoryCard :terr="terr" :groupCode="groupCode" :selectTerritory="selectTerritory" :fetch="fetch">
           </TerritoryCard>
         </b-list-group-item>

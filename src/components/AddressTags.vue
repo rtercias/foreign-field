@@ -1,16 +1,20 @@
 <template>
   <div class="address-tags w-100">
-    <div class="preview-tags mt-1 mb-2" :class="{ 'd-none': !collapsed }">
-      <b-button-group class="flex-wrap" size="sm">
-        <div class="text-left">
+    <div class="preview-tags" :class="{ 'd-none': !collapsed }">
+      <b-button-group size="sm">
+        <div class="d-flex flex-wrap">
           <b-badge
             v-for="(tag, index) in preview"
             v-show="!hide(tag)"
             pill
-            class="tag-button mr-1 mb-1 border-primary text-white"
+            class="tag-button mr-1 mb-1 border-primary text-white d-flex "
             size='sm'
             :key="index"
-            :variant="highlight(tag) ? 'danger' : 'primary'">
+            :variant="highlight(tag) ? 'danger' : 'primary'"
+            @click="() => mode === 'phoneAddress' && updateTag({ caption: tag, state: true })">
+            <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag)" class="mr-1">
+              <font-awesome-icon icon="times"></font-awesome-icon>
+            </span>
               {{ tag }}
           </b-badge>
         </div>
@@ -27,11 +31,11 @@
             v-show="!hide(tag.caption)"
             pill
             class="tag-button mr-1 mb-1 border-primary"
-            :class="{ active: false, 'd-none': readOnlyTag(tag), 'text-primary': !tag.state }"
+            :class="{ active: false, 'text-primary': !tag.state }"
             size='sm'
             :key="index"
             @click="() => updateTag(tag)"
-            :variant="tag.state ? 'primary' : 'outline-primary'">
+            :variant="tag.state ? (highlight(tag.caption) ? 'danger' : 'primary') : 'outline-primary'">
             <span v-if="tag.state && !readOnlyTag(tag)">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
@@ -40,7 +44,7 @@
         </div>
       </b-button-group>
     </div>
-    <div class="expand-tags">
+    <div class="expand-tags" v-if="mode !== 'phoneAddress'">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
@@ -60,13 +64,17 @@ import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
 
+const PHONE_ADDRESS_TAGS = ['no number', 'do not mail', 'verify', 'business'];
+const READ_ONLY_PHONE_ADDRESS_TAGS = ['verify', 'business'];
+const READ_ONLY_ADDRESS_TAGS = [];
+
 export default {
   name: 'AddressTags',
-  props: ['address'],
+  props: ['address', 'mode'],
   data() {
     return {
       collapsed: true,
-      language: get(this.user, 'congregation.language', 'Tagalog'),
+      language: get(this.user, 'congregation.language') || 'Tagalog',
       isSaving: false,
     };
   },
@@ -81,7 +89,7 @@ export default {
       getTerritory: 'territory/getTerritory',
     }),
     async updateTag(tag) {
-      if (this.readOnlyTag(tag)) return;
+      if (this.readOnlyTag(tag.caption)) return;
       this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       let cancel;
@@ -91,6 +99,7 @@ export default {
       if (index !== -1 && tag.state) {
         const confirm = await this.confirmRemoveTag(tag);
         if (confirm) {
+          this.$set(this.address, 'isBusy', true);
           this.setAddress(this.address);
           this.$set(this.selectedTags, index, tag);
           await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
@@ -117,6 +126,7 @@ export default {
 
       this.collapsed = true;
       this.isSaving = false;
+      this.$set(this.address, 'isBusy', false);
     },
     loadselectedTags() {
       this.availableTags.forEach((e) => {
@@ -196,13 +206,12 @@ export default {
         await this.getTerritory(this.address.territory_id);
       }
     },
-    readOnlyTag(/* tag */) {
-      return false;
-      // Temporarily commented out this code to allow for user cleanup
-      // return !this.availableTags.some(t => tag.caption.toLowerCase() === t.toLowerCase());
+    readOnlyTag(tag = '') {
+      const readOnlyTags = this.mode === 'phoneAddress' ? READ_ONLY_PHONE_ADDRESS_TAGS : READ_ONLY_ADDRESS_TAGS;
+      return readOnlyTags.some(t => tag === t);
     },
     highlight(tag) {
-      const tagsToHighlight = ['do not mail'];
+      const tagsToHighlight = ['no number', 'do not mail'];
       return tagsToHighlight.includes(tag);
     },
     hide(tag) {
@@ -216,7 +225,7 @@ export default {
       updatedAddress: 'address/address',
     }),
     availableTags() {
-      return [
+      const all = [
         'verify',
         'day sleeper',
         `wife speaks ${this.language}`,
@@ -224,12 +233,17 @@ export default {
         'business',
         'no number',
         'do not mail',
-        // `does not speak ${this.language}`,
-        // 'do not call',
+        `does not speak ${this.language}`,
+        'do not call',
         // 'deaf/mute',
         // 'blind',
-
       ];
+
+      if (this.mode === 'phoneAddress') {
+        return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
+      }
+
+      return all;
     },
     combinedTags() {
       const newArr = unionWith(this.selectedTags, this.availableTags,
@@ -248,7 +262,12 @@ export default {
         || [];
     },
     preview() {
-      return this.selectedTags.sort();
+      const all = this.selectedTags.sort();
+      if (this.mode === 'phoneAddress') {
+        return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
+      }
+
+      return all;
     },
     formattedPhone() {
       const { phone } = this.address;

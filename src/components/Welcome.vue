@@ -3,7 +3,7 @@
     <h3 v-if="!isAuthenticated">Welcome to Foreign Field</h3>
     <Auth v-if="!isAuthenticated"></Auth>
     <b-row v-else class="main justify-content-center">
-      <div class="new-message bg-secondary text-dark align-items-center pt-2 pb-2 w-100 text-white"
+      <div class="new-message bg-secondary text-dark align-items-center py-2 w-100 text-white"
       v-show='msgBoxOpen && !isPWA'>
         <div class="message text-left col-10">
           <span class="update-message">App version now available! To download, add this page to your home screen.</span>
@@ -35,22 +35,22 @@
           </b-button>
         </b-button-group>
       </div>
-      <div v-if="!loading" class="panel col-sm-12 col-md-5 pt-3 pb-3 border-info m-2">
+      <div v-if="!loading" class="panel col-sm-12 col-md-5 py-3 border-info m-2">
         <span v-if="!(territories && territories.length)" class="text-center">I have no territories checked out.</span>
         <div v-else class="text-left">
           <span class="small">Territories I've checked out:</span>
           <b-list-group>
-            <b-list-group-item v-for="terr in territories" :key="terr.id" class="pl-2 pr-2">
+            <b-list-group-item v-for="terr in territories" :key="terr.id" class="px-2">
               <MyTerritory :territory="terr"></MyTerritory>
             </b-list-group-item>
           </b-list-group>
         </div>
       </div>
-      <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left pt-3 pb-3 border-info m-2">
+      <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
         <span class="small">Other territories I've recently seen:</span>
         <div v-if="seenTerritories.length">
           <b-list-group>
-            <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="pl-2 pr-2">
+            <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="px-2">
               <div class="d-flex justify-content-between align-items-center">
                 <MyTerritory :territory="terr"></MyTerritory>
                 <b-button class="text-danger"
@@ -64,10 +64,10 @@
           </b-list-group>
         </div>
       </div>
-      <div v-if="!loading && canManage" class="panel text-left pt-3 pb-3 col-sm-12 col-md-5 border-info m-2">
+      <div v-if="!loading && canManage" class="panel text-left py-3 col-sm-12 col-md-5 border-info m-2">
         <ChangeLog :type="'addresses'" :fullscreen="false" />
       </div>
-      <div v-if="!loading && canWrite" class="panel text-left pt-3 pb-3 scol-sm-12 col-md-5 border-info m-2">
+      <div v-if="!loading && canWrite" class="panel text-left py-3 scol-sm-12 col-md-5 border-info m-2">
         <Reports />
       </div>
     </b-row>

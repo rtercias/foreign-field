@@ -25,6 +25,7 @@ import { mapGetters, mapActions } from 'vuex';
 import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
 import get from 'lodash/get';
+import { format } from '../utils/phone';
 
 export default {
   name: 'PhoneTags',
@@ -32,7 +33,7 @@ export default {
   data() {
     return {
       collapsed: true,
-      language: get(this.user, 'congregation.language', 'Tagalog'),
+      language: get(this.user, 'congregation.language') || 'Tagalog',
       isSaving: false,
     };
   },
@@ -57,9 +58,8 @@ export default {
 
       if (index !== -1) {
         const isAddressPhone = this.address.phone === this.phone.phone;
-        const addrPhoneMsg = isAddressPhone ? 'This will also remove the address phone number.' : '';
-        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${tag}" tag? ${addrPhoneMsg}`, {
-          title: `${this.phone.phone}`,
+        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${tag}" tag?`, {
+          title: `${format(this.phone.phone)}`,
           centered: true,
         });
         if (confirm) {

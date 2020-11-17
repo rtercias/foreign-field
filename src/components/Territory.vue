@@ -4,7 +4,7 @@
       Please wait <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
     </div>
     <div v-else>
-      <header class="w-100 pl-2 pr-2">
+      <header class="w-100 px-2">
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
             <div class="text-left">
