@@ -44,7 +44,7 @@
         </div>
       </b-button-group>
     </div>
-    <div class="expand-tags" v-if="mode !== 'phoneAddress' && !this.disabled">
+    <div class="expand-tags" v-if="mode !== 'phoneAddress' && !disabled">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
