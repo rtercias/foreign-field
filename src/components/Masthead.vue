@@ -233,7 +233,7 @@ export default {
             `<p><b>IMPORTANT: CAMPAIGNS WILL RESET ALL ACTIVITIES! PLEASE USE RESPONSIBLY.</b></p>
             <p>Campaigns allow territories to be worked separately from regular territory coverage.
             When a new campaign is started, you are given the option to <u>check in all territories</u> or
-            allow publishers <u>keep the territories</u> they've already checked out.</p>
+            allow publishers to <u>keep territories</u> they've already checked out.</p>
             <p>To begin, press "New Campaign".</p>
             <p>After the campaign, press "End Campaign".<br/>This will <u>check in all campaign territories</u>
             and reset them back to regular territories.</p>`,
