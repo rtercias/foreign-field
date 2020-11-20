@@ -12,7 +12,7 @@
             :key="index"
             :variant="highlight(tag) ? 'danger' : 'primary'"
             @click="() => mode === 'phoneAddress' && updateTag({ caption: tag, state: true })">
-            <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag)" class="mr-1">
+            <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag) && !disabled" class="mr-1">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
               {{ tag }}
@@ -89,7 +89,7 @@ export default {
       getTerritory: 'territory/getTerritory',
     }),
     async updateTag(tag) {
-      if (this.readOnlyTag(tag.caption)) return;
+      if (this.disabled || this.readOnlyTag(tag.caption)) return;
       this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       let cancel;

@@ -2,7 +2,7 @@
   <div class="activity-history p-4">
     <h3 class="w-100">Activity History</h3>
     <h5 class="w-100">{{address.addr1}} {{address.addr2}} {{address.city}}</h5>
-    <Loading v-if="isLoading"></Loading>
+    <Loading class="w-100" v-if="isLoading"></Loading>
     <div class="pt-3" v-else>
       <span class="blockquote" v-if="activityLogs.length === 0">
         No activity logs. This address is fresh!
@@ -13,12 +13,22 @@
             <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
             <b-icon-dash @click="toggleGroup(index)" v-else />
           </span>
-          <ActivityButton class="fa-2x pr-2" :disabled="true" :displayOnly="true" :value="group[0].value" />
+          <ActivityButton
+            class="fa-2x pr-2"
+            :displayOnly="true"
+            :value="group[0].value"
+            :action-button-list="actionButtonList"
+          />
           <span>{{index}} - {{getPublisherName(group[0].publisher_id)}}</span>
         </div>
         <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
-          <div class="log pb-1" v-for="log in group" :key="log.id">
-            <ActivityButton class="fa-2x pl-3 pr-2" :disabled="true" :displayOnly="true" :value="log.value" />
+          <div class="log pl-3 pb-1" v-for="log in group" :key="log.id">
+            <ActivityButton
+              class="fa-2x pl-3 pr-2"
+              :displayOnly="true"
+              :value="log.value"
+              :action-button-list="actionButtonList"
+            />
             <span>{{friendlyTime(log.timestamp)}} - {{getPublisherName(log.publisher_id)}}</span>
           </div>
         </div>
@@ -54,7 +64,6 @@ export default {
     };
   },
   mounted() {
-    this.fetch();
     this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
   },
   computed: {
@@ -62,6 +71,7 @@ export default {
       address: 'address/address',
       congId: 'auth/congId',
       publishers: 'publishers/publishers',
+      actionButtonList: 'address/actionButtonList',
     }),
     activityLogs() {
       return this.address && orderBy(this.address.activityLogs, (a) => {

@@ -28,7 +28,16 @@
               :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
               Optimize
             </b-nav-item>
-            <b-nav-item v-if="canRead" :to="`/dnc/${user.congregation.id}`">DNC</b-nav-item>
+            <b-nav-item v-if="canRead" :to="`/dnc/${user.congregation && user.congregation.id}`">DNC</b-nav-item>
+            <b-nav-item
+              v-if="canLead"
+              @click="toggleCampaignMode">
+              <span :class="{ 'text-warning': isCampaignMode }">
+                <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
+                <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
+                {{isCampaignMode ? 'End Campaign' : 'New Campaign'}}
+              </span>
+            </b-nav-item>
           </b-navbar-nav>
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown v-if="isAuthenticated" right>
@@ -43,8 +52,9 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import VuePullRefresh from 'vue-pull-refresh';
+import get from 'lodash/get';
 
 export default {
   name: 'Masthead',
@@ -70,9 +80,15 @@ export default {
         readyLabel: 'Ready',
         loadingLabel: 'Reloading',
       },
+      togglingCampaignMode: false,
     };
   },
   methods: {
+    ...mapActions({
+      updateCongregation: 'auth/updateCongregation',
+      checkinAll: 'territories/checkinAll',
+      copyCheckouts: 'territories/copyCheckouts',
+    }),
     logout() {
       this.$store.dispatch('auth/logout');
       this.$router.push('/signout');
@@ -92,6 +108,85 @@ export default {
         this.$router.go(-1);
       }
     },
+    async toggleCampaignMode() {
+      if (this.isCampaignMode) {
+        this.endCampaign();
+      } else {
+        this.startCampaign();
+      }
+    },
+    async startCampaign() {
+      const cong = { ...this.user.congregation };
+      const message = 'Start a new campaign?';
+      const response = await this.$bvModal.msgBoxConfirm(message, {
+        title: `${cong.name} Campaign`,
+        centered: true,
+      });
+
+      if (!response) return;
+      this.togglingCampaignMode = true;
+
+      // Step 1: toggle campaign mode
+      cong.campaign = !cong.campaign;
+      await this.updateCongregation({ cong });
+
+      const checkinAll = await this.$bvModal.msgBoxConfirm(
+        'Do you want to check in ALL territories, or allow publishers to keep their checked out territories', {
+          title: 'Campaign',
+          centered: true,
+          okTitle: 'Check In',
+          cancelTitle: 'Keep Checkouts',
+        }
+      );
+
+      if (checkinAll) {
+        // Step 2a: check in all
+        await this.checkinAll({
+          congId: cong.id,
+          username: this.user.username,
+          tzOffset: new Date().getTimezoneOffset().toString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          campaign: false,
+        });
+      } else {
+        // Step 2b: copy existing checkouts for campaign
+        await this.copyCheckouts({
+          congId: cong.id,
+          username: this.user.username,
+          campaign: true,
+        });
+      }
+
+      this.togglingCampaignMode = false;
+      this.$router.go();
+    },
+    async endCampaign() {
+      const cong = { ...this.user.congregation };
+      const message = 'End the current campaign?';
+      const response = await this.$bvModal.msgBoxConfirm(message, {
+        title: 'Campaign',
+        centered: true,
+      });
+
+      if (!response) return;
+      this.togglingCampaignMode = true;
+
+      // Step 1: toggle campaign mode
+      cong.campaign = !cong.campaign;
+      await this.updateCongregation({ cong });
+
+      // Step 2: check in all
+      await this.checkinAll({
+        congId: cong.id,
+        username: this.user.username,
+        tzOffset: new Date().getTimezoneOffset().toString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        campaign: true,
+      });
+
+      this.togglingCampaignMode = false;
+      this.$router.go();
+    },
   },
 
   computed: {
@@ -107,6 +202,7 @@ export default {
       canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
       canRead: 'auth/canRead',
+      canLead: 'auth/canLead',
       isDesktop: 'auth/isDesktop',
       territory: 'territory/territory',
     }),
@@ -115,6 +211,9 @@ export default {
     },
     matchingRouteNames() {
       return this.$route.matched.map(r => r.name);
+    },
+    isCampaignMode() {
+      return get(this.user, 'congregation.campaign') || false;
     },
   },
 };

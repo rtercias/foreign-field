@@ -22,6 +22,7 @@
               :group="territory.group"
               :incomingResponse="item.lastActivity"
               :revealed="revealed"
+              :disabled="disabled"
               @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
               @toggle-left-panel="toggleLeftPanel">
@@ -81,6 +82,7 @@
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
               :slashed="button.slashed"
+              :disabled="disabled"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
