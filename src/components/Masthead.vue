@@ -30,13 +30,14 @@
             </b-nav-item>
             <b-nav-item v-if="canRead" :to="`/dnc/${user.congregation && user.congregation.id}`">DNC</b-nav-item>
             <b-nav-item
-              v-if="canLead"
-              @click="toggleCampaignMode">
-              <span :class="{ 'text-warning': isCampaignMode }">
+              v-if="canLead">
+              <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">
                 <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
                 <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
                 {{isCampaignMode ? 'End Campaign' : 'New Campaign'}}
               </span>
+              <font-awesome-icon v-if="canLead" class="ml-1 text-info" icon="info-circle" @click="toggleCampaignHelp" />
+              <b-toaster name="campaign-help"></b-toaster>
             </b-nav-item>
           </b-navbar-nav>
           <b-navbar-nav class="ml-auto">
@@ -55,6 +56,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import VuePullRefresh from 'vue-pull-refresh';
 import get from 'lodash/get';
+import { channel } from '../main';
 
 export default {
   name: 'Masthead',
@@ -82,6 +84,24 @@ export default {
       },
       togglingCampaignMode: false,
     };
+  },
+  mounted() {
+    channel.bind('check-in-all', async (congId) => {
+      if (this.congId === congId) {
+        this.$bvToast.toast('All territories have been checked in.', {
+          variant: 'success',
+          noAutoHide: true,
+        });
+      }
+    });
+    channel.bind('copy-checkouts', async (congId) => {
+      if (this.congId === congId) {
+        this.$bvToast.toast('Territory checkouts have been preserved.', {
+          variant: 'success',
+          noAutoHide: true,
+        });
+      }
+    });
   },
   methods: {
     ...mapActions({
@@ -132,7 +152,7 @@ export default {
 
       const checkinAll = await this.$bvModal.msgBoxConfirm(
         'Do you want to check in ALL territories, or allow publishers to keep their checked out territories', {
-          title: 'Campaign',
+          title: `${cong.name} Campaign`,
           centered: true,
           okTitle: 'Check In',
           cancelTitle: 'Keep Checkouts',
@@ -141,6 +161,11 @@ export default {
 
       if (checkinAll) {
         // Step 2a: check in all
+        this.$bvToast.toast('Checking in all territories. The page will refresh when it\'s done.', {
+          variant: 'warning',
+          noAutoHide: true,
+        });
+
         await this.checkinAll({
           congId: cong.id,
           username: this.user.username,
@@ -150,6 +175,11 @@ export default {
         });
       } else {
         // Step 2b: copy existing checkouts for campaign
+        this.$bvToast.toast('Copying existing checkouts. The page will refresh when it\'s done.', {
+          variant: 'warning',
+          noAutoHide: true,
+        });
+
         await this.copyCheckouts({
           congId: cong.id,
           username: this.user.username,
@@ -171,6 +201,11 @@ export default {
       if (!response) return;
       this.togglingCampaignMode = true;
 
+      this.$bvToast.toast('Checking in all territories. The page will refresh when it\'s done.', {
+        variant: 'warning',
+        noAutoHide: true,
+      });
+
       // Step 1: toggle campaign mode
       cong.campaign = !cong.campaign;
       await this.updateCongregation({ cong });
@@ -186,6 +221,32 @@ export default {
 
       this.togglingCampaignMode = false;
       this.$router.go();
+    },
+    toggleCampaignHelp() {
+      this.$bvToast.hide('campaign-help');
+
+      const h = this.$createElement;
+      const campaignHelp = h(
+        'div', {
+          domProps: {
+            innerHTML:
+            `<p><b>IMPORTANT: CAMPAIGNS WILL RESET ALL ACTIVITIES! PLEASE USE RESPONSIBLY.</b></p>
+            <p>Campaigns allow territories to be worked separately from regular territory coverage.
+            When a new campaign is started, you are given the option to <u>check in all territories</u> or
+            allow publishers <u>keep the territories</u> they've already checked out.</p>
+            <p>To begin, press "New Campaign".</p>
+            <p>After the campaign, press "End Campaign".<br/>This will <u>check in all campaign territories</u>
+            and reset them back to regular territories.</p>`,
+          },
+        },
+      );
+
+      this.$bvToast.toast([campaignHelp], {
+        id: 'campaign-help',
+        variant: 'warning',
+        noAutoHide: true,
+        toaster: this.isDesktop ? 'campaign-help' : undefined,
+      });
     },
   },
 
