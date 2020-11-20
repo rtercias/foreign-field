@@ -9,7 +9,8 @@
       :class="{ 'border-success border-medium': a.id === foundId }"
       :address="a"
       :territory="territory"
-      :index="index">
+      :index="index"
+      :disabled="disabled">
     </PhoneAddressCard>
   </div>
 </template>
@@ -18,7 +19,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import differenceInDays from 'date-fns/differenceInDays';
 import orderBy from 'lodash/orderBy';
-import get from 'lodash/get';
 import PhoneAddressCard from './PhoneAddressCard';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
@@ -32,7 +32,7 @@ export default {
     SearchBar,
     Loading,
   },
-  props: ['group', 'id'],
+  props: ['group', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', async (log) => {
       if (this.territory && this.territory.addresses) {
@@ -141,9 +141,6 @@ export default {
         this.saveSeenTerritory();
       }
       this.isLoading = false;
-    },
-    isTerritoryCheckedOut() {
-      return get(this.territory, 'status.status') === 'Checked Out';
     },
     search(_keyword) {
       if (!_keyword) {

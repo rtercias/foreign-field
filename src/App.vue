@@ -1,12 +1,18 @@
 <template>
   <div id="app" class="d-flex min-vh-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
     <Masthead :class="{ 'w-25': isDesktop }"></Masthead>
-    <router-view class="view" :class="{ 'w-75': isDesktop }"></router-view>
+    <div :class="{ 'w-75': isDesktop }">
+      <b-alert variant="success" :show="isCampaignMode">
+        <font-awesome-icon icon="bolt" /> CAMPAIGN MODE
+      </b-alert>
+      <router-view class="view"></router-view>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import get from 'lodash/get';
 import Masthead from './components/Masthead';
 
 export default {
@@ -18,7 +24,11 @@ export default {
     ...mapGetters({
       isForcedOut: 'auth/isForcedOut',
       isDesktop: 'auth/isDesktop',
+      user: 'auth/user',
     }),
+    isCampaignMode() {
+      return !!get(this.user, 'congregation.campaign') || false;
+    },
   },
 };
 

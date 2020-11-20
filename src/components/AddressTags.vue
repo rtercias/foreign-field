@@ -12,7 +12,7 @@
             :key="index"
             :variant="highlight(tag) ? 'danger' : 'primary'"
             @click="() => mode === 'phoneAddress' && updateTag({ caption: tag, state: true })">
-            <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag)" class="mr-1">
+            <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag) && !disabled" class="mr-1">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
               {{ tag }}
@@ -44,7 +44,7 @@
         </div>
       </b-button-group>
     </div>
-    <div class="expand-tags" v-if="mode !== 'phoneAddress'">
+    <div class="expand-tags" v-if="mode !== 'phoneAddress' && !disabled">
       <b-badge v-on:click="collapsed = !collapsed" variant="light">
         <span v-if="!collapsed">done</span>
         <span v-else-if="!preview || preview.length===0">new tag</span>
@@ -70,7 +70,7 @@ const READ_ONLY_ADDRESS_TAGS = [];
 
 export default {
   name: 'AddressTags',
-  props: ['address', 'mode'],
+  props: ['address', 'mode', 'disabled'],
   data() {
     return {
       collapsed: true,
@@ -89,7 +89,7 @@ export default {
       getTerritory: 'territory/getTerritory',
     }),
     async updateTag(tag) {
-      if (this.readOnlyTag(tag.caption)) return;
+      if (this.disabled || this.readOnlyTag(tag.caption)) return;
       this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       let cancel;

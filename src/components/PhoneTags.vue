@@ -11,7 +11,7 @@
             :key="index"
             :variant="highlight(tag) ? 'success' : 'danger'"
             @click="() => remove(tag)">
-            <span class="mr-1"><font-awesome-icon icon="times"></font-awesome-icon></span>
+            <span class="mr-1" v-if="!disabled"><font-awesome-icon icon="times"></font-awesome-icon></span>
             {{tag}}
           </b-badge>
         </div>
@@ -29,7 +29,7 @@ import { format } from '../utils/phone';
 
 export default {
   name: 'PhoneTags',
-  props: ['phone', 'address'],
+  props: ['phone', 'address', 'disabled'],
   data() {
     return {
       collapsed: true,
@@ -53,6 +53,7 @@ export default {
       return tag === 'confirmed';
     },
     async remove(tag) {
+      if (this.disabled) return;
       this.isSaving = true;
       const index = this.selectedTags.findIndex(t => t === tag);
 

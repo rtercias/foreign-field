@@ -10,6 +10,7 @@
           :items="territory.addresses"
           item-key="id"
           :revealed.sync="revealed"
+          :disabled="disabled"
           data-toggle="collapse"
           @active="closeSwipes">
           <template v-slot="{ item, index, revealed }">
@@ -26,11 +27,12 @@
               :group="group"
               :incomingResponse="item.incomingResponse"
               :revealed="revealed"
+              :disabled="disabled"
               @update-response="updateResponse"
               @togglePanel="openSwipe">
             </AddressCard>
           </template>
-          <template v-slot:right="{ item, close }" v-if="isTerritoryCheckedOut">
+          <template v-slot:right="{ item, close }">
             <ActivityButton
               v-for="(button, index) in containerButtonList"
               :key="index"
@@ -38,7 +40,7 @@
               :value="button.value"
               :actionButtonList="actionButtonList"
               :slashed="button.value === 'LW' && doNotMail"
-              :disabled="button.value === 'LW' && doNotMail"
+              :disabled="disabled || (button.value === 'LW' && doNotMail)"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>
@@ -73,7 +75,7 @@ export default {
     Loading,
     SearchBar,
   },
-  props: ['group', 'id'],
+  props: ['group', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', (log) => {
       if (log && this.territory && this.territory.addresses) {
@@ -217,9 +219,6 @@ export default {
         this.saveSeenTerritory();
       }
       this.isLoading = false;
-    },
-    isTerritoryCheckedOut() {
-      return get(this.territory, 'status.status') === 'Checked Out';
     },
     async updateResponse(address, _value, close) {
       let value = _value;

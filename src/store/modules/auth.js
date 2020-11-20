@@ -12,6 +12,7 @@ const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
 const SET_GROUP_CODES = 'SET_GROUP_CODES';
+const SET_CONGREGATION = 'SET_CONGREGATION';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
@@ -54,7 +55,8 @@ export const auth = {
     canCheckout: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canWrite: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canRead: (state, getters) => getters.canWrite || state.user && ['RP', 'RP-E', 'TS'].includes(state.user.role),
-    canManage: state => state.user && (state.user.role === 'Admin' || state.user.role === 'TS'),
+    canManage: state => state.user && (state.user.role === 'TS' || state.user.role === 'Admin'),
+    canLead: state => state.user && state.user.role === 'SO',
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
@@ -89,6 +91,11 @@ export const auth = {
 
     SET_GROUP_CODES(state, groupCodes) {
       state.groupCodes = groupCodes;
+    },
+
+    SET_CONGREGATION(state, cong) {
+      state.congregation = cong;
+      state.user.congregation = cong;
     },
 
     RESET(state) {
@@ -144,6 +151,8 @@ export const auth = {
                   name
                   description
                   language
+                  admin_email
+                  campaign
                   options
                 }
                 territories {
@@ -230,6 +239,7 @@ export const auth = {
     },
 
     async getGroupCodes({ commit }, congId) {
+      if (!congId) return;
       const response = await axios({
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
@@ -239,8 +249,49 @@ export const auth = {
       });
 
       const { congregation } = (response && response.data && response.data.data) || [];
-      const groupCodes = congregation.groups.sort();
+      const groupCodes = congregation && congregation.groups && congregation.groups.sort() || [];
       commit(SET_GROUP_CODES, groupCodes);
+    },
+
+    async updateCongregation({ commit }, { cong }) {
+      if (!cong) {
+        return;
+      }
+
+      if (cong.campaign) cong.campaign = 1;
+      if (!cong.campaign) cong.campaign = 0;
+      if (cong.options && typeof cong.options === 'object') {
+        cong.options = JSON.stringify(cong.options);
+      }
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation UpdateCongregation($cong: CongregationInput!) { 
+            updateCongregation (cong: $cong) { 
+              id
+              name
+              description
+              language
+              campaign
+              admin_email
+              options
+            }
+          }`),
+          variables: {
+            cong,
+          },
+        },
+      });
+
+      if (response && response.data && response.data.data) {
+        const { updateCongregation } = response.data.data;
+        commit(SET_CONGREGATION, updateCongregation);
+      }
     },
 
     async firebaseInit({ dispatch, state, commit }) {
