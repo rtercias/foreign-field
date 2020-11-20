@@ -1,30 +1,34 @@
 <template>
   <div class="territories">
-    <h4 class="pt-3 pl-3 w-100 text-left">Service Group: {{groupCode}}</h4>
-    <header class="w-100 m-0 p-3 row align-items-center justify-content-between">
-      <b-dropdown right variant="secondary">
-        <span slot="button-content">
-          <font-awesome-icon icon="filter" />
-          {{availability}}
-        </span>
-        <b-dropdown-item
-          class="availability-filter p-0"
-          v-for="avail in availabilityFilters"
-          v-bind:key="avail"
-          @click="() => setAvailability(avail)">
-          <font-awesome-icon class="selected" icon="check" v-if="availability === avail" />
-          {{avail}}
-        </b-dropdown-item>
-      </b-dropdown>
-      <b-dropdown class="sort-btn" right variant="secondary">
-        <span slot="button-content">
-          <font-awesome-icon icon="sort-amount-down-alt" />
-          {{sortOption}}
-        </span>
-        <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
-          <font-awesome-icon class="selected" icon="check" v-if="sortOption === option" /> {{option}}
-        </b-dropdown-item>
-      </b-dropdown>
+    <header class="d-flex flex-column align-items-center">
+      <div class="d-flex align-items-center justify-content-between w-100 pb-3">
+        <h4 class="text-left pr-3">Service Group: {{groupCode}}</h4>
+      </div>
+      <div class="d-flex w-100 justify-content-between w-100">
+        <b-dropdown right variant="secondary">
+          <span slot="button-content">
+            <font-awesome-icon icon="filter" />
+            {{availability}}
+          </span>
+          <b-dropdown-item
+            class="availability-filter p-0"
+            v-for="avail in availabilityFilters"
+            v-bind:key="avail"
+            @click="() => setAvailability(avail)">
+            <font-awesome-icon class="selected" icon="check" v-if="availability === avail" />
+            {{avail}}
+          </b-dropdown-item>
+        </b-dropdown>
+        <b-dropdown class="sort-btn" right variant="secondary">
+          <span slot="button-content">
+            <font-awesome-icon icon="sort-amount-down-alt" />
+            {{sortOption}}
+          </span>
+          <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
+            <font-awesome-icon class="selected" icon="check" v-if="sortOption === option" /> {{option}}
+          </b-dropdown-item>
+        </b-dropdown>
+      </div>
     </header>
     <Loading v-if="loading"></Loading>
     <div v-else>
@@ -48,6 +52,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import get from 'lodash/get';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
 import Loading from './Loading.vue';
@@ -84,6 +89,7 @@ export default {
         'Name',
         'Description',
       ],
+      loading: true,
     };
   },
 
@@ -93,7 +99,6 @@ export default {
       user: 'auth/user',
       token: 'auth/token',
       territories: 'territories/territories',
-      loading: 'territories/loading',
     }),
 
     filteredTerritories() {
@@ -104,13 +109,18 @@ export default {
       const filtered = this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
       return orderBy(filtered, this.sortOption.toLowerCase());
     },
+    isCampaignMode() {
+      return get(this.user, 'congregation.campaign') || false;
+    },
   },
 
   watch: {
     congId() {
+      if (!this.congId) return;
       this.fetch();
     },
     async token() {
+      if (!this.congId) return;
       await this.fetch();
     },
   },
@@ -134,6 +144,7 @@ export default {
     },
 
     async fetch() {
+      this.loading = true;
       const congId = this.congId || (this.user && this.user.congId);
       this.groupCode = this.$route.params.group;
       this.availability = sessionStorage.getItem('availability') || 'Available';
@@ -142,6 +153,7 @@ export default {
         groupCode: this.groupCode,
       });
       await this.fetchPublishers(congId);
+      this.loading = false;
     },
 
     ...mapActions({

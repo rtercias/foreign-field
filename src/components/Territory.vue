@@ -75,8 +75,6 @@ export default {
   },
   props: ['group', 'id'],
   beforeRouteEnter(to, from, next) {
-    if (from.name) next();
-
     const { options = defaultOptions } = store.state.auth;
     const name = get(options, 'territory.defaultView');
     const { group, id } = to.params;
@@ -111,8 +109,7 @@ export default {
       options: 'auth/options',
     }),
     isCheckedOut() {
-      return this.canViewReports
-        || (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
+      return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
         || false;
     },
     isRecentlyWorked() {

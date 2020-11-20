@@ -40,7 +40,7 @@
               :value="button.value"
               :actionButtonList="actionButtonList"
               :slashed="button.value === 'LW' && doNotMail"
-              :disabled="button.value === 'LW' && doNotMail"
+              :disabled="disabled || (button.value === 'LW' && doNotMail)"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
           </template>

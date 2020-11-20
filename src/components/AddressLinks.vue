@@ -72,8 +72,10 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    await this.fetchAddress(this.addressId);
     this.setLeftNavRoute(this.returnRoute);
+    if (this.token) {
+      await this.fetchAddress(this.addressId);
+    }
     this.isLoading = false;
   },
   computed: {

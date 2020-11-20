@@ -30,7 +30,7 @@ const routes = [
     component: Territories,
     props: true,
     meta: {
-      permissions: ['TS', 'GO', 'SO', 'RP-E'],
+      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
     },
   },
   {

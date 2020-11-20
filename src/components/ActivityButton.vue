@@ -14,7 +14,7 @@
     </span>
   </div>
   <div
-    v-else-if="get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
+    v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction d-flex flex-column justify-content-center align-items-center px-3"
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
@@ -38,7 +38,7 @@
       </font-awesome-layers>
     </span>
     <span
-      v-if="!selected && !!get('description')"
+      v-if="!displayOnly && !selected && !!get('description')"
       class="description"
       :class="{ [`text-${get('color')}`]: invert, 'text-white': !invert }">
       {{disabled ? get('disabledText') : get('description')}}
@@ -89,7 +89,7 @@ export default {
       loading: 'auth/loading',
     }),
     item() {
-      return this.actionButtonList.find(b => b.value === this.value) || {};
+      return this.actionButtonList && this.actionButtonList.find(b => b.value === this.value) || {};
     },
     invert() {
       return this.displayOnly || this.selected;

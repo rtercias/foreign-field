@@ -16,6 +16,8 @@ const SET_LOADING = 'SET_LOADING';
 const SET_ERROR = 'SET_ERROR';
 const SET_NEAREST_TERRITORIES = 'SET_NEAREST_TERRITORIES';
 const SET_LAST_ACTIVITY = 'SET_LAST_ACTIVITY';
+const CHECKIN_ALL = 'CHECKIN_ALL';
+const COPY_CHECKOUTS = 'COPY_CHECKOUTS';
 
 export const territories = {
   namespaced: true,
@@ -52,6 +54,8 @@ export const territories = {
         territory.lastActivity = lastActivity;
       }
     },
+    CHECKIN_ALL: () => {},
+    COPY_CHECKOUTS: () => {},
   },
   actions: {
     async fetchTerritories({ commit }, params) {
@@ -227,6 +231,61 @@ export const territories = {
         commit(SET_LAST_ACTIVITY, terr);
       } catch (exception) {
         console.error('Unable to get last activity', exception);
+      }
+    },
+
+    async checkinAll({ commit }, { congId, username, tzOffset, timezone, campaign }) {
+      try {
+        await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(
+              gql`
+                mutation CheckinAll(
+                  $congId: Int! $username: String! $tz_offset: String! $timezone: String! $campaign: Boolean
+                ) { 
+                  checkinAll (
+                    congId: $congId, username: $username, tz_offset: $tz_offset, timezone: $timezone, campaign: $campaign
+                  )
+              }`
+            ),
+            variables: {
+              congId,
+              username,
+              tz_offset: tzOffset,
+              timezone,
+              campaign,
+            },
+          },
+        });
+
+        commit(CHECKIN_ALL);
+      } catch (exception) {
+        console.error('Unable to checkin all territories', exception);
+      }
+    },
+
+    async copyCheckouts({ commit }, { congId, username, campaign }) {
+      try {
+        await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`mutation CopyCheckouts($congId: Int! $username: String! $campaign: Boolean) { 
+              copyCheckouts (congId: $congId, username: $username, campaign: $campaign)
+            }`),
+            variables: {
+              congId,
+              username,
+              campaign,
+            },
+          },
+        });
+
+        commit(COPY_CHECKOUTS);
+      } catch (exception) {
+        console.error('Unable to copy checkouts', exception);
       }
     },
   },

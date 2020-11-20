@@ -264,6 +264,7 @@ export default {
 }
 .ellipsis-v, .ellipsis-v-static {
   cursor: pointer;
+  z-index: 1;
 }
 .static-buttons {
   display: flex;
