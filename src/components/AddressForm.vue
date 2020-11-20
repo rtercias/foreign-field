@@ -347,7 +347,6 @@ export default {
         ? `/territories/${this.group}/${this.territoryId}`
         : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail${queryParam}`;
       if (this.$route.name === 'address-new') return '/';
-      if (origin) return undefined;
       return addMode;
     },
 
