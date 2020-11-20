@@ -56,7 +56,7 @@ export const auth = {
     canWrite: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canRead: (state, getters) => getters.canWrite || state.user && ['RP', 'RP-E', 'TS'].includes(state.user.role),
     canManage: state => state.user && (state.user.role === 'TS' || state.user.role === 'Admin'),
-    canLead: state => state.user && (state.user.role === 'SO' || state.user.role === 'Admin'),
+    canLead: state => state.user && state.user.role === 'SO',
     mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
