@@ -202,6 +202,10 @@ function validateAddress(_address, isNew) {
     delete address.type;
   }
 
+  if ('parent_id' in address) {
+    delete address.parent_id;
+  }
+
   return address;
 }
 
