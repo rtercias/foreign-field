@@ -16,7 +16,7 @@
       </h5>
       <PhoneTags :phone="phoneRecord" :address="address" :disabled="disabled"></PhoneTags>
     </div>
-    <div class="static-buttons col-3 pr-0 justify-content-end">
+    <div class="static-buttons col-3 justify-content-end">
       <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
       </font-awesome-icon>
       <div
@@ -68,9 +68,6 @@ export default {
       transform: '',
       clickedToOpen: false,
     };
-  },
-  mounted() {
-    this.$set(this.phoneRecord, 'isBusy', false);
   },
   methods: {
     ...mapActions({
@@ -125,8 +122,8 @@ export default {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
     async getLastActivityPublisher() {
-      const id = this.lastActivity.publisher_id;
-      const congId = this.user.congregation.id;
+      const id = Number.parseInt(this.lastActivity.publisher_id, 10);
+      const congId = Number.parseInt(this.user.congregation.id, 10);
       await this.fetchPublisher({ id, congId });
     },
     edit() {
@@ -171,13 +168,13 @@ export default {
       return '';
     },
     lastActivity() {
-      return this.phoneRecord.lastActivity || { value: 'START', timestamp: '' };
+      return get(this.phoneRecord, 'lastActivity') || { value: 'START', timestamp: '' };
     },
     selectedResponse() {
       return this.lastActivity.value;
     },
     isMySelectedResponse() {
-      const publisherId = get(this.phoneRecord.lastActivity, 'publisher_id') || '';
+      const publisherId = get(this.lastActivity, 'publisher_id') || '';
       const userId = get(this.user, 'id') || '';
       return publisherId.toString() === userId.toString();
     },
@@ -193,7 +190,7 @@ export default {
   },
   watch: {
     incomingResponse(log) {
-      if (log && log.publisher_id !== this.user.id) {
+      if (log && this.user && log.publisher_id !== this.user.id) {
         this.$set(this.phoneRecord, 'selectedResponse', log.value);
         this.$set(this.phoneRecord, 'selectedResponseTS', log.timestamp);
         this.isIncomingResponse = (get(log, 'publisher_id') || '').toString() !== (get(this.user, 'id') || '').toString();

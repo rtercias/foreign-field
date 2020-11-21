@@ -23,7 +23,7 @@
             :reset="reset"
             :territoryId="id"
             :group="group"
-            :incomingResponse="item.incomingResponse"
+            :incomingResponse="item.lastActivity"
             :revealed="revealed"
             :disabled="disabled"
             @update-response="updateResponse"
@@ -58,7 +58,6 @@ import ActivityButton from './ActivityButton';
 import AddressTags from './AddressTags';
 import Loading from './Loading.vue';
 import SearchBar from './SearchBar';
-import { channel } from '../main';
 
 const BUTTON_LIST = ['NH', 'HOME', 'LW'];
 
@@ -74,35 +73,6 @@ export default {
   },
   props: ['territory', 'group', 'id', 'disabled'],
   async mounted() {
-    channel.bind('add-log', (log) => {
-      if (log && this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === log.address_id);
-        if (address) {
-          this.$set(address, 'incomingResponse', log);
-        }
-      }
-    });
-    channel.bind('add-note', (args) => {
-      if (this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === args.addressId);
-        if (address && !address.notes.includes(args.note)) {
-          const notesArray = address.notes ? address.notes.split(',') : [];
-          notesArray.push(args.note);
-          this.$set(address, 'notes', notesArray.join(','));
-        }
-      }
-    });
-    channel.bind('remove-note', (args) => {
-      if (this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === args.addressId);
-        if (address && address.notes.includes(args.note)) {
-          const notesArray = address.notes ? address.notes.split(',') : [];
-          const filtered = notesArray.filter(n => n !== args.note);
-          this.$set(address, 'notes', filtered.join(','));
-        }
-      }
-    });
-
     if (this.canCheckout) {
       this.setLeftNavRoute(`/territories/${this.group}`);
     } else {
@@ -159,16 +129,6 @@ export default {
 
     isActiveAddress(addressId) {
       return this.lastActivity ? addressId === this.lastActivity.address_id : false;
-    },
-
-    async refreshTerritory(_address) {
-      if (_address) {
-        const index = this.territory.addresses.findIndex(a => a.id === _address.id);
-        this.territory.addresses.splice(index, 1, _address);
-        this.territory.lastActivity = { address_id: _address.id, ..._address.lastActivity };
-      } else {
-        await this.getTerritory({ id: this.id });
-      }
     },
 
     seenTerritories() {

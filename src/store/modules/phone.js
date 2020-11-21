@@ -2,9 +2,11 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import clone from 'lodash/clone';
+import get from 'lodash/get';
 import { InvalidPhoneError } from '../exceptions/custom-errors';
+import { activityModel } from './address';
 
-const model = gql`fragment Model on Phone {
+const phoneModel = gql`fragment PhoneModel on Phone {
   id
   congregationId
   parent_id
@@ -18,23 +20,6 @@ const model = gql`fragment Model on Phone {
   create_date
   update_user
   update_date
-  activityLogs {
-    id
-    checkout_id
-    address_id
-    value
-    tz_offset
-    timestamp
-    timezone
-    publisher_id
-    notes
-  }
-  lastActivity {
-    value
-    timestamp
-    publisher_id
-    address_id
-  }
 }`;
 
 export const PHONE_STATUS = {
@@ -52,6 +37,7 @@ const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
 const PHONE_LOOKUP_SUCCESS = 'PHONE_LOOKUP_SUCCESS';
 const PHONE_LOOKUP_FAIL = 'PHONE_LOOKUP_FAIL';
+const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
 
 const ACTION_BUTTON_LIST = [
   {
@@ -190,7 +176,7 @@ export const phone = {
 
   getters: {
     phone: state => state.phone,
-
+    error: state => state.error,
     checkoutInfo: (state, getters, rootState, rootGetters) => {
       const terr = rootGetters['territory/territory'];
       return terr.status;
@@ -242,6 +228,10 @@ export const phone = {
     PHONE_LOOKUP_FAIL(state, exception) {
       console.error(PHONE_LOOKUP_FAIL, exception);
     },
+    FETCH_LAST_ACTIVITY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(FETCH_LAST_ACTIVITY_FAIL, exception);
+    },
   },
 
   actions: {
@@ -249,32 +239,41 @@ export const phone = {
       commit(SET_PHONE, _phone);
     },
 
-    async fetchPhone({ commit }, phoneId) {
-      commit('auth/LOADING', true, { root: true });
+    async fetchLastActivity({ commit, dispatch }, { phoneId }) {
+      try {
+        if (!phoneId) {
+          commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
+          return;
+        }
 
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`query Phone($phoneId: Int) { 
-            phone(id: $phoneId) { 
-              ...Model
-            }
-          }
-          ${model}`),
-          variables: {
-            phoneId,
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        },
-      });
+          data: {
+            query: print(gql`query Phone($phoneId: Int) {
+              phone(id: $phoneId) {
+                lastActivity {
+                  ...ActivityModel
+                }
+              }
+            }
+            ${activityModel}`),
+            variables: {
+              phoneId,
+            },
+          },
+        });
 
-      if (response && response.data && response.data.data) {
-        const { phone: p } = response.data.data;
-        commit(SET_PHONE, p);
-        commit('auth/LOADING', false, { root: true });
+        const { lastActivity } = get(response, 'data.data.phone') || {};
+        if (lastActivity) {
+          dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
+        }
+      } catch (e) {
+        console.error(`Unable to fetch last activity for phone id ${phoneId}.`, e);
+        throw e;
       }
     },
 
@@ -294,10 +293,10 @@ export const phone = {
         data: {
           query: print(gql`mutation AddPhone($phone: PhoneInput!) { 
             addPhone(phone: $phone) { 
-              ...Model
+              ...PhoneModel
             }
           }
-          ${model}`),
+          ${phoneModel}`),
           variables: {
             phone: p,
           },
@@ -335,10 +334,10 @@ export const phone = {
         data: {
           query: print(gql`mutation UpdatePhone($phone: PhoneInput!) { 
             updatePhone(phone: $phone) { 
-              ...Model
+              ...PhoneModel
             }
           }
-          ${model}`),
+          ${phoneModel}`),
           variables: {
             phone: p,
           },

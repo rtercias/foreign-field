@@ -24,7 +24,7 @@
               class="fa-2x pr-2"
               :displayOnly="true"
               :value="group[0].value"
-              :action-button-list="actionButtonList || defaultButtonList"
+              :action-button-list="buttonList"
             />
             <span>{{index}} - set by {{getPublisherName(group[0].publisher_id)}}</span>
           </div>
@@ -34,7 +34,7 @@
                 class="fa-2x pl-3 pr-2"
                 :displayOnly="true"
                 :value="log.value"
-                :action-button-list="actionButtonList || defaultButtonList"
+                :action-button-list="buttonList"
               />
               <span>{{friendlyTime(log.timestamp)}} - set by {{getPublisherName(log.publisher_id)}}</span>
             </div>
@@ -57,7 +57,7 @@ import ActivityButton from './ActivityButton';
 
 export default {
   name: 'ActivityHistory',
-  props: ['group', 'territoryId', 'addressId', 'checkoutId', 'actionButtonList'],
+  props: ['group', 'territoryId', 'addressId', 'checkoutId'],
   components: {
     Loading,
     BIconPlus,
@@ -70,6 +70,7 @@ export default {
       groups: {},
       groupKeys: {},
       useCheckoutId: !!this.checkoutId,
+      buttonList: this.addressButtonList,
     };
   },
   async mounted() {
@@ -82,7 +83,8 @@ export default {
       address: 'address/address',
       congId: 'auth/congId',
       publishers: 'publishers/publishers',
-      defaultButtonList: 'address/actionButtonList',
+      phoneButtonList: 'phone/actionButtonList',
+      addressButtonList: 'address/actionButtonList',
     }),
     activityLogs() {
       return this.address && orderBy(this.address.activityLogs, (a) => {
@@ -113,6 +115,7 @@ export default {
       } else {
         await this.fetchAddress({ addressId: this.addressId });
       }
+      this.buttonList = this.getButtonList(this.address.type);
       this.groups = this.logsGroupedByDate();
       this.isLoading = false;
     },
@@ -148,6 +151,12 @@ export default {
     },
     toggleGroup(index) {
       this.$set(this.groupKeys, index, { collapsed: !this.groupKeys[index].collapsed });
+    },
+    getButtonList(type) {
+      if (type === 'Regular') {
+        return this.addressButtonList;
+      }
+      return this.phoneButtonList;
     },
   },
 };

@@ -2,7 +2,7 @@
   <div v-if="disabled"></div>
   <div
     v-else-if="get('type') === 'link'"
-    class="interaction d-flex justify-content-center align-items-center px-3"
+    class="interaction d-flex justify-content-center align-items-center"
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <b-button
@@ -13,13 +13,14 @@
       </b-button>
     </span>
   </div>
-  <div
+  <b-button
+    variant="link"
     v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
-    class="interaction d-flex flex-column justify-content-center align-items-center px-3"
+    class="interaction d-flex flex-column justify-content-center align-items-center p-0"
     :class="{ [`bg-${get('color')}`]: !invert }">
-    <span class="pl-0">
+    <span class="w-100">
       <font-awesome-layers
-        class="text-white fa-fw"
+        class="text-white fa-2x w-100"
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
@@ -43,7 +44,7 @@
       :class="{ [`text-${get('color')}`]: invert, 'text-white': !invert }">
       {{disabled ? get('disabledText') : get('description')}}
     </span>
-  </div>
+  </b-button>
 </template>
 
 <script>
@@ -112,6 +113,8 @@ export default {
 
 .interaction {
   cursor: pointer;
+  text-decoration: none;
+  border-radius: 0;
 
   &.disabled {
     cursor: not-allowed;
@@ -122,6 +125,10 @@ export default {
   }
   .slash-shadow {
     top: 10px !important;
+  }
+
+  &:hover {
+    text-decoration: none;
   }
 }
 

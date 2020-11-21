@@ -35,12 +35,11 @@ export default {
   async mounted() {
     channel.bind('add-log', async (log) => {
       if (this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === log.parent_id);
-        if (address) {
+        const phoneAddress = this.territory.addresses.find(a => a.id === log.parent_id);
+        if (phoneAddress) {
           const id = log.address_id;
-          const phone = address.phones.find(p => p.id === id);
+          const phone = phoneAddress.phones.find(p => p.id === id);
           if (phone) {
-            this.$set(phone, 'incomingResponse', log.value);
             this.$set(phone, 'lastActivity', log);
           }
         }
@@ -92,10 +91,9 @@ export default {
   },
   methods: {
     ...mapActions({
-      getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
       setLeftNavRoute: 'auth/setLeftNavRoute',
-      fetchPhone: 'phone/fetchPhone',
+      fetchPhone: 'address/fetchAddress',
     }),
     seenTerritories() {
       let seenTerritories = [];

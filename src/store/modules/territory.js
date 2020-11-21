@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
@@ -11,6 +12,10 @@ const SET_TERRITORY = 'SET_TERRITORY';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
+const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
+const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
+const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
+const LOADING_TERRITORY_FALSE = 'LOADING_TERRITORY_FALSE';
 
 export const territory = {
   namespaced: true,
@@ -23,6 +28,7 @@ export const territory = {
   getters: {
     territory: state => state.territory,
     congId: state => state.territory.congregationid,
+    isLoading: state => state.isLoading,
     isCheckedOut: state => state.territory && state.territory.status && state.territory.status.status === 'Checked Out',
     isOwnedByUser: (state, getters, rootState, rootGetters) => {
       const user = rootGetters['auth/user'];
@@ -48,6 +54,12 @@ export const territory = {
       store.cache.clear();
     },
     SET_TERRITORY(state, terr) {
+      for (const address of terr.addresses) {
+        address.isBusy = true;
+        for (const phone of address.phones) {
+          phone.isBusy = true;
+        }
+      }
       state.territory = terr;
     },
     GET_TERRITORY_FAIL(state, exception) {
@@ -59,6 +71,28 @@ export const territory = {
     },
     RESET_TERRITORY(state) {
       state.territory = {};
+    },
+    SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
+      const address = state.territory.addresses.find(a => a.id === addressId);
+      if (address) {
+        Vue.set(address, 'lastActivity', lastActivity);
+        Vue.set(address, 'isBusy', false);
+      }
+    },
+    SET_PHONE_LAST_ACTIVITY(state, { phoneId, lastActivity }) {
+      for (const address of state.territory.addresses) {
+        const phone = address.phones && address.phones.find(p => p.id === phoneId);
+        if (phone) {
+          Vue.set(phone, 'lastActivity', lastActivity);
+          Vue.set(phone, 'isBusy', false);
+        }
+      }
+    },
+    LOADING_TERRITORY_TRUE(state) {
+      state.isLoading = true;
+    },
+    LOADING_TERRITORY_FALSE(state) {
+      state.isLoading = false;
     },
   },
 
@@ -127,7 +161,7 @@ export const territory = {
       }
     },
 
-    async getTerritory({ commit, getters, rootGetters }, { id }) {
+    async getTerritory({ commit, getters, rootGetters, dispatch }, { id }) {
       if (!id) {
         commit(GET_TERRITORY_FAIL, 'id is required');
         return;
@@ -142,6 +176,8 @@ export const territory = {
         console.warn('Token is ready');
       }
 
+      commit(LOADING_TERRITORY_TRUE);
+
       try {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -150,20 +186,10 @@ export const territory = {
             query: print(gql`query Territory($terrId: Int) { 
               territory (id: $terrId) {
                 group_code id congregationid name description type city
-                lastActivity {
-                  address_id
-                  timestamp
-                }
                 addresses {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
                   territory_id congregationId status type
-                  lastActivity {
-                    id
-                    timestamp
-                    value
-                    publisher_id
-                  }
                   phones {
                     id
                     congregationId
@@ -175,12 +201,6 @@ export const territory = {
                     notes
                     sort
                     create_user
-                    lastActivity {
-                      address_id
-                      publisher_id
-                      value
-                      timestamp
-                    }
                   }
                 }
                 status {
@@ -199,15 +219,26 @@ export const territory = {
           },
         });
 
-        if (!response || !response.data || !response.data.data || !response.data.data.territory) {
-          return;
-        }
-        const { territory: terr } = response.data.data;
+        const { territory: terr } = get(response, 'data.data');
         terr.addresses = orderBy(terr.addresses, 'sort');
         commit(SET_TERRITORY, terr);
         commit(GET_TERRITORY_SUCCESS);
+        commit(LOADING_TERRITORY_FALSE);
+
+        await dispatch('fetchLastActivities', terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
+        commit(LOADING_TERRITORY_FALSE);
+        throw exception;
+      }
+    },
+
+    async fetchLastActivities({ dispatch }, terr) {
+      for (const address of terr.addresses) {
+        for (const phone of address.phones) {
+          await dispatch('phone/fetchLastActivity', { phoneId: phone.id }, { root: true });
+        }
+        await dispatch('address/fetchLastActivity', { addressId: address.id }, { root: true });
       }
     },
 
@@ -251,6 +282,14 @@ export const territory = {
       } catch (e) {
         console.error('Unable to reset territory activities', e);
       }
+    },
+
+    setAddressLastActivity({ commit }, { addressId, lastActivity }) {
+      commit(SET_ADDRESS_LAST_ACTIVITY, { addressId, lastActivity });
+    },
+
+    setPhoneLastActivity({ commit }, { phoneId, lastActivity }) {
+      commit(SET_PHONE_LAST_ACTIVITY, { phoneId, lastActivity });
     },
   },
 };

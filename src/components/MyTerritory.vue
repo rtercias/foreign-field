@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-link :to="url(territory)" @click="() => setTerr(territory)">
+    <b-link :to="url(territory)">
       {{territory.name}} ({{firstCity}})
     </b-link>
     <span v-if="territory.status">
@@ -24,16 +24,12 @@ export default {
   props: ['territory'],
   methods: {
     ...mapActions({
-      setTerritory: 'territory/setTerritory',
     }),
     checkoutDate(date) {
       return format(new Date(date), 'MM/dd/yyyy');
     },
     url(terr) {
       return `/territories/${terr.group_code}/${terr.id}`;
-    },
-    setTerr(terr) {
-      this.setTerritory(terr);
     },
   },
   computed: {
@@ -56,9 +52,6 @@ export default {
       const cityArray = this.territory.city.split(',');
       return cityArray.length && cityArray[0];
     },
-  },
-  mounted() {
-    this.setTerritory(this.territory);
   },
 };
 </script>
