@@ -3,7 +3,7 @@
     <header class="d-flex flex-column align-items-center">
       <div class="d-flex align-items-center justify-content-between w-100 pb-3">
         <h4 class="text-left pr-3">Service Group: {{groupCode}}</h4>
-        <div v-if="isCampaignMode">
+        <div v-if="isCampaignMode" class="campaign-status">
           Campaign Status:
           <b-badge class="bg-white p-2 border-medium border-secondary">Remainder</b-badge>
           <b-badge class="alert-warning p-2 border-medium">In progress</b-badge>
@@ -43,7 +43,7 @@
           v-for="terr in filteredTerritories"
           v-bind:key="terr.id"
           data-toggle="collapse"
-          class="territory-card col-md-6 px-4"
+          class="territory-card col-md-6 col-lg-3 px-4"
           :class="{
             'list-group-item-success': isCampaignMode && terr.status.status === 'Recently Worked',
             'list-group-item-warning': isCampaignMode && terr.status.status === 'Checked Out'
@@ -177,6 +177,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.campaign-status {
+  white-space: nowrap;
+}
 .availability-filter, .sort-btn {
   .selected {
     margin-left: -20px;
