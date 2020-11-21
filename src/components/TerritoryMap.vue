@@ -7,7 +7,7 @@
       :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
-        v-for="(x, i) in (addresses || territory.addresses)"
+        v-for="(x, i) in territory.addresses"
         :key="i"
         @click="() => centerMarker(x)"
         :lat-lng="getLatLng(x)">
@@ -51,7 +51,7 @@ export default {
     LControlZoom,
     MapLinks,
   },
-  props: ['group', 'id', 'addresses', 'options'],
+  props: ['group', 'id', 'territory', 'options'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -62,7 +62,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      territory: 'territory/territory',
       token: 'auth/token',
     }),
     bounds() {
@@ -95,7 +94,7 @@ export default {
   },
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
-    if (this.token && !this.addresses) {
+    if (this.token && !this.territory) {
       await this.getTerritory({ id: this.id });
     }
   },

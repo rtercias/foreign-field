@@ -3,6 +3,12 @@
     <header class="d-flex flex-column align-items-center">
       <div class="d-flex align-items-center justify-content-between w-100 pb-3">
         <h4 class="text-left pr-3">Service Group: {{groupCode}}</h4>
+        <div v-if="isCampaignMode">
+          Campaign Status:
+          <b-badge class="bg-white p-2 border-medium border-secondary">Remainder</b-badge>
+          <b-badge class="alert-warning p-2 border-medium">In progress</b-badge>
+          <b-badge class="alert-success p-2 border-medium">Completed</b-badge>
+        </div>
       </div>
       <div class="d-flex w-100 justify-content-between w-100">
         <b-dropdown right variant="secondary">
@@ -37,7 +43,11 @@
           v-for="terr in filteredTerritories"
           v-bind:key="terr.id"
           data-toggle="collapse"
-          class="territory-card col-md-6 px-4">
+          class="territory-card col-md-6 px-4"
+          :class="{
+            'list-group-item-success': isCampaignMode && terr.status.status === 'Recently Worked',
+            'list-group-item-warning': isCampaignMode && terr.status.status === 'Checked Out'
+          }">
           <TerritoryCard :terr="terr" :groupCode="groupCode" :selectTerritory="selectTerritory" :fetch="fetch">
           </TerritoryCard>
         </b-list-group-item>
