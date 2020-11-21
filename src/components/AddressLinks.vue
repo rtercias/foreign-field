@@ -126,12 +126,6 @@ export default {
       setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
   },
-  watch: {
-    async token() {
-      await this.fetchAddress({ addressId: this.addressId });
-    },
-    immediate: true,
-  },
 };
 </script>
 

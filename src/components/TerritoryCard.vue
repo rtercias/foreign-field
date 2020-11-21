@@ -63,7 +63,6 @@ export default {
   methods: {
     ...mapActions({
       checkinTerritory: 'territory/checkinTerritory',
-      getTerritory: 'territory/getTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       fetchLastActivity: 'territories/fetchLastActivity',
     }),

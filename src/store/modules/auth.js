@@ -195,7 +195,7 @@ export const auth = {
 
         const { user } = (response && response.data && response.data.data) || {};
         const options = JSON.parse(get(user, 'congregation.options', '{}'));
-        const congregation = { ...user.congregation, options };
+        const congregation = user && { ...user.congregation, options };
         const userRoles = get(user, 'role', '').split(',');
         const { permissions = [] } = router.currentRoute.meta;
         const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
@@ -295,6 +295,10 @@ export const auth = {
     },
 
     async firebaseInit({ dispatch, state, commit }) {
+      const tempToken = sessionStorage.getItem('firebaseui::token');
+      axios.defaults.headers.common.Authorization = `Bearer ${tempToken}`;
+      commit(UPDATE_TOKEN, tempToken);
+
       return new Promise((resolve, reject) => {
         firebase.initializeApp(config);
         firebase.auth().onAuthStateChanged(async (user) => {
@@ -305,10 +309,14 @@ export const auth = {
               throw new Error('Unable to retrieve token from Firebase');
             }
 
+            commit(UPDATE_TOKEN, user.token);
+            sessionStorage.setItem('firebaseui::token', user.token);
+
             axios.interceptors.request.use(async (cfg) => {
               const token = await user.getIdToken();
-              commit(UPDATE_TOKEN, token);
+              sessionStorage.setItem('firebaseui::token', user.token);
               cfg.headers.Authorization = `Bearer ${token}`;
+              commit(UPDATE_TOKEN, token);
               return cfg;
             });
 

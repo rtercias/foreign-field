@@ -5,7 +5,7 @@ import clone from 'lodash/clone';
 import get from 'lodash/get';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
-const addressModel = gql`fragment AddressModel on Address {
+export const addressModel = gql`fragment AddressModel on Address {
   congregationId
   territory_id
   id
@@ -20,6 +20,7 @@ const addressModel = gql`fragment AddressModel on Address {
   notes
   status
   sort
+  parent_id
   phones {
     id
     phone
@@ -28,7 +29,7 @@ const addressModel = gql`fragment AddressModel on Address {
   }
 }`;
 
-const activityModel = gql`fragment ActivityModel on ActivityLog {
+export const activityModel = gql`fragment ActivityModel on ActivityLog {
   id
   checkout_id
   address_id
@@ -47,7 +48,6 @@ export const ADDRESS_STATUS = {
 };
 
 const SET_ADDRESS = 'SET_ADDRESS';
-const ADD_LOG = 'ADD_LOG';
 const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
 const ADD_ADDRESS = 'ADD_ADDRESS';
@@ -56,6 +56,8 @@ const CHANGE_STATUS = 'CHANGE_STATUS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
 const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
+const FETCH_LAST_ACTIVITY_SUCCESS = 'FETCH_LAST_ACTIVITY_SUCCESS';
+const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
 
 const ACTION_BUTTON_LIST = [
   {
@@ -211,7 +213,7 @@ export const address = {
 
   getters: {
     address: state => state.address,
-
+    error: state => state.error,
     checkoutInfo: (state, getters, rootState, rootGetters) => {
       const terr = rootGetters['territory/territory'];
       return terr.status;
@@ -229,12 +231,6 @@ export const address = {
   mutations: {
     SET_ADDRESS(state, addr) {
       state.address = addr;
-    },
-
-    ADD_LOG(state, log) {
-      if (state.address.id === log.address_id) {
-        state.address.activityLogs.push(log);
-      }
     },
 
     UPDATE_LOG(state, log) {
@@ -289,6 +285,15 @@ export const address = {
         state.address.postal_code = zip;
       }
     },
+
+    FETCH_LAST_ACTIVITY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(FETCH_LAST_ACTIVITY_FAIL, exception);
+    },
+    FETCH_LAST_ACTIVITY_SUCCESS(state, lastActivity) {
+      state.error = null;
+      state.address.lastActivity = lastActivity;
+    },
   },
 
   actions: {
@@ -333,6 +338,44 @@ export const address = {
       }
     },
 
+    async fetchLastActivity({ commit, dispatch }, { addressId }) {
+      try {
+        if (!addressId) {
+          commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
+          return;
+        }
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`query Address($addressId: Int) { 
+              address(id: $addressId) { 
+                lastActivity {
+                  ...ActivityModel
+                }
+              }
+            }
+            ${activityModel}`),
+            variables: {
+              addressId,
+            },
+          },
+        });
+
+        const { lastActivity } = get(response, 'data.data.address') || {};
+        if (lastActivity) {
+          dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
+        }
+      } catch (e) {
+        console.error(`Unable to fetch last activity for address id ${addressId}.`, e);
+        throw e;
+      }
+    },
+
     async addLog({ commit, getters, rootGetters }, { entityId, value }) {
       try {
         const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
@@ -341,7 +384,7 @@ export const address = {
 
         commit('auth/LOADING', true, { root: true });
 
-        await axios({
+        const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -350,17 +393,18 @@ export const address = {
           data: {
             query: print(gql`mutation AddLog($activityLog: ActivityLogInput!) { 
               addLog(activityLog: $activityLog) {
-                id checkout_id address_id value tz_offset timestamp
-                timezone publisher_id notes
+                ...ActivityModel
               }
-            }`),
+            }
+            ${activityModel}`),
             variables: {
               activityLog,
             },
           },
         });
 
-        commit(ADD_LOG, activityLog);
+        const { addLog } = get(response, 'data.data') || {};
+        commit(FETCH_LAST_ACTIVITY_SUCCESS, addLog);
       } catch (e) {
         console.error('Unable to add an activityLog', e);
         throw e;

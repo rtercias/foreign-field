@@ -10,10 +10,12 @@
           <b-link
             class="w-100"
             :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
-            <span class="address text-primary font-weight-bold" :class="{ 'phone-address': mode === 'phoneAddress' }">
-              {{address.addr1}} {{address.addr2}}&nbsp;
+            <div class="address text-primary font-weight-bold" :class="{ 'phone-address': mode === 'phoneAddress' }">
+              {{address.addr1}} {{address.addr2}}
+            </div>
+            <div class="text-left small font-weight-bold">
               {{address.city}} {{address.state_province}} {{address.postal_code}}
-            </span>
+            </div>
           </b-link>
         </div>
         <div v-else class="address col-10 flex-column pt-2 pb-4">
@@ -31,7 +33,7 @@
         </div>
         <div
           class="static-buttons col-2 justify-content-end"
-          :class="{ 'pt-3 pr-0': mode !== 'phoneAddress', 'align-self-center, pr-1': mode === 'phoneAddress' }">
+          :class="{ 'pt-3': mode !== 'phoneAddress', 'align-self-center': mode === 'phoneAddress' }">
           <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging || address.isBusy">
           </font-awesome-icon>
           <div
@@ -97,7 +99,6 @@ export default {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
-      getTerritory: 'territory/getTerritory',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
@@ -153,17 +154,10 @@ export default {
     },
 
     async getLastActivityPublisher() {
-      const id = this.lastActivity.publisher_id;
-      const congId = this.user.congregation.id;
+      const id = Number.parseInt(this.lastActivity.publisher_id, 10);
+      const congId = Number.parseInt(this.user.congregation.id, 10);
       await this.fetchPublisher({ id, congId });
     },
-  },
-  mounted() {
-    this.setAddress(this.address);
-    if (this.lastActivity) {
-      this.$set(this.address, 'selectedResponse', this.lastActivity.value || this.START);
-      this.$set(this.address, 'selectedResponseTS', Number(this.lastActivity.timestamp) || null);
-    }
   },
   computed: {
     ...mapGetters({
@@ -204,10 +198,10 @@ export default {
       return '';
     },
     lastActivity() {
-      return this.address.lastActivity || { value: 'START', timestamp: '' };
+      return get(this.address, 'lastActivity') || { value: 'START', timestamp: '' };
     },
     isMySelectedResponse() {
-      const publisherId = get(this.address.lastActivity, 'publisher_id') || '';
+      const publisherId = get(this.lastActivity, 'publisher_id') || '';
       const userId = get(this.user, 'id') || '';
       return publisherId.toString() === userId.toString();
     },
@@ -216,8 +210,8 @@ export default {
   watch: {
     incomingResponse(log) {
       if (log) {
-        this.address.selectedResponse = log.value;
-        this.address.selectedResponseTS = log.timestamp;
+        this.$set(this.address, 'selectedResponse', log.value);
+        this.$set(this.address, 'selectedResponseTS', log.timestamp);
 
         const publisherId = get(log, 'publisher_id') || '';
         const userId = get(this.user, 'id') || '';

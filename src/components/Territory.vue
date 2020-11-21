@@ -43,7 +43,8 @@
             </b-button-group>
             <b-button-group v-else size="sm">
               <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
-                Check In
+                <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
+                <span v-else>Check In</span>
               </b-button>
               <b-button
                 v-if="canWrite && viewMode === 'address-list'"
@@ -66,6 +67,7 @@ import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
 import { store, defaultOptions } from '../store';
+import { channel } from '../main';
 
 export default {
   name: 'Territory',
@@ -85,17 +87,42 @@ export default {
   },
   data() {
     return {
-      isLoading: true,
       reset: false,
       workInProgress: {},
       viewMode: this.defaultView,
+      isCheckingIn: false,
     };
   },
   async mounted() {
-    if (this.token) {
-      await this.getTerritory({ id: this.id });
-      this.isLoading = false;
-    }
+    await this.getTerritory({ id: this.id });
+    channel.bind('add-log', (log) => {
+      if (log && this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === log.address_id);
+        if (address) {
+          this.$set(address, 'lastActivity', log);
+        }
+      }
+    });
+    channel.bind('add-note', (args) => {
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === args.addressId);
+        if (address && !address.notes.includes(args.note)) {
+          const notesArray = address.notes ? address.notes.split(',') : [];
+          notesArray.push(args.note);
+          this.$set(address, 'notes', notesArray.join(','));
+        }
+      }
+    });
+    channel.bind('remove-note', (args) => {
+      if (this.territory && this.territory.addresses) {
+        const address = this.territory.addresses.find(a => a.id === args.addressId);
+        if (address && address.notes.includes(args.note)) {
+          const notesArray = address.notes ? address.notes.split(',') : [];
+          const filtered = notesArray.filter(n => n !== args.note);
+          this.$set(address, 'notes', filtered.join(','));
+        }
+      }
+    });
   },
   computed: {
     ...mapGetters({
@@ -108,6 +135,7 @@ export default {
       ownedBy: 'territory/isOwnedByUser',
       options: 'auth/options',
       token: 'auth/token',
+      isLoading: 'territory/isLoading',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -166,7 +194,7 @@ export default {
     },
 
     async checkInAndReset() {
-      this.isLoading = true;
+      this.isCheckingIn = true;
       await this.checkinTerritory({
         territoryId: this.id,
         userId: get(this.territory, 'status.publisher.id'),
@@ -180,7 +208,7 @@ export default {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
 
-      this.isLoading = false;
+      this.isCheckingIn = false;
       await this.$router.push({ name: 'home' });
       this.checkInToast('success');
     },
@@ -208,15 +236,11 @@ export default {
       deep: true,
       immediate: true,
     },
-    async token() {
-      await this.getTerritory({ id: this.id });
-      this.isLoading = false;
-    },
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .list-group {
   display: block;
 }
@@ -224,11 +248,11 @@ export default {
   columns: 1;
 }
 .columns > [class*="col-"] {
-    -webkit-column-break-inside: avoid;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    width: 100%;
-    float: none;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+  width: 100%;
+  float: none;
 }
 ul {
   list-style-type: none;
@@ -239,8 +263,8 @@ li {
   margin: 0 10px;
 }
 .add-new {
-    font-size: 24px;
-  }
+  font-size: 24px;
+}
 @media (min-width: 769px) {
   .columns {
     columns: 2;

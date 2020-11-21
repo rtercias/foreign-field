@@ -99,14 +99,6 @@ export default {
       await this.getTerritory({ id: this.id });
     }
   },
-  watch: {
-    async token() {
-      if (!this.addresses) {
-        await this.getTerritory({ id: this.id });
-      }
-    },
-    immediate: true,
-  },
 };
 </script>
 

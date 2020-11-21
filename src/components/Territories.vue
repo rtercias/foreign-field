@@ -119,10 +119,6 @@ export default {
       if (!this.congId) return;
       this.fetch();
     },
-    async token() {
-      if (!this.congId) return;
-      await this.fetch();
-    },
   },
 
   methods: {

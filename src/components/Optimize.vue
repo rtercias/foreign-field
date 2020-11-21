@@ -225,13 +225,6 @@ export default {
       return this.state === '';
     },
   },
-  watch: {
-    async token() {
-      await this.getTerritory({ id: this.id });
-      this.reset();
-    },
-    immediate: true,
-  },
 };
 </script>
 <style scoped>

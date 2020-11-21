@@ -61,32 +61,32 @@
           </template>
           <template v-slot:right="{ item, close }">
             <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
-            <div
-              v-if="item.type === 'Regular'"
-              v-show="!item.isBusy"
-              class="interaction d-flex flex-column justify-content-center align-items-center bg-success px-2">
-              <b-button :href="lookupFastPeopleSearch()" target="_blank" variant="link">
-                <font-awesome-layers
-                  class="text-white fa-fw fa-stack">
-                  <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
-                  <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
-                  <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
-                </font-awesome-layers>
-              </b-button>
-              <span class="description text-white">People Search</span>
-            </div>
             <ActivityButton
               v-for="(button, index) in rightButtonList(item.type)"
               :key="index"
-              class="fa-2x"
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
               :slashed="button.slashed"
               :disabled="disabled"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
-            <b-link
+            <b-button
+              v-if="item.type === 'Regular'"
               v-show="!item.isBusy"
+              variant="link"
+              class="interaction d-flex flex-column justify-content-center align-items-center bg-success px-2"
+              :href="lookupFastPeopleSearch()" target="_blank">
+              <font-awesome-layers
+                class="text-white fa-fw fa-stack">
+                <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
+                <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
+                <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
+              </font-awesome-layers>
+              <span class="description text-white pt-1">People Search</span>
+            </b-button>
+            <b-button
+              v-show="!item.isBusy"
+              variant="link"
               :class="`interaction d-flex flex-column justify-content-center
                 align-items-center px-3 bg-success text-decoration-none`"
               :to="{
@@ -95,15 +95,14 @@
                   group: territory.group_code,
                   territoryId: territory.id,
                   addressId: item.type === 'Phone' ? item.id : address.id,
-                  checkoutId: territory.status.checkout_id,
-                  actionButtonList: actionButtonList(item.type),
+                  checkoutId: territory.status && territory.status.checkout_id,
                 }
               }">
-              <font-awesome-layers class="text-white fa-2x pb-5">
+              <font-awesome-layers class="text-white fa-2x">
                 <font-awesome-icon icon="history"></font-awesome-icon>
               </font-awesome-layers>
-              <span class="description text-white">History</span>
-            </b-link>
+              <span class="description text-white pt-1">History</span>
+            </b-button>
           </template>
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
@@ -218,14 +217,16 @@ export default {
       return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
     },
     combinedAddressAndPhones() {
-      return [this.address, ...this.address.phones];
+      if (this.address && this.address.phones) {
+        return [this.address, ...this.address.phones];
+      }
+      return this.address ? [this.address] : [];
     },
   },
   methods: {
     ...mapActions({
       addPhone: 'phone/addPhone',
       updatePhone: 'phone/updatePhone',
-      setPhone: 'phone/setPhone',
       addPhoneTag: 'phone/addTag',
       addAddressTag: 'address/addTag',
       removePhoneTag: 'phone/removeTag',
