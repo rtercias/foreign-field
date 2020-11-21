@@ -16,11 +16,11 @@
   <b-button
     variant="link"
     v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
-    class="interaction d-flex flex-column justify-content-center align-items-center p-0"
+    class="interaction"
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="w-100">
       <font-awesome-layers
-        class="text-white fa-2x w-100"
+        class="fa-layers text-white fa-2x w-100"
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
@@ -33,7 +33,7 @@
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
-          class="nh-text font-weight-bold"
+          class="nh-text font-weight-bold w-100"
           :class="{ [`text-${get('color')}`]: !invert, 'text-white': invert }">
         </font-awesome-layers-text>
       </font-awesome-layers>
@@ -109,6 +109,7 @@ export default {
 }
 .nh-text {
   font-size: 0.5em;
+  text-align: center;
 }
 
 .interaction {

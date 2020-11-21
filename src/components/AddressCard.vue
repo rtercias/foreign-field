@@ -6,7 +6,7 @@
     <div class="w-100">
       <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
         :class="{ 'min-height': mode !== 'phoneAddress' }">
-        <div v-if="mode==='phoneAddress'" class="col-10 pb-2">
+        <div v-if="mode==='phoneAddress'" class="col-9 pb-2">
           <b-link
             class="w-100"
             :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
@@ -18,7 +18,7 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address col-10 flex-column pt-2 pb-4">
+        <div v-else class="address col-9 flex-column pt-2 pb-4">
           <div>
             <h5 class="mb-0">
               <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
@@ -32,15 +32,19 @@
           </div>
         </div>
         <div
-          class="static-buttons col-2 justify-content-end"
+          class="static-buttons col-3"
           :class="{ 'pt-3': mode !== 'phoneAddress', 'align-self-center': mode === 'phoneAddress' }">
-          <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="isLogging || address.isBusy">
-          </font-awesome-icon>
+          <font-awesome-icon
+            class="logging-spinner text-info ml-3"
+            icon="circle-notch"
+            spin
+            v-if="isLogging || address.isBusy"
+          />
           <div
             :class="{ hidden: address.selectedResponse === 'START' || isLogging || address.isBusy }"
-            class="d-flex flex-column">
+            class="d-flex flex-column w-100">
             <ActivityButton
-              class="selected-response fa-2x"
+              class="selected-response fa-2x d-flex"
               :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
               :value="address.selectedResponse"
               :next="'START'"
@@ -280,7 +284,6 @@ export default {
 .logging-spinner {
   font-size: 30px;
   position: absolute;
-  right: 21px;
 }
 
 @media print {

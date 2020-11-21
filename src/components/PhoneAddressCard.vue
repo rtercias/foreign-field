@@ -74,21 +74,23 @@
               v-if="item.type === 'Regular'"
               v-show="!item.isBusy"
               variant="link"
-              class="interaction d-flex flex-column justify-content-center align-items-center bg-success px-2"
+              class="interaction bg-success px-2 py-3"
               :href="lookupFastPeopleSearch()" target="_blank">
-              <font-awesome-layers
-                class="text-white fa-fw fa-stack">
-                <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
-                <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
-                <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
-              </font-awesome-layers>
+              <span class="w-100 d-block pt-1">
+                <font-awesome-layers
+                  class="text-white fa-fw fa-stack mx-2">
+                  <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
+                  <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
+                  <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
+                </font-awesome-layers>
+              </span>
               <span class="description text-white pt-1">People Search</span>
             </b-button>
             <b-button
               v-show="!item.isBusy"
               variant="link"
-              :class="`interaction d-flex flex-column justify-content-center
-                align-items-center px-3 bg-success text-decoration-none`"
+              class="interaction bg-success"
+              :class="{ 'py-3': item.type === 'Regular' }"
               :to="{
                 name: 'activity-history-checkout',
                 params: {
@@ -98,27 +100,28 @@
                   checkoutId: territory.status && territory.status.checkout_id,
                 }
               }">
-              <font-awesome-layers class="text-white fa-2x">
-                <font-awesome-icon icon="history"></font-awesome-icon>
-              </font-awesome-layers>
+              <span class="w-100 d-block pt-1">
+                <font-awesome-layers class="text-white fa-2x mx-2">
+                  <font-awesome-icon icon="history"></font-awesome-icon>
+                </font-awesome-layers>
+              </span>
               <span class="description text-white pt-1">History</span>
             </b-button>
           </template>
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
-            <div
+            <b-button
               v-if="item.type === 'Phone'"
+              variant="link"
               v-show="!item.isBusy"
-              class="interaction fa-2x d-flex flex-column justify-content-center align-items-center px-3 bg-danger">
-              <span class="pl-0">
-                <font-awesome-layers
-                  class="remove-number text-white fa-fw"
-                  @click="() => removePhone(item)">
+              class="interaction bg-danger">
+              <span class="w-100 d-block">
+                <font-awesome-layers class="remove-number text-white fa-2x" @click="() => removePhone(item)">
                   <font-awesome-icon icon="trash-alt"></font-awesome-icon>
                 </font-awesome-layers>
               </span>
               <span class="description text-white">Remove</span>
-            </div>
+            </b-button>
             <ActivityButton
               v-show="!item.isBusy"
               v-for="(button, index) in leftButtonList(item.type)"
@@ -537,7 +540,7 @@ export default {
   bottom: 2px;
 }
 .pc-header-font {
-    font-size:.8rem;
+  font-size:.8rem;
 }
 .description {
   font-size: 7pt;

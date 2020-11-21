@@ -3,7 +3,7 @@
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <div class="d-flex flex-column pl-2 col-8">
+    <div class="d-flex flex-column pl-4 col-9">
       <h5 class="mb-0 mr-auto">
         <a v-if="allowedToCall && !disabled" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
@@ -16,14 +16,13 @@
       </h5>
       <PhoneTags :phone="phoneRecord" :address="address" :disabled="disabled"></PhoneTags>
     </div>
-    <div class="static-buttons col-3 justify-content-end">
-      <font-awesome-icon class="logging-spinner text-info" icon="circle-notch" spin v-if="phoneRecord.isBusy">
-      </font-awesome-icon>
-      <div
+    <div class="static-buttons col-3 pl-1">
+      <font-awesome-icon class="logging-spinner text-info ml-3" icon="circle-notch" spin v-if="phoneRecord.isBusy" />
+      <span
         :class="{ hidden: selectedResponse === 'START' || phoneRecord.isBusy }"
-        class="d-flex flex-column">
+        class="d-flex flex-column w-100">
         <ActivityButton
-          class="selected-response fa-2x"
+          class="selected-response fa-2x px-2"
           :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
           :value="selectedResponse"
           :next="'START'"
@@ -31,7 +30,7 @@
           :actionButtonList="actionButtonList"
           @button-click="confirmClearStatus">
         </ActivityButton>
-      </div>
+      </span>
     </div>
     <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
@@ -230,7 +229,6 @@ export default {
 .logging-spinner {
   font-size: 30px;
   position: absolute;
-  right: 21px;
 }
 @media print {
   .interaction {
