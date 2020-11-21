@@ -1,5 +1,5 @@
 <template>
-  <Loading v-if="isLoading" class="w-100" />
+  <Loading v-if="isLoading || territoryIsLoading" class="w-100" />
   <div v-else class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search"></SearchBar>
     <PhoneAddressCard
@@ -84,6 +84,7 @@ export default {
       token: 'auth/token',
       canCheckout: 'auth/canCheckout',
       phone: 'phone/phone',
+      territoryIsLoading: 'territory/isLoading',
     }),
     lastActivity() {
       return this.territory.lastActivity;

@@ -9,9 +9,9 @@
               <h4 class="mb-0">{{primaryCity}}</h4>
               <span>{{secondaryCities}}</span>
             </div>
-            <h4 class="text-right d-xl-none">
+            <h4 class="text-right">
                 <font-awesome-icon
-                  class="text-primary"
+                  class="text-primary d-xl-none"
                   icon="sms"
                   size="sm"
                   @click="openSMSMobile()">

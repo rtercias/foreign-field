@@ -17,12 +17,18 @@ const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
 const LOADING_TERRITORY_FALSE = 'LOADING_TERRITORY_FALSE';
 
+const initialState = {
+  territory: {
+    name: '',
+    description: '',
+    addresses: [],
+  },
+};
+
 export const territory = {
   namespaced: true,
   state: {
-    territory: {
-      addresses: [],
-    },
+    ...initialState,
   },
 
   getters: {
@@ -90,6 +96,7 @@ export const territory = {
     },
     LOADING_TERRITORY_TRUE(state) {
       state.isLoading = true;
+      state.territory = { ...initialState.territory };
     },
     LOADING_TERRITORY_FALSE(state) {
       state.isLoading = false;
