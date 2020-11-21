@@ -5,7 +5,7 @@ import clone from 'lodash/clone';
 import get from 'lodash/get';
 import { InvalidAddressError } from '../exceptions/custom-errors';
 
-const model = gql`fragment Model on Address {
+const addressModel = gql`fragment AddressModel on Address {
   congregationId
   territory_id
   id
@@ -26,22 +26,18 @@ const model = gql`fragment Model on Address {
     notes
     sort 
   }
-  activityLogs {
-    id
-    checkout_id
-    address_id
-    value
-    tz_offset
-    timestamp
-    timezone
-    publisher_id
-    notes
-  }
-  lastActivity {
-    value
-    timestamp
-    publisher_id
-  }
+}`;
+
+const activityModel = gql`fragment ActivityModel on ActivityLog {
+  id
+  checkout_id
+  address_id
+  value
+  tz_offset
+  timestamp
+  timezone
+  publisher_id
+  notes
 }`;
 
 export const ADDRESS_STATUS = {
@@ -300,7 +296,7 @@ export const address = {
       commit(SET_ADDRESS, addr);
     },
 
-    async fetchAddress({ commit }, addressId) {
+    async fetchAddress({ commit }, { addressId, checkoutId }) {
       commit('auth/LOADING', true, { root: true });
 
       const response = await axios({
@@ -310,14 +306,22 @@ export const address = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: print(gql`query Address($addressId: Int) { 
+          query: print(gql`query Address($addressId: Int $checkoutId: Int) { 
             address(id: $addressId) { 
-              ...Model
+              ...AddressModel
+              activityLogs(checkout_id: $checkoutId) {
+                ...ActivityModel
+              }
+              lastActivity {
+                ...ActivityModel
+              }
             }
           }
-          ${model}`),
+          ${addressModel}
+          ${activityModel}`),
           variables: {
             addressId,
+            checkoutId,
           },
         },
       });
@@ -443,10 +447,10 @@ export const address = {
         data: {
           query: print(gql`mutation CreateAddress($address: AddressInput!) { 
             addAddress(address: $address) { 
-              ...Model
+              ...AddressModel
             }
           }
-          ${model}`),
+          ${addressModel}`),
           variables: {
             address: addr,
           },
@@ -484,10 +488,10 @@ export const address = {
         data: {
           query: print(gql`mutation UpdateAddress($address: AddressInput!) { 
             updateAddress(address: $address) { 
-              ...Model
+              ...AddressModel
             }
           }
-          ${model}`),
+          ${addressModel}`),
           variables: {
             address: addr,
           },

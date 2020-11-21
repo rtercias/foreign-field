@@ -127,7 +127,7 @@ export const territory = {
       }
     },
 
-    async getTerritory({ commit, getters, rootGetters }, id) {
+    async getTerritory({ commit, getters, rootGetters }, { id }) {
       if (!id) {
         commit(GET_TERRITORY_FAIL, 'id is required');
         return;
@@ -158,10 +158,6 @@ export const territory = {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
                   territory_id congregationId status type
-                  activityLogs {
-                    id checkout_id address_id value tz_offset
-                    timestamp timezone publisher_id notes
-                  }
                   lastActivity {
                     id
                     timestamp

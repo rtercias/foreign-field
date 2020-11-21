@@ -62,7 +62,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchTerritories: 'territories/fetchTerritories',
       checkinTerritory: 'territory/checkinTerritory',
       getTerritory: 'territory/getTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',

@@ -131,6 +131,15 @@ const routes = [
     },
   },
   {
+    name: 'activity-history-checkout',
+    path: '/territories/:group/:territoryId/addresses/:addressId/history/:checkoutId',
+    component: ActivityHistory,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+    },
+  },
+  {
     name: 'address-new',
     path: '/addresses/:mode',
     component: AddressForm,
@@ -195,6 +204,10 @@ function convertIdsToNumber(to) {
 }
 
 router.beforeEach((to, from, next) => {
-  convertIdsToNumber(to);
-  next();
+  try {
+    convertIdsToNumber(to);
+    next();
+  } catch (e) {
+    console.warn('route beforeEach guard error', e);
+  }
 });

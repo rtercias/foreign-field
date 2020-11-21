@@ -96,13 +96,13 @@ export default {
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
     if (this.token && !this.addresses) {
-      await this.getTerritory(this.id);
+      await this.getTerritory({ id: this.id });
     }
   },
   watch: {
     async token() {
       if (!this.addresses) {
-        await this.getTerritory(this.id);
+        await this.getTerritory({ id: this.id });
       }
     },
     immediate: true,

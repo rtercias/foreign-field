@@ -205,7 +205,7 @@ export default {
 
         if (this.mode === Modes.add) {
           await this.addAddress(this.model);
-          await this.getTerritory(this.model.territory_id);
+          await this.getTerritory({ id: this.model.territory_id });
         } else if (this.mode === Modes.edit) {
           await this.updateAddress(this.model);
         }
@@ -230,7 +230,7 @@ export default {
       this.isLoading = true;
       await this.fetchAllTerritories({ congId: this.congId });
       if (this.mode === Modes.edit) {
-        await this.fetchAddress(this.addressId);
+        await this.fetchAddress({ addressId: this.addressId });
         this.model = this.address;
         if (!this.model.sort) {
           this.model.sort = 0;
@@ -238,7 +238,7 @@ export default {
         delete this.model.activityLogs;
       } else {
         if (this.user && this.territoryId) {
-          await this.getTerritory(this.territoryId);
+          await this.getTerritory({ id: this.territoryId });
         }
         await this.setAddress({});
         this.model = {
@@ -318,7 +318,7 @@ export default {
 
     async updateTerritory(territoryId) {
       this.$set(this.model, 'territory_id', territoryId);
-      await this.getTerritory(territoryId);
+      await this.getTerritory({ id: territoryId });
     },
 
     done() {

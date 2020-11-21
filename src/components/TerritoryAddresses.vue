@@ -1,52 +1,49 @@
 <template>
   <div class="territory-addresses pb-5">
-    <Loading v-if="isLoading"></Loading>
-    <div v-else>
-      <SearchBar :search-text="'Search this territory'" @on-click="search"></SearchBar>
-      <b-list-group>
-        <swipe-list
-          ref="list"
-          class="card"
-          :items="territory.addresses"
-          item-key="id"
-          :revealed.sync="revealed"
-          :disabled="disabled"
-          data-toggle="collapse"
-          @active="closeSwipes">
-          <template v-slot="{ item, index, revealed }">
-            <AddressCard
-              :ref="`address-${item.id}`"
-              :index="index"
-              :class="{
-                'bg-white border-warning border-medium active': isActiveAddress(item.id),
-                'border-success border-medium': item.id === foundId
-              }"
-              :address="item"
-              :reset="reset"
-              :territoryId="id"
-              :group="group"
-              :incomingResponse="item.incomingResponse"
-              :revealed="revealed"
-              :disabled="disabled"
-              @update-response="updateResponse"
-              @togglePanel="openSwipe">
-            </AddressCard>
-          </template>
-          <template v-slot:right="{ item, close }">
-            <ActivityButton
-              v-for="(button, index) in containerButtonList"
-              :key="index"
-              class="fa-2x"
-              :value="button.value"
-              :actionButtonList="actionButtonList"
-              :slashed="button.value === 'LW' && doNotMail"
-              :disabled="disabled || (button.value === 'LW' && doNotMail)"
-              @button-click="() => updateResponse(item, button.value, close)">
-            </ActivityButton>
-          </template>
-        </swipe-list>
-      </b-list-group>
-    </div>
+    <SearchBar :search-text="'Search this territory'" @on-click="search"></SearchBar>
+    <b-list-group>
+      <swipe-list
+        ref="list"
+        class="card"
+        :items="territory.addresses"
+        item-key="id"
+        :revealed.sync="revealed"
+        :disabled="disabled"
+        data-toggle="collapse"
+        @active="closeSwipes">
+        <template v-slot="{ item, index, revealed }">
+          <AddressCard
+            :ref="`address-${item.id}`"
+            :index="index"
+            :class="{
+              'bg-white border-warning border-medium active': isActiveAddress(item.id),
+              'border-success border-medium': item.id === foundId
+            }"
+            :address="item"
+            :reset="reset"
+            :territoryId="id"
+            :group="group"
+            :incomingResponse="item.incomingResponse"
+            :revealed="revealed"
+            :disabled="disabled"
+            @update-response="updateResponse"
+            @togglePanel="openSwipe">
+          </AddressCard>
+        </template>
+        <template v-slot:right="{ item, close }">
+          <ActivityButton
+            v-for="(button, index) in containerButtonList"
+            :key="index"
+            class="fa-2x"
+            :value="button.value"
+            :actionButtonList="actionButtonList"
+            :slashed="button.value === 'LW' && doNotMail"
+            :disabled="disabled || (button.value === 'LW' && doNotMail)"
+            @button-click="() => updateResponse(item, button.value, close)">
+          </ActivityButton>
+        </template>
+      </swipe-list>
+    </b-list-group>
   </div>
 </template>
 
@@ -75,7 +72,7 @@ export default {
     Loading,
     SearchBar,
   },
-  props: ['group', 'id', 'disabled'],
+  props: ['territory', 'group', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', (log) => {
       if (log && this.territory && this.territory.addresses) {
@@ -111,7 +108,6 @@ export default {
     } else {
       this.setLeftNavRoute('/');
     }
-    await this.loadTerritory();
   },
   data() {
     return {
@@ -124,7 +120,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      territory: 'territory/territory',
       user: 'auth/user',
       token: 'auth/token',
       authLoading: 'auth/loading',
@@ -144,12 +139,10 @@ export default {
   },
   methods: {
     ...mapActions({
-      getTerritory: 'territory/getTerritory',
       resetNHRecords: 'territory/resetNHRecords',
       setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
-      fetchAddress: 'address/fetchAddress',
     }),
 
     openSwipe(index, revealed) {
@@ -174,7 +167,7 @@ export default {
         this.territory.addresses.splice(index, 1, _address);
         this.territory.lastActivity = { address_id: _address.id, ..._address.lastActivity };
       } else {
-        await this.getTerritory(this.id);
+        await this.getTerritory({ id: this.id });
       }
     },
 
@@ -213,13 +206,6 @@ export default {
       const parsed = JSON.stringify(seenList);
       localStorage.setItem('seenTerritories', parsed);
     },
-    async loadTerritory() {
-      if (this.token) {
-        await this.getTerritory(this.id);
-        this.saveSeenTerritory();
-      }
-      this.isLoading = false;
-    },
     async updateResponse(address, _value, close) {
       let value = _value;
       this.setAddress(address);
@@ -232,7 +218,6 @@ export default {
 
       try {
         await this.addLog({ entityId: address.id, value });
-        await this.fetchAddress(address.id);
         const updatedAddress = this.territory.addresses.find(a => a.id === address.id);
         updatedAddress.lastActivity = {
           publisher_id: this.user.id,
@@ -263,9 +248,6 @@ export default {
     },
   },
   watch: {
-    async token() {
-      await this.loadTerritory();
-    },
     foundId(value) {
       const card = this.$refs[`address-${value}`];
       if (card && card.$el) card.$el.scrollIntoView();

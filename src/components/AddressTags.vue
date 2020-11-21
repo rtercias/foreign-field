@@ -159,7 +159,7 @@ export default {
         const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
         this.setAddress(this.address);
         await this.markAsDoNotCall({ addressId: this.address.id, userid: this.user.id, tag: datestamped });
-        await this.getTerritory(this.address.territory_id);
+        await this.getTerritory({ id: this.address.territory_id });
       }
     },
     async notForeign(tag) {
@@ -171,7 +171,7 @@ export default {
       if (response) {
         this.setAddress(this.address);
         await this.markAsNotForeign({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
-        await this.getTerritory(this.address.territory_id);
+        await this.getTerritory({ id: this.address.territory_id });
       }
     },
     hasPhone() {
@@ -203,7 +203,7 @@ export default {
         this.setAddress(this.address);
         await this.updateAddress(updatedAddress);
         await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: invalidPhoneNumberTag });
-        await this.getTerritory(this.address.territory_id);
+        await this.getTerritory({ id: this.address.territory_id });
       }
     },
     readOnlyTag(tag = '') {
