@@ -137,7 +137,7 @@ export default {
   },
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
-    await this.getTerritory(this.id);
+    await this.getTerritory({ id: this.id });
     this.reset();
   },
   methods: {
@@ -198,7 +198,7 @@ export default {
         this.saving = true;
         const addressIds = this.territory.addresses.map(a => a.id);
         await this.updateSort({ addressIds, userid: this.user.id });
-        await this.getTerritory(this.id);
+        await this.getTerritory({ id: this.id });
         this.reset();
       }
     },
@@ -227,7 +227,7 @@ export default {
   },
   watch: {
     async token() {
-      await this.getTerritory(this.id);
+      await this.getTerritory({ id: this.id });
       this.reset();
     },
     immediate: true,

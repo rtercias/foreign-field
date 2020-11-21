@@ -97,7 +97,6 @@ export default {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
-      fetchAddress: 'address/fetchAddress',
       getTerritory: 'territory/getTerritory',
       fetchPublisher: 'publisher/fetchPublisher',
     }),

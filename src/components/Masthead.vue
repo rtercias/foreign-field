@@ -236,7 +236,8 @@ export default {
             allow publishers to <u>keep territories</u> they've already checked out.</p>
             <p>To begin, press "New Campaign".</p>
             <p>After the campaign, press "End Campaign".<br/>This will <u>check in all campaign territories</u>
-            and reset them back to regular territories.</p>`,
+            and reset them back to regular territories.</p>
+            <p>It's also highly recommended to communicate to the publishers when Campaign Mode will start and end.</p>`,
           },
         },
       );

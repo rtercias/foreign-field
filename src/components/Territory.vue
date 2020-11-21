@@ -1,8 +1,6 @@
 <template>
   <div class="territory">
-    <div v-if="isLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
-      Please wait <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
-    </div>
+    <Loading v-if="isLoading" />
     <div v-else>
       <header class="w-100 px-2">
         <div class="w-100">
@@ -57,7 +55,7 @@
           </div>
         </div>
       </header>
-      <router-view :disabled="!isCheckedOut"></router-view>
+      <router-view :disabled="!isCheckedOut" :territory="territory"></router-view>
     </div>
   </div>
 </template>
@@ -66,12 +64,14 @@
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
+import Loading from './Loading';
 import { store, defaultOptions } from '../store';
 
 export default {
   name: 'Territory',
   components: {
     TerritoryMap,
+    Loading,
   },
   props: ['group', 'id'],
   beforeRouteEnter(to, from, next) {
@@ -93,9 +93,9 @@ export default {
   },
   async mounted() {
     if (this.token) {
-      await this.getTerritory(this.id);
+      await this.getTerritory({ id: this.id });
+      this.isLoading = false;
     }
-    this.isLoading = false;
   },
   computed: {
     ...mapGetters({
@@ -107,6 +107,7 @@ export default {
       canManage: 'auth/canManage',
       ownedBy: 'territory/isOwnedByUser',
       options: 'auth/options',
+      token: 'auth/token',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -206,6 +207,10 @@ export default {
       },
       deep: true,
       immediate: true,
+    },
+    async token() {
+      await this.getTerritory({ id: this.id });
+      this.isLoading = false;
     },
   },
 };

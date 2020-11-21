@@ -1,6 +1,5 @@
 <template>
-  <Loading class="w-100" v-if="isLoading"></Loading>
-  <div v-else class="phone-witnessing d-flex flex-row flex-wrap align-items-baseline">
+  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search"></SearchBar>
     <PhoneAddressCard
       v-for="(a, index) in territory.addresses" :key="a.id"
@@ -32,7 +31,7 @@ export default {
     SearchBar,
     Loading,
   },
-  props: ['group', 'id', 'disabled'],
+  props: ['territory', 'group', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', async (log) => {
       if (this.territory && this.territory.addresses) {
@@ -63,11 +62,10 @@ export default {
     });
 
     if (this.canCheckout) {
-      this.setLeftNavRoute(`/territories/${this.group}`);
+      this.setLeftNavRoute(`/territories/${this.territory.group_code}`);
     } else {
       this.setLeftNavRoute('/');
     }
-    await this.loadTerritory();
   },
   data() {
     return {
@@ -79,7 +77,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      territory: 'territory/territory',
       user: 'auth/user',
       token: 'auth/token',
       authLoading: 'auth/loading',
@@ -135,13 +132,6 @@ export default {
       const parsed = JSON.stringify(seenList);
       localStorage.setItem('seenTerritories', parsed);
     },
-    async loadTerritory() {
-      if (this.token) {
-        await this.getTerritory(this.id);
-        this.saveSeenTerritory();
-      }
-      this.isLoading = false;
-    },
     search(_keyword) {
       if (!_keyword) {
         this.foundId = 0;
@@ -161,10 +151,6 @@ export default {
     },
   },
   watch: {
-    async token() {
-      this.isLoading = true;
-      await this.loadTerritory();
-    },
     foundId(value) {
       const ref = this.$refs[`phone-address-${value}`];
       const card = ref && ref.length && ref[0];

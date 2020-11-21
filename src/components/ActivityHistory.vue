@@ -1,35 +1,43 @@
 <template>
-  <div class="activity-history p-4">
-    <h3 class="w-100">Activity History</h3>
+  <div class="activity-history p-4" :key="checkoutId">
+    <h3 class="w-100 mt-0">Activity History</h3>
     <h5 class="w-100">{{address.addr1}} {{address.addr2}} {{address.city}}</h5>
     <Loading class="w-100" v-if="isLoading"></Loading>
-    <div class="pt-3" v-else>
+    <div class="pt-3 w-100" v-else>
       <span class="blockquote" v-if="activityLogs.length === 0">
         No activity logs. This address is fresh!
       </span>
-      <div class="group" v-for="(group, index) in groups" :key="index" v-else>
-        <div class="group-head">
-          <span class="fa-2x pr-2">
-            <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
-            <b-icon-dash @click="toggleGroup(index)" v-else />
-          </span>
-          <ActivityButton
-            class="fa-2x pr-2"
-            :displayOnly="true"
-            :value="group[0].value"
-            :action-button-list="actionButtonList"
-          />
-          <span>{{index}} - {{getPublisherName(group[0].publisher_id)}}</span>
+      <div v-else>
+        <div class="pb-3" v-if="!!checkoutId">
+          Activity history for current checkout only. Click
+          <b-button class="p-0" variant="link" @click="toggleCheckout">here</b-button>
+          <span v-if="useCheckoutId"> to see all history.</span>
+          <span v-else> to see only the current checkout.</span>
         </div>
-        <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
-          <div class="log pl-3 pb-1" v-for="log in group" :key="log.id">
+        <div class="group" v-for="(group, index) in groups" :key="index">
+          <div class="group-head">
+            <span class="fa-2x pr-2">
+              <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
+              <b-icon-dash @click="toggleGroup(index)" v-else />
+            </span>
             <ActivityButton
-              class="fa-2x pl-3 pr-2"
+              class="fa-2x pr-2"
               :displayOnly="true"
-              :value="log.value"
-              :action-button-list="actionButtonList"
+              :value="group[0].value"
+              :action-button-list="actionButtonList || defaultButtonList"
             />
-            <span>{{friendlyTime(log.timestamp)}} - {{getPublisherName(log.publisher_id)}}</span>
+            <span>{{index}} - set by {{getPublisherName(group[0].publisher_id)}}</span>
+          </div>
+          <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
+            <div class="log pl-3 pb-1" v-for="log in group" :key="log.id">
+              <ActivityButton
+                class="fa-2x pl-3 pr-2"
+                :displayOnly="true"
+                :value="log.value"
+                :action-button-list="actionButtonList || defaultButtonList"
+              />
+              <span>{{friendlyTime(log.timestamp)}} - set by {{getPublisherName(log.publisher_id)}}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -49,7 +57,7 @@ import ActivityButton from './ActivityButton';
 
 export default {
   name: 'ActivityHistory',
-  props: ['group', 'territoryId', 'addressId'],
+  props: ['group', 'territoryId', 'addressId', 'checkoutId', 'actionButtonList'],
   components: {
     Loading,
     BIconPlus,
@@ -61,17 +69,20 @@ export default {
       isLoading: true,
       groups: {},
       groupKeys: {},
+      useCheckoutId: !!this.checkoutId,
     };
   },
-  mounted() {
+  async mounted() {
     this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
+    await this.fetchPublishers(this.congId);
+    await this.fetch();
   },
   computed: {
     ...mapGetters({
       address: 'address/address',
       congId: 'auth/congId',
       publishers: 'publishers/publishers',
-      actionButtonList: 'address/actionButtonList',
+      defaultButtonList: 'address/actionButtonList',
     }),
     activityLogs() {
       return this.address && orderBy(this.address.activityLogs, (a) => {
@@ -84,11 +95,9 @@ export default {
     },
   },
   watch: {
-    congId() {
+    async congId() {
+      await this.fetchPublishers(this.congId);
       this.fetch();
-    },
-    address() {
-      this.isLoading = false;
     },
   },
   methods: {
@@ -98,13 +107,22 @@ export default {
       setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     async fetch() {
-      await this.fetchPublishers(this.congId);
-      await this.fetchAddress(this.addressId);
+      this.isLoading = true;
+      if (this.useCheckoutId) {
+        await this.fetchAddress({ addressId: this.addressId, checkoutId: this.checkoutId });
+      } else {
+        await this.fetchAddress({ addressId: this.addressId });
+      }
       this.groups = this.logsGroupedByDate();
+      this.isLoading = false;
+    },
+    async toggleCheckout() {
+      this.useCheckoutId = !this.useCheckoutId;
+      await this.fetch();
     },
     getPublisherName(id) {
       const pub = this.publishers && this.publishers.find(p => p.id === id);
-      return pub && `${pub.firstname} ${pub.lastname.charAt(0)}.`;
+      return pub && `${pub.firstname} ${pub.lastname}`;
     },
     friendlyTime(ts) {
       const timestamp = Number(ts);

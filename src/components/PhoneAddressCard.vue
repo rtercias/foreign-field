@@ -19,7 +19,7 @@
               :class="{ 'border-warning active': isActiveAddress(item.id) }"
               :address="item"
               :territoryId="territory.id"
-              :group="territory.group"
+              :group="territory.group_code"
               :incomingResponse="item.lastActivity"
               :revealed="revealed"
               :disabled="disabled"
@@ -85,6 +85,25 @@
               :disabled="disabled"
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
+            <b-link
+              v-show="!item.isBusy"
+              :class="`interaction d-flex flex-column justify-content-center
+                align-items-center px-3 bg-success text-decoration-none`"
+              :to="{
+                name: 'activity-history-checkout',
+                params: {
+                  group: territory.group_code,
+                  territoryId: territory.id,
+                  addressId: item.type === 'Phone' ? item.id : address.id,
+                  checkoutId: territory.status.checkout_id,
+                  actionButtonList: actionButtonList(item.type),
+                }
+              }">
+              <font-awesome-layers class="text-white fa-2x pb-5">
+                <font-awesome-icon icon="history"></font-awesome-icon>
+              </font-awesome-layers>
+              <span class="description text-white">History</span>
+            </b-link>
           </template>
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
@@ -204,8 +223,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchPhone: 'phone/fetchPhone',
-      fetchAddress: 'address/fetchAddress',
       addPhone: 'phone/addPhone',
       updatePhone: 'phone/updatePhone',
       setPhone: 'phone/setPhone',
@@ -378,11 +395,6 @@ export default {
       try {
         this.$set(entity, 'isBusy', true);
         await this.addLog({ entityId: entity.id, value });
-        if (entity.type === 'Phone') {
-          await this.fetchPhone(entity.id);
-        } else {
-          await this.fetchAddress(entity.id);
-        }
         const timestamp = Date.now();
 
         this.$set(entity, 'selectedResponse', value);

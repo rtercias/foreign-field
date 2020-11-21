@@ -30,7 +30,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      fetchAddress: 'address/fetchAddress',
       updateAddress: 'address/updateAddress',
     }),
   },
