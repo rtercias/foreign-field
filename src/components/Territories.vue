@@ -3,8 +3,8 @@
     <header class="d-flex flex-column align-items-center">
       <div class="d-flex align-items-center justify-content-between w-100 pb-3">
         <h4 class="text-left pr-3">Service Group: {{groupCode}}</h4>
-        <div v-if="isCampaignMode" class="campaign-status">
-          Campaign Status:
+        <div v-if="isCampaignMode">
+          <span class="small pr-1">Campaign Status:</span>
           <b-badge class="bg-white p-2 border-medium border-secondary">Remainder</b-badge>
           <b-badge class="alert-warning p-2 border-medium">In progress</b-badge>
           <b-badge class="alert-success p-2 border-medium">Completed</b-badge>
@@ -177,9 +177,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.campaign-status {
-  white-space: nowrap;
-}
 .availability-filter, .sort-btn {
   .selected {
     margin-left: -20px;
