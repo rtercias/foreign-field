@@ -680,6 +680,7 @@ export const address = {
         const instance = axios.create();
         const key = process.env.VUE_APP_GOOGLE_MAPS_API;
         const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${fullAddress}&key=${key}`;
+        delete instance.defaults.headers.common.Authorization;
         const response = await instance.get(url);
 
         if (response && response.data) {
