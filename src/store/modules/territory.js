@@ -168,7 +168,7 @@ export const territory = {
       }
     },
 
-    async getTerritory({ commit, getters, rootGetters, dispatch }, { id }) {
+    async getTerritory({ commit, getters, rootGetters, dispatch }, { id, getLastActivity }) {
       if (!id) {
         commit(GET_TERRITORY_FAIL, 'id is required');
         return;
@@ -232,7 +232,7 @@ export const territory = {
         commit(GET_TERRITORY_SUCCESS);
         commit(LOADING_TERRITORY_FALSE);
 
-        await dispatch('fetchLastActivities', terr);
+        if (getLastActivity) await dispatch('fetchLastActivities', terr);
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
         commit(LOADING_TERRITORY_FALSE);

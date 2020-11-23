@@ -57,7 +57,7 @@
         <TerritoryMap
           class="optimize-map p-0"
           v-show="showMap"
-          :addresses="mappedAddresses"
+          :territory="{ addresses: mappedAddresses }"
           :options="{ showSortOrder: true, simple: true }">
         </TerritoryMap>
         <div class="d-flex p-0">

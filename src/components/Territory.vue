@@ -94,7 +94,7 @@ export default {
     };
   },
   async mounted() {
-    await this.getTerritory({ id: this.id });
+    await this.getTerritory({ id: this.id, getLastActivity: true });
     channel.bind('add-log', (log) => {
       if (log && this.territory && this.territory.addresses) {
         const address = this.territory.addresses.find(a => a.id === log.address_id);
