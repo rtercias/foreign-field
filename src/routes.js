@@ -26,7 +26,7 @@ const routes = [
   },
   {
     name: 'group',
-    path: '/territories/:group',
+    path: '/territories/:groupCode',
     component: Territories,
     props: true,
     meta: {
@@ -35,7 +35,7 @@ const routes = [
   },
   {
     name: 'territory',
-    path: '/territories/:group/:id',
+    path: '/territories/:groupCode/:id',
     component: Territory,
     props: true,
     meta: {

@@ -18,11 +18,7 @@
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
-              <b-dropdown-item v-for="group in groupCodes" :key="group" :to="`/territories/${group}`" class="m-0 w-100">
-                <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
-              </b-dropdown-item>
-            </b-nav-item-dropdown>
+            <b-nav-item v-if="canWrite" to="/territories/ALL">Territories</b-nav-item>
             <b-nav-item
               v-if="canWrite && matchingRouteNames.includes('territory')"
               :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
