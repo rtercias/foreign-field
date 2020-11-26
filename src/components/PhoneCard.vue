@@ -1,6 +1,6 @@
 <template>
   <div class="phone-card p-2 d-flex align-items-center justify-content-between">
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
+    <font-awesome-layers class="left-panel-button ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
     <div class="d-flex flex-column pl-4 col-9">
@@ -207,6 +207,9 @@ export default {
 }
 .ellipsis-v, .ellipsis-v-static {
   cursor: pointer;
+}
+.left-panel-button {
+  z-index: 1;
 }
 .static-buttons {
   display: flex;

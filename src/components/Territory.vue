@@ -47,7 +47,7 @@
                 <span v-else>Check In</span>
               </b-button>
               <b-button
-                v-if="canWrite && viewMode === 'address-list'"
+                v-if="canWrite && ['address-list', 'phone-list'].includes(viewMode)"
                 variant="success"
                 :to="`/territories/${group}/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
