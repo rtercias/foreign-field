@@ -73,11 +73,11 @@ export default {
   },
   props: ['territory', 'group', 'id', 'disabled'],
   async mounted() {
-    if (this.canCheckout) {
-      this.setLeftNavRoute(`/territories/${this.group}`);
-    } else {
-      this.setLeftNavRoute('/');
-    }
+    // if (this.canCheckout) {
+    //   this.setLeftNavRoute(`/territories/${this.group}`);
+    // } else {
+    //   this.setLeftNavRoute('/');
+    // }
   },
   data() {
     return {

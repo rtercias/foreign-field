@@ -1,15 +1,26 @@
 <template>
   <div class="territories">
-    <header class="d-flex flex-column align-items-center">
-      <div class="d-flex align-items-center justify-content-between w-100 pb-3">
-        <h4 class="text-left pr-3">Service Group: {{groupCode}}</h4>
-        <div v-if="isCampaignMode">
+    <header class="d-flex flex-column align-items-center px-3 pt-0">
+      <div class="row w-100 pb-1">
+        <b-dropdown class="col-sm-12 col-md-3 group-codes px-0 py-2" :text="`Service Group: ${selectedGroup}`">
+          <b-dropdown-item v-for="group in groupCodes" :key="group" @click="() => fetch(group)" class="m-0 w-100">
+            <font-awesome-icon icon="check" v-if="group === selectedGroup" /> {{group}}
+          </b-dropdown-item>
+        </b-dropdown>
+        <div v-if="isCampaignMode" class="col-sm-12 col-md-9 text-right px-0 py-2">
           <span class="small pr-1">Campaign Status:</span>
-          <b-badge class="bg-white p-2 border-medium border-secondary">Remainder</b-badge>
-          <b-badge class="alert-warning p-2 border-medium">In progress</b-badge>
-          <b-badge class="alert-success p-2 border-medium">Completed</b-badge>
+          <b-badge class="bg-white p-2 border-medium border-secondary">Remainder ({{count('Available')}})</b-badge>
+          <b-badge class="alert-warning p-2 border-medium">In progress ({{count('Checked Out')}})</b-badge>
+          <b-badge class="alert-success p-2 border-medium">Completed ({{count('Recently Worked')}})</b-badge>
         </div>
       </div>
+      <SearchBar
+        class="w-100"
+        :search-text="'Filter by territory name or description'"
+        :results="filteredTerritories"
+        allow-exclude="true"
+        @on-change="applyFilter">
+      </SearchBar>
       <div class="d-flex w-100 justify-content-between w-100">
         <b-dropdown right variant="secondary">
           <span slot="button-content">
@@ -48,7 +59,7 @@
             'list-group-item-success': isCampaignMode && terr.status.status === 'Recently Worked',
             'list-group-item-warning': isCampaignMode && terr.status.status === 'Checked Out'
           }">
-          <TerritoryCard :terr="terr" :groupCode="groupCode" :selectTerritory="selectTerritory" :fetch="fetch">
+          <TerritoryCard :terr="terr" :groupCode="terr.group" :selectTerritory="selectTerritory" :fetch="fetch">
           </TerritoryCard>
         </b-list-group-item>
       </b-list-group>
@@ -65,27 +76,33 @@ import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
+import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 import orderBy from 'lodash/orderBy';
 
+const DEFAULT_FILTER = 'All';
+
 export default {
   name: 'Territories',
+  props: ['groupCode'],
   components: {
     TerritoryCard,
     CheckoutModal,
     Loading,
+    SearchBar,
   },
 
   beforeRouteUpdate(to, from, next) {
     next();
-    this.groupCode = to.params.group;
     this.fetch();
   },
 
   data() {
     return {
-      groupCode: '',
       selectedTerritory: {},
+      selectedGroup: '',
+      keywordFilter: '',
+      excludeKeyword: false,
       cities: [],
       availability: '',
       availabilityFilters: [
@@ -109,18 +126,30 @@ export default {
       user: 'auth/user',
       token: 'auth/token',
       territories: 'territories/territories',
+      groups: 'auth/groupCodes',
     }),
-
+    searchedTerritories() {
+      const { territories = [] } = this;
+      if (this.keywordFilter) {
+        return territories.filter(t => this.excludeKeyword !== this.compareToKeyword([t.name, t.description]));
+      }
+      return territories;
+    },
     filteredTerritories() {
       if (this.availability === 'All') {
-        const allTerrs = this.territories;
+        const allTerrs = this.searchedTerritories;
         return orderBy(allTerrs, this.sortOption.toLowerCase());
       }
-      const filtered = this.territories && this.territories.filter(t => t.status && t.status.status === this.availability);
+      const filtered = this.searchedTerritories && this.searchedTerritories.filter(
+        t => t.status && t.status.status === this.availability
+      );
       return orderBy(filtered, this.sortOption.toLowerCase());
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
+    },
+    groupCodes() {
+      return ['ALL', ...this.groups];
     },
   },
 
@@ -138,10 +167,6 @@ export default {
 
     async setAvailability(value) {
       this.availability = value;
-      await this.$store.dispatch('territories/fetchTerritories', {
-        congId: this.congId,
-        groupCode: this.groupCode,
-      });
       sessionStorage.setItem('availability', value);
     },
 
@@ -149,17 +174,35 @@ export default {
       this.sortOption = value;
     },
 
-    async fetch() {
-      this.loading = true;
+    async fetch(group = '') {
       const congId = this.congId || (this.user && this.user.congId);
-      this.groupCode = this.$route.params.group;
-      this.availability = sessionStorage.getItem('availability') || 'Available';
+      this.selectedGroup = group;
+      this.loading = true;
+      this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
       await this.$store.dispatch('territories/fetchTerritories', {
         congId,
-        groupCode: this.groupCode,
+        groupCode: this.selectedGroup === 'ALL' ? '' : this.selectedGroup,
       });
-      await this.fetchPublishers(congId);
       this.loading = false;
+    },
+
+    applyFilter(value, exclude) {
+      this.keywordFilter = value;
+      this.excludeKeyword = exclude;
+    },
+
+    compareToKeyword(values) {
+      return values.reduce(
+        (acc, value) => acc || String(value).toLowerCase().includes(this.keywordFilter.toLowerCase()),
+        false,
+      );
+    },
+
+    count(filter) {
+      const filtered = this.searchedTerritories && this.searchedTerritories.filter(
+        t => t.status && t.status.status === filter
+      );
+      return filtered && filtered.length || 0;
     },
 
     ...mapActions({
@@ -169,9 +212,11 @@ export default {
     }),
   },
 
-  mounted() {
+  async mounted() {
+    const congId = this.congId || (this.user && this.user.congId);
     this.setLeftNavRoute('/');
-    this.fetch();
+    await this.fetch(this.groupCode);
+    await this.fetchPublishers(congId);
   },
 };
 </script>
