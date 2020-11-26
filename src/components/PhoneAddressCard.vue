@@ -412,6 +412,7 @@ export default {
 
         this.$set(this.territory, 'lastActivity', entity.lastActivity);
         this.$set(entity, 'isBusy', false);
+        if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
@@ -447,6 +448,7 @@ export default {
         this.$set(entity, 'notes', `${updatedNotes}`);
         this.$set(entity, 'isBusy', false);
         this.isAddressBusy = false;
+        if (typeof close === 'function') close();
       } catch (e) {
         console.error('Unable to apply tag', e);
       }
