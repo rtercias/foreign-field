@@ -45,9 +45,8 @@
         </b-list-group-item>
         <b-list-group-item
           class="lead p-4 font-weight-bold w-100"
-          @click="() => $router.go(-1)"
-          variant="light"
-          button>
+          :to="`/territories/${territoryId}/${$route.query.origin || ''}`"
+          variant="light">
           Cancel
         </b-list-group-item>
       </b-list-group>
