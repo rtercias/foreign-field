@@ -1,22 +1,51 @@
 <template>
-  <div class="territories" :key="groupCode">
+  <Loading v-if="loading"></Loading>
+  <div v-else class="territories" :key="groupCode">
     <header class="d-flex flex-column align-items-center px-3 pt-0">
-      <div class="row w-100 pb-1">
-        <b-dropdown class="col-sm-12 col-md-3 group-codes px-0 py-2" :text="`Service Group: ${selectedGroup}`">
+      <div class="row w-100">
+        <b-dropdown
+          class="selected-group col-sm-12 col-md-3 text-left h-100 alert p-sm-0 px-0 mb-0"
+          :text="`Service Group: ${selectedGroup}`">
           <b-dropdown-item
             v-for="group in groupCodes"
             :key="group"
             :to="{ name: 'group', params: { groupCode: group } }"
-            class="m-0 w-100">
-            <font-awesome-icon icon="check" v-if="group === selectedGroup" /> {{group}}
+            class="w-100 mx-0 pl-2">
+            <font-awesome-icon class="ml-n4" icon="check" v-if="group === selectedGroup" /> {{group}}
           </b-dropdown-item>
         </b-dropdown>
-        <div v-if="isCampaignMode" class="col-sm-12 col-md-9 text-right px-0 py-2">
-          <span class="small pr-1">Campaign Status:</span>
-          <b-badge class="bg-white p-2 border-medium border-secondary">Remainder ({{count('Available')}})</b-badge>
-          <b-badge class="alert-warning p-2 border-medium">In progress ({{count('Checked Out')}})</b-badge>
-          <b-badge class="alert-success p-2 border-medium">Completed ({{count('Recently Worked')}})</b-badge>
-        </div>
+        <div class="col-sm-auto col-md-1"></div>
+        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 d-block">
+          <b-badge
+            variant="warning"
+            class="btn alert p-2 border-medium"
+            :class="{ 'border-primary': typeFilter === 'SEARCH' }"
+            @click="() => setTypeFilter('SEARCH')">
+            Survey ({{count('SEARCH')}})
+          </b-badge>
+          <b-badge
+            variant="success"
+            class="btn alert p-2 border-medium"
+            :class="{ 'border-primary': typeFilter === 'BUSINESS' }"
+            @click="() => setTypeFilter('BUSINESS')">
+            Business ({{count('Business')}})
+          </b-badge>
+        </b-button-group>
+        <div class="col-sm-auto col-md-1"></div>
+        <b-button-group v-if="isDesktop && isCampaignMode" class="col-sm-12 col-md-4 text-right p-sm-0 d-block">
+          <b-badge
+            v-for="avail in availabilityFilters.filter(a => a.value !== 'All')"
+            :key="avail.value"
+            class="btn alert p-2 border-medium"
+            :class="{
+              'border-primary': availability === avail.value,
+              'border-secondary bg-white': avail.value === 'Available' && availability !== 'Available',
+              [`alert-${avail.variant}`]: avail.variant,
+            }"
+            @click="() => setAvailability(avail.value)">
+            {{availabilityText(avail.value)}} ({{count(avail.value)}})
+          </b-badge>
+        </b-button-group>
       </div>
       <SearchBar
         class="w-100"
@@ -26,18 +55,27 @@
         @on-change="applyFilter">
       </SearchBar>
       <div class="d-flex w-100 justify-content-between w-100">
-        <b-dropdown right variant="secondary">
+        <b-dropdown left variant="secondary">
           <span slot="button-content">
             <font-awesome-icon icon="filter" />
-            {{availability}}
+            {{`${typeText ? `${typeText} - ` : ''}${availability}`}}
           </span>
           <b-dropdown-item
             class="availability-filter p-0"
+            v-for="type in typeFilters"
+            v-bind:key="type.value"
+            @click="() => setTypeFilter(type.value)">
+            <font-awesome-icon class="selected" icon="check" v-if="typeFilter === type.value" />
+            {{type.text}}
+          </b-dropdown-item>
+          <b-dropdown-divider class="w-100 pr-4"></b-dropdown-divider>
+          <b-dropdown-item
+            class="availability-filter p-0"
             v-for="avail in availabilityFilters"
-            v-bind:key="avail"
-            @click="() => setAvailability(avail)">
+            v-bind:key="avail.value"
+            @click="() => setAvailability(avail.value)">
             <font-awesome-icon class="selected" icon="check" v-if="availability === avail" />
-            {{avail}}
+            {{isCampaignMode ? avail.campaignText : avail.value}}
           </b-dropdown-item>
         </b-dropdown>
         <b-dropdown class="sort-btn" right variant="secondary">
@@ -51,8 +89,7 @@
         </b-dropdown>
       </div>
     </header>
-    <Loading v-if="loading"></Loading>
-    <div v-else>
+    <div>
       <b-list-group class="columns flex-row flex-wrap">
         <b-list-group-item
           v-for="terr in filteredTerritories"
@@ -63,7 +100,12 @@
             'list-group-item-success': isCampaignMode && get(terr, 'status.status') === 'Recently Worked',
             'list-group-item-warning': isCampaignMode && get(terr, 'status.status') === 'Checked Out'
           }">
-          <TerritoryCard :terr="terr" :groupCode="terr.group" :selectTerritory="selectTerritory" :fetch="fetch">
+          <TerritoryCard
+            :terr="terr"
+            :groupCode="terr.group"
+            :selectTerritory="selectTerritory"
+            :fetch="fetch"
+            :type-filters="typeFilters">
           </TerritoryCard>
         </b-list-group-item>
       </b-list-group>
@@ -104,11 +146,16 @@ export default {
       excludeKeyword: false,
       cities: [],
       availability: '',
+      typeFilter: '',
       availabilityFilters: [
-        'All',
-        'Available',
-        'Checked Out',
-        'Recently Worked',
+        { value: 'All', campaignText: 'All' },
+        { value: 'Available', campaignText: 'Remainder' },
+        { value: 'Checked Out', campaignText: 'In Progress', variant: 'warning' },
+        { value: 'Recently Worked', campaignText: 'Done', variant: 'success' },
+      ],
+      typeFilters: [
+        { value: 'SEARCH', text: 'Survey', variant: 'warning' },
+        { value: 'BUSINESS', text: 'Business', variant: 'success' },
       ],
       sortOption: 'Description',
       sortOptions: [
@@ -126,11 +173,18 @@ export default {
       token: 'auth/token',
       territories: 'territories/territories',
       groups: 'auth/groupCodes',
+      isDesktop: 'auth/isDesktop',
     }),
     searchedTerritories() {
       const { territories = [] } = this;
       if (this.keywordFilter) {
-        return territories.filter(t => this.excludeKeyword !== this.compareToKeyword([t.name, t.description]));
+        return territories.filter(t => this.excludeKeyword !== this.compareToKeyword(
+          this.keywordFilter,
+          [t.name, t.description],
+        ));
+      }
+      if (this.typeFilter) {
+        return territories.filter(t => this.compareToKeyword(this.typeFilter, [t.type]));
       }
       return territories;
     },
@@ -150,6 +204,9 @@ export default {
     groupCodes() {
       return ['ALL', ...this.groups];
     },
+    typeText() {
+      return (this.typeFilters.find(t => t.value === this.typeFilter) || { text: '' }).text;
+    },
   },
 
   watch: {
@@ -166,8 +223,12 @@ export default {
     },
 
     async setAvailability(value) {
-      this.availability = value;
-      sessionStorage.setItem('availability', value);
+      this.availability = this.availability === value ? 'All' : value;
+      sessionStorage.setItem('availability', this.availability);
+    },
+
+    async setTypeFilter(value) {
+      this.typeFilter = this.typeFilter === value ? '' : value;
     },
 
     sort(value) {
@@ -175,11 +236,11 @@ export default {
     },
 
     async fetch() {
+      this.loading = true;
       const congId = this.congId || (this.user && this.user.congId);
       this.selectedGroup = this.groupCode;
-      this.loading = true;
       this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
-      await this.$store.dispatch('territories/fetchTerritories', {
+      await this.fetchTerritories({
         congId,
         groupCode: this.selectedGroup === 'ALL' ? '' : this.selectedGroup,
       });
@@ -191,24 +252,37 @@ export default {
       this.excludeKeyword = exclude;
     },
 
-    compareToKeyword(values) {
+    compareToKeyword(filter, values) {
       return values.reduce(
-        (acc, value) => acc || String(value).toLowerCase().includes(this.keywordFilter.toLowerCase()),
+        (acc, value) => acc || String(value).toLowerCase().includes(filter.toLowerCase()),
         false,
       );
     },
 
     count(filter) {
-      const filtered = this.searchedTerritories && this.searchedTerritories.filter(
-        t => get(t, 'status.status') === filter
-      );
-      return filtered && filtered.length || 0;
+      if (!this.territories && !this.searchedTerritories) return 0;
+      if (!filter) return this.searchedTerritories.length;
+      if (this.typeFilters.map(t => t.value.toLowerCase()).includes(filter.toLowerCase())) {
+        return this.territories.filter(t => t.type.toLowerCase() === filter.toLowerCase()).length;
+      }
+      if (this.availabilityFilters.map(t => t.value).includes(filter)) {
+        return this.searchedTerritories.filter(t => get(t, 'status.status') === filter).length;
+      }
+      return 0;
+    },
+
+    availabilityText(availability) {
+      if (this.isCampaignMode) {
+        return (this.availabilityFilters.find(t => t.value === availability) || { campaignText: '' }).campaignText;
+      }
+      return availability;
     },
 
     ...mapActions({
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
       setLeftNavRoute: 'auth/setLeftNavRoute',
+      fetchTerritories: 'territories/fetchTerritories',
     }),
   },
 
@@ -221,60 +295,69 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.availability-filter, .sort-btn {
-  .selected {
-    margin-left: -20px;
+<style lang="scss">
+.territories {
+  .selected-group {
+    .dropdown-toggle {
+      width: 100%;
+      font-size: small;
+    }
   }
-}
-.availability-filter, .sort-btn li {
-  width: calc(100% - 1rem);
-}
-header {
-  padding: 1.25rem 2rem;
-}
-.list-group {
-  display: flex;
-}
-h4 {
-  margin: 0;
-  font-size: 18px;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-.list-group-item {
-  text-align: left;
-  padding: 0.75rem 2rem;
-  border-width: 2px;
-}
-.list-group-item:hover {
-  cursor: pointer;
-}
-.list-group-item a {
-  padding-top: 0.4rem;
-}
-.list-group-item h5 {
-  font-weight: normal;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.recently-worked-button {
-  background: transparent;
-}
-.list-group-item .checkout-publisher-dropdown>button.btn.btn-link {
-  padding: 0 !important;
-}
+  .availability-filter, .sort-btn {
+    .selected {
+      margin-left: -20px;
+    }
+  }
+  .availability-filter, .sort-btn li {
+    width: calc(100% - 1rem);
+  }
+  header {
+    padding: 1.25rem 2rem;
+  }
+  .list-group {
+    display: flex;
+  }
+  h4 {
+    margin: 0;
+    font-size: 18px;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+  .list-group-item {
+    text-align: left;
+    padding: 0.75rem 2rem;
+    border-width: 2px;
+    cursor: default !important;
+  }
+  .list-group-item:hover {
+    cursor: pointer;
+  }
+  .list-group-item a {
+    padding-top: 0.4rem;
+  }
+  .list-group-item h5 {
+    font-weight: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .recently-worked-button {
+    background: transparent;
+  }
+  .list-group-item .checkout-publisher-dropdown>button.btn.btn-link {
+    padding: 0 !important;
+  }
 
-@media print {
-  .columns {
-    columns: 2;
+  @media print {
+    .columns {
+      columns: 2;
+    }
   }
 }
 </style>
