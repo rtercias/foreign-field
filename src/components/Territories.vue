@@ -236,7 +236,6 @@ export default {
     },
 
     async fetch() {
-      this.loading = true;
       const congId = this.congId || (this.user && this.user.congId);
       this.selectedGroup = this.groupCode;
       this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
