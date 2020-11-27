@@ -1,6 +1,9 @@
 <template>
   <div class="address-card-container p-2 d-flex align-items-center" :class="{ 'min-height': mode === 'phoneAddress' }">
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
+    <font-awesome-layers
+      v-if="mode === 'phoneAddress'"
+      class="ellipsis-v-static text-muted fa-1x"
+      @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
     <div class="w-100">
@@ -9,7 +12,7 @@
         <div v-if="mode==='phoneAddress'" class="col-9 pb-2">
           <b-link
             class="w-100"
-            :to="`/territories/${territory.group_code}/${territory.id}/addresses/${address.id}/detail?origin=phone`">
+            :to="`/territories/${territory.id}/addresses/${address.id}/detail?origin=phone`">
             <div class="address text-primary font-weight-bold" :class="{ 'phone-address': mode === 'phoneAddress' }">
               {{address.addr1}} {{address.addr2}}
             </div>
@@ -21,7 +24,7 @@
         <div v-else class="address col-9 flex-column pt-2 pb-4">
           <div>
             <h5 class="mb-0">
-              <b-link :to="`/territories/${group}/${territoryId}/addresses/${address.id}/detail`">
+              <b-link :to="`/territories/${territoryId}/addresses/${address.id}/detail`">
                 {{address.addr1}}
               </b-link>&nbsp;
             </h5>
@@ -80,7 +83,7 @@ import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'group', 'incomingResponse', 'revealed', 'index', 'mode', 'disabled'],
+  props: ['address', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode', 'disabled'],
   components: {
     AddressLinks,
     ActivityButton,

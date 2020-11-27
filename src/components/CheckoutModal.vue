@@ -18,7 +18,7 @@ import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'CheckoutModal',
-  props: ['territory', 'fetch'],
+  props: ['territory'],
   data() {
     return {
       selectedPublisher: { name: 'me' },
@@ -50,7 +50,7 @@ export default {
         username: this.user.username,
       });
 
-      this.$router.push(`/territories/${this.group}/${this.territory.id}`);
+      this.$router.push(`/territories/${this.territory.id}`);
     },
   },
 

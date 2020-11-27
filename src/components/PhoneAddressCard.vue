@@ -19,7 +19,6 @@
               :class="{ 'border-warning active': isActiveAddress(item.id) }"
               :address="item"
               :territoryId="territory.id"
-              :group="territory.group_code"
               :incomingResponse="item.lastActivity"
               :revealed="revealed"
               :disabled="disabled"
@@ -335,7 +334,7 @@ export default {
             domProps: {
               innerHTML:
               `This number already exists in territory
-              <b-link :to="/territories/${terr.group_code}/${terr.id}">
+              <b-link :to="/territories/${terr.id}">
                 ${terr.name}
               </b-link>`,
             },

@@ -2,7 +2,7 @@
   <div class="column">
     <div class="row justify-content-between px-2">
       <div>
-        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="column">
+        <b-link :to="`/territories/${terr.id}`" class="column">
           <h5 class="mb-0">
             {{`${primaryDescription}${territoryDescriptions.length > 1
               ? ` +${territoryDescriptions.length-1}`
@@ -90,7 +90,7 @@ export default {
         });
         this.saving = false;
 
-        this.fetch();
+        await this.fetch();
       }
     },
     async fetchLastWorked(territoryId) {

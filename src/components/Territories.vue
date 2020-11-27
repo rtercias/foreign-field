@@ -1,9 +1,13 @@
 <template>
-  <div class="territories">
+  <div class="territories" :key="groupCode">
     <header class="d-flex flex-column align-items-center px-3 pt-0">
       <div class="row w-100 pb-1">
         <b-dropdown class="col-sm-12 col-md-3 group-codes px-0 py-2" :text="`Service Group: ${selectedGroup}`">
-          <b-dropdown-item v-for="group in groupCodes" :key="group" @click="() => fetch(group)" class="m-0 w-100">
+          <b-dropdown-item
+            v-for="group in groupCodes"
+            :key="group"
+            :to="{ name: 'group', params: { groupCode: group } }"
+            class="m-0 w-100">
             <font-awesome-icon icon="check" v-if="group === selectedGroup" /> {{group}}
           </b-dropdown-item>
         </b-dropdown>
@@ -56,14 +60,14 @@
           data-toggle="collapse"
           class="territory-card col-md-6 col-lg-3 px-4"
           :class="{
-            'list-group-item-success': isCampaignMode && terr.status.status === 'Recently Worked',
-            'list-group-item-warning': isCampaignMode && terr.status.status === 'Checked Out'
+            'list-group-item-success': isCampaignMode && get(terr, 'status.status') === 'Recently Worked',
+            'list-group-item-warning': isCampaignMode && get(terr, 'status.status') === 'Checked Out'
           }">
           <TerritoryCard :terr="terr" :groupCode="terr.group" :selectTerritory="selectTerritory" :fetch="fetch">
           </TerritoryCard>
         </b-list-group-item>
       </b-list-group>
-      <CheckoutModal :territory="selectedTerritory" :fetch="fetch"></CheckoutModal>
+      <CheckoutModal :territory="selectedTerritory"></CheckoutModal>
     </div>
     <span class="p-2" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
       There are no {{availability}} territories
@@ -90,11 +94,6 @@ export default {
     CheckoutModal,
     Loading,
     SearchBar,
-  },
-
-  beforeRouteUpdate(to, from, next) {
-    next();
-    this.fetch();
   },
 
   data() {
@@ -141,7 +140,7 @@ export default {
         return orderBy(allTerrs, this.sortOption.toLowerCase());
       }
       const filtered = this.searchedTerritories && this.searchedTerritories.filter(
-        t => t.status && t.status.status === this.availability
+        t => get(t, 'status.status') === this.availability
       );
       return orderBy(filtered, this.sortOption.toLowerCase());
     },
@@ -161,6 +160,7 @@ export default {
   },
 
   methods: {
+    get,
     selectTerritory(territory) {
       this.selectedTerritory = territory;
     },
@@ -174,9 +174,9 @@ export default {
       this.sortOption = value;
     },
 
-    async fetch(group = '') {
+    async fetch() {
       const congId = this.congId || (this.user && this.user.congId);
-      this.selectedGroup = group;
+      this.selectedGroup = this.groupCode;
       this.loading = true;
       this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
       await this.$store.dispatch('territories/fetchTerritories', {
@@ -200,7 +200,7 @@ export default {
 
     count(filter) {
       const filtered = this.searchedTerritories && this.searchedTerritories.filter(
-        t => t.status && t.status.status === filter
+        t => get(t, 'status.status') === filter
       );
       return filtered && filtered.length || 0;
     },
@@ -215,7 +215,7 @@ export default {
   async mounted() {
     const congId = this.congId || (this.user && this.user.congId);
     this.setLeftNavRoute('/');
-    await this.fetch(this.groupCode);
+    await this.fetch();
     await this.fetchPublishers(congId);
   },
 };

@@ -7,7 +7,7 @@
           <div>{{address.addr1}} {{address.addr2}}</div>
           <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
         </div>
-        <b-link class="pr-4" :to="`/territories/${group}/${territoryId}/addresses/${address.id}/edit${queryParamOrigin}`">
+        <b-link class="pr-4" :to="`/territories/${territoryId}/addresses/${address.id}/edit${queryParamOrigin}`">
           <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
         </b-link>
       </div>
@@ -34,19 +34,20 @@
           411.com
         </b-list-group-item>
         <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="dark"
-          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/history`">
+          :to="`/territories/${territoryId}/addresses/${address.id}/history`">
           <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
           Activity History
         </b-list-group-item>
         <b-list-group-item v-if="canWrite" class="lead p-4 font-weight-bold w-auto" variant="danger"
-          :to="`/territories/${group}/${territoryId}/addresses/${address.id}/logs?fullscreen=true`">
+          :to="`/territories/${territoryId}/addresses/${address.id}/logs?fullscreen=true`">
           <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
           Address Change Log
         </b-list-group-item>
         <b-list-group-item
-          class="lead p-4 font-weight-bold w-auto"
-          :to="`/territories/${group}/${territoryId}/${$route.query.origin || ''}`"
-          variant="light">
+          class="lead p-4 font-weight-bold w-100"
+          @click="() => $router.go(-1)"
+          variant="light"
+          button>
           Cancel
         </b-list-group-item>
       </b-list-group>
@@ -61,7 +62,7 @@ import Loading from './Loading';
 
 export default {
   name: 'AddressLinks',
-  props: ['addressId', 'group', 'territoryId'],
+  props: ['addressId', 'territoryId'],
   components: {
     Loading,
   },
@@ -72,7 +73,6 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    this.setLeftNavRoute(this.returnRoute);
     if (this.token) {
       await this.fetchAddress({ addressId: this.addressId });
     }
@@ -112,7 +112,7 @@ export default {
         return '/';
       }
 
-      return `/territories/${this.group}/${this.territoryId}/${origin}`;
+      return `/territories/${this.territoryId}/${origin}`;
     },
     queryParamOrigin() {
       const { origin = '' } = this.$route.query;
@@ -123,7 +123,6 @@ export default {
   methods: {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
   },
 };

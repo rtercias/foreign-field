@@ -16,6 +16,7 @@
 </template>
 <script>
 import { mapActions } from 'vuex';
+import get from 'lodash/get';
 import format from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
 
@@ -29,7 +30,7 @@ export default {
       return format(new Date(date), 'MM/dd/yyyy');
     },
     url(terr) {
-      return `/territories/${terr.group_code}/${terr.id}`;
+      return `/territories/${terr.id}`;
     },
   },
   computed: {
@@ -49,7 +50,7 @@ export default {
       return formatDistance(new Date(this.territory.lastVisited), new Date(), { addSuffix: true });
     },
     firstCity() {
-      const cityArray = this.territory.city.split(',');
+      const cityArray = (get(this.territory, 'city') || '').split(',');
       return cityArray.length && cityArray[0];
     },
   },

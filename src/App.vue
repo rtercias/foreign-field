@@ -5,7 +5,7 @@
       <b-alert variant="success" :show="isCampaignMode">
         <font-awesome-icon icon="bolt" /> CAMPAIGN MODE
       </b-alert>
-      <router-view class="view"></router-view>
+      <router-view class="view" :key="key"></router-view>
     </div>
   </div>
 </template>
@@ -28,6 +28,9 @@ export default {
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
+    },
+    key() {
+      return `${this.$route.name}-${JSON.stringify(this.$route.params)}`;
     },
   },
 };

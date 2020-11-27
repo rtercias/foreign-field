@@ -1,6 +1,6 @@
 <template>
   <div class="territory">
-    <Loading v-if="isLoading" />
+    <Loading v-if="territoryIsLoading" />
     <div v-else>
       <header class="w-100 px-2">
         <div class="w-100">
@@ -22,22 +22,22 @@
             <b-button-group size="sm">
               <b-button
                 variant="outline-info"
-                :to="{ name: 'address-list', params: { group, id } }"
+                :to="{ name: 'address-list', params: { id } }"
                 :pressed="viewMode === 'address-list'">
                 Address
               </b-button>
               <b-button
                 variant="outline-info"
-                :to="{ name: 'phone-list', params: { group, id } }"
+                :to="{ name: 'phone-list', params: { id } }"
                 :pressed="viewMode === 'phone-list'">
                 Phone
               </b-button>
-              <b-button variant="outline-info" :to="`/territories/${group}/${id}/map`" :pressed="viewMode==='map-view'">
+              <b-button variant="outline-info" :to="`/territories/${id}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='map-view'" size="sm">
-              <b-button variant="primary" :to="`/territories/${group}/${id}/optimize`">
+              <b-button variant="primary" :to="`/territories/${id}/optimize`">
                 Optimize
               </b-button>
             </b-button-group>
@@ -49,7 +49,7 @@
               <b-button
                 v-if="canWrite && viewMode === 'address-list'"
                 variant="success"
-                :to="`/territories/${group}/${id}/addresses/add`">
+                :to="`/territories/${id}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
             </b-button-group>
@@ -75,13 +75,13 @@ export default {
     TerritoryMap,
     Loading,
   },
-  props: ['group', 'id'],
+  props: ['id'],
   beforeRouteEnter(to, from, next) {
     const { options = defaultOptions } = store.state.auth;
     const name = get(options, 'territory.defaultView');
-    const { group, id } = to.params;
+    const { id } = to.params;
     if (name !== to.name) {
-      next({ name, params: { group, id } });
+      next({ name, params: { id } });
     }
     next();
   },
@@ -135,7 +135,7 @@ export default {
       ownedBy: 'territory/isOwnedByUser',
       options: 'auth/options',
       token: 'auth/token',
-      isLoading: 'territory/isLoading',
+      territoryIsLoading: 'territory/isLoading',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -153,10 +153,12 @@ export default {
     },
     secondaryCities() {
       if (this.cityNames.length > 1 && this.cityNames.length <= 3) {
-        return `also: ${this.cityNames.slice(1).join(',')}`;
+        const scubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() === 'null');
+        return scubbedCityNames.length > 1 ? `also: ${this.cityNames.slice(1).join(',')}` : '';
       }
       if (this.cityNames.length > 3) {
-        return `also: ${this.cityNames.length} cities`;
+        const scubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() === 'null');
+        return `also: ${scubbedCityNames.length} cities`;
       }
 
       return '';

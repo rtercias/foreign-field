@@ -51,7 +51,7 @@ export default {
     LControlZoom,
     MapLinks,
   },
-  props: ['group', 'id', 'territory', 'options'],
+  props: ['id', 'territory', 'options'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -93,7 +93,7 @@ export default {
     },
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
+    this.setLeftNavRoute(`/territories/${this.id}`);
     if (this.token && !this.territory) {
       await this.getTerritory({ id: this.id });
     }

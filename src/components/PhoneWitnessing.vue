@@ -1,5 +1,5 @@
 <template>
-  <Loading v-if="isLoading || territoryIsLoading" class="w-100" />
+  <Loading v-if="territoryIsLoading" class="w-100" />
   <div v-else class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search"></SearchBar>
     <PhoneAddressCard
@@ -32,7 +32,7 @@ export default {
     SearchBar,
     Loading,
   },
-  props: ['territory', 'group', 'id', 'disabled'],
+  props: ['territory', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', async (log) => {
       if (this.territory && this.territory.addresses) {
@@ -60,15 +60,6 @@ export default {
         if (phone) this.$set(phone, 'notes', args.notes);
       }
     });
-
-    if (this.canCheckout) {
-      this.setLeftNavRoute(`/territories/${this.territory.group_code}`);
-    } else {
-      this.setLeftNavRoute('/');
-    }
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 500);
   },
   data() {
     return {
@@ -96,7 +87,6 @@ export default {
   methods: {
     ...mapActions({
       resetNHRecords: 'territory/resetNHRecords',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       fetchPhone: 'address/fetchAddress',
     }),
     seenTerritories() {
@@ -135,30 +125,32 @@ export default {
       localStorage.setItem('seenTerritories', parsed);
     },
     search(_keyword) {
+      this.foundId = 0;
       if (!_keyword) {
         this.foundId = 0;
         return;
       }
       const keyword = _keyword.toLowerCase();
-      const foundAddress = this.territory.addresses.find(a => a.addr1.toLowerCase().includes(keyword)
-        || a.addr2.toLowerCase().includes(keyword)
-        || a.city.toLowerCase().includes(keyword)
-        || a.notes.toLowerCase().includes(keyword));
+      const foundAddress = this.territory.addresses.find(a => this.compareToKeyword(
+        keyword,
+        [a.addr1, a.addr2, a.city, a.notes],
+      ));
       const foundPhone = !foundAddress
-        ? this.territory.addresses.find(a => a.phones.find(p => p.phone.toLowerCase().includes(keyword)
-          || p.notes.toLowerCase().includes(keyword)))
+        ? this.territory.addresses.find(a => a.phones.find(p => this.compareToKeyword(keyword, [p.phone, p.notes])))
         : null;
 
       this.foundId = foundAddress && foundAddress.id || foundPhone && foundPhone.id || 0;
-    },
-  },
-  watch: {
-    foundId(value) {
-      const ref = this.$refs[`phone-address-${value}`];
+      const ref = this.$refs[`phone-address-${this.foundId}`];
       const card = ref && ref.length && ref[0];
       if (card && card.$el) card.$el.scrollIntoView();
     },
-    immediate: true,
+
+    compareToKeyword(keyword, values) {
+      return values.reduce(
+        (acc, value) => acc || String(value).toLowerCase().includes(keyword.toLowerCase()),
+        false,
+      );
+    },
   },
 };
 </script>

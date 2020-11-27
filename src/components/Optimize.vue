@@ -136,7 +136,7 @@ export default {
     };
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.group}/${this.id}`);
+    this.setLeftNavRoute(`/territories/${this.id}`);
     await this.getTerritory({ id: this.id });
     this.reset();
   },
