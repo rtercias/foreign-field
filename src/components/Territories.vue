@@ -3,17 +3,7 @@
   <div v-else class="territories" :key="groupCode">
     <header class="d-flex flex-column align-items-center px-3 pt-0">
       <div class="row w-100">
-        <b-dropdown
-          class="selected-group col-sm-12 col-md-3 text-left h-100 alert p-sm-0 px-0 mb-0"
-          :text="`Service Group: ${selectedGroup}`">
-          <b-dropdown-item
-            v-for="group in groupCodes"
-            :key="group"
-            :to="{ name: 'group', params: { groupCode: group } }"
-            class="w-100 mx-0 pl-2">
-            <font-awesome-icon class="ml-n4" icon="check" v-if="group === selectedGroup" /> {{group}}
-          </b-dropdown-item>
-        </b-dropdown>
+        <groups-select :selected-group="selectedGroup"></groups-select>
         <div class="col-sm-auto col-md-1"></div>
         <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 d-block">
           <b-badge
@@ -122,6 +112,7 @@ import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryCard from './TerritoryCard.vue';
 import CheckoutModal from './CheckoutModal.vue';
+import GroupsSelect from './GroupsSelect';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 import orderBy from 'lodash/orderBy';
@@ -136,6 +127,7 @@ export default {
     CheckoutModal,
     Loading,
     SearchBar,
+    GroupsSelect,
   },
 
   data() {
@@ -200,9 +192,6 @@ export default {
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
-    },
-    groupCodes() {
-      return ['ALL', ...this.groups];
     },
     typeText() {
       return (this.typeFilters.find(t => t.value === this.typeFilter) || { text: '' }).text;
@@ -280,14 +269,12 @@ export default {
     ...mapActions({
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       fetchTerritories: 'territories/fetchTerritories',
     }),
   },
 
   async mounted() {
     const congId = this.congId || (this.user && this.user.congId);
-    this.setLeftNavRoute('/');
     await this.fetch();
     await this.fetchPublishers(congId);
   },

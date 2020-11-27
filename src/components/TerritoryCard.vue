@@ -36,7 +36,10 @@
     <div class="text-right">
       <hr class="mb-2 mt-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
-      <div class="d-flex justify-content-between">
+      <div class="d-flex" :class="{
+          'justify-content-end': terr.type === 'Regular',
+          'justify-content-between': terr.type !== 'Regular',
+        }">
         <b-badge class="territory-type" alert :variant="typeFilter(terr.type).variant" v-if="terr.type !== 'Regular'">
           {{typeFilter(terr.type).text}}
         </b-badge>

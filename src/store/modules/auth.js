@@ -30,7 +30,7 @@ function initialState() {
     congregation: {},
     groupCodes: [],
     loading: false,
-    mastheadLeftNavRoute: '/',
+    mastheadLeftNavRoute: '',
     token: '',
     options: null,
   };
