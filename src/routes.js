@@ -25,8 +25,17 @@ const routes = [
     name: 'signout', path: '/signout', component: Signout, props: true,
   },
   {
+    name: 'territories',
+    path: '/territories',
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
+    },
+    redirect: '/groups/ALL',
+  },
+  {
     name: 'group',
-    path: '/territories/:groupCode',
+    path: '/groups/:groupCode',
     component: Territories,
     props: true,
     meta: {
@@ -35,7 +44,7 @@ const routes = [
   },
   {
     name: 'territory',
-    path: '/territories/:groupCode/:id',
+    path: '/territories/:id',
     component: Territory,
     props: true,
     meta: {
@@ -65,16 +74,30 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       },
-    }],
-  },
-  {
-    name: 'optimize',
-    path: '/territories/:group/:id/optimize',
-    component: Optimize,
-    props: true,
-    meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO'],
     },
+    {
+      name: 'optimize',
+      path: 'optimize',
+      component: Optimize,
+      props: true,
+      meta: {
+        permissions: ['Admin', 'TS', 'SO', 'GO'],
+      },
+    },
+    {
+      name: 'territory-group',
+      path: '/territories/:groupCode/:id',
+      props: true,
+      redirect: (to) => {
+        if (to.params.groupCode && Number.isSafeInteger(Number(to.params.id))) {
+          return '/territories/:id';
+        }
+        return '/groups/:groupCode';
+      },
+      meta: {
+        permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
+      },
+    }],
   },
   {
     name: 'dnc',
@@ -105,7 +128,7 @@ const routes = [
   },
   {
     name: 'address-change-logs',
-    path: '/territories/:group/:territoryId/:type/:recordId/logs',
+    path: '/territories/:territoryId/:type/:recordId/logs',
     component: ChangeLog,
     props: true,
     meta: {
@@ -114,7 +137,7 @@ const routes = [
   },
   {
     name: 'address-links',
-    path: '/territories/:group/:territoryId/addresses/:addressId/detail',
+    path: '/territories/:territoryId/addresses/:addressId/detail',
     component: AddressLinks,
     props: true,
     meta: {
@@ -123,7 +146,7 @@ const routes = [
   },
   {
     name: 'activity-history',
-    path: '/territories/:group/:territoryId/addresses/:addressId/history',
+    path: '/territories/:territoryId/addresses/:addressId/history',
     component: ActivityHistory,
     props: true,
     meta: {
@@ -132,7 +155,7 @@ const routes = [
   },
   {
     name: 'activity-history-checkout',
-    path: '/territories/:group/:territoryId/addresses/:addressId/history/:checkoutId',
+    path: '/territories/:territoryId/addresses/:addressId/history/:checkoutId',
     component: ActivityHistory,
     props: true,
     meta: {
@@ -150,7 +173,7 @@ const routes = [
   },
   {
     name: 'address-new-terr',
-    path: '/territories/:group/:territoryId/addresses/:mode',
+    path: '/territories/:territoryId/addresses/:mode',
     component: AddressForm,
     props: true,
     meta: {
@@ -159,7 +182,7 @@ const routes = [
   },
   {
     name: 'address-edit',
-    path: '/territories/:group/:territoryId/addresses/:addressId/:mode',
+    path: '/territories/:territoryId/addresses/:addressId/:mode',
     component: AddressForm,
     props: true,
     meta: {
@@ -168,7 +191,7 @@ const routes = [
   },
   {
     name: 'phone-new',
-    path: '/territories/:group/:territoryId/addresses/:addressId/phones/:mode',
+    path: '/territories/:territoryId/addresses/:addressId/phones/:mode',
     component: AddressForm,
     props: true,
     meta: {
@@ -177,7 +200,7 @@ const routes = [
   },
   {
     name: 'phone-edit',
-    path: '/territories/:group/:territoryId/addresses/:addressId/phones/:phoneId/:mode',
+    path: '/territories/:territoryId/addresses/:addressId/phones/:phoneId/:mode',
     component: AddressForm,
     props: true,
     meta: {

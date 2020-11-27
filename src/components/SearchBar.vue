@@ -8,11 +8,11 @@
         @click="search">
       </font-awesome-icon>
     </div>
-    <div class="d-flex justify-content-between">
-      <b-check v-model="exclude" v-show="allowExclude && !!keywordFilter" class="w-25 text-left">
+    <div class="d-flex justify-content-end">
+      <b-check v-model="exclude" v-show="allowExclude && !!keywordFilter" class="w-50 text-left">
         <span class="small">Exclude Filter</span>
       </b-check>
-      <span v-if="results" class="d-block small pt-1 text-right w-100">Count: {{results.length}}</span>
+      <span v-if="results" class="d-block small pt-1 text-right w-50">Count: {{results.length}}</span>
     </div>
   </div>
 </template>

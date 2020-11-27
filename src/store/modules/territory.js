@@ -95,11 +95,11 @@ export const territory = {
       }
     },
     LOADING_TERRITORY_TRUE(state) {
-      state.isLoading = true;
+      Vue.set(state, 'isLoading', true);
       state.territory = { ...initialState.territory };
     },
     LOADING_TERRITORY_FALSE(state) {
-      state.isLoading = false;
+      Vue.set(state, 'isLoading', false);
     },
   },
 
@@ -230,7 +230,6 @@ export const territory = {
         terr.addresses = orderBy(terr.addresses, 'sort');
         commit(SET_TERRITORY, terr);
         commit(GET_TERRITORY_SUCCESS);
-        commit(LOADING_TERRITORY_FALSE);
 
         if (getLastActivity) await dispatch('fetchLastActivities', terr);
       } catch (exception) {
@@ -240,10 +239,11 @@ export const territory = {
       }
     },
 
-    async fetchLastActivities({ dispatch }, terr) {
+    async fetchLastActivities({ commit, dispatch, getters }, terr) {
       for (const address of terr.addresses) {
         for (const phone of address.phones) {
           await dispatch('phone/fetchLastActivity', { phoneId: phone.id }, { root: true });
+          if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
         }
         await dispatch('address/fetchLastActivity', { addressId: address.id }, { root: true });
       }

@@ -71,7 +71,7 @@
         <b-list-group>
           <b-list-group-item v-for="(search, index) in searchedAddresses" :key="index">
             {{search.addr1}} {{search.addr2}} {{search.city}} {{search.state_province}} {{search.postal_code}}
-            <b-link :to="`/territories/${search.territory.group_code}/${search.territory.id}`">
+            <b-link :to="`/territories/${search.territory.id}`">
               Edit
             </b-link>
           </b-list-group-item>
@@ -108,7 +108,7 @@
           <span v-if="mode === 'add'">the addition of this new address.</span>
           <span v-if="mode === 'edit'">this address update.</span>
         </p>
-        <b-button v-if="canManage" variant="info" :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
+        <b-button v-if="canManage" variant="info" :to="`/territories/${territory.id}/optimize`">
           Optimize
         </b-button>
       </div>
@@ -155,7 +155,7 @@ const requiredAddress = ['addr1', 'city', 'state_province'];
 
 export default {
   name: 'AddressForm',
-  props: ['group', 'territoryId', 'addressId', 'mode', 'phoneId'],
+  props: ['territoryId', 'addressId', 'mode', 'phoneId'],
   components: {
     TheMask,
     AddressMap,
@@ -344,8 +344,8 @@ export default {
       const { origin = '' } = this.$route.query;
       const queryParam = origin ? `?origin=${origin}` : '';
       const addMode = this.mode === Modes.add
-        ? `/territories/${this.group}/${this.territoryId}`
-        : `/territories/${this.group}/${this.territoryId}/addresses/${this.addressId}/detail${queryParam}`;
+        ? `/territories/${this.territoryId}`
+        : `/territories/${this.territoryId}/addresses/${this.addressId}/detail${queryParam}`;
       if (this.$route.name === 'address-new') return '/';
       return addMode;
     },

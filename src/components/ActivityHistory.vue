@@ -57,7 +57,7 @@ import ActivityButton from './ActivityButton';
 
 export default {
   name: 'ActivityHistory',
-  props: ['group', 'territoryId', 'addressId', 'checkoutId'],
+  props: ['territoryId', 'addressId', 'checkoutId'],
   components: {
     Loading,
     BIconPlus,
@@ -74,7 +74,7 @@ export default {
     };
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.group}/${this.territoryId}`);
+    this.setLeftNavRoute(`/territories/${this.territoryId}`);
     await this.fetchPublishers(this.congId);
     await this.fetch();
   },
