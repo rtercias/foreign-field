@@ -1,8 +1,9 @@
 <template>
   <div class="change-log" :class="{ 'text-left': isFullScreen }">
     <div
-      class="d-flex justify-content-between align-items-center pb-0 text-center"
-      :class="{ 'py-3 px-2': isFullScreen, 'flex-column': isSingleRecord }">
+      class="d-flex justify-content-between pb-0 text-center"
+      :class="{ 'py-3 px-2': isFullScreen }">
+      <div :class="{ small: !isFullScreen, lead: isFullScreen }">{{subtitle}}</div>
       <div
         v-if="isSingleRecord"
         :class="{
@@ -13,11 +14,6 @@
         <div>{{title1}}</div>
         <div>{{title2}}</div>
       </div>
-      <div
-        :class="{
-          small: !isFullScreen,
-          lead: isFullScreen,
-        }">{{subtitle}}</div>
       <b-dropdown v-if="showDateFilter" class="date-filter" right variant="secondary">
         <span slot="button-content">Range: {{selectedRange.text}}</span>
         <b-dropdown-item v-for='(range, index) in dateRanges' :key="index" @click="() => selectRange(range)">
@@ -62,7 +58,7 @@ import { unmask } from '../utils/phone';
 
 export default {
   name: 'ChangeLog',
-  props: ['group', 'territoryId', 'type', 'recordId', 'publisherId'],
+  props: ['territoryId', 'type', 'recordId', 'publisherId'],
   components: {
     ChangeLogAddressCard,
     Loading,
@@ -90,6 +86,7 @@ export default {
     ...mapActions({
       getChangeLog: 'addresses/getChangeLog',
       setLeftNavRoute: 'auth/setLeftNavRoute',
+      fetchAddress: 'address/fetchAddress',
     }),
     async refresh() {
       this.$set(this, 'loading', true);
@@ -99,6 +96,12 @@ export default {
         recordId: this.recordId,
         publisherId: this.publisherId,
       });
+
+      if (this.isFullScreen && this.logs && this.logs.length
+        && this.logs[0].address && this.logs[0].address.type === 'Phone') {
+        await this.fetchAddress({ addressId: this.logs[0].address.parent_id });
+      }
+
       this.loading = false;
     },
     setLastEvent(name, { item, index }) {
@@ -115,12 +118,11 @@ export default {
       this.selectedRange = range;
       await this.refresh();
     },
-    compareToKeyword(text) {
-      return String(text).toLowerCase().includes(this.keywordFilter.toLowerCase());
-    },
-    compareToUnmaskedKeyword(phone) {
-      const unmaskedFilter = unmask(this.keywordFilter.toLowerCase());
-      return String(phone).toLowerCase().includes(unmaskedFilter);
+    compareToKeyword(values) {
+      return values.reduce(
+        (acc, value) => acc || String(value).toLowerCase().includes(this.keywordFilter.toLowerCase()),
+        false,
+      );
     },
     filter(value) {
       this.keywordFilter = value;
@@ -131,16 +133,17 @@ export default {
       congId: 'auth/congId',
       user: 'auth/user',
       storeLogs: 'addresses/logs',
+      address: 'address/address',
     }),
     title1() {
-      return this.isSingleRecord && this.logs && this.logs.length
-        ? `${this.logs[0].address.addr1} ${this.logs[0].address.addr2}`
-        : '';
+      const record = this.logs && this.logs.length && this.logs[0].address;
+      const address = record.type === 'Phone' ? this.address : record;
+      return this.isSingleRecord && address ? `${address.addr1} ${address.addr2}` : '';
     },
     title2() {
-      return this.isSingleRecord && this.logs && this.logs.length
-        ? `${this.logs[0].address.city}, ${this.logs[0].address.state_province}`
-        : '';
+      const record = this.logs && this.logs.length && this.logs[0].address;
+      const address = record.type === 'Phone' ? this.address : record;
+      return this.isSingleRecord && address ? `${address.city}, ${address.state_province}` : '';
     },
     subtitle() {
       return 'Recent Updates';
@@ -156,13 +159,16 @@ export default {
     },
     logs() {
       if (this.keywordFilter) {
-        return this.cleanLogs.filter(log => this.compareToKeyword(log.address.addr1)
-          || this.compareToKeyword(log.address.addr2)
-          || this.compareToKeyword(log.address.city)
-          || this.compareToKeyword(log.publisher.firstname)
-          || this.compareToKeyword(log.publisher.lastname)
-          || this.compareToKeyword(log.address.territory.name)
-          || this.compareToUnmaskedKeyword(log.address.phone));
+        return this.cleanLogs.filter(log => this.compareToKeyword([
+          log.address.addr1,
+          log.address.addr2,
+          log.address.city,
+          log.address.postal_code,
+          log.publisher.firstname,
+          log.publisher.lastname,
+          log.address.territory.name,
+          unmask(log.address.phone),
+        ]));
       }
 
       return this.isFullScreen ? this.cleanLogs : this.preview;
@@ -187,7 +193,7 @@ export default {
     },
     returnRoute() {
       if (this.recordId && this.type === 'addresses') {
-        return `/territories/${this.group}/${this.territoryId}/addresses/${this.recordId}/detail`;
+        return `/territories/${this.territoryId}/addresses/${this.recordId}/detail`;
       }
 
       return '/';

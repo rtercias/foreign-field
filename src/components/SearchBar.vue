@@ -8,20 +8,26 @@
         @click="search">
       </font-awesome-icon>
     </div>
-    <span v-if="results" class="d-block small pt-1 text-right">Count: {{results.length}}</span>
+    <div class="d-flex justify-content-end">
+      <b-check v-model="exclude" v-show="allowExclude && !!keywordFilter" class="w-50 text-left">
+        <span class="small">Exclude Filter</span>
+      </b-check>
+      <span v-if="results" class="d-block small pt-1 text-right w-50">Count: {{results.length}}</span>
+    </div>
   </div>
 </template>
 <script>
 export default {
-  props: ['searchText', 'results'],
+  props: ['searchText', 'results', 'allowExclude'],
   data() {
     return {
       keywordFilter: '',
+      exclude: false,
     };
   },
   methods: {
     search() {
-      this.$emit('on-click', this.keywordFilter);
+      this.$emit('on-click', this.keywordFilter, this.exclude);
     },
     keydown(e) {
       if (e.keyCode === 13) {
@@ -31,7 +37,10 @@ export default {
   },
   watch: {
     keywordFilter() {
-      this.$emit('on-change', this.keywordFilter);
+      this.$emit('on-change', this.keywordFilter, this.exclude);
+    },
+    exclude() {
+      this.$emit('on-change', this.keywordFilter, this.exclude);
     },
   },
 };

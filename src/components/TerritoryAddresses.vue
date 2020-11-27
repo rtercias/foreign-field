@@ -22,7 +22,6 @@
             :address="item"
             :reset="reset"
             :territoryId="id"
-            :group="group"
             :incomingResponse="item.lastActivity"
             :revealed="revealed"
             :disabled="disabled"
@@ -71,14 +70,7 @@ export default {
     Loading,
     SearchBar,
   },
-  props: ['territory', 'group', 'id', 'disabled'],
-  async mounted() {
-    if (this.canCheckout) {
-      this.setLeftNavRoute(`/territories/${this.group}`);
-    } else {
-      this.setLeftNavRoute('/');
-    }
-  },
+  props: ['territory', 'id', 'disabled'],
   data() {
     return {
       isLoading: true,
@@ -110,7 +102,6 @@ export default {
   methods: {
     ...mapActions({
       resetNHRecords: 'territory/resetNHRecords',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
     }),
@@ -199,20 +190,20 @@ export default {
         return;
       }
       const keyword = _keyword.toLowerCase();
-      const foundAddress = this.territory.addresses.find(a => a.addr1.toLowerCase().includes(keyword)
-        || a.addr2.toLowerCase().includes(keyword)
-        || a.city.toLowerCase().includes(keyword)
-        || a.notes.toLowerCase().includes(keyword));
-
+      const foundAddress = this.territory.addresses.find(a => this.compareToKeyword(
+        keyword,
+        [a.addr1, a.addr2, a.city, a.notes],
+      ));
       this.foundId = foundAddress && foundAddress.id || 0;
-    },
-  },
-  watch: {
-    foundId(value) {
-      const card = this.$refs[`address-${value}`];
+      const card = this.$refs[`address-${this.foundId}`];
       if (card && card.$el) card.$el.scrollIntoView();
     },
-    immediate: true,
+    compareToKeyword(keyword, values) {
+      return values.reduce(
+        (acc, value) => acc || String(value).toLowerCase().includes(keyword.toLowerCase()),
+        false,
+      );
+    },
   },
 };
 </script>

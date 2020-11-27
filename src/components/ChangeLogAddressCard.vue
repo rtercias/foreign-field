@@ -5,12 +5,12 @@
         <div v-if="!isSingleRecord">
           <b-link
             v-if="log.address.type === 'Phone'"
-            :to="`/territories/${group}/${territoryId}/addresses/${log.address.parent_id}/detail?origin=${$route.name}`">
+            :to="`/territories/${territoryId}/addresses/${log.address.parent_id}/detail?origin=${$route.name}`">
             <div>{{formatPhone(log.address.phone)}}</div>
           </b-link>
           <b-link
             v-else
-            :to="`/territories/${group}/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
+            :to="`/territories/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
             <div>{{log.address.addr1}} {{log.address.addr2}}</div>
             <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
           </b-link>

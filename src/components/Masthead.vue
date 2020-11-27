@@ -18,14 +18,10 @@
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav>
             <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item-dropdown v-if="canWrite" class="group-codes" text="Territories">
-              <b-dropdown-item v-for="group in groupCodes" :key="group" :to="`/territories/${group}`" class="m-0 w-100">
-                <font-awesome-icon icon="check" v-if="group === groupCode" /> {{group}}
-              </b-dropdown-item>
-            </b-nav-item-dropdown>
+            <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>
             <b-nav-item
               v-if="canWrite && matchingRouteNames.includes('territory')"
-              :to="`/territories/${territory.group_code}/${territory.id}/optimize`">
+              :to="`/territories/${territory.id}/optimize`">
               Optimize
             </b-nav-item>
             <b-nav-item v-if="canRead" :to="`/dnc/${user.congregation && user.congregation.id}`">DNC</b-nav-item>
@@ -63,16 +59,8 @@ export default {
   components: {
     VuePullRefresh,
   },
-  watch: {
-    $route(to) {
-      if (to.params.group) {
-        this.groupCode = to.params.group;
-      }
-    },
-  },
   data() {
     return {
-      groupCode: this.$route.params.group,
       permissions: {
         territories: ['Admin', 'TS', 'GO', 'SO'],
       },
@@ -276,6 +264,9 @@ export default {
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
+    },
+    groupCode() {
+      return get(this.territory, 'group_code') || (this.groupCodes && this.groupCodes.length && this.groupCodes[0]) || 'ALL';
     },
   },
 };

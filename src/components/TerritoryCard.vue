@@ -2,7 +2,7 @@
   <div class="column">
     <div class="row justify-content-between px-2">
       <div>
-        <b-link :to="`/territories/${groupCode}/${terr.id}`" class="column">
+        <b-link :to="`/territories/${terr.id}`" class="column">
           <h5 class="mb-0">
             {{`${primaryDescription}${territoryDescriptions.length > 1
               ? ` +${territoryDescriptions.length-1}`
@@ -36,14 +36,21 @@
     <div class="text-right">
       <hr class="mb-2 mt-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
-      <div class="last-worked" v-if="terr.lastActivity">Last worked: {{lastWorked}}</div>
-      <div v-else class="loading">
-        <div v-if="terr.lastActivityLoading" class="font-weight-bold m-0 medium">
-          <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+      <div class="d-flex justify-content-between">
+        <b-badge class="territory-type" alert :variant="typeFilter(terr.type).variant" v-if="terr.type !== 'Regular'">
+          {{typeFilter(terr.type).text}}
+        </b-badge>
+        <div>
+          <div class="last-worked" v-if="terr.lastActivity">Last worked: {{lastWorked}}</div>
+          <div v-else class="loading">
+            <div v-if="terr.lastActivityLoading" class="font-weight-bold m-0 medium">
+              <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
+            </div>
+            <b-button v-else class="get-last-activity p-0" variant="link" @click="() => fetchLastWorked(terr.id)">
+              Get last activity
+            </b-button>
+          </div>
         </div>
-        <b-button v-else class="get-last-activity p-0" variant="link" @click="() => fetchLastWorked(terr.id)">
-          Get last activity
-        </b-button>
       </div>
     </div>
   </div>
@@ -54,7 +61,7 @@ import format from 'date-fns/format';
 
 export default {
   name: 'TerritoryCard',
-  props: ['terr', 'groupCode', 'selectTerritory', 'fetch'],
+  props: ['terr', 'groupCode', 'selectTerritory', 'fetch', 'typeFilters'],
   data() {
     return {
       saving: false,
@@ -90,7 +97,7 @@ export default {
         });
         this.saving = false;
 
-        this.fetch();
+        await this.fetch();
       }
     },
     async fetchLastWorked(territoryId) {
@@ -99,6 +106,9 @@ export default {
       const vuexTerritory = this.territories.find(t => t.id === this.terr.id);
       this.$set(this.terr, 'lastActivity', vuexTerritory.lastActivity);
       this.$set(this.terr, 'lastActivityLoading', false);
+    },
+    typeFilter(type) {
+      return this.typeFilters.find(t => t.value === type) || {};
     },
   },
   computed: {
