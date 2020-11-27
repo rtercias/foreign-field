@@ -37,14 +37,21 @@
               </b-button>
             </b-button-group>
           </div>
-          <div class="col-sm-12 col-md-6">
+          <div class="col-sm-12 col-md-6 small">
+            <span class="small d-none d-md-inline mr-2">Territories:</span>
             <groups-select></groups-select>
           </div>
         </div>
       </div>
-      <div v-if="!loading" class="panel col-sm-12 col-md-5 py-3 border-info m-2">
-        <span v-if="!(territories && territories.length)" class="text-center">I have no territories checked out.</span>
-        <div v-else class="text-left">
+      <div v-if="!loading" class="panel col-sm-12 col-md-5 py-3 border-info m-2 d-flex">
+        <font-awesome-icon
+          icon="circle-notch"
+          spin
+          v-if="myTerritoriesLoading"
+          class="my-territories-loading text-info text-center w-100 align-self-center"
+        />
+        <span v-else-if="!(territories && territories.length)" class="text-center">I have no territories checked out.</span>
+        <div v-else class="text-left w-100">
           <span class="small">Territories I've checked out:</span>
           <b-list-group>
             <b-list-group-item v-for="terr in territories" :key="terr.id" class="px-2">
@@ -54,8 +61,9 @@
         </div>
       </div>
       <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
-        <span class="small">Other territories I've recently seen:</span>
-        <div v-if="seenTerritories.length">
+        <span v-if="!seenTerritories.length" class="text-center">I have not visited any territories lately.</span>
+        <div v-else>
+          <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
             <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="px-2">
               <div class="d-flex justify-content-between align-items-center">
@@ -82,7 +90,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import Auth from './Auth';
 import Loading from './Loading.vue';
 import Reports from './Reports';
@@ -105,7 +113,6 @@ export default {
       msgBoxOpen: '',
       msgDismissed: JSON.parse(localStorage.getItem('updateMsgDismissed')),
       seenTerritories: [],
-
     };
   },
   computed: {
@@ -116,6 +123,7 @@ export default {
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
+      myTerritoriesLoading: 'auth/myTerritoriesLoading',
     }),
     territories() {
       return this.user && this.user.territories || [];
@@ -125,6 +133,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      getUserTerritories: 'auth/getUserTerritories',
+    }),
     getSeenTerritories() {
       if (localStorage.getItem('seenTerritories')) {
         try {
@@ -152,13 +163,19 @@ export default {
       this.seenTerritories = filtered;
     },
   },
-  mounted() {
+  async mounted() {
     this.advertiseMsg();
     this.getSeenTerritories();
+    if (this.user) {
+      await this.getUserTerritories(this.user.username);
+    }
   },
   watch: {
     territories() {
       this.getSeenTerritories();
+    },
+    async user() {
+      await this.getUserTerritories(this.user.username);
     },
   },
 };
@@ -211,6 +228,9 @@ router-link {
 .panel {
   border-radius: 10px;
   border-style: double;
+}
+.my-territories-loading {
+  font-size: 40px;
 }
 
 </style>

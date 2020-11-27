@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import axios from 'axios';
 import firebase from 'firebase/app';
 import gql from 'graphql-tag';
@@ -17,6 +18,7 @@ const RESET = 'RESET';
 const LOADING = 'LOADING';
 const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
 const UPDATE_TOKEN = 'UPDATE_TOKEN';
+const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
 
 function initialState() {
   return {
@@ -33,6 +35,7 @@ function initialState() {
     mastheadLeftNavRoute: '',
     token: '',
     options: null,
+    myTerritoriesLoading: false,
   };
 }
 
@@ -61,6 +64,7 @@ export const auth = {
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
     options: state => state.options,
+    myTerritoriesLoading: state => state.myTerritoriesLoading,
   },
 
   mutations: {
@@ -107,6 +111,7 @@ export const auth = {
 
     LOADING(state, value) {
       state.loading = value;
+      Vue.set(state, 'myTerritoriesLoading', value);
     },
 
     MASTHEAD_LEFT_NAV_ROUTE(state, value) {
@@ -115,6 +120,11 @@ export const auth = {
 
     UPDATE_TOKEN(state, value) {
       state.token = value;
+    },
+
+    USER_TERRITORIES_ADDED(state, territories) {
+      Vue.set(state.user, 'territories', territories);
+      Vue.set(state, 'myTerritoriesLoading', false);
     },
   },
 
@@ -155,15 +165,50 @@ export const auth = {
                   campaign
                   options
                 }
+              }
+            }`),
+            variables: {
+              username,
+            },
+          },
+        });
+
+        if (!response || !response.data || !response.data.data || !response.data.data.user) {
+          reject(new IncompleteRegistrationError('Unauthorized'));
+        }
+
+        const { user } = (response && response.data && response.data.data) || {};
+        const options = JSON.parse(get(user, 'congregation.options', '{}'));
+        const congregation = user && { ...user.congregation, options };
+        const userRoles = get(user, 'role', '').split(',');
+        const { permissions = [] } = router.currentRoute.meta;
+        const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
+        if (hasPermission) {
+          commit(AUTHORIZE, { ...user, congregation });
+          resolve();
+        } else {
+          reject(new UnauthorizedUserError('Unauthorized'));
+        }
+
+        commit(LOADING, false);
+      });
+    },
+
+    async getUserTerritories({ commit }, username) {
+      commit(LOADING, true);
+      return new Promise(async (resolve, reject) => {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Publisher($username: String) {
+              user (username: $username) {
                 territories {
                   id
                   name
                   city
                   group_code
                   type
-                  lastActivity {
-                    timestamp
-                  }
                   status {
                     status
                     date
@@ -190,22 +235,11 @@ export const auth = {
         });
 
         if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject(new IncompleteRegistrationError('Unauthorized'));
+          reject(new Error('user not found'));
         }
 
         const { user } = (response && response.data && response.data.data) || {};
-        const options = JSON.parse(get(user, 'congregation.options', '{}'));
-        const congregation = user && { ...user.congregation, options };
-        const userRoles = get(user, 'role', '').split(',');
-        const { permissions = [] } = router.currentRoute.meta;
-        const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
-        if (hasPermission) {
-          commit(AUTHORIZE, { ...user, congregation });
-          resolve();
-        } else {
-          reject(new UnauthorizedUserError('Unauthorized'));
-        }
-
+        commit(USER_TERRITORIES_ADDED, user.territories);
         commit(LOADING, false);
       });
     },

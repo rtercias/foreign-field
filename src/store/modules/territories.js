@@ -100,7 +100,9 @@ export const territories = {
         });
 
         if (response && response.data && response.data.data) {
-          commit(SET_TERRITORIES, response.data.data.territories);
+          const { territories: terrs } = response.data.data;
+          const filtered = terrs.filter(t => t.type !== 'Test');
+          commit(SET_TERRITORIES, params.groupCode === 'TEST' ? terrs : filtered);
           commit(SET_LOADING, false);
         }
       } catch (e) {

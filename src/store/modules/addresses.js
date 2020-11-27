@@ -173,6 +173,7 @@ export const addresses = {
                 phone
                 notes
                 parent_id
+                territory_id
                 territory {
                   id
                   name

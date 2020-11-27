@@ -153,12 +153,12 @@ export default {
     },
     secondaryCities() {
       if (this.cityNames.length > 1 && this.cityNames.length <= 3) {
-        const scubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() === 'null');
-        return scubbedCityNames.length > 1 ? `also: ${this.cityNames.slice(1).join(',')}` : '';
+        const scrubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() !== 'null');
+        return scrubbedCityNames.length > 1 ? `also: ${this.cityNames.slice(1).join(',')}` : '';
       }
       if (this.cityNames.length > 3) {
-        const scubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() === 'null');
-        return `also: ${scubbedCityNames.length} cities`;
+        const scrubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() !== 'null');
+        return `also: ${scrubbedCityNames.length} cities`;
       }
 
       return '';

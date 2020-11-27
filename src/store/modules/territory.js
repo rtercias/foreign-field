@@ -246,6 +246,7 @@ export const territory = {
           if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
         }
         await dispatch('address/fetchLastActivity', { addressId: address.id }, { root: true });
+        if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
       }
     },
 
