@@ -22,6 +22,9 @@ html, body { height: 100% }
   top: 68px;
   background-color: white;
 }
+.dropdown-menu {
+  z-index: 10000;
+}
 
 $primary: #5184B7;
 $secondary: #D4E0ED;
