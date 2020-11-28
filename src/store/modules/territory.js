@@ -227,7 +227,9 @@ export const territory = {
         });
 
         const { territory: terr } = get(response, 'data.data');
-        terr.addresses = orderBy(terr.addresses, 'sort');
+        if (terr && terr.addresses) {
+          terr.addresses = orderBy(terr.addresses, 'sort');
+        }
         commit(SET_TERRITORY, terr);
         commit(GET_TERRITORY_SUCCESS);
 
