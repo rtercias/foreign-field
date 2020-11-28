@@ -1,5 +1,5 @@
 <template>
-  <div class="sticky-top p-2 bg-white border-bottom" :style="{ top: top }">
+  <div class="sticky-top bg-white border-bottom" :style="{ top: top }" :class="{ 'p-0': noPadding, 'p-2': !noPadding }">
     <div class="position-relative">
       <b-form-input v-model="keywordFilter" :placeholder="searchText" @keydown="keydown" />
       <font-awesome-icon
@@ -18,12 +18,15 @@
 </template>
 <script>
 export default {
-  props: ['searchText', 'results', 'allowExclude', 'top'],
+  props: ['searchText', 'model', 'results', 'allowExclude', 'top', 'noPadding'],
   data() {
     return {
       keywordFilter: '',
       exclude: false,
     };
+  },
+  mounted() {
+    this.keywordFilter = this.model;
   },
   methods: {
     search() {
@@ -41,6 +44,9 @@ export default {
     },
     exclude() {
       this.$emit('on-change', this.keywordFilter, this.exclude);
+    },
+    model() {
+      this.keywordFilter = this.model;
     },
   },
 };

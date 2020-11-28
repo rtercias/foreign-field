@@ -42,6 +42,7 @@
         :search-text="'Filter by territory name or description'"
         :results="filteredTerritories"
         allow-exclude="true"
+        :model="keywordFilter"
         @on-change="applyFilter">
       </SearchBar>
       <div class="d-flex w-100 justify-content-between w-100 pt-2">
@@ -277,6 +278,10 @@ export default {
     const congId = this.congId || (this.user && this.user.congId);
     await this.fetch();
     await this.fetchPublishers(congId);
+
+    if (this.$route.query.territory) {
+      this.applyFilter(this.$route.query.territory);
+    }
   },
 };
 </script>

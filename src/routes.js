@@ -7,7 +7,7 @@ import Territories from './components/Territories';
 import Territory from './components/Territory';
 import TerritoryAddresses from './components/TerritoryAddresses';
 import TerritoryMap from './components/TerritoryMap';
-import Dnc from './components/Dnc';
+import SearchResults from './components/SearchResults';
 import AssignmentReport from './components/AssignmentReport';
 import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
@@ -100,9 +100,9 @@ const routes = [
     }],
   },
   {
-    name: 'dnc',
-    path: '/dnc/:id',
-    component: Dnc,
+    name: 'search',
+    path: '/search/:keyword',
+    component: SearchResults,
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],

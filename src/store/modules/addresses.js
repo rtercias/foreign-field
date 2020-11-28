@@ -56,9 +56,13 @@ export const addresses = {
     },
   },
   actions: {
-    async getDnc({ commit }, id) {
+    async getDnc({ commit }, params) {
       try {
-        if (!id) {
+        if (!params.id) {
+          return;
+        }
+        if (!params.keyword) {
+          commit(DNC_SUCCESS, []);
           return;
         }
         const response = await axios({
@@ -68,16 +72,20 @@ export const addresses = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query Dnc($congId: Int) {
-              dnc(congId:$congId) {
+            query: print(gql`query Dnc($congId: Int, $keyword: String) {
+              dnc(congId: $congId, keyword: $keyword) {
+                id
                 addr1
                 addr2
                 city
                 state_province
+                postal_code
+                territory_id
               }
             }`),
             variables: {
-              congId: id,
+              congId: params.id,
+              keyword: params.keyword,
             },
           },
         });
@@ -86,16 +94,7 @@ export const addresses = {
           return;
         }
 
-        const raw = response.data.data.dnc;
-
-        const dnc = raw.map(d => ({
-          address: `
-              ${d.addr1} 
-              ${d.addr2 ? `${d.addr2} ` : ''}
-              ${d.city ? `${d.city} ` : ''}
-              ${d.state_province ? `${d.state_province} ` : ''}`,
-        }));
-
+        const { dnc } = response.data.data;
         commit(DNC_SUCCESS, dnc);
       } catch (exception) {
         commit(DNC_FAIL, exception);
@@ -154,7 +153,10 @@ export const addresses = {
     async addressSearch({ commit }, { congId, searchTerm }) {
       try {
         if (!congId) return;
-        if (!searchTerm) return;
+        if (!searchTerm) {
+          commit(ADDRESS_LOOKUP_SUCCESS, []);
+          return;
+        }
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,

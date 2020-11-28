@@ -125,17 +125,19 @@ export const territories = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query TerritoriesByCong($congId: Int) {
-              territories (congId: $congId) {
+            query: print(gql`query TerritoriesByCong($congId: Int, $keyword: String) {
+              territories (congId: $congId, keyword: $keyword) {
                 id
                 name
                 description
                 type
+                group_code
                 congregationid
               }
             }`),
             variables: {
               congId: params.congId,
+              keyword: params.keyword,
             },
           },
         });

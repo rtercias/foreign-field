@@ -60,6 +60,11 @@ export default {
         if (phone) this.$set(phone, 'notes', args.notes);
       }
     });
+
+    if (this.$route.query.addressId) {
+      this.foundId = Number.parseInt(this.$route.query.addressId, 10);
+      this.scrollToView();
+    }
   },
   data() {
     return {
@@ -140,6 +145,10 @@ export default {
         : null;
 
       this.foundId = foundAddress && foundAddress.id || foundPhone && foundPhone.id || 0;
+      this.scrollToView();
+    },
+
+    scrollToView() {
       const ref = this.$refs[`phone-address-${this.foundId}`];
       const card = ref && ref.length && ref[0];
       if (card && card.$el) card.$el.scrollIntoView();

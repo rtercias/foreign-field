@@ -1,5 +1,5 @@
 <template>
-  <div class="lead sticky-top">
+  <div class="masthead lead sticky-top">
     <vue-pull-refresh class="bg-primary" :on-refresh="onRefresh" :config="refreshOptions">
       <b-navbar
         class="border-warning"
@@ -14,10 +14,25 @@
         <b-link class="button text-white-50" @click="back">
           <font-awesome-icon icon="chevron-left" v-show="showLeftNav && !isDesktop"></font-awesome-icon>
         </b-link>
-        <b-nav-text v-if="!isDesktop && isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
+        <b-nav-text v-if="!isDesktop && isCampaignMode && isSearchHidden">CAMPAIGN MODE</b-nav-text>
+        <b-nav-text id="nav-search-bar" class="py-1" :class="{ 'pl-4': !isDesktop, 'w-100': isDesktop }">
+          <search-bar
+            v-if="!isSearchHidden || isDesktop"
+            class="search-bar w-100"
+            :search-text="'Search address or territory'"
+            @on-click="search"
+            :no-padding="true"
+          />
+          <font-awesome-icon
+            v-if="isSearchHidden && !isDesktop"
+            icon="search"
+            class="text-white-50"
+            @click="isSearchHidden = false"
+          />
+        </b-nav-text>
         <b-navbar-toggle :class="{ 'd-none': isDesktop }" target="nav_dropdown_collapse"></b-navbar-toggle>
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
-          <b-navbar-nav>
+          <b-navbar-nav class="pt-3">
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>
             <b-nav-item
@@ -54,11 +69,13 @@ import { mapGetters, mapActions } from 'vuex';
 import VuePullRefresh from 'vue-pull-refresh';
 import get from 'lodash/get';
 import { channel } from '../main';
+import SearchBar from './SearchBar';
 
 export default {
   name: 'Masthead',
   components: {
     VuePullRefresh,
+    SearchBar,
   },
   data() {
     return {
@@ -72,6 +89,7 @@ export default {
         loadingLabel: 'Reloading',
       },
       togglingCampaignMode: false,
+      isSearchHidden: true,
     };
   },
   mounted() {
@@ -116,6 +134,10 @@ export default {
       } else {
         this.$router.go(-1);
       }
+    },
+    search(keyword) {
+      this.isSearchHidden = true;
+      if (keyword) this.$router.push({ name: 'search', params: { keyword } });
     },
     async toggleCampaignMode() {
       if (this.isCampaignMode) {
@@ -274,6 +296,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.masthead .navbar {
+  min-height: 68px;
+}
 .pull-down-header {
   background-color: unset;
 }
@@ -285,5 +310,8 @@ export default {
 }
 .dropdown-item {
   width: 100%;
+}
+.search-bar input {
+  background: aliceblue;
 }
 </style>
