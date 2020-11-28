@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-2 mb-2">
+  <div class="sticky-top p-2 bg-white border-bottom" :style="{ top: top }">
     <div class="position-relative">
       <b-form-input v-model="keywordFilter" :placeholder="searchText" @keydown="keydown" />
       <font-awesome-icon
@@ -18,7 +18,7 @@
 </template>
 <script>
 export default {
-  props: ['searchText', 'results', 'allowExclude'],
+  props: ['searchText', 'results', 'allowExclude', 'top'],
   data() {
     return {
       keywordFilter: '',

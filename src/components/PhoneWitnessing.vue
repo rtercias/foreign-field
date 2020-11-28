@@ -1,7 +1,7 @@
 <template>
   <Loading v-if="territoryIsLoading" class="w-100" />
   <div v-else class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
-    <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search"></SearchBar>
+    <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="184px"></SearchBar>
     <PhoneAddressCard
       v-for="(a, index) in territory.addresses" :key="a.id"
       :ref="`phone-address-${a.id}`"

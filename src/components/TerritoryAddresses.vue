@@ -1,6 +1,6 @@
 <template>
   <div class="territory-addresses pb-5">
-    <SearchBar :search-text="'Search this territory'" @on-click="search"></SearchBar>
+    <SearchBar :search-text="'Search this territory'" @on-click="search" top="184px"></SearchBar>
     <b-list-group>
       <swipe-list
         ref="list"

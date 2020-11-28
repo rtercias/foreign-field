@@ -20,7 +20,7 @@
           <span class="title w-100" :class="{ 'pr-0': isDesktop }">Dashboard</span>
         </h3>
         <Loading v-if="loading"></Loading>
-        <div v-else class="row py-2 mx-5 px-3">
+        <div v-else class="row py-2 mx-sm-0 mx-md-5 px-sm-0 px-md-3">
           <div class="col-sm-12 col-md-6 d-flex justify-content-center">
             <b-button-group>
               <b-button v-if="canWrite" variant="success" size="sm" :to="`/addresses/add`">

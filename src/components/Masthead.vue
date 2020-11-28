@@ -1,5 +1,5 @@
 <template>
-  <div class="lead">
+  <div class="lead sticky-top">
     <vue-pull-refresh class="bg-primary" :on-refresh="onRefresh" :config="refreshOptions">
       <b-navbar
         class="border-warning"
@@ -14,6 +14,7 @@
         <b-link class="button text-white-50" @click="back">
           <font-awesome-icon icon="chevron-left" v-show="showLeftNav && !isDesktop"></font-awesome-icon>
         </b-link>
+        <b-nav-text v-if="!isDesktop && isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
         <b-navbar-toggle :class="{ 'd-none': isDesktop }" target="nav_dropdown_collapse"></b-navbar-toggle>
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav>

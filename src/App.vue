@@ -2,9 +2,16 @@
   <div id="app" class="d-flex min-vh-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
     <Masthead :class="{ 'w-25': isDesktop }"></Masthead>
     <div :class="{ 'w-75': isDesktop }">
-      <b-alert variant="success" :show="isCampaignMode">
-        <font-awesome-icon icon="bolt" /> CAMPAIGN MODE
-      </b-alert>
+      <b-navbar
+        v-if="isDesktop"
+        :sticky="true"
+        class="desktop-nav alert-success d-flex justify-content-between border-medium border-bottom">
+        <b-link class="button" @click="back">
+          <font-awesome-icon icon="chevron-left" v-show="false && showLeftNav"></font-awesome-icon>
+        </b-link>
+        <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
+        <b-nav-text></b-nav-text>
+      </b-navbar>
       <router-view class="view" :key="key"></router-view>
     </div>
   </div>
@@ -25,12 +32,25 @@ export default {
       isForcedOut: 'auth/isForcedOut',
       isDesktop: 'auth/isDesktop',
       user: 'auth/user',
+      leftNavRoute: 'auth/mastheadLeftNavRoute',
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
     },
     key() {
       return `${this.$route.name}-${JSON.stringify(this.$route.params)}`;
+    },
+    showLeftNav() {
+      return this.$route.name !== 'home';
+    },
+  },
+  methods: {
+    back() {
+      if (this.leftNavRoute) {
+        this.$router.push(this.leftNavRoute);
+      } else {
+        this.$router.go(-1);
+      }
     },
   },
 };
@@ -56,6 +76,11 @@ router-link {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: $dark;
+
+  .desktop-nav {
+    padding-top: 14px;
+    border-bottom: solid 6px;
+  }
 }
 .view {
   height: calc(100% - 1.5em);

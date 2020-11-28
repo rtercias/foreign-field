@@ -2,7 +2,7 @@
   <div class="territory">
     <Loading v-if="territoryIsLoading" />
     <div v-else>
-      <header class="w-100 px-2">
+      <header class="page-header sticky-top w-100 p-2 bg-white border-bottom" :sticky="true">
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
             <div class="text-left">
@@ -18,7 +18,7 @@
                 </font-awesome-icon> {{territoryName}}
             </h4>
           </div>
-          <div class="w-100 d-flex justify-content-between pb-3 pt-2">
+          <div class="w-100 d-flex justify-content-between py-2">
             <b-button-group size="sm">
               <b-button
                 variant="outline-info"

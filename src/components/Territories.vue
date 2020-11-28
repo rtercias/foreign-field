@@ -1,8 +1,8 @@
 <template>
   <Loading v-if="loading"></Loading>
   <div v-else class="territories" :key="groupCode">
-    <header class="d-flex flex-column align-items-center px-3 pt-0">
-      <div class="row w-100">
+    <header class="page-header sticky-top d-flex flex-column align-items-center p-3">
+      <div class="w-100 d-flex align-items-start">
         <groups-select :selected-group="selectedGroup"></groups-select>
         <div class="col-sm-auto col-md-1"></div>
         <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 d-block">
@@ -22,7 +22,7 @@
           </b-badge>
         </b-button-group>
         <div class="col-sm-auto col-md-1"></div>
-        <b-button-group v-if="isDesktop && isCampaignMode" class="col-sm-12 col-md-4 text-right p-sm-0 d-block">
+        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-4 text-right p-sm-0 d-block">
           <b-badge
             v-for="avail in availabilityFilters.filter(a => a.value !== 'All')"
             :key="avail.value"
@@ -44,7 +44,7 @@
         allow-exclude="true"
         @on-change="applyFilter">
       </SearchBar>
-      <div class="d-flex w-100 justify-content-between w-100">
+      <div class="d-flex w-100 justify-content-between w-100 pt-2">
         <b-dropdown left variant="secondary">
           <span slot="button-content">
             <font-awesome-icon icon="filter" />
