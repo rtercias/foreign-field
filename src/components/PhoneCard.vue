@@ -8,13 +8,12 @@
         <a v-if="allowedToCall && !disabled" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
         <span v-else>{{ formattedPhone }}</span>
         <font-awesome-icon
-          v-if="!disabled"
-          class="small text-primary ml-3"
+          class="edit-phone small text-primary ml-3"
           icon="pencil-alt"
           @click="edit">
         </font-awesome-icon>
       </h5>
-      <PhoneTags :phone="phoneRecord" :address="address" :disabled="disabled"></PhoneTags>
+      <PhoneTags :phone="phoneRecord" :address="address"></PhoneTags>
     </div>
     <div class="static-buttons col-3 pl-1">
       <font-awesome-icon class="logging-spinner text-info ml-3" icon="circle-notch" spin v-if="phoneRecord.isBusy" />
@@ -232,6 +231,9 @@ export default {
 .logging-spinner {
   font-size: 30px;
   position: absolute;
+}
+.edit-phone {
+  cursor: pointer;
 }
 @media print {
   .interaction {

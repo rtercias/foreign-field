@@ -8,7 +8,6 @@
           :items="combinedAddressAndPhones || []"
           item-key="id"
           :revealed.sync="revealed"
-          :disabled="disabled"
           @active="onActive">
           <template v-slot="{ item, index, revealed }">
             <AddressCard
@@ -21,7 +20,6 @@
               :territoryId="territory.id"
               :incomingResponse="item.lastActivity"
               :revealed="revealed"
-              :disabled="disabled"
               @update-response="updateResponse"
               @toggle-right-panel="toggleRightPanel"
               @toggle-left-panel="toggleLeftPanel">
@@ -58,7 +56,7 @@
               </b-button>
             </b-list-group-item>
           </template>
-          <template v-slot:right="{ item, close }">
+          <template v-slot:right="{ item, close }" :disabled="true">
             <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <ActivityButton
               v-for="(button, index) in rightButtonList(item.type)"
@@ -83,7 +81,7 @@
                   <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
                 </font-awesome-layers>
               </span>
-              <span class="description text-white pt-1">People Search</span>
+              <span class="people-search-text description text-white pt-1">People Search</span>
             </b-button>
             <b-button
               v-show="!item.isBusy"
@@ -134,7 +132,6 @@
           </template>
         </swipe-list>
         <b-list-group-item
-          v-if="!disabled"
           class="d-flex pb-2 px-2 border-0"
           :class="{ 'pt-0': isDesktop }">
           <the-mask
@@ -265,7 +262,6 @@ export default {
       return this.territory.lastActivity ? id === this.territory.lastActivity.address_id : false;
     },
     toggleRightPanel(index, revealed) {
-      if (this.disabled) return;
       if (revealed) {
         this.$refs.list.closeActions(index);
       } else {
@@ -274,7 +270,6 @@ export default {
       }
     },
     toggleLeftPanel(index, revealed) {
-      if (this.disabled) return;
       if (revealed) {
         this.$refs.list.closeActions(index);
       } else {
@@ -562,6 +557,10 @@ export default {
 }
 .no-phone {
   cursor: pointer;
+}
+.people-search-text {
+  position: relative;
+  top: -2px;
 }
 @media (max-width: 768px) {
   .phone-address-card-container {

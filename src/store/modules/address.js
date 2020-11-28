@@ -206,6 +206,10 @@ function validateAddress(_address, isNew) {
     delete address.parent_id;
   }
 
+  if ('isBusy' in address) {
+    delete address.isBusy;
+  }
+
   return address;
 }
 

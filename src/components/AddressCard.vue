@@ -61,7 +61,6 @@
       <AddressTags
         :address="address"
         :mode="mode"
-        :disabled="disabled"
         v-on="$listeners"
         :class="{ 'pl-3': mode === 'phoneAddress'}">
       </AddressTags>
@@ -83,7 +82,7 @@ import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode', 'disabled'],
+  props: ['address', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -109,14 +108,12 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
-      if (this.disabled) return;
       if (this.mode === 'phoneAddress') {
         this.$emit('toggle-right-panel', this.index, this.revealed);
       }
       this.$emit('togglePanel', this.index, this.revealed);
     },
     toggleLeftPanel() {
-      if (this.disabled) return;
       this.$emit('toggle-left-panel', this.index, this.revealed);
     },
     async confirmClearStatus() {
