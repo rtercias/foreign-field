@@ -1,5 +1,8 @@
 <template>
-  <div class="territory-map">
+  <h3 v-if="territory.addresses.length === 0" class="w-100 text-center">
+    There are no addresses in this territory.
+  </h3>
+  <div v-else class="territory-map">
     <l-map
       class="map"
       :zoom="zoom"

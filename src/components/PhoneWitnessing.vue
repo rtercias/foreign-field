@@ -2,7 +2,11 @@
   <Loading v-if="territoryIsLoading" class="w-100" />
   <div v-else class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="184px"></SearchBar>
+    <h3 v-if="territory.addresses.length === 0" class="w-100 text-center">
+      There are no addresses in this territory.
+    </h3>
     <PhoneAddressCard
+      v-else
       v-for="(a, index) in territory.addresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"

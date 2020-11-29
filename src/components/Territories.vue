@@ -149,6 +149,7 @@ export default {
       typeFilters: [
         { value: 'SEARCH', text: 'Survey', variant: 'warning' },
         { value: 'BUSINESS', text: 'Business', variant: 'success' },
+        { value: 'Test', text: 'Test', variant: 'danger' },
       ],
       sortOption: 'Description',
       sortOptions: [

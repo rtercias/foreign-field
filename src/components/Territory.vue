@@ -6,8 +6,8 @@
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
             <div class="text-left">
-              <h4 class="mb-0">{{primaryCity}}</h4>
-              <span>{{secondaryCities}}</span>
+              <h4 class="mb-0">{{territory.description}}</h4>
+              <span>{{cities}}</span>
             </div>
             <h4 class="text-right">
                 <font-awesome-icon
@@ -151,20 +151,20 @@ export default {
       const arr = this.territory && this.territory.city ? this.territory.city.split(',') : [];
       return arr.filter(city => city.trim() !== '');
     },
-    primaryCity() {
-      return this.cityNames[0];
-    },
-    secondaryCities() {
-      if (this.cityNames.length > 1 && this.cityNames.length <= 3) {
-        const scrubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() !== 'null');
-        return scrubbedCityNames.length > 1 ? `also: ${this.cityNames.slice(1).join(',')}` : '';
-      }
-      if (this.cityNames.length > 3) {
-        const scrubbedCityNames = this.cityNames.slice(1).filter(c => c && c.trim() !== 'null');
-        return `also: ${scrubbedCityNames.length} cities`;
+    cities() {
+      let cities = '';
+      // show first two cities
+      for (const c of this.cityNames.slice(0, 2)) {
+        const city = c.trim();
+        cities += city !== 'null' && `${cities.length > 0 ? ', ' : ''}${city}`;
       }
 
-      return '';
+      // count all others
+      if (this.cityNames.length > 2) {
+        cities += ` and ${this.cityNames.length - 2} other cities`;
+      }
+
+      return cities;
     },
     territoryName() {
       return this.territory && this.territory.name ? this.territory.name : '';
