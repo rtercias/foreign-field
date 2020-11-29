@@ -14,8 +14,10 @@
         <b-link class="button text-white-50" @click="back">
           <font-awesome-icon icon="chevron-left" v-show="showLeftNav && !isDesktop"></font-awesome-icon>
         </b-link>
-        <b-nav-text v-if="!isDesktop && isCampaignMode && isSearchHidden">CAMPAIGN MODE</b-nav-text>
-        <b-nav-text id="nav-search-bar" class="py-1" :class="{ 'pl-4': !isDesktop, 'w-100': isDesktop }">
+        <b-nav-text class="campaign-mode" v-if="isSearchHidden">
+          <span v-if="!isDesktop && isCampaignMode">CAMPAIGN MODE</span>
+        </b-nav-text>
+        <b-nav-text id="nav-search-bar" class="py-1" :class="{ 'w-full': !isSearchHidden, 'w-100': isDesktop }">
           <search-bar
             v-if="!isSearchHidden || isDesktop"
             class="search-bar w-100"
@@ -26,7 +28,7 @@
           <font-awesome-icon
             v-if="isSearchHidden && !isDesktop"
             icon="search"
-            class="text-white-50"
+            class="text-white-50 mt-2"
             @click="isSearchHidden = false"
           />
         </b-nav-text>
@@ -310,7 +312,18 @@ export default {
 .dropdown-item {
   width: 100%;
 }
-.search-bar input {
-  background: aliceblue;
+.campaign-mode {
+  width: 172px;
+}
+#nav-search-bar {
+  &.w-full {
+    width: 240px;
+  }
+
+  .search-bar {
+    input {
+      background: aliceblue;
+    }
+  }
 }
 </style>
