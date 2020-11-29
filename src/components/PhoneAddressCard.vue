@@ -14,8 +14,10 @@
               v-if="item.type === 'Regular'"
               mode="phoneAddress"
               :index="index"
-              class="bg-light border-medium border-light border-right-0 border-left-0"
-              :class="{ 'border-warning active': isActiveAddress(item.id) }"
+              class="bg-light border-medium "
+              :class="isActiveAddress(item.id)
+                ? ['border-warning', 'active']
+                : ['border-light', 'border-right-0', 'border-left-0']"
               :address="item"
               :territoryId="territory.id"
               :incomingResponse="item.lastActivity"

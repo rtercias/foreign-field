@@ -174,40 +174,15 @@ function validateAddress(_address, isNew) {
     address.notes = '';
   }
 
-  if ('activityLogs' in address) {
-    delete address.activityLogs;
-  }
+  const unwantedProperties = [
+    'activityLogs', 'lastActivity', 'incomingResponse', 'selectedResponse', 'selectedResponseTS',
+    'phones', 'type', 'parent_id', 'isBusy',
+  ];
 
-  if ('lastActivity' in address) {
-    delete address.lastActivity;
-  }
-
-  if ('incomingResponse' in address) {
-    delete address.incomingResponse;
-  }
-
-  if ('selectedResponse' in address) {
-    delete address.selectedResponse;
-  }
-
-  if ('selectedResponseTS' in address) {
-    delete address.selectedResponseTS;
-  }
-
-  if ('phones' in address) {
-    delete address.phones;
-  }
-
-  if ('type' in address) {
-    delete address.type;
-  }
-
-  if ('parent_id' in address) {
-    delete address.parent_id;
-  }
-
-  if ('isBusy' in address) {
-    delete address.isBusy;
+  for (const unwanted of unwantedProperties) {
+    if (unwanted in address) {
+      delete address[unwanted];
+    }
   }
 
   return address;

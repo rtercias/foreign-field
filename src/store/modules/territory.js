@@ -222,6 +222,14 @@ export const territory = {
                     id username firstname lastname
                   }
                 }
+                lastActivity {
+                  id
+                  address_id
+                  checkout_id
+                  value
+                  timestamp
+                  publisher_id
+                }
               }
             }`),
             variables: {
