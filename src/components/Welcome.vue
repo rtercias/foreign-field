@@ -166,7 +166,7 @@ export default {
   async mounted() {
     this.advertiseMsg();
     this.getSeenTerritories();
-    if (this.user) {
+    if (this.user && !this.user.territories) {
       await this.getUserTerritories(this.user.username);
     }
   },
@@ -175,7 +175,9 @@ export default {
       this.getSeenTerritories();
     },
     async user() {
-      await this.getUserTerritories(this.user.username);
+      if (this.user && !this.user.territories) {
+        await this.getUserTerritories(this.user.username);
+      }
     },
   },
 };

@@ -94,7 +94,10 @@ export default {
     };
   },
   async mounted() {
-    await this.getTerritory({ id: this.id, getLastActivity: true });
+    const routesRequiringLastActivity = ['address-list', 'phone-list'];
+    const getLastActivity = routesRequiringLastActivity.includes(this.$route.name);
+    await this.getTerritory({ id: this.id, getLastActivity });
+
     channel.bind('add-log', (log) => {
       if (log && this.territory && this.territory.addresses) {
         const address = this.territory.addresses.find(a => a.id === log.address_id);

@@ -137,7 +137,9 @@ export default {
   },
   async mounted() {
     this.setLeftNavRoute(`/territories/${this.id}`);
-    await this.getTerritory({ id: this.id });
+    if (this.territory && this.territory.id !== this.id) {
+      await this.getTerritory({ id: this.id });
+    }
     this.reset();
   },
   methods: {
@@ -178,9 +180,9 @@ export default {
       this.optimizing = false;
       this.hasChanges = false;
       this.saving = false;
-      this.manualAddresses = cloneDeep(this.territory.addresses);
-      this.optimizedAddresses = cloneDeep(this.territory.addresses);
-      this.mappedAddresses = this.territory.addresses;
+      this.manualAddresses = this.territory && cloneDeep(this.territory.addresses);
+      this.optimizedAddresses = this.territory && cloneDeep(this.territory.addresses);
+      this.mappedAddresses = this.territory && this.territory.addresses;
     },
     async finalize() {
       const value = await this.$bvModal.msgBoxConfirm('Save the new sort order?', {
@@ -196,8 +198,10 @@ export default {
         }
 
         this.saving = true;
-        const addressIds = this.territory.addresses.map(a => a.id);
-        await this.updateSort({ addressIds, userid: this.user.id });
+        const addressIds = this.territory && this.territory.addresses.map(a => a.id);
+        if (addressIds) {
+          await this.updateSort({ addressIds, userid: this.user.id });
+        }
         await this.getTerritory({ id: this.id });
         this.reset();
       }

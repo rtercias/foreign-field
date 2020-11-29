@@ -60,10 +60,14 @@ export const territory = {
       store.cache.clear();
     },
     SET_TERRITORY(state, terr) {
-      for (const address of terr.addresses) {
-        address.isBusy = true;
-        for (const phone of address.phones) {
-          phone.isBusy = true;
+      if (terr && terr.addresses) {
+        for (const address of terr.addresses) {
+          address.isBusy = true;
+          if (address.phones) {
+            for (const phone of address.phones) {
+              phone.isBusy = true;
+            }
+          }
         }
       }
       state.territory = terr;
@@ -233,7 +237,11 @@ export const territory = {
         commit(SET_TERRITORY, terr);
         commit(GET_TERRITORY_SUCCESS);
 
-        if (getLastActivity) await dispatch('fetchLastActivities', terr);
+        if (getLastActivity) {
+          await dispatch('fetchLastActivities', terr);
+        } else {
+          commit(LOADING_TERRITORY_FALSE);
+        }
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
         commit(LOADING_TERRITORY_FALSE);

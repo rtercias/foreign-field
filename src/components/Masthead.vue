@@ -37,10 +37,9 @@
             <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>
             <b-nav-item
               v-if="canWrite && matchingRouteNames.includes('territory')"
-              :to="`/territories/${territory.id}/optimize`">
+              :to="`/territories/${territory && territory.id}/optimize`">
               Optimize
             </b-nav-item>
-            <b-nav-item v-if="canRead" :to="`/dnc/${user.congregation && user.congregation.id}`">DNC</b-nav-item>
             <b-nav-item
               v-if="canLead">
               <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">

@@ -16,6 +16,7 @@ const SET_GROUP_CODES = 'SET_GROUP_CODES';
 const SET_CONGREGATION = 'SET_CONGREGATION';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
+const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
 const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
 const UPDATE_TOKEN = 'UPDATE_TOKEN';
 const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
@@ -111,7 +112,9 @@ export const auth = {
 
     LOADING(state, value) {
       state.loading = value;
-      Vue.set(state, 'myTerritoriesLoading', value);
+    },
+    USER_TERRITORIES_LOADING(state, value) {
+      state.myTerritoriesLoading = value;
     },
 
     MASTHEAD_LEFT_NAV_ROUTE(state, value) {
@@ -195,7 +198,7 @@ export const auth = {
     },
 
     async getUserTerritories({ commit }, username) {
-      commit(LOADING, true);
+      commit(USER_TERRITORIES_LOADING, true);
       return new Promise(async (resolve, reject) => {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -238,9 +241,9 @@ export const auth = {
           reject(new Error('user not found'));
         }
 
-        const { user } = (response && response.data && response.data.data) || {};
-        commit(USER_TERRITORIES_ADDED, user.territories);
-        commit(LOADING, false);
+        const { territories } = (response && response.data && response.data.data.user) || {};
+        commit(USER_TERRITORIES_ADDED, territories);
+        commit(USER_TERRITORIES_LOADING, false);
       });
     },
 
