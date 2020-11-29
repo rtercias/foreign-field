@@ -37,7 +37,7 @@
               </b-button>
             </b-button-group>
           </div>
-          <div class="col-sm-12 col-md-6 small">
+          <div class="col-sm-12 col-md-6 small" v-if="canWrite">
             <span class="small d-none d-md-inline mr-2">Territories:</span>
             <groups-select></groups-select>
           </div>

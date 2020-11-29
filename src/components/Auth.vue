@@ -19,10 +19,10 @@ export default {
       signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        firebase.auth.PhoneAuthProvider.PROVIDER_ID,
       ],
       callbacks: {
-        signInSuccess: (currentUser) => {
-          this.$store.dispatch('auth/login', currentUser);
+        signInSuccess: () => {
           const redirectUrl = this.$router.currentRoute.query.redirect;
           this.$router.push(redirectUrl || '/welcome');
           // Do not automatically redirect.

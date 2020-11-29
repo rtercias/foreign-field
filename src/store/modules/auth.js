@@ -84,6 +84,9 @@ export const auth = {
 
     AUTHORIZE(state, user) {
       state.user = user;
+      if (!state.name) {
+        state.name = `${user.firstname} ${user.lastname}`;
+      }
       state.congId = state.user && state.user.congregation && state.user.congregation.id || 0;
       state.congregation = state.user && state.user.congregation;
       state.options = state.congregation && state.congregation.options;
@@ -156,6 +159,8 @@ export const auth = {
               user (username: $username) {
                 id 
                 username
+                firstname
+                lastname
                 role
                 role_description
                 status
@@ -254,7 +259,11 @@ export const auth = {
     async login({ dispatch, state }, user) {
       try {
         await dispatch('authenticate', user);
-        await dispatch('authorize', user.email);
+        if (user.emailVerified && !!user.email) {
+          await dispatch('authorize', user.email);
+        } else {
+          await dispatch('authorize', user.phoneNumber);
+        }
 
         if (!state.user) {
           // unauthorized
