@@ -15,6 +15,7 @@ import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
 import PhoneWitnessing from './components/PhoneWitnessing';
+import TerritoryForm from './components/TerritoryForm';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -44,7 +45,7 @@ const routes = [
   },
   {
     name: 'territory',
-    path: '/territories/:id',
+    path: '/territories/:id(\\d+)',
     component: Territory,
     props: true,
     meta: {
@@ -74,8 +75,7 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       },
-    },
-    {
+    }, {
       name: 'optimize',
       path: 'optimize',
       component: Optimize,
@@ -83,21 +83,30 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO'],
       },
-    },
-    {
-      name: 'territory-group',
-      path: '/territories/:groupCode/:id',
-      props: true,
-      redirect: (to) => {
-        if (to.params.groupCode && Number.isSafeInteger(Number(to.params.id))) {
-          return '/territories/:id';
-        }
-        return '/groups/:groupCode';
-      },
-      meta: {
-        permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
-      },
     }],
+  },
+  {
+    name: 'territory-edit',
+    path: '/territories/:id/edit',
+    component: TerritoryForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'territory-group',
+    path: '/territories/:groupCode/:id',
+    props: true,
+    redirect: (to) => {
+      if (to.params.groupCode && Number.isSafeInteger(Number(to.params.id))) {
+        return '/territories/:id';
+      }
+      return '/groups/:groupCode';
+    },
+    meta: {
+      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
+    },
   },
   {
     name: 'search',
@@ -205,6 +214,15 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+    },
+  },
+  {
+    name: 'territory-new',
+    path: '/territories/add',
+    component: TerritoryForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
     },
   },
 ];

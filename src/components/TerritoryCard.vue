@@ -34,7 +34,13 @@
       </div>
     </div>
     <div class="text-right">
-      <hr class="mb-2 mt-2" />
+      <b-link :to="{ name: 'territory-edit', params: { id: terr.id } }">
+        <font-awesome-icon
+          class="small text-primary"
+          icon="pencil-alt"
+        />
+      </b-link>
+      <hr class="my-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
       <div class="d-flex" :class="{
           'justify-content-end': terr.type === 'Regular',
