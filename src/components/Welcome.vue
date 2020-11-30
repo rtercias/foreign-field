@@ -23,16 +23,16 @@
         <div v-else class="row py-2 mx-sm-0 mx-md-5 px-sm-0 px-md-3">
           <div class="col-sm-12 col-md-6 d-flex justify-content-center">
             <b-button-group>
-              <b-button v-if="canWrite" variant="success" size="sm" :to="`/addresses/add`">
+              <b-button v-if="canWrite" variant="success" :to="`/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> Address
               </b-button>
-              <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+              <b-button v-if="canManage" variant="success" :to="`/territories/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> Territory
               </b-button>
-              <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+              <b-button v-if="canManage" variant="outline-light" :to="`/addresses/add`" disabled>
                 <font-awesome-icon icon="plus"></font-awesome-icon> Group
               </b-button>
-              <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
+              <b-button v-if="canManage" variant="outline-light" :to="`/addresses/add`" disabled>
                 <font-awesome-icon icon="plus"></font-awesome-icon> Publisher
               </b-button>
             </b-button-group>

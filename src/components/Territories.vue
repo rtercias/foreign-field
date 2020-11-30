@@ -69,15 +69,20 @@
             {{isCampaignMode ? avail.campaignText : avail.value}}
           </b-dropdown-item>
         </b-dropdown>
-        <b-dropdown class="sort-btn" right variant="secondary">
-          <span slot="button-content">
-            <font-awesome-icon icon="sort-amount-down-alt" />
-            {{sortOption}}
-          </span>
-          <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
-            <font-awesome-icon class="selected" icon="check" v-if="sortOption === option" /> {{option}}
-          </b-dropdown-item>
-        </b-dropdown>
+        <div>
+          <b-dropdown class="sort-btn pr-2" right variant="secondary">
+            <span slot="button-content">
+              <font-awesome-icon icon="sort-amount-down-alt" />
+              {{sortOption}}
+            </span>
+            <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
+              <font-awesome-icon class="selected" icon="check" v-if="sortOption === option" /> {{option}}
+            </b-dropdown-item>
+          </b-dropdown>
+          <b-button v-if="canManage" variant="success" :to="`/territories/add?group=${selectedGroup}`">
+            <font-awesome-icon icon="plus"></font-awesome-icon> Territory
+          </b-button>
+        </div>
       </div>
     </header>
     <div>
@@ -168,6 +173,7 @@ export default {
       territories: 'territories/territories',
       groups: 'auth/groupCodes',
       isDesktop: 'auth/isDesktop',
+      canManage: 'auth/canManage',
     }),
     searchedTerritories() {
       const { territories = [] } = this;

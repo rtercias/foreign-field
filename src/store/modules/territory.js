@@ -277,6 +277,55 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
+    async getTerritoryInfo({ commit, rootGetters }, { id }) {
+      if (!id) {
+        commit(GET_TERRITORY_FAIL, 'id is required');
+        return;
+      }
+      const token = rootGetters['auth/token'];
+      if (!token) {
+        commit(GET_TERRITORY_FAIL, 'Token is missing');
+        return;
+      }
+
+      commit(LOADING_TERRITORY_TRUE);
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Territory($terrId: Int) { 
+              territory (id: $terrId) {
+                group_code
+                id
+                congregationid
+                name
+                description
+                type
+                city
+              }
+            }`),
+            variables: {
+              terrId: id,
+            },
+          },
+        });
+
+        const { territory: terr } = get(response, 'data.data');
+        if (terr && terr.addresses) {
+          terr.addresses = orderBy(terr.addresses, 'sort');
+        }
+        commit(SET_TERRITORY, terr);
+        commit(GET_TERRITORY_SUCCESS);
+        commit(LOADING_TERRITORY_FALSE);
+      } catch (exception) {
+        commit(GET_TERRITORY_FAIL, exception);
+        commit(LOADING_TERRITORY_FALSE);
+        throw exception;
+      }
+    },
+
     async resetTerritoryActivities({ commit }, { checkoutId, userid, tzOffset, timezone }) {
       try {
         const response = await axios({

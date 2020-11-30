@@ -2,7 +2,7 @@
   <div class="masthead lead sticky-top">
     <vue-pull-refresh class="bg-primary" :on-refresh="onRefresh" :config="refreshOptions">
       <b-navbar
-        class="border-warning"
+        class="border-warning py-0"
         :class="{
           'gold-bottom': !isDesktop,
           'font-weight-bold text-left large-font-menu align-items-baseline': isDesktop
@@ -298,7 +298,7 @@ export default {
 
 <style lang="scss" scoped>
 .masthead .navbar {
-  min-height: 68px;
+  min-height: 52px;
 }
 .pull-down-header {
   background-color: unset;
