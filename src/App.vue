@@ -5,7 +5,8 @@
       <b-navbar
         v-if="isDesktop"
         :sticky="true"
-        class="desktop-nav alert-success d-flex justify-content-between border-medium border-bottom">
+        :class="`desktop-nav alert-success d-flex justify-content-between
+          border-medium border-bottom border-left-0 border-right-0 pt-0`">
         <b-link class="button" @click="back">
           <font-awesome-icon icon="chevron-left" v-show="false && showLeftNav"></font-awesome-icon>
         </b-link>
@@ -78,6 +79,7 @@ router-link {
   color: $dark;
 
   .desktop-nav {
+    min-height: 52px;
     padding-top: 14px;
     border-bottom: solid 6px;
   }
