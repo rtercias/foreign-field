@@ -16,6 +16,7 @@ import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
 import PhoneWitnessing from './components/PhoneWitnessing';
 import TerritoryForm from './components/TerritoryForm';
+import CongregationForm from './components/CongregationForm';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -24,6 +25,23 @@ const routes = [
   { name: 'unauthorized', path: '/unauthorized', component: Unauthorized },
   {
     name: 'signout', path: '/signout', component: Signout, props: true,
+  },
+  {
+    name: 'congregation-edit',
+    path: '/congregation',
+    component: CongregationForm,
+    meta: {
+      permissions: ['Admin', 'TS'],
+    },
+  },
+  {
+    name: 'congregation-add',
+    path: '/congregation/:mode',
+    component: CongregationForm,
+    props: true,
+    meta: {
+      permissions: ['Admin'],
+    },
   },
   {
     name: 'territories',

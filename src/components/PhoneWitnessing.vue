@@ -1,12 +1,10 @@
 <template>
-  <Loading v-if="territoryIsLoading" class="w-100" />
-  <div v-else class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
+  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="184px"></SearchBar>
-    <h3 v-if="territory.addresses.length === 0" class="w-100 text-center">
+    <!-- <h3 v-if="addressCount === 0" class="w-100 text-center">
       There are no addresses in this territory.
-    </h3>
+    </h3> -->
     <PhoneAddressCard
-      v-else
       v-for="(a, index) in territory.addresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"
@@ -23,6 +21,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import differenceInDays from 'date-fns/differenceInDays';
 import orderBy from 'lodash/orderBy';
+import get from 'lodash/get';
 import PhoneAddressCard from './PhoneAddressCard';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
@@ -91,6 +90,9 @@ export default {
     },
     containerButtonList() {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
+    },
+    addressCount() {
+      return get(this.territory, 'addresses.length') || 0;
     },
   },
   methods: {

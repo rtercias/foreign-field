@@ -156,7 +156,7 @@ export default {
       // show first two cities
       for (const c of this.cityNames.slice(0, 2)) {
         const city = c.trim();
-        cities += city !== 'null' && `${cities.length > 0 ? ', ' : ''}${city}`;
+        cities += city !== 'null' ? `${cities.length > 0 ? ', ' : ''}${city}` : '';
       }
 
       // count all others

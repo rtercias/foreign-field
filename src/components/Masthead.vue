@@ -36,6 +36,9 @@
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav class="pt-3">
             <b-nav-item to="/">Home</b-nav-item>
+            <b-nav-item v-if="canWrite" :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
+              {{congregation.name}}
+            </b-nav-item>
             <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>
             <b-nav-item
               v-if="canWrite && matchingRouteNames.includes('territory')"
@@ -273,7 +276,6 @@ export default {
       user: 'auth/user',
       name: 'auth/name',
       congId: 'auth/congId',
-      terrCongId: 'territory/congId',
       groupCodes: 'auth/groupCodes',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
       canManage: 'auth/canManage',
@@ -282,6 +284,7 @@ export default {
       canLead: 'auth/canLead',
       isDesktop: 'auth/isDesktop',
       territory: 'territory/territory',
+      congregation: 'auth/congregation',
     }),
     showLeftNav() {
       return this.$route.name !== 'home';
