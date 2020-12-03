@@ -350,9 +350,7 @@ export const address = {
         });
 
         const { lastActivity } = get(response, 'data.data.address') || {};
-        if (lastActivity) {
-          dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
-        }
+        dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
       } catch (e) {
         console.error(`Unable to fetch last activity for address id ${addressId}.`, e);
         throw e;

@@ -268,9 +268,7 @@ export const phone = {
         });
 
         const { lastActivity } = get(response, 'data.data.phone') || {};
-        if (lastActivity) {
-          dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
-        }
+        dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
       } catch (e) {
         console.error(`Unable to fetch last activity for phone id ${phoneId}.`, e);
         throw e;
