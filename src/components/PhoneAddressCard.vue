@@ -74,6 +74,7 @@
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success px-2 py-3"
+              @click="close"
               :href="lookupFastPeopleSearch()" target="_blank">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers
