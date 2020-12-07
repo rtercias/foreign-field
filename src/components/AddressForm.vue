@@ -31,7 +31,7 @@
             <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
           </b-form-group>
         </div>
-        <div v-if="canManage" class="mt-5">
+        <div v-if="canWrite" class="mt-5">
           <div class="text-left" v-if="showTerrHelp">
             <hr/>
             <p>
