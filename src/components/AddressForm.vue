@@ -115,10 +115,10 @@
       <div class="buttons py-4" :class="{ 'justify-content-between': step!==4, 'justify-content-end': step===4 }">
         <b-button v-if="step === 1" type="button" variant="light" @click="done">Cancel</b-button>
         <b-button v-else v-show="step !== 4" type="button" variant="light" @click="prev">Previous</b-button>
-        <b-button v-if="canManage && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">
+        <b-button v-if="canWrite && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
-        <b-button v-if="canManage && step === 2" type="button" variant="light" @click="goToSelectTerritory">
+        <b-button v-if="canWrite && step === 2" type="button" variant="light" @click="goToSelectTerritory">
           Select Territory
         </b-button>
         <b-button
