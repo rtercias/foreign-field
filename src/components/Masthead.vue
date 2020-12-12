@@ -262,7 +262,7 @@ export default {
       });
     },
     toggleClick() {
-      if (!this.isDesktop) window.scrollTo({ top: 0 });
+      window.scrollTo({ top: 0 });
     },
   },
 
