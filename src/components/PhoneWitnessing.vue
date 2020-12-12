@@ -155,7 +155,7 @@ export default {
     scrollToView() {
       const ref = this.$refs[`phone-address-${this.foundId}`];
       const card = ref && ref.length && ref[0];
-      if (card && card.$el) card.$el.scrollIntoView();
+      if (card && card.$el) card.$el.scrollIntoView(false);
     },
 
     compareToKeyword(keyword, values) {

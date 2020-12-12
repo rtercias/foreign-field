@@ -32,7 +32,7 @@
             @click="isSearchHidden = false"
           />
         </b-nav-text>
-        <b-navbar-toggle :class="{ 'd-none': isDesktop }" target="nav_dropdown_collapse"></b-navbar-toggle>
+        <b-navbar-toggle :class="{ 'd-none': isDesktop }" target="nav_dropdown_collapse" @click="toggleClick" />
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav class="pt-3">
             <b-nav-item to="/">Home</b-nav-item>
@@ -260,6 +260,9 @@ export default {
         noAutoHide: true,
         toaster: this.isDesktop ? 'campaign-help' : undefined,
       });
+    },
+    toggleClick() {
+      if (!this.isDesktop) window.scrollTo({ top: 0 });
     },
   },
 

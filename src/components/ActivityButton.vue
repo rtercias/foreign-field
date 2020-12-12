@@ -131,6 +131,9 @@ export default {
   &:hover {
     text-decoration: none;
   }
+  &:focus {
+    box-shadow: 0 0 0 rgb(255, 255, 255);
+  }
 }
 
 @media print {

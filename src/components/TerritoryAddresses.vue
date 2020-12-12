@@ -199,7 +199,7 @@ export default {
       ));
       this.foundId = foundAddress && foundAddress.id || 0;
       const card = this.$refs[`address-${this.foundId}`];
-      if (card && card.$el) card.$el.scrollIntoView();
+      if (card && card.$el) card.$el.scrollIntoView(false);
     },
     compareToKeyword(keyword, values) {
       return values.reduce(
