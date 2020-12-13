@@ -290,13 +290,13 @@ export const auth = {
         url: process.env.VUE_APP_ROOT_API,
         method: 'post',
         data: {
-          query: print(gql`{ congregation (id: ${congId}) { groups }}`),
+          query: print(gql`{ congregation (id: ${congId}) { groups { code } }}`),
         },
       });
 
       const { congregation } = (response && response.data && response.data.data) || [];
-      const groupCodes = congregation && congregation.groups && congregation.groups.sort() || [];
-      commit(SET_GROUP_CODES, groupCodes);
+      const groups = congregation && congregation.groups && congregation.groups.map(g => g.code).sort() || [];
+      commit(SET_GROUP_CODES, groups);
     },
 
     async updateCongregation({ commit }, { cong }) {
