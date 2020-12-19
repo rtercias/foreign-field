@@ -174,14 +174,14 @@ function validateAddress(_address, isNew) {
     address.notes = '';
   }
 
-  const unwantedProperties = [
+  const ignoredProperties = [
     'activityLogs', 'lastActivity', 'incomingResponse', 'selectedResponse', 'selectedResponseTS',
     'phones', 'type', 'parent_id', 'isBusy',
   ];
 
-  for (const unwanted of unwantedProperties) {
-    if (unwanted in address) {
-      delete address[unwanted];
+  for (const ignored of ignoredProperties) {
+    if (ignored in address) {
+      delete address[ignored];
     }
   }
 

@@ -6,6 +6,7 @@ import { store } from '..';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
+import { model, validate } from './models/TerritoryModel';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
@@ -16,6 +17,11 @@ const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
 const LOADING_TERRITORY_FALSE = 'LOADING_TERRITORY_FALSE';
+const ADD_TERRITORY = 'ADD_TERRITORY';
+const ADD_TERRITORY_FAIL = 'ADD_TERRITORY_FAIL';
+const UPDATE_TERRITORY = 'UPDATE_TERRITORY';
+const UPDATE_TERRITORY_FAIL = 'UPDATE_TERRITORY_FAIL';
+
 
 const initialState = {
   territory: {
@@ -104,6 +110,20 @@ export const territory = {
     },
     LOADING_TERRITORY_FALSE(state) {
       Vue.set(state, 'isLoading', false);
+    },
+    ADD_TERRITORY(state, cong) {
+      state.congregation = cong;
+    },
+    ADD_TERRITORY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(ADD_TERRITORY_FAIL, exception);
+    },
+    UPDATE_TERRITORY(state, cong) {
+      state.congregation = cong;
+    },
+    UPDATE_TERRITORY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(UPDATE_TERRITORY_FAIL, exception);
     },
   },
 
@@ -277,55 +297,6 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async getTerritoryInfo({ commit, rootGetters }, { id }) {
-      if (!id) {
-        commit(GET_TERRITORY_FAIL, 'id is required');
-        return;
-      }
-      const token = rootGetters['auth/token'];
-      if (!token) {
-        commit(GET_TERRITORY_FAIL, 'Token is missing');
-        return;
-      }
-
-      commit(LOADING_TERRITORY_TRUE);
-
-      try {
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          data: {
-            query: print(gql`query Territory($terrId: Int) { 
-              territory (id: $terrId) {
-                group_code
-                id
-                congregationid
-                name
-                description
-                type
-                city
-              }
-            }`),
-            variables: {
-              terrId: id,
-            },
-          },
-        });
-
-        const { territory: terr } = get(response, 'data.data');
-        if (terr && terr.addresses) {
-          terr.addresses = orderBy(terr.addresses, 'sort');
-        }
-        commit(SET_TERRITORY, terr);
-        commit(GET_TERRITORY_SUCCESS);
-        commit(LOADING_TERRITORY_FALSE);
-      } catch (exception) {
-        commit(GET_TERRITORY_FAIL, exception);
-        commit(LOADING_TERRITORY_FALSE);
-        throw exception;
-      }
-    },
-
     async resetTerritoryActivities({ commit }, { checkoutId, userid, tzOffset, timezone }) {
       try {
         const response = await axios({
@@ -366,6 +337,125 @@ export const territory = {
 
     setPhoneLastActivity({ commit }, { phoneId, lastActivity }) {
       commit(SET_PHONE_LAST_ACTIVITY, { phoneId, lastActivity });
+    },
+
+    async getTerritoryInfo({ commit, rootGetters }, { id }) {
+      if (!id) {
+        commit(GET_TERRITORY_FAIL, 'id is required');
+        return;
+      }
+      const token = rootGetters['auth/token'];
+      if (!token) {
+        commit(GET_TERRITORY_FAIL, 'Token is missing');
+        return;
+      }
+
+      commit(LOADING_TERRITORY_TRUE);
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Territory($terrId: Int) { 
+              ...TerritoryModel
+            },
+            ${model}`),
+            variables: {
+              terrId: id,
+            },
+          },
+        });
+
+        const { territory: terr } = get(response, 'data.data');
+        commit(SET_TERRITORY, terr);
+        commit(GET_TERRITORY_SUCCESS);
+        commit(LOADING_TERRITORY_FALSE);
+      } catch (exception) {
+        commit(GET_TERRITORY_FAIL, exception);
+        commit(LOADING_TERRITORY_FALSE);
+        throw exception;
+      }
+    },
+
+    async addTerritory({ commit, rootGetters }, _terr) {
+      try {
+        commit('auth/LOADING', true, { root: true });
+
+        const user = rootGetters['auth/user'];
+        const terr = validate(_terr);
+
+        if (!user) {
+          throw new Error('No authorized user');
+        }
+
+        terr.create_user = user.id;
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation AddTerritory($territory: TerritoryInput!) { 
+              addTerritory(territory: $territory) { 
+                ...TerritoryModel
+              }
+            }
+            ${model}`),
+            variables: {
+              territory: terr,
+            },
+          },
+        });
+
+        const { addTerritory } = get(response, 'data.data');
+        commit(ADD_TERRITORY, addTerritory);
+        commit('auth/LOADING', false, { root: true });
+      } catch (error) {
+        commit(ADD_TERRITORY_FAIL, error);
+      }
+    },
+
+    async updateTerritory({ commit, rootGetters }, _terr) {
+      try {
+        commit('auth/LOADING', true, { root: true });
+
+        const user = rootGetters['auth/user'];
+        const terr = validate(_terr);
+
+        if (!user) {
+          throw new Error('No authorized user');
+        }
+
+        terr.update_user = user.id;
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation UpdateTerritory($terr: TerritoryInput!) { 
+              updateTerritory(terr: $terr) { 
+                ...TerritoryModel
+              }
+            }
+            ${model}`),
+            variables: {
+              territory: terr,
+            },
+          },
+        });
+
+        const { updateTerritory } = get(response, 'data.data');
+        commit(UPDATE_TERRITORY, updateTerritory);
+        commit('auth/LOADING', false, { root: true });
+      } catch (error) {
+        commit(UPDATE_TERRITORY_FAIL, error);
+      }
     },
   },
 };

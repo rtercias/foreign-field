@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import clone from 'lodash/clone';
-import { InvalidCongregationError } from '../exceptions/custom-errors';
+import { InvalidCongregationError } from '../../exceptions/custom-errors';
 
 export const model = gql`fragment CongregationModel on Congregation {
   id
@@ -37,13 +37,13 @@ export function validate(_cong, isNew) {
     cong.campaign = 0;
   }
 
-  const unwantedProperties = [
+  const ignoredProperties = [
     'territories', 'publishers', 'groups',
   ];
 
-  for (const unwanted of unwantedProperties) {
-    if (unwanted in cong) {
-      delete cong[unwanted];
+  for (const ignored of ignoredProperties) {
+    if (ignored in cong) {
+      delete cong[ignored];
     }
   }
 

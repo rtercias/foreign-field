@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import clone from 'lodash/clone';
-import { InvalidGroupError } from '../exceptions/custom-errors';
+import { InvalidGroupError } from '../../exceptions/custom-errors';
 
 export const model = gql`fragment GroupModel on Group {
   id

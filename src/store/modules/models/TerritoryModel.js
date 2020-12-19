@@ -1,0 +1,56 @@
+import gql from 'graphql-tag';
+import clone from 'lodash/clone';
+import { InvalidTerritoryError } from '../../exceptions/custom-errors';
+
+export const model = gql`fragment TerritoryModel on Territory {
+  id
+  group_code
+  congregationid
+  name
+  description
+  type
+  city
+  status
+  tags
+}`;
+
+export function validate(_terr, isNew) {
+  const terr = clone(_terr);
+
+  if (isNew && terr.id) {
+    throw new InvalidTerritoryError('Territory ID must be empty when adding a new territory');
+  }
+  if (!terr.congregationid) {
+    throw new InvalidTerritoryError('Congregation id is required');
+  }
+  if (!terr.group_code) {
+    throw new InvalidTerritoryError('Group code is required');
+  }
+  if (!terr.name) {
+    throw new InvalidTerritoryError('Territory name is required');
+  }
+  if (!terr.type) {
+    throw new InvalidTerritoryError('Territory type is required');
+  }
+
+  // convert nullable fields to empty string when null
+  if (terr.description === null) {
+    terr.description = '';
+  }
+
+  if (terr.tags === null) {
+    terr.tags = '';
+  }
+
+  const ignoredProperties = [
+    'addresses', 'inactiveAddresses', 'status', 'lastActivity', 'phones',
+  ];
+
+  for (const ignored of ignoredProperties) {
+    if (ignored in terr) {
+      delete terr[ignored];
+    }
+  }
+
+  return terr;
+}

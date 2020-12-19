@@ -104,18 +104,18 @@ export const group = {
       }
     },
 
-    async addGroup({ commit }, _group) {
+    async addGroup({ commit, rootGetters }, _group) {
       try {
         commit('auth/LOADING', true, { root: true });
 
         const user = rootGetters['auth/user'];
-        const group = validate(_group);
+        const grp = validate(_group);
 
         if (!user) {
           throw new Error('No authorized user');
         }
 
-        group.create_user = user.id;
+        grp.create_user = user.id;
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -131,7 +131,7 @@ export const group = {
             }
             ${model}`),
             variables: {
-              group,
+              group: grp,
             },
           },
         });
@@ -144,18 +144,18 @@ export const group = {
       }
     },
 
-    async updateGroup({ commit }, _group) {
+    async updateGroup({ commit, rootGetters }, _group) {
       try {
         commit('auth/LOADING', true, { root: true });
 
         const user = rootGetters['auth/user'];
-        const group = validate(_group);
+        const grp = validate(_group);
 
         if (!user) {
           throw new Error('No authorized user');
         }
 
-        group.update_user = user.id;
+        grp.update_user = user.id;
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -171,7 +171,7 @@ export const group = {
             }
             ${model}`),
             variables: {
-              group,
+              group: grp,
             },
           },
         });

@@ -92,6 +92,7 @@ export const congregation = {
             query: print(gql`query Congregation($congId: Int) { 
               congregation (id: $congId) {
                 ...CongregationModel
+                groups
               }
             },
             ${model}`),
@@ -109,7 +110,7 @@ export const congregation = {
       }
     },
 
-    async addCongregation({ commit }, _cong) {
+    async addCongregation({ commit, rootGetters }, _cong) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -149,7 +150,7 @@ export const congregation = {
       }
     },
 
-    async updateCongregation({ commit }, _cong) {
+    async updateCongregation({ commit, rootGetters }, _cong) {
       try {
         commit('auth/LOADING', true, { root: true });
 

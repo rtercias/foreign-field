@@ -128,40 +128,15 @@ function validatePhone(_phone, isNew) {
     phone.notes = '';
   }
 
-  if ('activityLogs' in phone) {
-    delete phone.activityLogs;
-  }
+  const ignoredProperties = [
+    'activityLogs', 'lastActivity', 'incomingResponse', 'selectedResponse', 'selectedResponseTS',
+    'isBusy', 'editMode', 'create_date', 'update_date',
+  ];
 
-  if ('lastActivity' in phone) {
-    delete phone.lastActivity;
-  }
-
-  if ('incomingResponse' in phone) {
-    delete phone.incomingResponse;
-  }
-
-  if ('selectedResponse' in phone) {
-    delete phone.selectedResponse;
-  }
-
-  if ('selectedResponseTS' in phone) {
-    delete phone.selectedResponseTS;
-  }
-
-  if ('isBusy' in phone) {
-    delete phone.isBusy;
-  }
-
-  if ('editMode' in phone) {
-    delete phone.editMode;
-  }
-
-  if ('create_date' in phone) {
-    delete phone.create_date;
-  }
-
-  if ('update_date' in phone) {
-    delete phone.update_date;
+  for (const ignored of ignoredProperties) {
+    if (ignored in phone) {
+      delete phone[ignored];
+    }
   }
 
   return phone;
