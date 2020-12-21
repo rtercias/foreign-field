@@ -28,15 +28,16 @@ const routes = [
   },
   {
     name: 'congregation-edit',
-    path: '/congregation',
+    path: '/congregation/:id(\\d+)',
     component: CongregationForm,
+    props: true,
     meta: {
       permissions: ['Admin', 'TS'],
     },
   },
   {
     name: 'congregation-add',
-    path: '/congregation/:mode',
+    path: '/congregation/add',
     component: CongregationForm,
     props: true,
     meta: {

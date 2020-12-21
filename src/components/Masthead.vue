@@ -36,7 +36,9 @@
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav class="pt-3">
             <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item v-if="canWrite" :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
+            <b-nav-item
+              v-if="canManage || canLead"
+              :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
               {{congregation.name}}
             </b-nav-item>
             <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>

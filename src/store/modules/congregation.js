@@ -1,10 +1,10 @@
-import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
 import { model, validate } from './models/CongregationModel';
 
+const SET_CONGREGATION = 'SET_CONGREGATION';
 const ADD_CONGREGATION = 'ADD_CONGREGATION';
 const ADD_CONGREGATION_FAIL = 'ADD_CONGREGATION_FAIL';
 const UPDATE_CONGREGATION = 'UPDATE_CONGREGATION';
@@ -41,6 +41,9 @@ export const congregation = {
   },
 
   mutations: {
+    SET_CONGREGATION(state, cong) {
+      state.congregation = cong;
+    },
     GET_CONGREGATION_FAIL(state, exception) {
       state.error = exception;
       console.error(GET_CONGREGATION_FAIL, exception);
@@ -69,7 +72,11 @@ export const congregation = {
   },
 
   actions: {
-    async getCongregation({ commit, getters, rootGetters, dispatch }, { id }) {
+    async setCongregation({ commit }, cong) {
+      commit(SET_CONGREGATION, cong);
+    },
+
+    async getCongregation({ commit, getters, rootGetters }, { id }) {
       if (!id) {
         commit(GET_CONGREGATION_FAIL, 'id is required');
         return;
@@ -103,6 +110,10 @@ export const congregation = {
         });
 
         const { congregation: cong } = get(response, 'data.data');
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
         commit(GET_CONGREGATION_SUCCESS, cong);
       } catch (exception) {
         commit(GET_CONGREGATION_FAIL, exception);
@@ -122,7 +133,9 @@ export const congregation = {
         }
 
         cong.create_user = user.id;
-
+        if (cong.options && typeof cong.options === 'object') {
+          cong.options = JSON.stringify(cong.options);
+        }
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -143,6 +156,10 @@ export const congregation = {
         });
 
         const { addCongregation } = get(response, 'data.data');
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
         commit(ADD_CONGREGATION, addCongregation);
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
@@ -162,6 +179,9 @@ export const congregation = {
         }
 
         cong.update_user = user.id;
+        if (cong.options && typeof cong.options === 'object') {
+          cong.options = JSON.stringify(cong.options);
+        }
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -183,6 +203,10 @@ export const congregation = {
         });
 
         const { updateCongregation } = get(response, 'data.data');
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
         commit(UPDATE_CONGREGATION, updateCongregation);
         commit('auth/LOADING', false, { root: true });
       } catch (error) {

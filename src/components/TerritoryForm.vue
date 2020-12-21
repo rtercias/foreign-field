@@ -35,7 +35,8 @@
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
           type="submit"
-          variant="primary">
+          variant="primary"
+          @click="submit">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
@@ -60,7 +61,7 @@ const Types = [
   { text: 'Business', value: 'BUSINESS' },
   { text: 'Test', value: 'Test' },
 ];
-// const required = ['congregationId', 'name', 'group_code', 'type'];
+const required = ['congregationid', 'group_code', 'name', 'description', 'type'];
 
 export default {
   name: 'TerritoryForm',
@@ -73,24 +74,24 @@ export default {
       modes: Modes,
       isLoading: false,
       isSaving: false,
-      isFormComplete: false,
       model: {},
       error: '',
     };
   },
   async mounted() {
     window.scrollTo(0, 0);
-    // this.setLeftNavRoute(this.returnRoute);
+    this.setLeftNavRoute(`/groups/${this.defaultGroup}`);
     await this.refresh();
   },
   methods: {
     ...mapActions({
       getTerritoryInfo: 'territory/getTerritoryInfo',
-      fetchAllTerritories: 'territories/fetchAllTerritoriss',
+      addTerritory: 'territory/addTerritory',
+      updateTerritory: 'territory/updateTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
       getGroupCodes: 'auth/getGroupCodes',
     }),
-    async submitAddress() {
+    async submit() {
       try {
         this.isSaving = true;
         if (this.mode === Modes.add) {
@@ -107,6 +108,7 @@ export default {
         }
       }
       this.isSaving = false;
+      this.cancel();
     },
 
     cancel() {
@@ -154,13 +156,19 @@ export default {
       return this.id ? Modes.edit : Modes.add;
     },
     defaultGroup() {
-      return get(this.$route, 'query.group') || '';
+      return get(this.$route, 'query.group') || this.territory.group_code;
     },
     typeOptions() {
       return Types;
     },
     groupOptions() {
       return this.groupCodes.map(g => ({ text: g, value: g }));
+    },
+    isFormComplete() {
+      for (const field of required) {
+        if (!this.model[field]) return false;
+      }
+      return true;
     },
   },
 };

@@ -29,12 +29,16 @@ export function validate(_cong, isNew) {
   }
 
   // convert nullable fields to empty string when null
-  if (cong.description === null) {
+  if (!cong.description) {
     cong.description = '';
   }
 
-  if (cong.campaign === null) {
+  if (!cong.campaign) {
     cong.campaign = 0;
+  }
+
+  if (!cong.options) {
+    cong.options = '';
   }
 
   const ignoredProperties = [

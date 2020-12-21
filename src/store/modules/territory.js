@@ -358,7 +358,9 @@ export const territory = {
           method: 'post',
           data: {
             query: print(gql`query Territory($terrId: Int) { 
-              ...TerritoryModel
+              territory(id: $terrId) { 
+                ...TerritoryModel
+              }
             },
             ${model}`),
             variables: {
@@ -438,8 +440,8 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation UpdateTerritory($terr: TerritoryInput!) { 
-              updateTerritory(terr: $terr) { 
+            query: print(gql`mutation UpdateTerritory($territory: TerritoryInput!) { 
+              updateTerritory(territory: $territory) { 
                 ...TerritoryModel
               }
             }

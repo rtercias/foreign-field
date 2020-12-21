@@ -19,27 +19,33 @@
       <b-form-group label="Language" class="mt-3">
         <b-form-input v-model="model.language"></b-form-input>
       </b-form-group>
-      <b-form-group label="Campaign Mode" class="mt-3">
-        <b-form-checkbox :checked="model.campaign" disabled></b-form-checkbox>
-      </b-form-group>
       <b-form-group label="Admin Email" class="mt-3">
         <b-form-input v-model="model.admin_email"></b-form-input>
       </b-form-group>
+      <b-form-group class="mt-3">
+        <b-form-checkbox :checked="model.campaign">Campaign Mode</b-form-checkbox>
+      </b-form-group>
       <hr />
-      <!-- <div v-for="domain in domains" :key="domain.key">
-        <b-form-group v-for="option in domainOptions(domain)" :key="option.key" class="mt-3">
+      OPTIONS
+      <div v-for="optionGroup in optionGroups" :key="optionGroup.key">
+        <b-form-group
+          v-for="option in options(optionGroup, optionGroup.key)"
+          :key="option"
+          class="mt-3"
+          :label="proper(optionGroup.key)">
           <b-form-select
-            :options="congOptions(option.key)">
+            :options="congOptions(option)" v-model="optionGroup[optionGroup.key][option]">
           </b-form-select>
         </b-form-group>
-      </div> -->
+      </div>
       <div class="buttons py-4 justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
         <b-button
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
           type="submit"
-          variant="primary">
+          variant="primary"
+          @click="submit">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
@@ -49,6 +55,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import startCase from 'lodash/startCase';
 import Loading from './Loading';
 import { InvalidCongregationError } from '../store/exceptions/custom-errors';
 
@@ -57,11 +64,11 @@ const Modes = {
   edit: 'edit',
 };
 
-const CongOptions = [
-  { defaultView: ['address-list', 'phone-list'] },
-  { defaultSort: ['Description', 'Name'] },
-];
-// const required = ['name', 'language', 'admin_email'];
+const CongOptions = {
+  defaultView: [{ value: 'address-list', text: 'Address List' }, { value: 'phone-list', text: 'Phone List' }],
+  defaultSort: ['Description', 'Name'],
+};
+const required = ['name', 'language', 'admin_email'];
 
 export default {
   name: 'CongregationForm',
@@ -74,21 +81,19 @@ export default {
       modes: Modes,
       isLoading: false,
       isSaving: false,
-      isFormComplete: false,
       model: {},
       error: '',
     };
   },
   async mounted() {
-    // window.scrollTo(0, 0);
-    // this.setLeftNavRoute(this.returnRoute);
     await this.refresh();
   },
   methods: {
     ...mapActions({
-      setLeftNavRoute: 'auth/setLeftNavRoute',
+      addCongregation: 'congregation/addCongregation',
+      updateCongregation: 'congregation/updateCongregation',
     }),
-    async submitCong() {
+    async submit() {
       try {
         this.isSaving = true;
         if (this.mode === Modes.add) {
@@ -126,33 +131,47 @@ export default {
     congOptions(key) {
       return CongOptions[key];
     },
+    options(group) {
+      const options = [];
+      if (group) {
+        for (const [key] of Object.entries(group[group.key])) {
+          options.push(key);
+        }
+      }
+      return options;
+    },
+    proper(text) {
+      return startCase(text);
+    },
   },
   computed: {
     ...mapGetters({
       user: 'auth/user',
       isAdmin: 'auth/isAdmin',
-      congregation: 'auth/congregation',
+      congregation: 'congregation/congregation',
     }),
     mode() {
       return this.id ? Modes.edit : Modes.add;
     },
-    domains() {
-      const domains = [];
-      if (this.model && this.model.option) {
-        for (const [key, value] of Object.entries(this.model.option)) {
-          domains.push({ [key]: value });
+    optionGroups() {
+      const optionGroups = [];
+      if (this.model && this.model.options) {
+        for (const [key, value] of Object.entries(this.model.options)) {
+          optionGroups.push({ key, [key]: value });
         }
       }
-      return domains;
+      return optionGroups;
     },
-    domainOptions(domain) {
-      const options = [];
-      if (domain) {
-        for (const [key, value] of Object.entries(domain)) {
-          options.push({ [key]: value });
-        }
+    isFormComplete() {
+      for (const field of required) {
+        if (!this.model[field]) return false;
       }
-      return options;
+      return true;
+    },
+  },
+  watch: {
+    async user() {
+      await this.refresh();
     },
   },
 };

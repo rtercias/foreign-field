@@ -148,7 +148,7 @@ export const auth = {
       });
     },
 
-    async authorize({ commit }, username) {
+    async authorize({ commit, dispatch }, username) {
       commit(LOADING, true);
       return new Promise(async (resolve, reject) => {
         const response = await axios({
@@ -193,6 +193,7 @@ export const auth = {
         const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
         if (hasPermission) {
           commit(AUTHORIZE, { ...user, congregation });
+          dispatch('congregation/setCongregation', congregation, { root: true });
           resolve();
         } else {
           reject(new UnauthorizedUserError('Unauthorized'));

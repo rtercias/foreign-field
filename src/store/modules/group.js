@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
@@ -40,19 +39,19 @@ export const group = {
       state.error = exception;
       console.error(GET_GROUP_FAIL, exception);
     },
-    GET_GROUP_SUCCESS(state, group) {
-      state.group = group;
+    GET_GROUP_SUCCESS(state, _group) {
+      state.group = _group;
       state.error = null;
     },
-    ADD_GROUP(state, group) {
-      state.group = group;
+    ADD_GROUP(state, _group) {
+      state.group = _group;
     },
     ADD_GROUP_FAIL(state, exception) {
       state.error = exception;
       console.error(ADD_GROUP_FAIL, exception);
     },
-    UPDATE_GROUP(state, group) {
-      state.group = group;
+    UPDATE_GROUP(state, _group) {
+      state.group = _group;
     },
     UPDATE_GROUP_FAIL(state, exception) {
       state.error = exception;
@@ -64,7 +63,7 @@ export const group = {
   },
 
   actions: {
-    async getGroup({ commit, getters, rootGetters, dispatch }, { id }) {
+    async getGroup({ commit, getters, rootGetters }, { id }) {
       if (!id) {
         commit(GET_GROUP_FAIL, 'id is required');
         return;
@@ -96,8 +95,8 @@ export const group = {
           },
         });
 
-        const { group } = get(response, 'data.data');
-        commit(GET_GROUP_SUCCESS, group);
+        const { group: _group } = get(response, 'data.data');
+        commit(GET_GROUP_SUCCESS, _group);
       } catch (exception) {
         commit(GET_GROUP_FAIL, exception);
         throw exception;

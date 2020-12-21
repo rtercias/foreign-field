@@ -9,8 +9,13 @@ export const model = gql`fragment TerritoryModel on Territory {
   name
   description
   type
-  city
-  status
+  status {
+    checkout_id
+    status
+    date
+    publisherid
+    campaign
+  }
   tags
 }`;
 
@@ -28,6 +33,9 @@ export function validate(_terr, isNew) {
   }
   if (!terr.name) {
     throw new InvalidTerritoryError('Territory name is required');
+  }
+  if (!terr.description) {
+    throw new InvalidTerritoryError('Territory description is required');
   }
   if (!terr.type) {
     throw new InvalidTerritoryError('Territory type is required');
