@@ -27,18 +27,9 @@
       </b-form-group>
       <hr />
       OPTIONS
-      <div v-for="optionGroup in optionGroups" :key="optionGroup.key">
-        <b-form-group
-          v-for="option in options(optionGroup, optionGroup.key)"
-          :key="option"
-          class="mt-3"
-          :label="proper(optionGroup.key)">
-          <b-form-select
-            :options="congOptions(option)" v-model="optionGroup[optionGroup.key][option]">
-          </b-form-select>
-        </b-form-group>
-      </div>
-      <div class="buttons py-4 justify-content-between">
+      <option-tree v-for="node in getNodes()" :node="node" :key="node.key" :depth="0"></option-tree>
+      <hr />
+      <div class="buttons justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
         <b-button
           :disabled="!isFormComplete || isSaving"
@@ -56,7 +47,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import startCase from 'lodash/startCase';
+import get from 'lodash/get';
 import Loading from './Loading';
+import OptionTree from './OptionTree';
 import { InvalidCongregationError } from '../store/exceptions/custom-errors';
 
 const Modes = {
@@ -64,9 +57,21 @@ const Modes = {
   edit: 'edit',
 };
 
-const CongOptions = {
-  defaultView: [{ value: 'address-list', text: 'Address List' }, { value: 'phone-list', text: 'Phone List' }],
-  defaultSort: ['Description', 'Name'],
+const CongDefault = {
+  options: {
+    territory: {
+      defaultView: [
+        { value: 'address-list', text: 'Address List' },
+        { value: 'phone-list', text: 'Phone List' },
+      ],
+    },
+    territories: {
+      defaultSort: [
+        'Description',
+        'Name',
+      ],
+    },
+  },
 };
 const required = ['name', 'language', 'admin_email'];
 
@@ -75,6 +80,7 @@ export default {
   props: ['id'],
   components: {
     Loading,
+    OptionTree,
   },
   data() {
     return {
@@ -128,20 +134,33 @@ export default {
       }
       this.isLoading = false;
     },
-    congOptions(key) {
-      return CongOptions[key];
-    },
-    options(group) {
-      const options = [];
-      if (group) {
-        for (const [key] of Object.entries(group[group.key])) {
-          options.push(key);
+    getNodes(_path) {
+      const path = _path || 'options';
+      const node = get(this.model, path);
+      const nodes = [];
+      if (typeof node === 'object') {
+        for (const [key, value] of Object.entries(node)) {
+          nodes.push({
+            key,
+            nodes: this.getNodes(`${path}.${key}`),
+            value,
+            label: startCase(key),
+            options: this.congOptions(`${path}.${key}`),
+          });
         }
+        return nodes;
       }
-      return options;
+      return undefined;
     },
     proper(text) {
       return startCase(text);
+    },
+    congOptions(key) {
+      const option = get(CongDefault, key);
+      if (Array.isArray(option)) {
+        return option;
+      }
+      return null;
     },
   },
   computed: {
@@ -152,15 +171,6 @@ export default {
     }),
     mode() {
       return this.id ? Modes.edit : Modes.add;
-    },
-    optionGroups() {
-      const optionGroups = [];
-      if (this.model && this.model.options) {
-        for (const [key, value] of Object.entries(this.model.options)) {
-          optionGroups.push({ key, [key]: value });
-        }
-      }
-      return optionGroups;
     },
     isFormComplete() {
       for (const field of required) {
