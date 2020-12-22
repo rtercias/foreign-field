@@ -96,10 +96,15 @@ export const congregation = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Congregation($congId: Int) { 
+            query: print(gql`query Congregation($congId: Int!) { 
               congregation (id: $congId) {
                 ...CongregationModel
-                groups
+                groups {
+                  id
+                  code
+                  description
+                  overseer
+                }
               }
             },
             ${model}`),
@@ -109,11 +114,12 @@ export const congregation = {
           },
         });
 
-        const { congregation: cong } = get(response, 'data.data');
         const { errors } = get(response, 'data');
         if (errors && errors.length) {
           throw new Error(errors[0].message);
         }
+        const { congregation: cong } = get(response, 'data.data');
+        cong.options = JSON.parse(get(cong, 'options', '{}'));
         commit(GET_CONGREGATION_SUCCESS, cong);
       } catch (exception) {
         commit(GET_CONGREGATION_FAIL, exception);
@@ -155,11 +161,11 @@ export const congregation = {
           },
         });
 
-        const { addCongregation } = get(response, 'data.data');
         const { errors } = get(response, 'data');
         if (errors && errors.length) {
           throw new Error(errors[0].message);
         }
+        const { addCongregation } = get(response, 'data.data');
         commit(ADD_CONGREGATION, addCongregation);
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
@@ -202,11 +208,11 @@ export const congregation = {
           },
         });
 
-        const { updateCongregation } = get(response, 'data.data');
         const { errors } = get(response, 'data');
         if (errors && errors.length) {
           throw new Error(errors[0].message);
         }
+        const { updateCongregation } = get(response, 'data.data');
         commit(UPDATE_CONGREGATION, updateCongregation);
         commit('auth/LOADING', false, { root: true });
       } catch (error) {

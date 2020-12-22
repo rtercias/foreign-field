@@ -26,8 +26,14 @@
         <b-form-checkbox :checked="model.campaign">Campaign Mode</b-form-checkbox>
       </b-form-group>
       <hr />
-      OPTIONS
-      <option-tree v-for="node in getNodes()" :node="node" :key="node.key" :depth="0"></option-tree>
+      Preferences
+      <option-tree
+        v-for="node in getNodes()"
+        :key="node.key"
+        :node="node"
+        :depth="0"
+        @option-updated="updateOption"
+      />
       <hr />
       <div class="buttons justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
@@ -48,6 +54,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import startCase from 'lodash/startCase';
 import get from 'lodash/get';
+import set from 'lodash/set';
+import has from 'lodash/has';
 import Loading from './Loading';
 import OptionTree from './OptionTree';
 import { InvalidCongregationError } from '../store/exceptions/custom-errors';
@@ -59,17 +67,31 @@ const Modes = {
 
 const CongDefault = {
   options: {
-    territory: {
-      defaultView: [
-        { value: 'address-list', text: 'Address List' },
-        { value: 'phone-list', text: 'Phone List' },
-      ],
-    },
     territories: {
-      defaultSort: [
-        'Description',
-        'Name',
-      ],
+      defaultSort: {
+        options: [
+          'Description',
+          'Name',
+        ],
+      },
+    },
+    territory: {
+      defaultView: {
+        options: [
+          { value: 'address-list', text: 'Address List' },
+          { value: 'phone-list', text: 'Phone List' },
+        ],
+      },
+    },
+    level1: {
+      level2: {
+        level3: {
+          options: [
+            'test1',
+            'test2',
+          ],
+        },
+      },
     },
   },
 };
@@ -96,6 +118,7 @@ export default {
   },
   methods: {
     ...mapActions({
+      getCongregation: 'congregation/getCongregation',
       addCongregation: 'congregation/addCongregation',
       updateCongregation: 'congregation/updateCongregation',
     }),
@@ -130,22 +153,25 @@ export default {
     async refresh() {
       this.isLoading = true;
       if (this.mode === Modes.edit) {
+        await this.getCongregation({ id: this.id });
         this.model = this.congregation;
       }
       this.isLoading = false;
     },
     getNodes(_path) {
       const path = _path || 'options';
-      const node = get(this.model, path);
       const nodes = [];
+      const node = get(CongDefault, path);
       if (typeof node === 'object') {
-        for (const [key, value] of Object.entries(node)) {
+        for (const [key] of Object.entries(node)) {
+          if (key === 'options') return undefined;
+          const fullPath = `${path}.${key}`;
           nodes.push({
-            key,
-            nodes: this.getNodes(`${path}.${key}`),
-            value,
+            key: fullPath,
+            nodes: this.getNodes(fullPath),
+            value: get(this.model, fullPath),
             label: startCase(key),
-            options: this.congOptions(`${path}.${key}`),
+            options: this.congOptions(fullPath),
           });
         }
         return nodes;
@@ -156,11 +182,18 @@ export default {
       return startCase(text);
     },
     congOptions(key) {
-      const option = get(CongDefault, key);
-      if (Array.isArray(option)) {
-        return option;
+      const node = get(CongDefault, key) || {};
+      if (Array.isArray(node.options)) {
+        return node.options;
       }
       return null;
+    },
+    updateOption({ key, value }) {
+      if (has(this.model, key)) {
+        set(this.model, key, value);
+      } else {
+        set(this.model, key.split('.'), value);
+      }
     },
   },
   computed: {
