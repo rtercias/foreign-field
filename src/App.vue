@@ -5,7 +5,7 @@
       <b-navbar
         v-if="isDesktop"
         :sticky="true"
-        :class="`desktop-nav alert-success d-flex justify-content-between
+        :class="`desktop-nav alert-secondary d-flex justify-content-between
           border-medium border-bottom border-left-0 border-right-0 pt-0`">
         <b-link class="button" @click="back">
           <font-awesome-icon icon="chevron-left" v-show="false && showLeftNav"></font-awesome-icon>
@@ -85,6 +85,6 @@ router-link {
   }
 }
 .view {
-  height: calc(100% - 1.5em);
+  height: calc(100% - 52px);
 }
 </style>

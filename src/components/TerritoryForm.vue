@@ -9,7 +9,7 @@
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <Loading v-if="isLoading"></Loading>
-    <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submitTerritory">
+    <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
       <b-form-group label="Territory Name" class="mt-3">
         <b-form-input v-model="model.name"></b-form-input>
       </b-form-group>
@@ -35,8 +35,7 @@
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
           type="submit"
-          variant="primary"
-          @click="submit">
+          variant="primary">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
@@ -80,7 +79,6 @@ export default {
   },
   async mounted() {
     window.scrollTo(0, 0);
-    this.setLeftNavRoute(`/groups/${this.defaultGroup}`);
     await this.refresh();
   },
   methods: {
@@ -93,11 +91,22 @@ export default {
     }),
     async submit() {
       try {
-        this.isSaving = true;
-        if (this.mode === Modes.add) {
-          await this.addTerritory(this.model);
-        } else if (this.mode === Modes.edit) {
-          await this.updateTerritory(this.model);
+        const message = 'Are you sure you want to save your changes?';
+        const confirm = await this.$bvModal.msgBoxConfirm(message, {
+          title: this.territory.name,
+          centered: true,
+        });
+        if (confirm) {
+          this.isSaving = true;
+          if (this.mode === Modes.add) {
+            await this.addTerritory(this.model);
+          } else if (this.mode === Modes.edit) {
+            await this.updateTerritory(this.model);
+          }
+          this.$bvToast.toast('Territory saved.', {
+            title: this.territory.name,
+            solid: true,
+          });
         }
       } catch (err) {
         if (err instanceof InvalidTerritoryError) {
@@ -137,6 +146,7 @@ export default {
           create_user: this.user && this.user.username,
         };
       }
+      this.setLeftNavRoute(`/groups/${this.defaultGroup}`);
       this.isLoading = false;
     },
   },
@@ -149,7 +159,6 @@ export default {
       isAdmin: 'auth/isAdmin',
       groupCodes: 'auth/groupCodes',
       territory: 'territory/territory',
-      territories: 'territories/territories',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
     }),
     mode() {

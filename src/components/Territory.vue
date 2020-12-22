@@ -2,20 +2,20 @@
   <div class="territory">
     <Loading v-if="territoryIsLoading" />
     <div v-else>
-      <header class="page-header sticky-top w-100 p-2 bg-white border-bottom" :sticky="true">
+      <header class="page-header sticky-top w-100 pt-2 px-2 pb-0 bg-white border-bottom" :sticky="true">
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
-            <div class="text-left">
+            <div class="text-left w-50">
               <h4 class="mb-0">{{territory.description}}</h4>
-              <span>{{cities}}</span>
+              <span class="cities">{{cities}}</span>
             </div>
-            <h4 class="text-right">
-                <font-awesome-icon
-                  class="text-primary d-xl-none"
-                  icon="sms"
-                  size="sm"
-                  @click="openSMSMobile()">
-                </font-awesome-icon> {{territoryName}}
+            <h4 class="text-right w-50 territory-name">
+              <font-awesome-icon
+                class="text-primary d-xl-none"
+                icon="sms"
+                size="sm"
+                @click="openSMSMobile()">
+              </font-awesome-icon> {{territoryName}}
             </h4>
           </div>
           <div class="w-100 d-flex justify-content-between py-2">
@@ -269,6 +269,18 @@ li {
 }
 .add-new {
   font-size: 24px;
+}
+.territory-name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
+}
+.cities {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
 }
 @media (min-width: 769px) {
   .columns {

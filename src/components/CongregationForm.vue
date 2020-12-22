@@ -9,7 +9,7 @@
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <Loading v-if="isLoading"></Loading>
-    <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submitCong">
+    <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
       <b-form-group label="Congregation Name" class="mt-3">
         <b-form-input v-model="model.name"></b-form-input>
       </b-form-group>
@@ -43,8 +43,7 @@
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
           type="submit"
-          variant="primary"
-          @click="submit">
+          variant="primary">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
           <span v-else>Submit</span>
         </b-button>
@@ -97,11 +96,22 @@ export default {
     }),
     async submit() {
       try {
-        this.isSaving = true;
-        if (this.mode === Modes.add) {
-          await this.addCongregation(this.model);
-        } else if (this.mode === Modes.edit) {
-          await this.updateCongregation(this.model);
+        const message = 'Are you sure you want to save your changes?';
+        const confirm = await this.$bvModal.msgBoxConfirm(message, {
+          title: this.congregation.name,
+          centered: true,
+        });
+        if (confirm) {
+          this.isSaving = true;
+          if (this.mode === Modes.add) {
+            await this.addCongregation(this.model);
+          } else if (this.mode === Modes.edit) {
+            await this.updateCongregation(this.model);
+          }
+          this.$bvToast.toast('Congregation saved.', {
+            title: this.congregation.name,
+            solid: true,
+          });
         }
       } catch (err) {
         if (err instanceof InvalidCongregationError) {
@@ -175,6 +185,9 @@ export default {
       isAdmin: 'auth/isAdmin',
       congregation: 'congregation/congregation',
     }),
+    canEditCongregation() {
+      return this.isAdmin || this.user.congregation.id === this.id;
+    },
     mode() {
       return this.id ? Modes.edit : Modes.add;
     },

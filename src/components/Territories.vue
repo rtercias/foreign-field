@@ -1,7 +1,7 @@
 <template>
   <Loading v-if="loading"></Loading>
   <div v-else class="territories" :key="groupCode">
-    <header class="page-header sticky-top d-flex flex-column align-items-center p-3">
+    <header class="page-header sticky-top d-flex flex-column align-items-center p-3 border-bottom">
       <div class="w-100 d-flex align-items-start">
         <groups-select :selected-group="selectedGroup"></groups-select>
         <div class="col-sm-auto col-md-1"></div>
@@ -15,7 +15,7 @@
           </b-badge>
           <b-badge
             variant="success"
-            class="btn alert p-2 border-medium"
+            class="btn alert p-2 border-medium mb-0"
             :class="{ 'border-primary': typeFilter === 'BUSINESS' }"
             @click="() => setTypeFilter('BUSINESS')">
             Business ({{count('Business')}})
@@ -26,7 +26,7 @@
           <b-badge
             v-for="avail in availabilityFilters.filter(a => a.value !== 'All')"
             :key="avail.value"
-            class="btn alert p-2 border-medium"
+            class="btn alert p-2 border-medium mb-0"
             :class="{
               'border-primary': availability === avail.value,
               'border-secondary bg-white': avail.value === 'Available' && availability !== 'Available',
@@ -37,14 +37,6 @@
           </b-badge>
         </b-button-group>
       </div>
-      <SearchBar
-        class="w-100"
-        :search-text="'Filter by territory name or description'"
-        :results="filteredTerritories"
-        allow-exclude="true"
-        :model="keywordFilter"
-        @on-change="applyFilter">
-      </SearchBar>
       <div class="d-flex w-100 justify-content-between w-100 pt-2">
         <b-dropdown left variant="secondary">
           <span slot="button-content">
@@ -84,6 +76,15 @@
           </b-button>
         </div>
       </div>
+      <SearchBar
+        class="w-100 pt-3"
+        :search-text="'Filter by territory name or description'"
+        :results="filteredTerritories"
+        allow-exclude="true"
+        :model="keywordFilter"
+        no-padding="true"
+        @on-change="applyFilter">
+      </SearchBar>
     </header>
     <div>
       <b-list-group class="columns flex-row flex-wrap">
