@@ -46,7 +46,6 @@ export const congregation = {
     },
     GET_CONGREGATION_FAIL(state, exception) {
       state.error = exception;
-      console.error(GET_CONGREGATION_FAIL, exception);
     },
     GET_CONGREGATION_SUCCESS(state, cong) {
       state.congregation = cong;
@@ -57,14 +56,12 @@ export const congregation = {
     },
     ADD_CONGREGATION_FAIL(state, exception) {
       state.error = exception;
-      console.error(ADD_CONGREGATION_FAIL, exception);
     },
     UPDATE_CONGREGATION(state, cong) {
       state.congregation = cong;
     },
     UPDATE_CONGREGATION_FAIL(state, exception) {
       state.error = exception;
-      console.error(UPDATE_CONGREGATION_FAIL, exception);
     },
     RESET_ERROR(state) {
       state.error = null;
@@ -123,7 +120,7 @@ export const congregation = {
         commit(GET_CONGREGATION_SUCCESS, cong);
       } catch (exception) {
         commit(GET_CONGREGATION_FAIL, exception);
-        throw exception;
+        console.error(GET_CONGREGATION_FAIL, exception);
       }
     },
 
@@ -170,6 +167,7 @@ export const congregation = {
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
         commit(ADD_CONGREGATION_FAIL, error);
+        console.error(GET_CONGREGATION_FAIL, error);
       }
     },
 
@@ -217,6 +215,7 @@ export const congregation = {
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
         commit(UPDATE_CONGREGATION_FAIL, error);
+        console.error(GET_CONGREGATION_FAIL, error);
       }
     },
   },

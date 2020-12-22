@@ -4,7 +4,7 @@ import { print } from 'graphql/language/printer';
 import clone from 'lodash/clone';
 import get from 'lodash/get';
 import { InvalidPhoneError } from '../exceptions/custom-errors';
-import { activityModel } from './address';
+import { model as activityModel } from './models/ActivityModel';
 
 const phoneModel = gql`fragment PhoneModel on Phone {
   id
@@ -246,7 +246,6 @@ export const phone = {
         dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
       } catch (e) {
         console.error(`Unable to fetch last activity for phone id ${phoneId}.`, e);
-        throw e;
       }
     },
 

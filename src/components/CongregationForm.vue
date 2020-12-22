@@ -23,10 +23,12 @@
         <b-form-input v-model="model.admin_email"></b-form-input>
       </b-form-group>
       <b-form-group class="mt-3">
-        <b-form-checkbox :checked="model.campaign">Campaign Mode</b-form-checkbox>
+        <b-form-checkbox :checked="model.campaign" v-model="model.campaign">
+          Campaign Mode
+        </b-form-checkbox>
       </b-form-group>
       <hr />
-      Preferences
+      <span class="d-block pb-2">Preferences</span>
       <option-tree
         v-for="node in getNodes()"
         :key="node.key"
@@ -59,42 +61,13 @@ import has from 'lodash/has';
 import Loading from './Loading';
 import OptionTree from './OptionTree';
 import { InvalidCongregationError } from '../store/exceptions/custom-errors';
+import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 
 const Modes = {
   add: 'add',
   edit: 'edit',
 };
 
-const CongDefault = {
-  options: {
-    territories: {
-      defaultSort: {
-        options: [
-          'Description',
-          'Name',
-        ],
-      },
-    },
-    territory: {
-      defaultView: {
-        options: [
-          { value: 'address-list', text: 'Address List' },
-          { value: 'phone-list', text: 'Phone List' },
-        ],
-      },
-    },
-    level1: {
-      level2: {
-        level3: {
-          options: [
-            'test1',
-            'test2',
-          ],
-        },
-      },
-    },
-  },
-};
 const required = ['name', 'language', 'admin_email'];
 
 export default {

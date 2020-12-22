@@ -99,7 +99,7 @@ export const group = {
         commit(GET_GROUP_SUCCESS, _group);
       } catch (exception) {
         commit(GET_GROUP_FAIL, exception);
-        throw exception;
+        console.error(GET_GROUP_FAIL, exception);
       }
     },
 

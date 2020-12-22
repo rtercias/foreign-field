@@ -35,6 +35,8 @@ export function validate(_cong, isNew) {
 
   if (!cong.campaign) {
     cong.campaign = 0;
+  } else {
+    cong.campaign = Number(cong.campaign);
   }
 
   if (!cong.options) {

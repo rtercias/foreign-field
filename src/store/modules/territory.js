@@ -273,7 +273,7 @@ export const territory = {
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
         commit(LOADING_TERRITORY_FALSE);
-        throw exception;
+        console.error(GET_TERRITORY_FAIL, exception);
       }
     },
 
@@ -376,7 +376,7 @@ export const territory = {
       } catch (exception) {
         commit(GET_TERRITORY_FAIL, exception);
         commit(LOADING_TERRITORY_FALSE);
-        throw exception;
+        console.error(GET_TERRITORY_FAIL, exception);
       }
     },
 
