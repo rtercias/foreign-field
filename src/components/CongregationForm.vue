@@ -1,54 +1,60 @@
 <template>
-  <div class="cong-form">
-    <div class="cong-header justify-content-around align-items-center lead py-3">
-      <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Congregation</span>
-      <div v-else-if="mode===modes.edit" class="lead font-weight-bold w-100 d-flex justify-content-between px-4">
-        <div>Edit Congregation: {{model.name}}</div>
-        <div>{{model.description}}</div>
+  <div class="w-100 d-flex">
+    <div class="cong-form w-50">
+      <div class="cong-header justify-content-around align-items-center lead py-3">
+        <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Congregation</span>
+        <div v-else-if="mode===modes.edit" class="lead w-100 d-flex justify-content-between px-4">
+          <div class="font-weight-bold">Edit Congregation</div>
+          <div>{{model.name}}</div>
+        </div>
       </div>
+      <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
+      <Loading v-if="isLoading"></Loading>
+      <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
+        <b-form-group label="Congregation Name" class="mt-3">
+          <b-form-input v-model="model.name"></b-form-input>
+        </b-form-group>
+        <b-form-group label="Description" class="mt-3">
+          <b-form-input v-model="model.description"></b-form-input>
+        </b-form-group>
+        <b-form-group label="Language" class="mt-3">
+          <b-form-input v-model="model.language"></b-form-input>
+        </b-form-group>
+        <b-form-group label="Admin Email" class="mt-3">
+          <b-form-input v-model="model.admin_email"></b-form-input>
+        </b-form-group>
+        <b-form-group class="mt-3">
+          <b-form-checkbox :checked="model.campaign" v-model="model.campaign">
+            Campaign Mode
+          </b-form-checkbox>
+        </b-form-group>
+        <hr />
+        <span class="d-block pb-2">Preferences</span>
+        <option-tree
+          v-for="node in getNodes()"
+          :key="node.key"
+          :node="node"
+          :depth="0"
+          @option-updated="updateOption"
+        />
+        <hr />
+        <div class="buttons justify-content-between">
+          <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
+          <b-button
+            :disabled="!isFormComplete || isSaving"
+            class="submit-button"
+            type="submit"
+            variant="primary">
+            <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
+            <span v-else>Submit</span>
+          </b-button>
+        </div>
+      </b-form>
     </div>
-    <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
-    <Loading v-if="isLoading"></Loading>
-    <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
-      <b-form-group label="Congregation Name" class="mt-3">
-        <b-form-input v-model="model.name"></b-form-input>
-      </b-form-group>
-      <b-form-group label="Description" class="mt-3">
-        <b-form-input v-model="model.description"></b-form-input>
-      </b-form-group>
-      <b-form-group label="Language" class="mt-3">
-        <b-form-input v-model="model.language"></b-form-input>
-      </b-form-group>
-      <b-form-group label="Admin Email" class="mt-3">
-        <b-form-input v-model="model.admin_email"></b-form-input>
-      </b-form-group>
-      <b-form-group class="mt-3">
-        <b-form-checkbox :checked="model.campaign" v-model="model.campaign">
-          Campaign Mode
-        </b-form-checkbox>
-      </b-form-group>
-      <hr />
-      <span class="d-block pb-2">Preferences</span>
-      <option-tree
-        v-for="node in getNodes()"
-        :key="node.key"
-        :node="node"
-        :depth="0"
-        @option-updated="updateOption"
-      />
-      <hr />
-      <div class="buttons justify-content-between">
-        <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
-        <b-button
-          :disabled="!isFormComplete || isSaving"
-          class="submit-button"
-          type="submit"
-          variant="primary">
-          <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
-          <span v-else>Submit</span>
-        </b-button>
-      </div>
-    </b-form>
+    <div class="border-left w-50">
+      <group-list :congregation-id="congregation.id" class="border-bottom pb-5"></group-list>
+      <publisher-list :congregation-id="congregation.id"></publisher-list>
+    </div>
   </div>
 </template>
 <script>
@@ -61,11 +67,9 @@ import Loading from './Loading';
 import OptionTree from './OptionTree';
 import { InvalidCongregationError } from '../store/exceptions/custom-errors';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
-
-const Modes = {
-  add: 'add',
-  edit: 'edit',
-};
+import PublisherList from './PublisherList';
+import GroupList from './GroupList';
+import { Modes } from '../utils/modes';
 
 const required = ['name', 'language', 'admin_email'];
 
@@ -75,6 +79,8 @@ export default {
   components: {
     Loading,
     OptionTree,
+    PublisherList,
+    GroupList,
   },
   data() {
     return {
@@ -206,5 +212,4 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-
 </style>

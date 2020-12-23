@@ -58,6 +58,7 @@ export const publisher = {
               congregationid 
               username 
               status
+              role
             }
           }`),
           variables: {
@@ -67,10 +68,9 @@ export const publisher = {
         },
       });
 
-      if (response && response.data && response.data.data) {
-        const pub = response.data.data.publisher || [];
-        commit(SET_PUBLISHER, pub);
-      }
+      const { publisher: pub } = get(response, 'data.data');
+      pub.status = pub.status === 'active';
+      commit(SET_PUBLISHER, pub);
     },
     async addPublisher({ commit, rootGetters }, _publisher) {
       try {

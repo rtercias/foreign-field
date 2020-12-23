@@ -142,10 +142,10 @@ import { TheMask } from 'vue-the-mask';
 import AddressMap from './AddressMap';
 import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
+import { Modes as _Modes } from '../utils/modes';
 
 const Modes = {
-  add: 'add',
-  edit: 'edit',
+  ..._Modes,
   phoneAdd: 'phone-add',
   phoneEdit: 'phone-edit',
 };

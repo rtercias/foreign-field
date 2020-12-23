@@ -9,7 +9,7 @@ export const model = gql`fragment PublisherModel on Publisher {
   lastname
   username
   status
-  role_id
+  role
 }`;
 
 export function validate(_publisher, isNew) {
@@ -24,10 +24,7 @@ export function validate(_publisher, isNew) {
   if (!publisher.username) {
     throw new InvalidPublisherError('Username is required');
   }
-  if (!publisher.status) {
-    throw new InvalidPublisherError('Status is required');
-  }
-  if (!publisher.role_id) {
+  if (!publisher.role) {
     throw new InvalidPublisherError('Role is required');
   }
 
@@ -40,5 +37,6 @@ export function validate(_publisher, isNew) {
     publisher.lastname = 0;
   }
 
+  publisher.status = publisher.status ? 'active' : 'disabled';
   return publisher;
 }

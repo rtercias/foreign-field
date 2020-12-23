@@ -17,6 +17,8 @@ import ChangeLog from './components/ChangeLog';
 import PhoneWitnessing from './components/PhoneWitnessing';
 import TerritoryForm from './components/TerritoryForm';
 import CongregationForm from './components/CongregationForm';
+import GroupForm from './components/GroupForm';
+import PublisherForm from './components/PublisherForm';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -52,6 +54,24 @@ const routes = [
       permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
     },
     redirect: '/groups/ALL',
+  },
+  {
+    name: 'group-add',
+    path: '/groups/add',
+    component: GroupForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'group-edit',
+    path: '/groups/:id/edit',
+    component: GroupForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
   },
   {
     name: 'group',
@@ -242,6 +262,24 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'publisher-add',
+    path: '/publishers/add',
+    component: PublisherForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'publisher-edit',
+    path: '/publishers/:id/edit',
+    component: PublisherForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
     },
   },
 ];

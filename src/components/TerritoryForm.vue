@@ -48,11 +48,7 @@ import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import Loading from './Loading';
 import { InvalidTerritoryError } from '../store/exceptions/custom-errors';
-
-const Modes = {
-  add: 'add',
-  edit: 'edit',
-};
+import { Modes } from '../utils/modes';
 
 const Types = [
   { text: 'Regular', value: 'Regular' },

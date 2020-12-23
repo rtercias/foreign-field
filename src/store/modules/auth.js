@@ -162,7 +162,6 @@ export const auth = {
                 firstname
                 lastname
                 role
-                role_description
                 status
                 congregation {
                   id
