@@ -78,9 +78,6 @@ export default {
     ...mapGetters({
       congId: 'auth/congId',
     }),
-    group() {
-      return get(this.log, 'address.territory.group_code');
-    },
     territoryId() {
       return get(this.log, 'address.territory.id');
     },

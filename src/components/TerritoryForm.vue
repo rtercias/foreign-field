@@ -10,14 +10,20 @@
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
     <Loading v-if="isLoading"></Loading>
     <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
-      <b-form-group label="Territory Name" class="mt-3">
+      <b-form-group
+        label="Territory Name"
+        class="mt-3"
+        description="Hint: Territory names are usually enumerated, like 'NYC-001'">
         <b-form-input v-model="model.name"></b-form-input>
       </b-form-group>
-      <b-form-group label="Description" class="mt-3">
+      <b-form-group
+        label="Description"
+        class="mt-3"
+        description="Hint: Use an easily recognizable description, like 'Manhattan'">
         <b-form-input v-model="model.description"></b-form-input>
       </b-form-group>
-      <b-form-group label="Group Code" class="mt-3">
-        <b-form-select v-model="model.group_code"
+      <b-form-group label="Group" class="mt-3">
+        <b-form-select v-model="model.group_id"
           :options="groupOptions" required>
         </b-form-select>
       </b-form-group>
@@ -56,7 +62,7 @@ const Types = [
   { text: 'Business', value: 'BUSINESS' },
   { text: 'Test', value: 'Test' },
 ];
-const required = ['congregationid', 'group_code', 'name', 'description', 'type'];
+const required = ['congregationid', 'group_id', 'name', 'description', 'type'];
 
 export default {
   name: 'TerritoryForm',
@@ -83,7 +89,7 @@ export default {
       addTerritory: 'territory/addTerritory',
       updateTerritory: 'territory/updateTerritory',
       setLeftNavRoute: 'auth/setLeftNavRoute',
-      getGroupCodes: 'auth/getGroupCodes',
+      getGroups: 'group/getGroups',
     }),
     async submit() {
       try {
@@ -128,7 +134,7 @@ export default {
     async refresh() {
       this.isLoading = true;
       if (!this.groups) {
-        await this.getGroupCodes(this.congId);
+        await this.getGroups({ congId: this.congId });
       }
 
       if (this.mode === Modes.edit) {
@@ -137,7 +143,7 @@ export default {
       } else {
         this.model = {
           congregationid: this.congId,
-          group_code: this.defaultGroup,
+          group_id: this.defaultGroup,
           type: 'Regular',
           create_user: this.user && this.user.username,
         };
@@ -153,7 +159,7 @@ export default {
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
       isAdmin: 'auth/isAdmin',
-      groupCodes: 'auth/groupCodes',
+      groups: 'group/groups',
       territory: 'territory/territory',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
     }),
@@ -161,13 +167,13 @@ export default {
       return this.id ? Modes.edit : Modes.add;
     },
     defaultGroup() {
-      return get(this.$route, 'query.group') || this.territory.group_code;
+      return get(this.$route, 'query.group') || this.territory.group_id;
     },
     typeOptions() {
       return Types;
     },
     groupOptions() {
-      return this.groupCodes.map(g => ({ text: g, value: g }));
+      return this.groups.map(g => ({ text: g.code, value: g.id }));
     },
     isFormComplete() {
       for (const field of required) {

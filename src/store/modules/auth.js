@@ -12,7 +12,6 @@ import { IncompleteRegistrationError, UnauthorizedUserError } from '../exception
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
-const SET_GROUP_CODES = 'SET_GROUP_CODES';
 const SET_CONGREGATION = 'SET_CONGREGATION';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
@@ -31,7 +30,6 @@ function initialState() {
     photoUrl: '',
     congId: 0,
     congregation: {},
-    groupCodes: [],
     loading: false,
     mastheadLeftNavRoute: '',
     token: '',
@@ -52,7 +50,6 @@ export const auth = {
     user: state => state.user,
     congId: state => state.congId,
     congregation: state => state.congregation,
-    groupCodes: state => state.groupCodes,
     isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
     canViewReports: state => state.user && ['Admin', 'TS', 'SO', 'GO'].includes(state.user.role),
@@ -95,10 +92,6 @@ export const auth = {
 
     FORCEOUT(state) {
       state.isForcedOut = true;
-    },
-
-    SET_GROUP_CODES(state, groupCodes) {
-      state.groupCodes = groupCodes;
     },
 
     SET_CONGREGATION(state, cong) {
@@ -215,7 +208,7 @@ export const auth = {
                   id
                   name
                   city
-                  group_code
+                  group_id
                   type
                   status {
                     status
@@ -281,22 +274,9 @@ export const auth = {
         }
       }
 
-      dispatch('getGroupCodes', state.congId);
-    },
-
-    async getGroupCodes({ commit }, congId) {
-      if (!congId) return;
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        data: {
-          query: print(gql`{ congregation (id: ${congId}) { groups { code } }}`),
-        },
-      });
-
-      const { congregation } = (response && response.data && response.data.data) || [];
-      const groups = congregation && congregation.groups && congregation.groups.map(g => g.code).sort() || [];
-      commit(SET_GROUP_CODES, groups);
+      if (state.congId) {
+        dispatch('group/getGroups', { congId: state.congId }, { root: true });
+      }
     },
 
     async updateCongregation({ commit }, { cong }) {

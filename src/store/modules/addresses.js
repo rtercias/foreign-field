@@ -180,7 +180,7 @@ export const addresses = {
                   id
                   name
                   description
-                  group_code
+                  group_id
                 }
               }
             }`),
@@ -236,7 +236,7 @@ export const addresses = {
                     id
                     name
                     description
-                    group_code
+                    group_id
                   }
                   parent_id
                 }

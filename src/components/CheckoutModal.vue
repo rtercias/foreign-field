@@ -22,7 +22,6 @@ export default {
   data() {
     return {
       selectedPublisher: { name: 'me' },
-      group: this.$route.params.group,
     };
   },
 

@@ -4,7 +4,7 @@ import { InvalidTerritoryError } from '../../exceptions/custom-errors';
 
 export const model = gql`fragment TerritoryModel on Territory {
   id
-  group_code
+  group_id
   congregationid
   name
   description
@@ -28,8 +28,8 @@ export function validate(_terr, isNew) {
   if (!terr.congregationid) {
     throw new InvalidTerritoryError('Congregation id is required');
   }
-  if (!terr.group_code) {
-    throw new InvalidTerritoryError('Group code is required');
+  if (!terr.group_id) {
+    throw new InvalidTerritoryError('Group id is required');
   }
   if (!terr.name) {
     throw new InvalidTerritoryError('Territory name is required');
@@ -48,6 +48,10 @@ export function validate(_terr, isNew) {
 
   if (terr.tags === null) {
     terr.tags = '';
+  }
+
+  if (Number.isInteger(Number(terr.group_id))) {
+    terr.group_id = Number(terr.group_id);
   }
 
   const ignoredProperties = [

@@ -10,6 +10,8 @@ const UPDATE_GROUP = 'UPDATE_GROUP';
 const UPDATE_GROUP_FAIL = 'UPDATE_GROUP_FAIL';
 const GET_GROUP_FAIL = 'GET_GROUP_FAIL';
 const GET_GROUP_SUCCESS = 'GET_GROUP_SUCCESS';
+const GET_GROUPS_FAIL = 'GET_GROUPS_FAIL';
+const GET_GROUPS_SUCCESS = 'GET_GROUPS_SUCCESS';
 const RESET_ERROR = 'RESET_ERROR';
 
 const initialState = {
@@ -20,6 +22,7 @@ const initialState = {
     description: '',
     overseer: '',
   },
+  groups: [],
   error: null,
 };
 
@@ -32,6 +35,7 @@ export const group = {
   getters: {
     group: state => state.group,
     error: state => state.error,
+    groups: state => state.groups,
   },
 
   mutations: {
@@ -41,6 +45,14 @@ export const group = {
     },
     GET_GROUP_SUCCESS(state, _group) {
       state.group = _group;
+      state.error = null;
+    },
+    GET_GROUPS_FAIL(state, exception) {
+      state.error = exception;
+      console.error(GET_GROUP_FAIL, exception);
+    },
+    GET_GROUPS_SUCCESS(state, _groups) {
+      state.groups = _groups;
       state.error = null;
     },
     ADD_GROUP(state, _group) {
@@ -103,6 +115,46 @@ export const group = {
       }
     },
 
+    async getGroups({ commit, getters, rootGetters }, { congId }) {
+      if (!congId) {
+        commit(GET_GROUPS_FAIL, 'cong id is required');
+        return;
+      }
+      const token = rootGetters['auth/token'];
+      if (!token) {
+        commit(GET_GROUPS_FAIL, 'Token is missing');
+        return;
+      }
+
+      if (getters.error) {
+        commit(RESET_ERROR);
+      }
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Groups($congId: Int) { 
+              groups (congId: $congId) {
+                ...GroupModel
+              }
+            },
+            ${model}`),
+            variables: {
+              congId,
+            },
+          },
+        });
+
+        const { groups } = get(response, 'data.data');
+        commit(GET_GROUPS_SUCCESS, groups);
+      } catch (exception) {
+        commit(GET_GROUPS_FAIL, exception);
+        console.error(GET_GROUPS_FAIL, exception);
+      }
+    },
+
     async addGroup({ commit, rootGetters }, _group) {
       try {
         commit('auth/LOADING', true, { root: true });
@@ -113,8 +165,6 @@ export const group = {
         if (!user) {
           throw new Error('No authorized user');
         }
-
-        grp.create_user = user.id;
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -153,8 +203,6 @@ export const group = {
         if (!user) {
           throw new Error('No authorized user');
         }
-
-        grp.update_user = user.id;
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,

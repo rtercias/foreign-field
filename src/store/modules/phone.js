@@ -303,7 +303,7 @@ export const phone = {
                   id
                   name
                   description
-                  group_code
+                  group_id
                 }
               }
             }`),

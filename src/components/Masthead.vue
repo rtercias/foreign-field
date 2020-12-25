@@ -41,7 +41,7 @@
               :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
               {{congregation.name}}
             </b-nav-item>
-            <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>
+            <b-nav-item v-if="canWrite" :to="`/groups/${groupId}`">Territories</b-nav-item>
             <b-nav-item
               v-if="canWrite && matchingRouteNames.includes('territory')"
               :to="`/territories/${territory && territory.id}/optimize`">
@@ -278,7 +278,7 @@ export default {
       user: 'auth/user',
       name: 'auth/name',
       congId: 'auth/congId',
-      groupCodes: 'auth/groupCodes',
+      groups: 'group/groups',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
       canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
@@ -297,8 +297,8 @@ export default {
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
     },
-    groupCode() {
-      return get(this.territory, 'group_code') || (this.groupCodes && this.groupCodes.length && this.groupCodes[0]) || 'ALL';
+    groupId() {
+      return get(this.territory, 'group_id') || get(this.groups, '[0].id') || 0;
     },
   },
 };

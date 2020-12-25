@@ -142,7 +142,7 @@ export default {
       const basicTerritory = {
         name: this.territory.name,
         city,
-        group_code: this.territory.group_code,
+        group_id: this.territory.group_id,
         id: this.territory.id,
         lastVisited: (new Date()).toISOString(),
       };

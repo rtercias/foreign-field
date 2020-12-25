@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="p-3 d-flex justify-content-between">
+    <div class="d-flex justify-content-between">
       <span class="lead font-weight-bold">Groups</span>
       <b-button v-if="canManage" variant="success" :to="`/groups/add`">
         <font-awesome-icon icon="plus"></font-awesome-icon> Add
@@ -13,8 +13,8 @@
       <b-list-group>
         <b-list-group-item v-for="group in groups" :key="group.id">
           <div class="d-flex justify-content-between">
-            {{group}}
-            <b-link :to="`/groups/${group}/edit`">
+            {{group.code}} - {{group.description}}
+            <b-link :to="`/groups/${group.id}/edit`">
               <font-awesome-icon
                 class="small text-primary"
                 icon="pencil-alt"
@@ -44,17 +44,17 @@ export default {
   },
   async mounted() {
     if (this.congregationId) {
-      await this.getGroupCodes(this.congregationId);
+      await this.getGroups({ congId: this.congregationId });
     }
   },
   methods: {
     ...mapActions({
-      getGroupCodes: 'auth/getGroupCodes',
+      getGroups: 'group/getGroups',
     }),
   },
   computed: {
     ...mapGetters({
-      groups: 'auth/groupCodes',
+      groups: 'group/groups',
       canManage: 'auth/canManage',
     }),
   },

@@ -27,7 +27,7 @@
         <div class="text-uppercase pt-4">Territories</div>
         <b-list-group-item v-for="terr in territories" :key="terr.id">
           <div>
-            <b-link :to="`/groups/${terr.group_code}?territory=${terr.name}`">
+            <b-link :to="`/groups/${terr.group_id}?territory=${terr.name}`">
               {{terr.name}} {{terr.description}}
             </b-link>
           </div>

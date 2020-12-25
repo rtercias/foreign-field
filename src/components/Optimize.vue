@@ -114,7 +114,7 @@ import TerritoryMap from './TerritoryMap';
 
 export default {
   name: 'Optimize',
-  props: ['group', 'id'],
+  props: ['groupId', 'id'],
   components: {
     OptimizeCard,
     Draggable,

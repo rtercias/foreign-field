@@ -40,7 +40,7 @@ import Loading from './Loading';
 import { InvalidGroupError } from '../store/exceptions/custom-errors';
 import { Modes } from '../utils/modes';
 
-const required = ['code', 'description', 'overseer'];
+const required = ['code', 'description'];
 
 export default {
   name: 'GroupForm',
@@ -138,8 +138,13 @@ export default {
       return true;
     },
     overseerOptions() {
-      return this.publishers.filter(p => p.role === 'GO')
+      const overseers = this.publishers.filter(p => p.role === 'GO')
         .map(p => ({ value: p.id, text: `${p.firstname} ${p.lastname}` }));
+
+      return [
+        { value: 0, text: 'Unassigned' },
+        ...overseers,
+      ];
     },
   },
   watch: {

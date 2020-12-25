@@ -1,14 +1,13 @@
 <template>
   <Loading v-if="loading"></Loading>
-  <div v-else class="territories" :key="groupCode">
+  <div v-else class="territories" :key="groupId">
     <header class="page-header sticky-top d-flex flex-column align-items-center p-3 border-bottom">
       <div class="w-100 d-flex align-items-start">
-        <groups-select :selected-group="selectedGroup"></groups-select>
-        <div class="col-sm-auto col-md-1"></div>
-        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 d-block">
+        <groups-select :selected-id="selectedGroup" class="col-md-3"></groups-select>
+        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 d-block text-right">
           <b-badge
             variant="warning"
-            class="btn alert p-2 border-medium"
+            class="btn alert p-2 border-medium mb-0"
             :class="{ 'border-primary': typeFilter === 'SEARCH' }"
             @click="() => setTypeFilter('SEARCH')">
             Survey ({{count('SEARCH')}})
@@ -21,8 +20,7 @@
             Business ({{count('Business')}})
           </b-badge>
         </b-button-group>
-        <div class="col-sm-auto col-md-1"></div>
-        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-4 text-right p-sm-0 d-block">
+        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-6 text-right p-sm-0 d-block">
           <b-badge
             v-for="avail in availabilityFilters.filter(a => a.value !== 'All')"
             :key="avail.value"
@@ -41,7 +39,7 @@
         <b-dropdown left variant="secondary">
           <span slot="button-content">
             <font-awesome-icon icon="filter" />
-            {{`${typeText ? `${typeText} - ` : ''}${availability}`}}
+            {{`${typeText ? `${typeText} - ` : ''}${availabilityText(availability)}`}}
           </span>
           <b-dropdown-item
             class="availability-filter p-0"
@@ -58,7 +56,7 @@
             v-bind:key="avail.value"
             @click="() => setAvailability(avail.value)">
             <font-awesome-icon class="selected" icon="check" v-if="availability === avail" />
-            {{isCampaignMode ? avail.campaignText : avail.value}}
+            {{availabilityText(avail.value)}}
           </b-dropdown-item>
         </b-dropdown>
         <div>
@@ -99,7 +97,7 @@
           }">
           <TerritoryCard
             :terr="terr"
-            :groupCode="terr.group"
+            :groupId="terr.group_id"
             :selectTerritory="selectTerritory"
             :fetch="fetch"
             :type-filters="typeFilters">
@@ -128,7 +126,7 @@ const DEFAULT_FILTER = 'All';
 
 export default {
   name: 'Territories',
-  props: ['groupCode'],
+  props: ['groupId'],
   components: {
     TerritoryCard,
     CheckoutModal,
@@ -140,17 +138,17 @@ export default {
   data() {
     return {
       selectedTerritory: {},
-      selectedGroup: '',
+      selectedGroup: 0,
       keywordFilter: '',
       excludeKeyword: false,
       cities: [],
       availability: '',
       typeFilter: '',
       availabilityFilters: [
-        { value: 'All', campaignText: 'All' },
-        { value: 'Available', campaignText: 'Remainder' },
-        { value: 'Checked Out', campaignText: 'In Progress', variant: 'warning' },
-        { value: 'Recently Worked', campaignText: 'Done', variant: 'success' },
+        { value: 'All', text: 'All', campaignText: 'All' },
+        { value: 'Available', text: 'Available', campaignText: 'Remainder' },
+        { value: 'Checked Out', text: 'Checked Out', campaignText: 'In Progress', variant: 'warning' },
+        { value: 'Recently Worked', text: 'Recently Completed', campaignText: 'Done', variant: 'success' },
       ],
       typeFilters: [
         { value: 'SEARCH', text: 'Survey', variant: 'warning' },
@@ -172,7 +170,7 @@ export default {
       user: 'auth/user',
       token: 'auth/token',
       territories: 'territories/territories',
-      groups: 'auth/groupCodes',
+      groups: 'group/groups',
       isDesktop: 'auth/isDesktop',
       canManage: 'auth/canManage',
     }),
@@ -235,11 +233,10 @@ export default {
 
     async fetch() {
       const congId = this.congId || (this.user && this.user.congId);
-      this.selectedGroup = this.groupCode;
       this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
       await this.fetchTerritories({
         congId,
-        groupCode: this.selectedGroup === 'ALL' ? '' : this.selectedGroup,
+        groupId: this.selectedGroup === 0 ? null : this.groupId,
       });
       this.loading = false;
     },
@@ -269,10 +266,12 @@ export default {
     },
 
     availabilityText(availability) {
+      const avail = this.availabilityFilters.find(t => t.value === availability);
+      if (!avail) return '';
       if (this.isCampaignMode) {
-        return (this.availabilityFilters.find(t => t.value === availability) || { campaignText: '' }).campaignText;
+        return avail.campaignText;
       }
-      return availability;
+      return avail.text;
     },
 
     ...mapActions({
@@ -284,6 +283,7 @@ export default {
 
   async mounted() {
     const congId = this.congId || (this.user && this.user.congId);
+    this.selectedGroup = this.groupId;
     await this.fetch();
     await this.fetchPublishers(congId);
 

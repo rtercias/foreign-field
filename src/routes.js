@@ -53,7 +53,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
     },
-    redirect: '/groups/ALL',
+    redirect: '/groups/0',
   },
   {
     name: 'group-add',
@@ -75,7 +75,7 @@ const routes = [
   },
   {
     name: 'group',
-    path: '/groups/:groupCode',
+    path: '/groups/:groupId',
     component: Territories,
     props: true,
     meta: {
@@ -135,13 +135,13 @@ const routes = [
   },
   {
     name: 'territory-group',
-    path: '/territories/:groupCode/:id',
+    path: '/territories/:groupId/:id',
     props: true,
     redirect: (to) => {
-      if (to.params.groupCode && Number.isSafeInteger(Number(to.params.id))) {
+      if (to.params.groupId && Number.isSafeInteger(Number(to.params.id))) {
         return '/territories/:id';
       }
-      return '/groups/:groupCode';
+      return '/groups/:groupId';
     },
     meta: {
       permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],

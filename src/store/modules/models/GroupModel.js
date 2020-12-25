@@ -2,6 +2,8 @@ import gql from 'graphql-tag';
 import clone from 'lodash/clone';
 import { InvalidGroupError } from '../../exceptions/custom-errors';
 
+export const TEST_GROUPS = [18, 21];
+
 export const model = gql`fragment GroupModel on Group {
   id
   congregation_id
@@ -29,7 +31,7 @@ export function validate(_group, isNew) {
   }
 
   if (group.overseer === null) {
-    group.overseer = '';
+    group.overseer = 0;
   }
 
   return group;

@@ -1,61 +1,67 @@
 <template>
-  <div class="w-100 d-flex">
-    <div class="cong-form w-50">
-      <div class="cong-header justify-content-around align-items-center lead py-3">
-        <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Congregation</span>
-        <div v-else-if="mode===modes.edit" class="lead w-100 d-flex justify-content-between px-4">
-          <div class="font-weight-bold">Edit Congregation</div>
-          <div>{{model.name}}</div>
+  <b-container>
+    <b-row>
+      <b-col sm="12" md="6" class="cong-form">
+        <div class="cong-header justify-content-around align-items-center lead py-4">
+          <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Congregation</span>
+          <div v-else-if="mode===modes.edit" class="lead w-100 d-flex justify-content-between px-4">
+            <div class="font-weight-bold" v-if="!readOnly">Edit Congregation</div>
+            <div class="font-weight-bold" v-else>Congregation</div>
+            <div v-if="readOnly" class="d-flex justify-content-end">
+              <b-button type="button" variant="success" @click="edit">Edit</b-button>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
-      <Loading v-if="isLoading"></Loading>
-      <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
-        <b-form-group label="Congregation Name" class="mt-3">
-          <b-form-input v-model="model.name"></b-form-input>
-        </b-form-group>
-        <b-form-group label="Description" class="mt-3">
-          <b-form-input v-model="model.description"></b-form-input>
-        </b-form-group>
-        <b-form-group label="Language" class="mt-3">
-          <b-form-input v-model="model.language"></b-form-input>
-        </b-form-group>
-        <b-form-group label="Admin Email" class="mt-3">
-          <b-form-input v-model="model.admin_email"></b-form-input>
-        </b-form-group>
-        <b-form-group class="mt-3">
-          <b-form-checkbox :checked="model.campaign" v-model="model.campaign">
-            Campaign Mode
-          </b-form-checkbox>
-        </b-form-group>
-        <hr />
-        <span class="d-block pb-2">Preferences</span>
-        <option-tree
-          v-for="node in getNodes()"
-          :key="node.key"
-          :node="node"
-          :depth="0"
-          @option-updated="updateOption"
-        />
-        <hr />
-        <div class="buttons justify-content-between">
-          <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
-          <b-button
-            :disabled="!isFormComplete || isSaving"
-            class="submit-button"
-            type="submit"
-            variant="primary">
-            <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
-            <span v-else>Submit</span>
-          </b-button>
-        </div>
-      </b-form>
-    </div>
-    <div class="border-left w-50">
-      <group-list :congregation-id="congregation.id" class="border-bottom pb-5"></group-list>
-      <publisher-list :congregation-id="congregation.id"></publisher-list>
-    </div>
-  </div>
+        <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
+        <Loading v-if="isLoading"></Loading>
+        <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
+          <b-form-group label="Congregation Name" class="mt-3" :disabled="readOnly">
+            <b-form-input v-model="model.name"></b-form-input>
+          </b-form-group>
+          <b-form-group label="Description" class="mt-3" :disabled="readOnly">
+            <b-form-input v-model="model.description"></b-form-input>
+          </b-form-group>
+          <b-form-group label="Language" class="mt-3" :disabled="readOnly">
+            <b-form-input v-model="model.language"></b-form-input>
+          </b-form-group>
+          <b-form-group label="Admin Email" class="mt-3" :disabled="readOnly">
+            <b-form-input v-model="model.admin_email"></b-form-input>
+          </b-form-group>
+          <b-form-group class="mt-3" :disabled="readOnly">
+            <b-form-checkbox :checked="model.campaign" v-model="model.campaign">
+              Campaign Mode
+            </b-form-checkbox>
+          </b-form-group>
+          <hr />
+          <span class="d-block pb-2">Preferences</span>
+          <option-tree
+            v-for="node in getNodes()"
+            :key="node.key"
+            :node="node"
+            :depth="0"
+            :disabled="readOnly"
+            @option-updated="updateOption"
+          />
+          <div v-if="!readOnly" class="buttons justify-content-between pt-5">
+            <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
+            <b-button
+              :disabled="!isFormComplete || isSaving"
+              class="submit-button"
+              type="submit"
+              variant="primary">
+              <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
+              <span v-else>Submit</span>
+            </b-button>
+          </div>
+          <hr />
+        </b-form>
+      </b-col>
+      <b-col sm="12" md="6" class="border-left">
+        <group-list :congregation-id="congregation.id" class="border-bottom pb-5 p-4"></group-list>
+        <publisher-list :congregation-id="congregation.id" class="p-4"></publisher-list>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
@@ -89,6 +95,7 @@ export default {
       isSaving: false,
       model: {},
       error: '',
+      readOnly: true,
     };
   },
   async mounted() {
@@ -100,6 +107,9 @@ export default {
       addCongregation: 'congregation/addCongregation',
       updateCongregation: 'congregation/updateCongregation',
     }),
+    edit() {
+      this.readOnly = false;
+    },
     async submit() {
       try {
         const message = 'Are you sure you want to save your changes?';
@@ -128,15 +138,12 @@ export default {
         }
       }
       this.isSaving = false;
+      this.readOnly = true;
     },
 
-    cancel() {
-      this.model = {};
-      if (this.leftNavRoute) {
-        this.$router.push(this.leftNavRoute);
-      } else {
-        this.$router.go(-1);
-      }
+    async cancel() {
+      await this.refresh();
+      this.readOnly = true;
     },
 
     async refresh() {
