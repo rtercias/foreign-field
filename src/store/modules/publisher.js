@@ -9,6 +9,8 @@ const ADD_PUBLISHER = 'ADD_PUBLISHER';
 const ADD_PUBLISHER_FAIL = 'ADD_PUBLISHER_FAIL';
 const UPDATE_PUBLISHER = 'UPDATE_PUBLISHER';
 const UPDATE_PUBLISHER_FAIL = 'UPDATE_PUBLISHER_FAIL';
+const DELETE_PUBLISHER = 'DELETE_PUBLISHER';
+const DELETE_PUBLISHER_FAIL = 'DELETE_PUBLISHER_FAIL';
 
 export const publisher = {
   namespaced: true,
@@ -35,6 +37,11 @@ export const publisher = {
     UPDATE_PUBLISHER_FAIL(state, exception) {
       state.error = exception;
       console.error(UPDATE_PUBLISHER_FAIL, exception);
+    },
+    DELETE_PUBLISHER() {},
+    DELETE_PUBLISHER_FAIL(state, exception) {
+      state.error = exception;
+      console.error(DELETE_PUBLISHER_FAIL, exception);
     },
   },
   actions: {
@@ -148,6 +155,47 @@ export const publisher = {
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
         commit(UPDATE_PUBLISHER_FAIL, error);
+      }
+    },
+
+    async deletePublisher({ commit, rootGetters }, id) {
+      try {
+        if (!id) {
+          throw new Error('no id to delete');
+        }
+
+        const user = rootGetters['auth/user'];
+        if (!user) {
+          throw new Error('No authorized user');
+        }
+
+        commit('auth/LOADING', true, { root: true });
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation DeletePublisher($id: Int!) { 
+              deletePublisher(id: $id)
+            }`),
+            variables: {
+              id,
+            },
+          },
+        });
+
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        commit(DELETE_PUBLISHER);
+      } catch (e) {
+        commit(DELETE_PUBLISHER_FAIL, e);
+      } finally {
+        commit('auth/LOADING', false, { root: true });
       }
     },
   },

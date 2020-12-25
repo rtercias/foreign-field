@@ -13,6 +13,7 @@ const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
 const ADD_ADDRESS = 'ADD_ADDRESS';
 const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+const DELETE_ADDRESS = 'DELETE_ADDRESS';
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
@@ -22,6 +23,7 @@ const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
 const FETCH_ADDRESS_FAIL = 'FETCH_ADDRESS_FAIL';
 const ADD_ADDRESS_FAIL = 'ADD_ADDRESS_FAIL';
 const UPDATE_ADDRESS_FAIL = 'UPDATE_ADDRESS_FAIL';
+const DELETE_ADDRESS_FAIL = 'DELETE_ADDRESS_FAIL';
 const LOG_FAIL = 'LOG_FAIL';
 const ADD_TAG_FAIL = 'ADD_TAG_FAIL';
 const REMOVE_TAG_FAIL = 'REMOVE_TAG_FAIL';
@@ -58,6 +60,10 @@ export const address = {
     LOG_FAIL(state, error) { state.error = error; },
     ADD_ADDRESS(state, addr) { state.address = addr; },
     UPDATE_ADDRESS(state, addr) { state.address = addr; },
+    DELETE_ADDRESS() {},
+    DELETE_ADDRESS_FAIL(state, exception) {
+      state.error = exception;
+    },
     CHANGE_STATUS(state, status) { state.address.status = status; },
     ADD_LOG(state, log) {
       if (state.address.id === log.address_id) {
@@ -398,6 +404,48 @@ export const address = {
       } catch (e) {
         commit(UPDATE_ADDRESS_FAIL, e);
         console.error(UPDATE_ADDRESS_FAIL, e);
+      } finally {
+        commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    async deleteAddress({ commit, rootGetters }, id) {
+      try {
+        if (!id) {
+          throw new Error('no id to delete');
+        }
+
+        const user = rootGetters['auth/user'];
+        if (!user) {
+          throw new Error('No authorized user');
+        }
+
+        commit('auth/LOADING', true, { root: true });
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation DeleteAddress($id: Int!) { 
+              deleteAddress(id: $id)
+            }`),
+            variables: {
+              id,
+            },
+          },
+        });
+
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        commit(DELETE_ADDRESS);
+      } catch (e) {
+        commit(DELETE_ADDRESS_FAIL, e);
+        console.error(DELETE_ADDRESS_FAIL, e);
       } finally {
         commit('auth/LOADING', false, { root: true });
       }

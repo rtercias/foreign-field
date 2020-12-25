@@ -22,6 +22,7 @@
       <hr />
       <div class="buttons justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
+        <b-button type="button" v-if="mode===modes.edit" variant="danger" @click="remove">Delete</b-button>
         <b-button
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
@@ -65,6 +66,7 @@ export default {
       getGroup: 'group/getGroup',
       addGroup: 'group/addGroup',
       updateGroup: 'group/updateGroup',
+      deleteGroup: 'group/deleteGroup',
       setLeftNavRoute: 'auth/setLeftNavRoute',
       fetchPublishers: 'publishers/fetchPublishers',
     }),
@@ -105,6 +107,17 @@ export default {
         this.$router.push(this.leftNavRoute);
       } else {
         this.$router.go(-1);
+      }
+    },
+
+    async remove() {
+      const message = 'Are you sure you want to delete this group?';
+      const confirm = await this.$bvModal.msgBoxConfirm(message, {
+        title: this.group.description,
+        centered: true,
+      });
+      if (confirm) {
+        await this.deleteGroup(this.group.id);
       }
     },
 

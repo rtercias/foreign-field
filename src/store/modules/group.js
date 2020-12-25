@@ -12,6 +12,8 @@ const GET_GROUP_FAIL = 'GET_GROUP_FAIL';
 const GET_GROUP_SUCCESS = 'GET_GROUP_SUCCESS';
 const GET_GROUPS_FAIL = 'GET_GROUPS_FAIL';
 const GET_GROUPS_SUCCESS = 'GET_GROUPS_SUCCESS';
+const DELETE_GROUP = 'DELETE_GROUP';
+const DELETE_GROUP_FAIL = 'DELETE_GROUP_FAIL';
 const RESET_ERROR = 'RESET_ERROR';
 
 const initialState = {
@@ -68,6 +70,11 @@ export const group = {
     UPDATE_GROUP_FAIL(state, exception) {
       state.error = exception;
       console.error(UPDATE_GROUP_FAIL, exception);
+    },
+    DELETE_GROUP() {},
+    DELETE_GROUP_FAIL(state, exception) {
+      state.error = exception;
+      console.error(DELETE_GROUP_FAIL, exception);
     },
     RESET_ERROR(state) {
       state.error = null;
@@ -228,6 +235,47 @@ export const group = {
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
         commit(UPDATE_GROUP_FAIL, error);
+      }
+    },
+
+    async deleteGroup({ commit, rootGetters }, id) {
+      try {
+        if (!id) {
+          throw new Error('no id to delete');
+        }
+
+        const user = rootGetters['auth/user'];
+        if (!user) {
+          throw new Error('No authorized user');
+        }
+
+        commit('auth/LOADING', true, { root: true });
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation DeleteGroup($id: Int!) { 
+              deleteGroup(id: $id)
+            }`),
+            variables: {
+              id,
+            },
+          },
+        });
+
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        commit(DELETE_GROUP);
+      } catch (e) {
+        commit(DELETE_GROUP_FAIL, e);
+      } finally {
+        commit('auth/LOADING', false, { root: true });
       }
     },
   },

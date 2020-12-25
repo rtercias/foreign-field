@@ -30,6 +30,7 @@
       <hr />
       <div class="buttons justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
+        <b-button type="button" v-if="mode===modes.edit" variant="danger" @click="remove">Delete</b-button>
         <b-button
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
@@ -75,6 +76,7 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
       addPublisher: 'publisher/addPublisher',
       updatePublisher: 'publisher/updatePublisher',
+      deletePublisher: 'publisher/deletePublisher',
       setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     async submit() {
@@ -114,6 +116,17 @@ export default {
         this.$router.push(this.leftNavRoute);
       } else {
         this.$router.go(-1);
+      }
+    },
+
+    async remove() {
+      const message = 'Are you sure you want to delete this publisher?';
+      const confirm = await this.$bvModal.msgBoxConfirm(message, {
+        title: this.displayName,
+        centered: true,
+      });
+      if (confirm) {
+        await this.deletePublisher(this.publisher.id);
       }
     },
 

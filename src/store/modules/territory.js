@@ -21,6 +21,8 @@ const ADD_TERRITORY = 'ADD_TERRITORY';
 const ADD_TERRITORY_FAIL = 'ADD_TERRITORY_FAIL';
 const UPDATE_TERRITORY = 'UPDATE_TERRITORY';
 const UPDATE_TERRITORY_FAIL = 'UPDATE_TERRITORY_FAIL';
+const DELETE_TERRITORY = 'DELETE_TERRITORY';
+const DELETE_TERRITORY_FAIL = 'DELETE_TERRITORY_FAIL';
 
 
 const initialState = {
@@ -124,6 +126,11 @@ export const territory = {
     UPDATE_TERRITORY_FAIL(state, exception) {
       state.error = exception;
       console.error(UPDATE_TERRITORY_FAIL, exception);
+    },
+    DELETE_TERRITORY() {},
+    DELETE_TERRITORY_FAIL(state, exception) {
+      state.error = exception;
+      console.error(DELETE_TERRITORY_FAIL, exception);
     },
   },
 
@@ -460,6 +467,47 @@ export const territory = {
         commit('auth/LOADING', false, { root: true });
       } catch (error) {
         commit(UPDATE_TERRITORY_FAIL, error);
+      }
+    },
+
+    async deleteTerritory({ commit, rootGetters }, id) {
+      try {
+        if (!id) {
+          throw new Error('no id to delete');
+        }
+
+        const user = rootGetters['auth/user'];
+        if (!user) {
+          throw new Error('No authorized user');
+        }
+
+        commit('auth/LOADING', true, { root: true });
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation DeleteTerritory($id: Int!) { 
+              deleteTerritory(id: $id)
+            }`),
+            variables: {
+              id,
+            },
+          },
+        });
+
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        commit(DELETE_TERRITORY);
+      } catch (e) {
+        commit(DELETE_TERRITORY_FAIL, e);
+      } finally {
+        commit('auth/LOADING', false, { root: true });
       }
     },
   },
