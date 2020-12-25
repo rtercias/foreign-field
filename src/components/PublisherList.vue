@@ -1,22 +1,26 @@
 <template>
   <div>
-    <div class="px-3 pt-3 d-flex justify-content-between">
+    <div class="d-flex justify-content-between">
       <span class="lead font-weight-bold">Publishers</span>
       <b-button v-if="canManage" variant="success" :to="`/publishers/add`">
         <font-awesome-icon icon="plus"></font-awesome-icon> Add
       </b-button>
     </div>
-    <div class="w-100 justify-content-center">
+    <div class="w-100 justify-content-center pt-2">
       <font-awesome-icon icon="spinner" v-if="loading"></font-awesome-icon>
       <search-bar
-        class="w-100 p-3"
+        class="w-100 mb-3"
         :search-text="'Search'"
         :model="text"
-        @on-click="search"
+        :results="publishers"
+        @on-change="filter"
         :no-padding="true"
       />
     </div>
     <div>
+      <b-check v-model="activeOnly" class="w-50 text-left">
+        <span class="small">Active only</span>
+      </b-check>
       <b-list-group>
         <b-list-group-item v-for="pub in publishers" :key="pub.id">
           <div class="d-flex justify-content-between">
@@ -51,6 +55,8 @@ export default {
       isDirty: false,
       text: this.$route.params.keyword,
       id: this.$route.params.id,
+      activeOnly: true,
+      keywordFilter: '',
     };
   },
   async mounted() {
@@ -60,9 +66,26 @@ export default {
   },
   computed: {
     ...mapGetters({
-      publishers: 'publishers/publishers',
+      pubs: 'publishers/publishers',
       canManage: 'auth/canManage',
+      user: 'auth/user',
     }),
+    publishers() {
+      let publishers = this.pubs;
+
+      if (this.activeOnly) {
+        publishers = publishers.filter(p => p.status === 'active');
+      }
+
+      if (this.keywordFilter) {
+        publishers = publishers.filter(p => this.compareToKeyword(this.keywordFilter, [
+          p.firstname,
+          p.lastname,
+          p.username,
+        ]));
+      }
+      return publishers;
+    },
   },
   methods: {
     ...mapActions({
@@ -83,15 +106,15 @@ export default {
         false,
       );
     },
-    async search(_keyword) {
-      // eslint-disable-next-line
-      console.log('keyword', _keyword);
-    // const congId = get(this.user, 'congregation.id');
-    // const keyword = _keyword || this.keyword;
-    // this.text = keyword;
-    // await this.addressSearch({ congId, searchTerm: keyword });
-    // await this.fetchAllTerritories({ congId, keyword });
-    // await this.getDnc({ id: congId, keyword });
+    filter(keyword) {
+      this.keywordFilter = keyword;
+    },
+  },
+  watch: {
+    async user() {
+      if (this.congregationId) {
+        await this.fetchPublishers(this.congregationId);
+      }
     },
   },
 };

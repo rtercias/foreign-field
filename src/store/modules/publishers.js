@@ -50,7 +50,7 @@ export const publishers = {
       });
 
       const { publishers: pubs } = get(response, 'data.data');
-      commit(SET_PUBLISHERS, pubs.filter(p => p.status === 'active'));
+      commit(SET_PUBLISHERS, pubs);
     },
   },
 };
