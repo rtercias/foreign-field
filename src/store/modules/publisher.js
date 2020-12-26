@@ -76,6 +76,7 @@ export const publisher = {
       });
 
       const { publisher: pub } = get(response, 'data.data');
+      pub.status = pub.status === 'active';
       commit(SET_PUBLISHER, pub);
     },
     async addPublisher({ commit, rootGetters }, _publisher) {
