@@ -121,6 +121,7 @@ import GroupsSelect from './GroupsSelect';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 import orderBy from 'lodash/orderBy';
+import toLower from 'lodash/toLower';
 
 const DEFAULT_FILTER = 'All';
 
@@ -190,12 +191,12 @@ export default {
     filteredTerritories() {
       if (this.availability === 'All') {
         const allTerrs = this.searchedTerritories;
-        return orderBy(allTerrs, this.sortOption.toLowerCase());
+        return orderBy(allTerrs, toLower(this.sortOption));
       }
       const filtered = this.searchedTerritories && this.searchedTerritories.filter(
         t => get(t, 'status.status') === this.availability
       );
-      return orderBy(filtered, this.sortOption.toLowerCase());
+      return orderBy(filtered, toLower(this.sortOption));
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
@@ -248,7 +249,7 @@ export default {
 
     compareToKeyword(filter, values) {
       return values.reduce(
-        (acc, value) => acc || String(value).toLowerCase().includes(filter.toLowerCase()),
+        (acc, value) => acc || toLower(String(value).includes(toLower(filter)),
         false,
       );
     },
@@ -256,8 +257,8 @@ export default {
     count(filter) {
       if (!this.territories && !this.searchedTerritories) return 0;
       if (!filter) return this.searchedTerritories.length;
-      if (this.typeFilters.map(t => t.value.toLowerCase()).includes(filter.toLowerCase())) {
-        return this.territories.filter(t => t.type.toLowerCase() === filter.toLowerCase()).length;
+      if (this.typeFilters.map(t => toLower(t.value)).includes(toLower(filter))) {
+        return this.territories.filter(t => toLower(t.type) === toLower(filter)).length;
       }
       if (this.availabilityFilters.map(t => t.value).includes(filter)) {
         return this.searchedTerritories.filter(t => get(t, 'status.status') === filter).length;
