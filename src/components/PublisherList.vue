@@ -54,6 +54,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import SearchBar from './SearchBar';
+import { displayName } from '../utils/publisher';
 
 export default {
   name: 'PublisherList',
@@ -103,19 +104,13 @@ export default {
       return publishers;
     },
     displayedPublishers() {
-      return this.publishers.map(p => ({ name: this.displayName(p), edit: p.id }));
+      return this.publishers.map(p => ({ name: displayName(p), edit: p.id }));
     },
   },
   methods: {
     ...mapActions({
       fetchPublishers: 'publishers/fetchPublishers',
     }),
-    displayName(pub) {
-      if (pub.firstname && pub.lastname) {
-        return `${pub.firstname} ${pub.lastname}`;
-      }
-      return pub.username;
-    },
     reset() {
       this.text = '';
     },

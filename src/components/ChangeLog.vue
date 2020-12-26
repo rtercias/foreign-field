@@ -155,7 +155,7 @@ export default {
       }
       return this.storeLogs.filter((log) => {
         const { name } = get(log, 'address.territory') || {};
-        return !name.includes('TEST');
+        return name && !name.includes('TEST');
       });
     },
     preview() {

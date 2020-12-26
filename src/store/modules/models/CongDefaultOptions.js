@@ -16,15 +16,5 @@ export const CongDefault = {
         ],
       },
     },
-    level1: {
-      level2: {
-        level3: {
-          options: [
-            'test1',
-            'test2',
-          ],
-        },
-      },
-    },
   },
 };

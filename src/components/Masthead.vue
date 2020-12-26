@@ -118,7 +118,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateCongregation: 'auth/updateCongregation',
       checkinAll: 'territories/checkinAll',
       copyCheckouts: 'territories/copyCheckouts',
     }),
@@ -165,7 +164,7 @@ export default {
 
       // Step 1: toggle campaign mode
       cong.campaign = !cong.campaign;
-      await this.updateCongregation({ cong });
+      await this.updateCongregation(cong);
 
       const checkinAll = await this.$bvModal.msgBoxConfirm(
         'Do you want to check in ALL territories, or allow publishers to keep their checked out territories', {

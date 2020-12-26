@@ -12,7 +12,6 @@ import { IncompleteRegistrationError, UnauthorizedUserError } from '../exception
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
-const SET_CONGREGATION = 'SET_CONGREGATION';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
@@ -92,11 +91,6 @@ export const auth = {
 
     FORCEOUT(state) {
       state.isForcedOut = true;
-    },
-
-    SET_CONGREGATION(state, cong) {
-      state.congregation = cong;
-      state.user.congregation = cong;
     },
 
     RESET(state) {
@@ -276,47 +270,6 @@ export const auth = {
 
       if (state.congId) {
         dispatch('group/getGroups', { congId: state.congId }, { root: true });
-      }
-    },
-
-    async updateCongregation({ commit }, { cong }) {
-      if (!cong) {
-        return;
-      }
-
-      if (cong.campaign) cong.campaign = 1;
-      if (!cong.campaign) cong.campaign = 0;
-      if (cong.options && typeof cong.options === 'object') {
-        cong.options = JSON.stringify(cong.options);
-      }
-
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`mutation UpdateCongregation($cong: CongregationInput!) { 
-            updateCongregation (cong: $cong) { 
-              id
-              name
-              description
-              language
-              campaign
-              admin_email
-              options
-            }
-          }`),
-          variables: {
-            cong,
-          },
-        },
-      });
-
-      if (response && response.data && response.data.data) {
-        const { updateCongregation } = response.data.data;
-        commit(SET_CONGREGATION, updateCongregation);
       }
     },
 
