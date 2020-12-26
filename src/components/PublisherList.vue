@@ -21,20 +21,33 @@
       <b-check v-model="activeOnly" class="w-50 text-left">
         <span class="small">Active only</span>
       </b-check>
-      <b-list-group>
-        <b-list-group-item v-for="pub in publishers" :key="pub.id">
-          <div class="d-flex justify-content-between">
-            {{displayName(pub)}}
-            <b-link :to="`/publishers/${pub.id}/edit`">
-              <font-awesome-icon
-                class="small text-primary"
-                icon="pencil-alt"
-              />
-            </b-link>
-          </div>
-        </b-list-group-item>
-      </b-list-group>
+      <b-table
+        class="publishers-list border-bottom"
+        :fields="fields"
+        :items="displayedPublishers"
+        :per-page="perPage"
+        :current-page="currentPage">
+        <template #cell(name)="data">
+          <span class="name">{{ data.value }}</span>
+        </template>
+        <template #cell(id)="data">
+          <b-link v-if="canManage" :to="`/publishers/${data.item.edit}/edit`">
+            <font-awesome-icon
+              class="small text-primary"
+              icon="pencil-alt"
+            />
+          </b-link>
+        </template>
+      </b-table>
     </div>
+    <b-pagination
+      class="justify-content-center"
+      v-model="currentPage"
+      :total-rows="publishers.length"
+      limit="3"
+      :per-page="perPage"
+      size="sm">
+    </b-pagination>
   </div>
 </template>
 
@@ -57,6 +70,9 @@ export default {
       id: this.$route.params.id,
       activeOnly: true,
       keywordFilter: '',
+      perPage: 5,
+      currentPage: 1,
+      fields: ['name', 'id'],
     };
   },
   async mounted() {
@@ -85,6 +101,9 @@ export default {
         ]));
       }
       return publishers;
+    },
+    displayedPublishers() {
+      return this.publishers.map(p => ({ name: this.displayName(p), edit: p.id }));
     },
   },
   methods: {
@@ -120,5 +139,18 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss">
+  .publishers-list {
+    thead {
+      display: none;
+    }
+    td:nth-child(1) {
+      text-align: left;
+      border-left: solid 1px rgba(0, 0, 0, 0.125);
+    }
+    td:nth-child(2) {
+      text-align: right;
+      border-right: solid 1px rgba(0, 0, 0, 0.125);
+    }
+  }
 </style>

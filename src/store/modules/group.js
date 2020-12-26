@@ -274,6 +274,7 @@ export const group = {
         commit(DELETE_GROUP);
       } catch (e) {
         commit(DELETE_GROUP_FAIL, e);
+        throw new Error(e);
       } finally {
         commit('auth/LOADING', false, { root: true });
       }

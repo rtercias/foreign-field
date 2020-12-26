@@ -89,6 +89,7 @@ export default {
         if (confirm) {
           this.isSaving = true;
           if (this.mode === Modes.add) {
+            this.model.congregationid = this.congregation.id;
             await this.addPublisher(this.model);
           } else if (this.mode === Modes.edit) {
             await this.updatePublisher(this.model);
@@ -127,6 +128,7 @@ export default {
       });
       if (confirm) {
         await this.deletePublisher(this.publisher.id);
+        this.cancel();
       }
     },
 

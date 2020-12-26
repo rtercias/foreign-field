@@ -337,6 +337,7 @@ export default {
       });
       if (confirm) {
         await this.deleteAddress(this.address.id);
+        this.$router.push(`/territories/${this.territoryId}`);
       }
     },
   },

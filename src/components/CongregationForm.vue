@@ -1,13 +1,13 @@
 <template>
   <b-container>
     <b-row>
-      <b-col sm="12" md="6" class="cong-form">
+      <b-col md="12" lg="7" class="cong-form">
         <div class="cong-header justify-content-around align-items-center lead py-4">
           <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Congregation</span>
           <div v-else-if="mode===modes.edit" class="lead w-100 d-flex justify-content-between px-4">
             <div class="font-weight-bold" v-if="!readOnly">Edit Congregation</div>
             <div class="font-weight-bold" v-else>Congregation</div>
-            <div v-if="readOnly" class="d-flex justify-content-end">
+            <div v-if="readOnly && canManage" class="d-flex justify-content-end">
               <b-button type="button" variant="success" @click="edit">Edit</b-button>
             </div>
           </div>
@@ -56,7 +56,7 @@
           <hr />
         </b-form>
       </b-col>
-      <b-col sm="12" md="6" class="border-left">
+      <b-col md="12" lg="5" class="border-left">
         <group-list :congregation-id="congregation.id" class="border-bottom pb-5 p-4"></group-list>
         <publisher-list :congregation-id="congregation.id" class="p-4"></publisher-list>
       </b-col>
@@ -196,6 +196,7 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       isAdmin: 'auth/isAdmin',
+      canManage: 'auth/canManage',
       congregation: 'congregation/congregation',
     }),
     canEditCongregation() {

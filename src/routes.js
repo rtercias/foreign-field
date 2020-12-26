@@ -34,7 +34,7 @@ const routes = [
     component: CongregationForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
     },
   },
   {

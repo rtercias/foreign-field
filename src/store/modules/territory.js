@@ -506,6 +506,7 @@ export const territory = {
         commit(DELETE_TERRITORY);
       } catch (e) {
         commit(DELETE_TERRITORY_FAIL, e);
+        throw e;
       } finally {
         commit('auth/LOADING', false, { root: true });
       }

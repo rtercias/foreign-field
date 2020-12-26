@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 import clone from 'lodash/clone';
 import { InvalidGroupError } from '../../exceptions/custom-errors';
 
-export const TEST_GROUPS = [18, 21];
+export const TEST_GROUPS = [18, 21, 22];
 
 export const model = gql`fragment GroupModel on Group {
   id

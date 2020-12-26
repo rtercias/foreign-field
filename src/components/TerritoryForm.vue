@@ -7,7 +7,7 @@
         <div>{{territory.description}}</div>
       </div>
     </div>
-    <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
+    <div class="text-danger font-weight-bold" v-if="error">{{error}}</div>
     <Loading v-if="isLoading"></Loading>
     <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
       <b-form-group
@@ -134,13 +134,19 @@ export default {
     },
 
     async remove() {
-      const message = 'Are you sure you want to delete this territory?';
-      const confirm = await this.$bvModal.msgBoxConfirm(message, {
-        title: this.territory.name,
-        centered: true,
-      });
-      if (confirm) {
-        await this.deleteTerritory(this.territory.id);
+      try {
+        const message = 'Are you sure you want to delete this territory?';
+        const confirm = await this.$bvModal.msgBoxConfirm(message, {
+          title: this.territory.name,
+          centered: true,
+        });
+        if (confirm) {
+          await this.deleteTerritory(this.territory.id);
+          this.cancel();
+        }
+      } catch (err) {
+        this.error = err.message;
+        window.scrollTo(0, 0);
       }
     },
 

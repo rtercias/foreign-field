@@ -14,7 +14,7 @@
         <b-list-group-item v-for="group in groups" :key="group.id">
           <div class="d-flex justify-content-between">
             {{group.code}} - {{group.description}}
-            <b-link :to="`/groups/${group.id}/edit`">
+            <b-link v-if="canManage" :to="`/groups/${group.id}/edit`">
               <font-awesome-icon
                 class="small text-primary"
                 icon="pencil-alt"
