@@ -37,7 +37,7 @@
           <b-navbar-nav class="pt-3">
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item
-              v-if="canManage || canLead"
+              v-if="canWrite"
               :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
               {{congregation.name}}
             </b-nav-item>
