@@ -249,7 +249,7 @@ export default {
 
     compareToKeyword(filter, values) {
       return values.reduce(
-        (acc, value) => acc || toLower(String(value).includes(toLower(filter)),
+        (acc, value) => acc || toLower(String(value).includes(toLower(filter))),
         false,
       );
     },
