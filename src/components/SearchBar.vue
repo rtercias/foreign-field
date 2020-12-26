@@ -1,5 +1,8 @@
 <template>
-  <div class="sticky-top bg-white border-bottom" :style="{ top: top }" :class="{ 'p-0': noPadding, 'p-2': !noPadding }">
+  <div
+    class="sticky-top bg-white"
+    :style="{ top: top }"
+    :class="{ 'p-0': noPadding, 'p-2 border-bottom': !noPadding }">
     <div class="position-relative">
       <b-form-input v-model="keywordFilter" :placeholder="searchText" @keydown="keydown" />
       <font-awesome-icon

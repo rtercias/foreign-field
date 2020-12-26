@@ -46,6 +46,7 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import get from 'lodash/get';
 import ChangeLogAddressCard from './ChangeLogAddressCard';
 import Loading from './Loading';
 import SearchBar from './SearchBar';
@@ -152,7 +153,10 @@ export default {
       if (this.isSingleRecord) {
         return this.storeLogs;
       }
-      return this.storeLogs.filter(log => !log.address.territory.name.includes('TEST'));
+      return this.storeLogs.filter((log) => {
+        const { name } = get(log, 'address.territory') || {};
+        return name && !name.includes('TEST');
+      });
     },
     preview() {
       return this.cleanLogs.slice(0, 3);

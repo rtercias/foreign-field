@@ -34,7 +34,13 @@
       </div>
     </div>
     <div class="text-right">
-      <hr class="mb-2 mt-2" />
+      <b-link :to="{ name: 'territory-edit', params: { id: terr.id } }">
+        <font-awesome-icon
+          class="small text-primary"
+          icon="pencil-alt"
+        />
+      </b-link>
+      <hr class="my-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
       <div class="d-flex" :class="{
           'justify-content-end': terr.type === 'Regular',
@@ -64,7 +70,7 @@ import format from 'date-fns/format';
 
 export default {
   name: 'TerritoryCard',
-  props: ['terr', 'groupCode', 'selectTerritory', 'fetch', 'typeFilters'],
+  props: ['terr', 'groupId', 'selectTerritory', 'fetch', 'typeFilters'],
   data() {
     return {
       saving: false,
@@ -126,12 +132,12 @@ export default {
     },
     assignedTo() {
       if (this.terr && this.terr.status && this.terr.status.publisher) {
-        const pre = this.isRecentlyWorked ? 'Recently assigned to' : 'Assigned to';
+        const pre = this.isRecentlyWorked
+          ? 'Recently completed'
+          : `Assigned to ${this.terr.status.publisher.firstname} ${this.terr.status.publisher.lastname}`;
         const timestamp = Number(this.terr.status.date);
         const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
-
-        return `${pre} ${this.terr.status.publisher.firstname} `
-          + `${this.terr.status.publisher.lastname}${formattedDate}`;
+        return `${pre}${formattedDate}`;
       }
 
       return '';

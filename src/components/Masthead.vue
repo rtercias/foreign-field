@@ -36,7 +36,12 @@
         <b-collapse is-nav id="nav_dropdown_collapse" :class="{ 'show d-block': isDesktop }">
           <b-navbar-nav class="pt-3">
             <b-nav-item to="/">Home</b-nav-item>
-            <b-nav-item v-if="canWrite" :to="`/groups/${groupCode}`">Territories</b-nav-item>
+            <b-nav-item
+              v-if="canManage || canLead"
+              :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
+              {{congregation.name}}
+            </b-nav-item>
+            <b-nav-item v-if="canWrite" :to="`/groups/${groupId}`">Territories</b-nav-item>
             <b-nav-item
               v-if="canWrite && matchingRouteNames.includes('territory')"
               :to="`/territories/${territory && territory.id}/optimize`">
@@ -113,7 +118,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateCongregation: 'auth/updateCongregation',
       checkinAll: 'territories/checkinAll',
       copyCheckouts: 'territories/copyCheckouts',
     }),
@@ -160,7 +164,7 @@ export default {
 
       // Step 1: toggle campaign mode
       cong.campaign = !cong.campaign;
-      await this.updateCongregation({ cong });
+      await this.updateCongregation(cong);
 
       const checkinAll = await this.$bvModal.msgBoxConfirm(
         'Do you want to check in ALL territories, or allow publishers to keep their checked out territories', {
@@ -273,8 +277,7 @@ export default {
       user: 'auth/user',
       name: 'auth/name',
       congId: 'auth/congId',
-      terrCongId: 'territory/congId',
-      groupCodes: 'auth/groupCodes',
+      groups: 'group/groups',
       leftNavRoute: 'auth/mastheadLeftNavRoute',
       canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
@@ -282,6 +285,7 @@ export default {
       canLead: 'auth/canLead',
       isDesktop: 'auth/isDesktop',
       territory: 'territory/territory',
+      congregation: 'auth/congregation',
     }),
     showLeftNav() {
       return this.$route.name !== 'home';
@@ -292,8 +296,8 @@ export default {
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
     },
-    groupCode() {
-      return get(this.territory, 'group_code') || (this.groupCodes && this.groupCodes.length && this.groupCodes[0]) || 'ALL';
+    groupId() {
+      return get(this.territory, 'group_id') || get(this.groups, '[0].id') || 0;
     },
   },
 };

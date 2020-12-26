@@ -1,10 +1,10 @@
 <template>
   <div class="territory-addresses pb-5">
-    <SearchBar :search-text="'Search this territory'" @on-click="search" top="184px"></SearchBar>
-    <h3 v-if="territory.addresses.length === 0" class="w-100 text-center">
+    <SearchBar :search-text="'Search this territory'" @on-click="search" top="176px"></SearchBar>
+    <!-- <h3 v-if="territory.addresses.length === 0" class="w-100 text-center">
       There are no addresses in this territory.
-    </h3>
-    <b-list-group v-else>
+    </h3> -->
+    <b-list-group>
       <swipe-list
         ref="list"
         class="card"
@@ -142,7 +142,7 @@ export default {
       const basicTerritory = {
         name: this.territory.name,
         city,
-        group_code: this.territory.group_code,
+        group_id: this.territory.group_id,
         id: this.territory.id,
         lastVisited: (new Date()).toISOString(),
       };

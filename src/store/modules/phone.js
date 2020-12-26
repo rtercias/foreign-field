@@ -1,171 +1,25 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
-import clone from 'lodash/clone';
 import get from 'lodash/get';
-import { InvalidPhoneError } from '../exceptions/custom-errors';
-import { activityModel } from './address';
+import { model as phoneModel, validate, ACTION_BUTTON_LIST } from './models/PhoneModel';
+import { model as activityModel } from './models/ActivityModel';
 
-const phoneModel = gql`fragment PhoneModel on Phone {
-  id
-  congregationId
-  parent_id
-  territory_id
-  type
-  status
-  phone
-  notes
-  sort
-  create_user
-  create_date
-  update_user
-  update_date
-}`;
-
-export const PHONE_STATUS = {
-  Active: 'Active',
-  NF: 'NF',
-  DNC: 'DNC',
-};
 
 export const REJECT_TAGS = ['invalid', 'do not call'];
 
 const SET_PHONE = 'SET_PHONE';
 const ADD_PHONE = 'ADD_PHONE';
+const ADD_PHONE_FAIL = 'ADD_PHONE_FAIL';
 const UPDATE_PHONE = 'UPDATE_PHONE';
+const UPDATE_PHONE_FAIL = 'UPDATE_PHONE_FAIL';
 const ADD_TAG = 'ADD_TAG';
+const ADD_TAG_FAIL = 'ADD_TAG_FAIL';
 const REMOVE_TAG = 'REMOVE_TAG';
+const REMOVE_TAG_FAIL = 'REMOVE_TAG_FAIL';
 const PHONE_LOOKUP_SUCCESS = 'PHONE_LOOKUP_SUCCESS';
 const PHONE_LOOKUP_FAIL = 'PHONE_LOOKUP_FAIL';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
-
-const ACTION_BUTTON_LIST = [
-  {
-    type: 'fa-icon',
-    value: 'START',
-    text: '',
-    icon: '',
-    color: 'success',
-  },
-  {
-    type: 'fa-icon',
-    value: 'NA',
-    text: '',
-    icon: 'comment-slash',
-    color: 'warning',
-    description: 'No Answer',
-  },
-  {
-    type: 'fa-icon',
-    value: 'CT',
-    text: '',
-    icon: 'comment',
-    color: 'primary',
-    description: 'Contacted',
-  },
-  {
-    type: 'fa-icon',
-    value: 'VM',
-    text: '',
-    icon: 'voicemail',
-    color: 'primary',
-    description: 'Voicemail',
-  },
-  {
-    type: 'fa-icon',
-    value: 'LW',
-    text: '',
-    icon: 'envelope',
-    color: 'primary',
-    description: 'Letter',
-    disabledText: 'Do Not Mail',
-  },
-  {
-    type: 'fa-icon',
-    value: 'invalid',
-    text: '',
-    icon: 'phone-slash',
-    color: 'danger',
-    description: 'Invalid',
-  },
-  {
-    type: 'fa-icon',
-    value: 'do not call',
-    text: '',
-    icon: 'minus-circle',
-    color: 'danger',
-    description: 'Do Not Call',
-  },
-  {
-    type: 'fa-icon',
-    value: 'confirmed',
-    text: '',
-    icon: 'check',
-    color: 'primary',
-    description: 'Confirmed',
-  },
-];
-
-function validatePhone(_phone, isNew) {
-  const phone = clone(_phone);
-
-  if (isNew && phone.id) {
-    throw new InvalidPhoneError('Phone ID must be empty when adding a new phone');
-  }
-  if (!phone.congregationId) {
-    throw new InvalidPhoneError('Congregation ID is required');
-  }
-  if (!phone.territory_id) {
-    throw new InvalidPhoneError('Territory ID is required');
-  }
-  if (!Number.isInteger(phone.sort)) {
-    phone.sort = 0;
-  }
-  if (!phone.phone) {
-    throw new InvalidPhoneError('Phone is required');
-  }
-  if (phone.notes === null) {
-    phone.notes = '';
-  }
-
-  if ('activityLogs' in phone) {
-    delete phone.activityLogs;
-  }
-
-  if ('lastActivity' in phone) {
-    delete phone.lastActivity;
-  }
-
-  if ('incomingResponse' in phone) {
-    delete phone.incomingResponse;
-  }
-
-  if ('selectedResponse' in phone) {
-    delete phone.selectedResponse;
-  }
-
-  if ('selectedResponseTS' in phone) {
-    delete phone.selectedResponseTS;
-  }
-
-  if ('isBusy' in phone) {
-    delete phone.isBusy;
-  }
-
-  if ('editMode' in phone) {
-    delete phone.editMode;
-  }
-
-  if ('create_date' in phone) {
-    delete phone.create_date;
-  }
-
-  if ('update_date' in phone) {
-    delete phone.update_date;
-  }
-
-  return phone;
-}
 
 export const phone = {
   namespaced: true,
@@ -194,40 +48,25 @@ export const phone = {
   },
 
   mutations: {
-    SET_PHONE(state, _phone) {
-      state.phone = _phone;
-    },
-
-    ADD_PHONE(state, _phone) {
-      state.phone = _phone;
-    },
-
-    UPDATE_PHONE(state, _phone) {
-      state.phone = _phone;
-    },
-
-    CHANGE_STATUS(state, status) {
-      state.phone.status = status;
-    },
-
+    SET_PHONE(state, _phone) { state.phone = _phone; },
+    ADD_PHONE(state, _phone) { state.phone = _phone; },
+    ADD_PHONE_FAIL(state, error) { state.error = error; },
+    UPDATE_PHONE(state, _phone) { state.phone = _phone; },
+    UPDATE_PHONE_FAIL(state, error) { state.error = error; },
+    PHONE_LOOKUP_SUCCESS(state, search) { state.search = search; },
+    PHONE_LOOKUP_FAIL(state, exception) { console.error(PHONE_LOOKUP_FAIL, exception); },
     ADD_TAG(state, tag) {
       const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
       arrTags.push(tag);
       state.phone.notes = arrTags.join(',');
     },
-
+    ADD_TAG_FAIL(state, error) { state.error = error; },
     REMOVE_TAG(state, tag) {
       const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
       const newTags = arrTags.filter(t => t !== tag);
       state.phone.notes = newTags.join(',');
     },
-
-    PHONE_LOOKUP_SUCCESS(state, search) {
-      state.search = search;
-    },
-    PHONE_LOOKUP_FAIL(state, exception) {
-      console.error(PHONE_LOOKUP_FAIL, exception);
-    },
+    REMOVE_TAG_FAIL(state, error) { state.error = error; },
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
       console.error(FETCH_LAST_ACTIVITY_FAIL, exception);
@@ -267,144 +106,177 @@ export const phone = {
           },
         });
 
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
         const { lastActivity } = get(response, 'data.data.phone') || {};
         dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
       } catch (e) {
+        commit(FETCH_LAST_ACTIVITY_FAIL, e);
         console.error(`Unable to fetch last activity for phone id ${phoneId}.`, e);
-        throw e;
       }
     },
 
     async addPhone({ commit, rootGetters }, _phone) {
-      commit('auth/LOADING', true, { root: true });
+      try {
+        commit('auth/LOADING', true, { root: true });
 
-      const user = rootGetters['auth/user'];
-      const p = validatePhone(_phone, true);
-      p.create_user = user.id;
+        const user = rootGetters['auth/user'];
+        const p = validate(_phone, true);
+        p.create_user = user.id;
 
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`mutation AddPhone($phone: PhoneInput!) { 
-            addPhone(phone: $phone) { 
-              ...PhoneModel
-            }
-          }
-          ${phoneModel}`),
-          variables: {
-            phone: p,
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        },
-      });
+          data: {
+            query: print(gql`mutation AddPhone($phone: PhoneInput!) { 
+              addPhone(phone: $phone) { 
+                ...PhoneModel
+              }
+            }
+            ${phoneModel}`),
+            variables: {
+              phone: p,
+            },
+          },
+        });
 
-      if (response && response.data && response.data.data) {
-        if (response.data.errors) {
-          throw new Error(response.data.errors[0].message);
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
         }
-        const { addPhone } = response.data.data;
+        const { addPhone } = get(response, 'data.data');
         commit(ADD_PHONE, addPhone);
+      } catch (e) {
+        commit(ADD_PHONE_FAIL, e);
+        console.error(ADD_PHONE_FAIL, e);
+      } finally {
         commit('auth/LOADING', false, { root: true });
       }
     },
 
     async updatePhone({ commit, rootGetters }, _phone) {
-      commit('auth/LOADING', true, { root: true });
+      try {
+        commit('auth/LOADING', true, { root: true });
 
-      const user = rootGetters['auth/user'];
-      const p = validatePhone(_phone);
+        const user = rootGetters['auth/user'];
+        const p = validate(_phone);
 
-      if (!user) {
-        throw new Error('No authorized user');
-      }
+        if (!user) {
+          throw new Error('No authorized user');
+        }
 
-      p.update_user = user.id;
+        p.update_user = user.id;
 
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`mutation UpdatePhone($phone: PhoneInput!) { 
-            updatePhone(phone: $phone) { 
-              ...PhoneModel
-            }
-          }
-          ${phoneModel}`),
-          variables: {
-            phone: p,
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        },
-      });
+          data: {
+            query: print(gql`mutation UpdatePhone($phone: PhoneInput!) { 
+              updatePhone(phone: $phone) { 
+                ...PhoneModel
+              }
+            }
+            ${phoneModel}`),
+            variables: {
+              phone: p,
+            },
+          },
+        });
 
-      if (response && response.data && response.data.data) {
-        const { updatePhone } = response.data.data;
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        const { updatePhone } = get(response, 'data.data');
         commit(UPDATE_PHONE, updatePhone);
+      } catch (e) {
+        commit(UPDATE_PHONE_FAIL, e);
+        console.error(UPDATE_PHONE_FAIL, e);
+      } finally {
         commit('auth/LOADING', false, { root: true });
       }
     },
 
     async addTag({ commit }, { phoneId, userid, tag }) {
-      commit('auth/LOADING', true, { root: true });
+      try {
+        commit('auth/LOADING', true, { root: true });
 
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`mutation AddPhoneTag($phoneId: Int!, $userid: Int!, $tag: String!) { 
-            addPhoneTag(phoneId: $phoneId, userid: $userid, note: $tag)
-          }`),
-          variables: {
-            phoneId,
-            userid,
-            tag,
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        },
-      });
+          data: {
+            query: print(gql`mutation AddPhoneTag($phoneId: Int!, $userid: Int!, $tag: String!) { 
+              addPhoneTag(phoneId: $phoneId, userid: $userid, note: $tag)
+            }`),
+            variables: {
+              phoneId,
+              userid,
+              tag,
+            },
+          },
+        });
 
-      if (response && response.data && response.data.data) {
-        const { addPhoneTag } = response.data.data;
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        const { addPhoneTag } = get(response, 'data.data');
         if (addPhoneTag) {
           commit(ADD_TAG, tag);
         }
+      } catch (e) {
+        commit(ADD_TAG_FAIL, e);
+        console.error(ADD_TAG_FAIL, e);
+      } finally {
         commit('auth/LOADING', false, { root: true });
       }
     },
 
     async removeTag({ commit }, { phoneId, userid, tag }) {
-      commit('auth/LOADING', true, { root: true });
+      try {
+        commit('auth/LOADING', true, { root: true });
 
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`mutation RemoveTag($phoneId: Int!, $userid: Int!, $tag: String!) { 
-            removePhoneTag(phoneId: $phoneId, userid: $userid, note: $tag)
-          }`),
-          variables: {
-            phoneId,
-            userid,
-            tag,
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        },
-      });
+          data: {
+            query: print(gql`mutation RemoveTag($phoneId: Int!, $userid: Int!, $tag: String!) { 
+              removePhoneTag(phoneId: $phoneId, userid: $userid, note: $tag)
+            }`),
+            variables: {
+              phoneId,
+              userid,
+              tag,
+            },
+          },
+        });
 
-      if (response && response.data && response.data.data) {
-        const { removePhoneTag } = response.data.data;
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        const { removePhoneTag } = get(response, 'data.data');
         if (removePhoneTag) {
           commit(REMOVE_TAG, tag);
         }
+      } catch (e) {
+        commit(REMOVE_TAG_FAIL, e);
+        console.error(REMOVE_TAG_FAIL, e);
+      } finally {
         commit('auth/LOADING', false, { root: true });
       }
     },
@@ -431,7 +303,7 @@ export const phone = {
                   id
                   name
                   description
-                  group_code
+                  group_id
                 }
               }
             }`),

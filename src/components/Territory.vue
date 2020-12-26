@@ -2,24 +2,27 @@
   <div class="territory">
     <Loading v-if="territoryIsLoading" />
     <div v-else>
-      <header class="page-header sticky-top w-100 p-2 bg-white border-bottom" :sticky="true">
+      <header class="page-header sticky-top w-100 pt-2 px-2 pb-0 bg-white border-bottom" :sticky="true">
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
-            <div class="text-left">
+            <div class="text-left w-50">
               <h4 class="mb-0">{{territory.description}}</h4>
-              <span>{{cities}}</span>
+              <span class="cities">{{cities}}</span>
             </div>
-            <h4 class="text-right">
+            <div class="text-right w-50">
+              <h4 class="territory-name">
                 <font-awesome-icon
                   class="text-primary d-xl-none"
                   icon="sms"
                   size="sm"
                   @click="openSMSMobile()">
                 </font-awesome-icon> {{territoryName}}
-            </h4>
+              </h4>
+              <div class="small">{{currentPublisher}}</div>
+            </div>
           </div>
-          <div class="w-100 d-flex justify-content-between py-2">
-            <b-button-group size="sm">
+          <div class="header-buttons w-100 d-flex justify-content-between py-2">
+            <b-button-group size="sm" class="badge px-0">
               <b-button
                 variant="outline-info"
                 :to="{ name: 'address-list', params: { id } }"
@@ -36,12 +39,12 @@
                 Map
               </b-button>
             </b-button-group>
-            <b-button-group v-if="viewMode==='map-view'" size="sm">
+            <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
               <b-button variant="primary" :to="`/territories/${id}/optimize`">
                 Optimize
               </b-button>
             </b-button-group>
-            <b-button-group v-else size="sm">
+            <b-button-group v-else size="sm" class="badge px-0">
               <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Check In</span>
@@ -68,6 +71,7 @@ import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
 import { store, defaultOptions } from '../store';
 import { channel } from '../main';
+import { displayName } from '../utils/publisher';
 
 export default {
   name: 'Territory',
@@ -156,7 +160,7 @@ export default {
       // show first two cities
       for (const c of this.cityNames.slice(0, 2)) {
         const city = c.trim();
-        cities += city !== 'null' && `${cities.length > 0 ? ', ' : ''}${city}`;
+        cities += city !== 'null' ? `${cities.length > 0 ? ', ' : ''}${city}` : '';
       }
 
       // count all others
@@ -178,6 +182,15 @@ export default {
     defaultView() {
       const options = this.options || defaultOptions;
       return get(options, 'territory.defaultView');
+    },
+    currentPublisher() {
+      const status = get(this.territory, 'status.status');
+      const publisher = get(this.territory, 'status.publisher');
+      if (status === 'Checked Out') {
+        return `Checked out to: ${displayName(publisher)}`;
+      }
+
+      return '';
     },
   },
   methods: {
@@ -246,6 +259,13 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.territory {
+  .header-buttons {
+    .btn {
+      font-size: 12px;
+    }
+  }
+}
 .list-group {
   display: block;
 }
@@ -269,6 +289,18 @@ li {
 }
 .add-new {
   font-size: 24px;
+}
+.territory-name {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
+}
+.cities {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: inline-block;
+  overflow: hidden;
 }
 @media (min-width: 769px) {
   .columns {

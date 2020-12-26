@@ -12,8 +12,6 @@ import { IncompleteRegistrationError, UnauthorizedUserError } from '../exception
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
-const SET_GROUP_CODES = 'SET_GROUP_CODES';
-const SET_CONGREGATION = 'SET_CONGREGATION';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
@@ -31,7 +29,6 @@ function initialState() {
     photoUrl: '',
     congId: 0,
     congregation: {},
-    groupCodes: [],
     loading: false,
     mastheadLeftNavRoute: '',
     token: '',
@@ -52,7 +49,6 @@ export const auth = {
     user: state => state.user,
     congId: state => state.congId,
     congregation: state => state.congregation,
-    groupCodes: state => state.groupCodes,
     isAdmin: state => state.user && ['Admin'].includes(state.user.role),
     loading: state => state.loading,
     canViewReports: state => state.user && ['Admin', 'TS', 'SO', 'GO'].includes(state.user.role),
@@ -97,15 +93,6 @@ export const auth = {
       state.isForcedOut = true;
     },
 
-    SET_GROUP_CODES(state, groupCodes) {
-      state.groupCodes = groupCodes;
-    },
-
-    SET_CONGREGATION(state, cong) {
-      state.congregation = cong;
-      state.user.congregation = cong;
-    },
-
     RESET(state) {
       const s = initialState();
       Object.keys(s).forEach((key) => {
@@ -148,7 +135,7 @@ export const auth = {
       });
     },
 
-    async authorize({ commit }, username) {
+    async authorize({ commit, dispatch }, username) {
       commit(LOADING, true);
       return new Promise(async (resolve, reject) => {
         const response = await axios({
@@ -192,6 +179,7 @@ export const auth = {
         const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
         if (hasPermission) {
           commit(AUTHORIZE, { ...user, congregation });
+          dispatch('congregation/setCongregation', congregation, { root: true });
           resolve();
         } else {
           reject(new UnauthorizedUserError('Unauthorized'));
@@ -214,7 +202,7 @@ export const auth = {
                   id
                   name
                   city
-                  group_code
+                  group_id
                   type
                   status {
                     status
@@ -280,62 +268,8 @@ export const auth = {
         }
       }
 
-      dispatch('getGroupCodes', state.congId);
-    },
-
-    async getGroupCodes({ commit }, congId) {
-      if (!congId) return;
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        data: {
-          query: print(gql`{ congregation (id: ${congId}) { groups { code } }}`),
-        },
-      });
-
-      const { congregation } = (response && response.data && response.data.data) || [];
-      const groups = congregation && congregation.groups && congregation.groups.map(g => g.code).sort() || [];
-      commit(SET_GROUP_CODES, groups);
-    },
-
-    async updateCongregation({ commit }, { cong }) {
-      if (!cong) {
-        return;
-      }
-
-      if (cong.campaign) cong.campaign = 1;
-      if (!cong.campaign) cong.campaign = 0;
-      if (cong.options && typeof cong.options === 'object') {
-        cong.options = JSON.stringify(cong.options);
-      }
-
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        data: {
-          query: print(gql`mutation UpdateCongregation($cong: CongregationInput!) { 
-            updateCongregation (cong: $cong) { 
-              id
-              name
-              description
-              language
-              campaign
-              admin_email
-              options
-            }
-          }`),
-          variables: {
-            cong,
-          },
-        },
-      });
-
-      if (response && response.data && response.data.data) {
-        const { updateCongregation } = response.data.data;
-        commit(SET_CONGREGATION, updateCongregation);
+      if (state.congId) {
+        dispatch('group/getGroups', { congId: state.congId }, { root: true });
       }
     },
 

@@ -5,6 +5,7 @@ import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import toArray from 'lodash/toArray';
 import { print } from 'graphql/language/printer';
+import { TEST_GROUPS } from './models/GroupModel';
 
 export const TEST_TERRITORIES = [
   'TEST-000',
@@ -72,8 +73,8 @@ export const territories = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupCode: String) { 
-              territories (congId: $congId, group_code: $groupCode) { 
+            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int) { 
+              territories (congId: $congId, group_id: $groupId) { 
                 id
                 name
                 description
@@ -94,7 +95,7 @@ export const territories = {
             }`),
             variables: {
               congId: params.congId,
-              groupCode: params.groupCode,
+              groupId: params.groupId,
             },
           },
         });
@@ -102,7 +103,7 @@ export const territories = {
         if (response && response.data && response.data.data) {
           const { territories: terrs } = response.data.data;
           const filtered = terrs.filter(t => t.type !== 'Test');
-          commit(SET_TERRITORIES, params.groupCode === 'TEST' ? terrs : filtered);
+          commit(SET_TERRITORIES, TEST_GROUPS.includes(params.groupId) ? terrs : filtered);
           commit(SET_LOADING, false);
         }
       } catch (e) {
@@ -131,7 +132,10 @@ export const territories = {
                 name
                 description
                 type
-                group_code
+                group_id
+                group {
+                  code
+                }
                 congregationid
               }
             }`),

@@ -11,6 +11,8 @@ import { publisher } from './modules/publisher';
 import { publishers } from './modules/publishers';
 import { phone } from './modules/phone';
 import { reports } from './modules/reports';
+import { congregation } from './modules/congregation';
+import { group } from './modules/group';
 // import { router } from '../routes';
 
 Vue.use(Vuex);
@@ -61,5 +63,7 @@ export const store = new Store({
     publishers,
     phone,
     reports,
+    congregation,
+    group,
   },
 });

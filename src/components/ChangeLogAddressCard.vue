@@ -31,7 +31,7 @@
       </div>
     </div>
     <div>
-      <span>{{log.publisher.firstname}} {{log.publisher.lastname}}&nbsp;</span>
+      <span>{{displayName(log.publisher)}}&nbsp;</span>
       <b-list-group>
         <b-list-group-item
           class="p-2 d-flex flex-column justify-content-between align-items-start"
@@ -49,6 +49,7 @@ import get from 'lodash/get';
 import Change from './Change';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
+import { displayName } from '../utils/publisher';
 
 export default {
   name: 'ChangeLogAddressCard',
@@ -58,6 +59,7 @@ export default {
   },
   methods: {
     formatPhone,
+    displayName,
     changeDescription(change, key) {
       return `Changed ${key} ${change.old
         ? `from <b-badge>${this.value(change.old)}</b-badge>`
@@ -78,9 +80,6 @@ export default {
     ...mapGetters({
       congId: 'auth/congId',
     }),
-    group() {
-      return get(this.log, 'address.territory.group_code');
-    },
     territoryId() {
       return get(this.log, 'address.territory.id');
     },

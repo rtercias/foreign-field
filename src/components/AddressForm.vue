@@ -114,6 +114,9 @@
       </div>
       <div class="buttons py-4" :class="{ 'justify-content-between': step!==4, 'justify-content-end': step===4 }">
         <b-button v-if="step === 1" type="button" variant="light" @click="done">Cancel</b-button>
+        <b-button v-if="canManage && step === 1 && mode===modes.edit" type="button" variant="danger" @click="remove">
+          Delete
+        </b-button>
         <b-button v-else v-show="step !== 4" type="button" variant="light" @click="prev">Previous</b-button>
         <b-button v-if="canWrite && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">
           Locate on Map
@@ -142,10 +145,10 @@ import { TheMask } from 'vue-the-mask';
 import AddressMap from './AddressMap';
 import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
+import { Modes as _Modes } from '../utils/modes';
 
 const Modes = {
-  add: 'add',
-  edit: 'edit',
+  ..._Modes,
   phoneAdd: 'phone-add',
   phoneEdit: 'phone-edit',
 };
@@ -188,6 +191,7 @@ export default {
     ...mapActions({
       addAddress: 'address/addAddress',
       updateAddress: 'address/updateAddress',
+      deleteAddress: 'address/deleteAddress',
       fetchAddress: 'address/fetchAddress',
       addressLookup: 'address/addressLookup',
       getTerritory: 'territory/getTerritory',
@@ -323,6 +327,18 @@ export default {
 
     done() {
       this.$router.push(this.returnRoute);
+    },
+
+    async remove() {
+      const message = 'Are you sure you want to delete this address?';
+      const confirm = await this.$bvModal.msgBoxConfirm(message, {
+        title: this.address.addr1,
+        centered: true,
+      });
+      if (confirm) {
+        await this.deleteAddress(this.address.id);
+        this.$router.push(`/territories/${this.territoryId}`);
+      }
     },
   },
   computed: {

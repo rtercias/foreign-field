@@ -1,6 +1,7 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
+import get from 'lodash/get';
 import { print } from 'graphql/language/printer';
 
 const SET_PUBLISHERS = 'SET_PUBLISHERS';
@@ -39,6 +40,7 @@ export const publishers = {
               congregationid 
               username 
               status
+              role
             }
           }`),
           variables: {
@@ -47,12 +49,8 @@ export const publishers = {
         },
       });
 
-      if (response && response.data && response.data.data) {
-        const pubs = response.data.data.publishers || [];
-        commit(SET_PUBLISHERS, pubs.filter(p => p.status === 'active'
-          // TODO: remove congId filter when api has been pushed
-          && p.congregationid === congId));
-      }
+      const { publishers: pubs } = get(response, 'data.data');
+      commit(SET_PUBLISHERS, pubs);
     },
   },
 };

@@ -15,6 +15,10 @@ import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
 import PhoneWitnessing from './components/PhoneWitnessing';
+import TerritoryForm from './components/TerritoryForm';
+import CongregationForm from './components/CongregationForm';
+import GroupForm from './components/GroupForm';
+import PublisherForm from './components/PublisherForm';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome },
@@ -25,17 +29,53 @@ const routes = [
     name: 'signout', path: '/signout', component: Signout, props: true,
   },
   {
+    name: 'congregation-edit',
+    path: '/congregation/:id(\\d+)',
+    component: CongregationForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'congregation-add',
+    path: '/congregation/add',
+    component: CongregationForm,
+    props: true,
+    meta: {
+      permissions: ['Admin'],
+    },
+  },
+  {
     name: 'territories',
     path: '/territories',
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
     },
-    redirect: '/groups/ALL',
+    redirect: '/groups/0',
+  },
+  {
+    name: 'group-add',
+    path: '/groups/add',
+    component: GroupForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'group-edit',
+    path: '/groups/:id/edit',
+    component: GroupForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
   },
   {
     name: 'group',
-    path: '/groups/:groupCode',
+    path: '/groups/:groupId',
     component: Territories,
     props: true,
     meta: {
@@ -44,7 +84,7 @@ const routes = [
   },
   {
     name: 'territory',
-    path: '/territories/:id',
+    path: '/territories/:id(\\d+)',
     component: Territory,
     props: true,
     meta: {
@@ -74,8 +114,7 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       },
-    },
-    {
+    }, {
       name: 'optimize',
       path: 'optimize',
       component: Optimize,
@@ -83,21 +122,30 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO'],
       },
-    },
-    {
-      name: 'territory-group',
-      path: '/territories/:groupCode/:id',
-      props: true,
-      redirect: (to) => {
-        if (to.params.groupCode && Number.isSafeInteger(Number(to.params.id))) {
-          return '/territories/:id';
-        }
-        return '/groups/:groupCode';
-      },
-      meta: {
-        permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
-      },
     }],
+  },
+  {
+    name: 'territory-edit',
+    path: '/territories/:id/edit',
+    component: TerritoryForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'territory-group',
+    path: '/territories/:groupId/:id',
+    props: true,
+    redirect: (to) => {
+      if (to.params.groupId && Number.isSafeInteger(Number(to.params.id))) {
+        return '/territories/:id';
+      }
+      return '/groups/:groupId';
+    },
+    meta: {
+      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
+    },
   },
   {
     name: 'search',
@@ -205,6 +253,33 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+    },
+  },
+  {
+    name: 'territory-new',
+    path: '/territories/add',
+    component: TerritoryForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+    },
+  },
+  {
+    name: 'publisher-add',
+    path: '/publishers/add',
+    component: PublisherForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
+    },
+  },
+  {
+    name: 'publisher-edit',
+    path: '/publishers/:id/edit',
+    component: PublisherForm,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO'],
     },
   },
 ];

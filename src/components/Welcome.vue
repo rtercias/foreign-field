@@ -14,34 +14,12 @@
           </b-button>
         </div>
       </div>
-      <div class="col-sm-12">
+      <div class="col-sm-12 pb-3">
         <h3 class="align-items-center d-flex justify-content-center" :class="{ 'flex-column': isDesktop }">
           <img class="logo" :class="{ 'pr-5': !isDesktop }" :src="require('../assets/wheat-x.png')" />
           <span class="title w-100" :class="{ 'pr-0': isDesktop }">Dashboard</span>
         </h3>
         <Loading v-if="loading"></Loading>
-        <div v-else class="row py-2 mx-sm-0 mx-md-5 px-sm-0 px-md-3">
-          <div class="col-sm-12 col-md-6 d-flex justify-content-center">
-            <b-button-group>
-              <b-button v-if="canWrite" variant="success" size="sm" :to="`/addresses/add`">
-                <font-awesome-icon icon="plus"></font-awesome-icon> Address
-              </b-button>
-              <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
-                <font-awesome-icon icon="plus"></font-awesome-icon> Territory
-              </b-button>
-              <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
-                <font-awesome-icon icon="plus"></font-awesome-icon> Group
-              </b-button>
-              <b-button v-if="canManage" variant="outline-light" size="sm" :to="`/addresses/add`" disabled>
-                <font-awesome-icon icon="plus"></font-awesome-icon> Publisher
-              </b-button>
-            </b-button-group>
-          </div>
-          <div class="col-sm-12 col-md-6 small" v-if="canWrite">
-            <span class="small d-none d-md-inline mr-2">Territories:</span>
-            <groups-select></groups-select>
-          </div>
-        </div>
       </div>
       <div v-if="!loading" class="panel col-sm-12 col-md-5 py-3 border-info m-2 d-flex">
         <font-awesome-icon
