@@ -63,6 +63,7 @@ import startsWith from 'lodash/startsWith';
 import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
+import { language } from '../utils/tags';
 
 const PHONE_ADDRESS_TAGS = ['no number', 'do not mail', 'verify', 'business'];
 const READ_ONLY_PHONE_ADDRESS_TAGS = ['verify', 'business'];
@@ -74,7 +75,6 @@ export default {
   data() {
     return {
       collapsed: true,
-      language: get(this.user, 'congregation.language') || 'Tagalog',
       isSaving: false,
     };
   },
@@ -128,9 +128,10 @@ export default {
       this.isSaving = false;
       this.$set(this.address, 'isBusy', false);
     },
-    loadselectedTags() {
+    loadSelectedTags() {
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
+          e.caption = language(e.caption, this.language);
           e.state = true;
         }
       });
@@ -224,6 +225,9 @@ export default {
       user: 'auth/user',
       updatedAddress: 'address/address',
     }),
+    language() {
+      return (get(this.user, 'congregation.language') || 'Tagalog').toLowerCase();
+    },
     availableTags() {
       const all = [
         'verify',
@@ -255,11 +259,8 @@ export default {
       return finalArr;
     },
     selectedTags() {
-      return (this.address.notes && this.address.notes
-        .toLowerCase()
-        .split(',')
-        .filter(n => n.length))
-        || [];
+      const notes = String(get(this.address, 'notes')).replaceAll('#language#', this.language);
+      return (notes.toLowerCase().split(',').filter(n => n.length)) || [];
     },
     preview() {
       const all = this.selectedTags.sort();
@@ -275,7 +276,7 @@ export default {
     },
   },
   mounted() {
-    this.loadselectedTags();
+    this.loadSelectedTags();
   },
 };
 </script>

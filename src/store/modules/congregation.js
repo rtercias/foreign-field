@@ -171,7 +171,7 @@ export const congregation = {
       }
     },
 
-    async updateCongregation({ commit, rootGetters }, _cong) {
+    async updateCongregation({ commit, dispatch, rootGetters }, _cong) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -211,6 +211,7 @@ export const congregation = {
           throw new Error(errors[0].message);
         }
         const { updateCongregation } = get(response, 'data.data');
+        dispatch('auth/authorize', user.username, { root: true });
         commit(UPDATE_CONGREGATION, updateCongregation);
         commit('auth/LOADING', false, { root: true });
       } catch (error) {

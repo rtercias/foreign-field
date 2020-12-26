@@ -26,6 +26,7 @@ import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
 import get from 'lodash/get';
 import { format } from '../utils/phone';
+import { language } from '../utils/tags';
 
 export default {
   name: 'PhoneTags',
@@ -42,9 +43,10 @@ export default {
       removeTag: 'phone/removeTag',
       updateAddress: 'address/updateAddress',
     }),
-    loadselectedTags() {
+    loadSelectedTags() {
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
+          e.caption = language(e.caption, this.language);
           e.state = true;
         }
       });
@@ -109,7 +111,7 @@ export default {
     },
   },
   mounted() {
-    this.loadselectedTags();
+    this.loadSelectedTags();
   },
 };
 </script>
