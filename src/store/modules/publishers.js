@@ -50,6 +50,9 @@ export const publishers = {
       });
 
       const { publishers: pubs } = get(response, 'data.data');
+      for (const pub of pubs) {
+        pub.status = pub.status === 'active';
+      }
       commit(SET_PUBLISHERS, pubs);
     },
   },

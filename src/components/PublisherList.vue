@@ -91,7 +91,7 @@ export default {
       let publishers = this.pubs;
 
       if (this.activeOnly) {
-        publishers = publishers.filter(p => p.status === 'active');
+        publishers = publishers.filter(p => !!p.status);
       }
 
       if (this.keywordFilter) {
