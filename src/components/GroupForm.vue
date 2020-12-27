@@ -40,6 +40,7 @@ import { mapGetters, mapActions } from 'vuex';
 import Loading from './Loading';
 import { InvalidGroupError } from '../store/exceptions/custom-errors';
 import { Modes } from '../utils/modes';
+import { OVERSEER_OPTIONS } from '../store/modules/models/GroupModel';
 
 const required = ['code', 'description'];
 
@@ -158,7 +159,7 @@ export default {
       return true;
     },
     overseerOptions() {
-      const overseers = this.publishers.filter(p => p.role === 'GO')
+      const overseers = this.publishers.filter(p => OVERSEER_OPTIONS.includes(p.role))
         .map(p => ({ value: p.id, text: `${p.firstname} ${p.lastname}` }));
 
       return [

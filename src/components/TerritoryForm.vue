@@ -56,6 +56,7 @@ import get from 'lodash/get';
 import Loading from './Loading';
 import { InvalidTerritoryError } from '../store/exceptions/custom-errors';
 import { Modes } from '../utils/modes';
+import { TEST_GROUPS } from '../store/modules/models/GroupModel';
 
 const Types = [
   { text: 'Regular', value: 'Regular' },
@@ -189,6 +190,9 @@ export default {
       return get(this.$route, 'query.group') || this.territory.group_id;
     },
     typeOptions() {
+      if (!TEST_GROUPS.includes(this.model.group_id)) {
+        return Types.filter(t => t.value !== 'Test');
+      }
       return Types;
     },
     groupOptions() {

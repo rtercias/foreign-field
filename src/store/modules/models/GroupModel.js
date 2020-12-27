@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 import clone from 'lodash/clone';
 import { InvalidGroupError } from '../../exceptions/custom-errors';
 
+export const OVERSEER_OPTIONS = ['GO', 'SO', 'Admin', 'TS'];
 export const TEST_GROUPS = [18, 21, 22];
 
 export const model = gql`fragment GroupModel on Group {
