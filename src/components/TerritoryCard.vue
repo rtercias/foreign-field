@@ -46,9 +46,16 @@
           'justify-content-end': terr.type === 'Regular',
           'justify-content-between': terr.type !== 'Regular',
         }">
-        <b-badge class="territory-type" alert :variant="typeFilter(terr.type).variant" v-if="terr.type !== 'Regular'">
-          {{typeFilter(terr.type).text}}
-        </b-badge>
+        <div>
+          <b-badge
+            alert
+            class="territory-type mr-1"
+            :variant="typeFilter(terr.type).variant"
+            v-if="terr.type !== 'Regular'">
+            {{typeFilter(terr.type).text}}
+          </b-badge>
+          <b-badge class="mr-1" v-for="(tag, index) in tags" :key="index">{{tag}}</b-badge>
+        </div>
         <div>
           <div class="last-worked" v-if="terr.lastActivity">Last worked: {{lastWorked}}</div>
           <div v-else class="loading">
@@ -158,6 +165,9 @@ export default {
       }
 
       return format(new Date(timestamp), 'MM/dd/yyyy');
+    },
+    tags() {
+      return this.terr.tags ? this.terr.tags.split(',') : [];
     },
   },
 };

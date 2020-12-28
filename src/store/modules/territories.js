@@ -80,6 +80,7 @@ export const territories = {
                 description
                 type
                 congregationid
+                tags
                 status {
                   checkout_id
                   status
