@@ -180,7 +180,7 @@ export default {
       if (this.keywordFilter) {
         return territories.filter(t => this.excludeKeyword !== this.compareToKeyword(
           this.keywordFilter,
-          [t.name, t.description],
+          [t.name, t.description, t.tags],
         ));
       }
       if (this.typeFilter) {
