@@ -220,6 +220,13 @@ export const auth = {
                       timestamp
                     }
                   }
+                  lastActivity {
+                    id
+                    address_id
+                    checkout_id
+                    value
+                    timestamp
+                  }
                 }
               }
             }`),

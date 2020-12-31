@@ -28,7 +28,9 @@
           v-if="myTerritoriesLoading"
           class="my-territories-loading text-info text-center w-100 align-self-center"
         />
-        <span v-else-if="!(territories && territories.length)" class="text-center">I have no territories checked out.</span>
+        <span v-else-if="!(territories && territories.length)" class="text-center small">
+          I have no territories checked out.
+        </span>
         <div v-else class="text-left w-100">
           <span class="small">Territories I've checked out:</span>
           <b-list-group>
@@ -39,7 +41,9 @@
         </div>
       </div>
       <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
-        <span v-if="!seenTerritories.length" class="text-center">I have not visited any territories lately.</span>
+        <span v-if="!seenTerritories.length" class="text-center small">
+          I have not visited any territories lately.
+        </span>
         <div v-else>
           <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
