@@ -6,10 +6,10 @@
     <span v-if="territory.status">
       on {{territory.status && checkoutDate(territory.status.date)}}
     </span>
-    <div v-if="territory.lastVisited">
+    <div v-if="territory.lastVisited" class="small">
       {{formattedLastVisited}}
     </div>
-    <div class="last-activity font-weight-normal" v-if="territory.status">
+    <div class="small font-weight-normal" v-if="territory.status">
       Last activity: {{this.lastTimestamp}}
     </div>
   </div>
@@ -52,7 +52,4 @@ export default {
 };
 </script>
 <style scoped>
-  .last-activity {
-    font-size: 16px;
-  }
 </style>
