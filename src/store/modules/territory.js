@@ -527,7 +527,7 @@ export const territory = {
 
       let seenList;
       try {
-        seenList = JSON.parse(localStorage.getItem('seenTerritories'));
+        seenList = JSON.parse(localStorage.getItem('seenTerritories')) || [];
       } catch (e) {
         seenList = [];
       }
