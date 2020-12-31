@@ -201,7 +201,7 @@ export const auth = {
                 territories {
                   id
                   name
-                  city
+                  description
                   group_id
                   type
                   status {

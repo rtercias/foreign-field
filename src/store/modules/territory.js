@@ -6,6 +6,7 @@ import { store } from '..';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
+import differenceInDays from 'date-fns/differenceInDays';
 import { model, validate } from './models/TerritoryModel';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
@@ -509,6 +510,36 @@ export const territory = {
         throw e;
       } finally {
         commit('auth/LOADING', false, { root: true });
+      }
+    },
+
+    saveSeenTerritory(commands, terr) {
+      try {
+        if (!terr && !terr.name) return;
+
+        // create a basic territory and save it to local storage
+        const basicTerritory = {
+          name: terr.name,
+          description: terr.description,
+          group_id: terr.group_id,
+          id: terr.id,
+          lastVisited: (new Date()).toISOString(),
+        };
+        let seenList = JSON.parse(localStorage.getItem('seenTerritories'));
+        const idx = seenList.findIndex(t => t.id === terr.id);
+        if (idx >= 0) {
+          seenList.splice(idx, 1, basicTerritory);
+        } else {
+          seenList.push(basicTerritory);
+        }
+        // filter out old ones
+        seenList = seenList.filter(t => differenceInDays(new Date(), new Date(t.lastVisited)) < 60);
+        seenList = orderBy(seenList, 'lastVisited', 'desc');
+        seenList.length = seenList.length <= 5 ? seenList.length : 5;
+        const parsed = JSON.stringify(seenList);
+        localStorage.setItem('seenTerritories', parsed);
+      } catch (e) {
+        console.error('Unable to save territory in local storage');
       }
     },
   },

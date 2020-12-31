@@ -198,6 +198,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
+      saveSeenTerritory: 'territory/saveSeenTerritory',
     }),
 
     async checkIn() {
@@ -253,6 +254,11 @@ export default {
       },
       deep: true,
       immediate: true,
+    },
+    territory() {
+      if (this.territory.name !== '') {
+        this.saveSeenTerritory(this.territory);
+      }
     },
   },
 };

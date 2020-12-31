@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-link :to="url(territory)">
-      {{territory.name}} ({{firstCity}})
+      {{territory.name}} ({{territory.description}})
     </b-link>
     <span v-if="territory.status">
       on {{territory.status && checkoutDate(territory.status.date)}}
@@ -16,7 +16,6 @@
 </template>
 <script>
 import { mapActions } from 'vuex';
-import get from 'lodash/get';
 import format from 'date-fns/format';
 import formatDistance from 'date-fns/formatDistance';
 
@@ -48,10 +47,6 @@ export default {
     },
     formattedLastVisited() {
       return formatDistance(new Date(this.territory.lastVisited), new Date(), { addSuffix: true });
-    },
-    firstCity() {
-      const cityArray = (get(this.territory, 'city') || '').split(',');
-      return cityArray.length && cityArray[0];
     },
   },
 };
