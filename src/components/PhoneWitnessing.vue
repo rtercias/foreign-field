@@ -1,5 +1,5 @@
 <template>
-  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap align-items-baseline">
+  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap">
     <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="176px"></SearchBar>
     <PhoneAddressCard
       v-for="(a, index) in territory.addresses" :key="a.id"
