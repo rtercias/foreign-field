@@ -34,7 +34,7 @@
       </div>
     </div>
     <div class="text-right">
-      <b-link :to="{ name: 'territory-edit', params: { id: terr.id } }">
+      <b-link :to="{ name: 'territory-edit', params: { id: terr.id } }" v-if="canManage">
         <font-awesome-icon
           class="small text-primary"
           icon="pencil-alt"
@@ -131,6 +131,7 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       canWrite: 'auth/canWrite',
+      canManage: 'auth/canManage',
       territories: 'territories/territories',
     }),
 

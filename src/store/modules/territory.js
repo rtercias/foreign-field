@@ -6,7 +6,6 @@ import { store } from '..';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
-import differenceInDays from 'date-fns/differenceInDays';
 import { model, validate } from './models/TerritoryModel';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
@@ -24,7 +23,6 @@ const UPDATE_TERRITORY = 'UPDATE_TERRITORY';
 const UPDATE_TERRITORY_FAIL = 'UPDATE_TERRITORY_FAIL';
 const DELETE_TERRITORY = 'DELETE_TERRITORY';
 const DELETE_TERRITORY_FAIL = 'DELETE_TERRITORY_FAIL';
-
 
 const initialState = {
   territory: {
@@ -511,39 +509,6 @@ export const territory = {
       } finally {
         commit('auth/LOADING', false, { root: true });
       }
-    },
-
-    saveSeenTerritory(commands, terr) {
-      if (!terr && !terr.name) return;
-
-      // create a basic territory and save it to local storage
-      const basicTerritory = {
-        name: terr.name,
-        description: terr.description,
-        group_id: terr.group_id,
-        id: terr.id,
-        lastVisited: (new Date()).toISOString(),
-      };
-
-      let seenList;
-      try {
-        seenList = JSON.parse(localStorage.getItem('seenTerritories')) || [];
-      } catch (e) {
-        seenList = [];
-      }
-
-      const idx = seenList.findIndex(t => t.id === terr.id);
-      if (idx >= 0) {
-        seenList.splice(idx, 1, basicTerritory);
-      } else {
-        seenList.push(basicTerritory);
-      }
-      // filter out old ones
-      seenList = seenList.filter(t => differenceInDays(new Date(), new Date(t.lastVisited)) < 60);
-      seenList = orderBy(seenList, 'lastVisited', 'desc');
-      seenList.length = seenList.length <= 5 ? seenList.length : 5;
-      const parsed = JSON.stringify(seenList);
-      localStorage.setItem('seenTerritories', parsed);
     },
   },
 };

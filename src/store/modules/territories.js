@@ -4,6 +4,7 @@ import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import toArray from 'lodash/toArray';
+import differenceInDays from 'date-fns/differenceInDays';
 import { print } from 'graphql/language/printer';
 import { TEST_GROUPS } from './models/GroupModel';
 
@@ -19,6 +20,7 @@ const SET_NEAREST_TERRITORIES = 'SET_NEAREST_TERRITORIES';
 const SET_LAST_ACTIVITY = 'SET_LAST_ACTIVITY';
 const CHECKIN_ALL = 'CHECKIN_ALL';
 const COPY_CHECKOUTS = 'COPY_CHECKOUTS';
+const SET_RECENTLY_SEEN_TERRITORIES = 'SET_RECENTLY_SEEN_TERRITORIES';
 
 export const territories = {
   namespaced: true,
@@ -27,12 +29,14 @@ export const territories = {
     loading: false,
     error: '',
     nearestTerritories: [],
+    recentlySeenTerritories: [],
   },
   getters: {
     territories: state => orderBy(state.territories, 'description', 'name'),
     loading: state => state.loading,
     error: state => state.error,
     nearestTerritories: state => state.nearestTerritories,
+    recentlySeenTerritories: state => state.recentlySeenTerritories,
   },
   mutations: {
     SET_TERRITORIES: (state, terrs) => state.territories = terrs,
@@ -57,6 +61,7 @@ export const territories = {
     },
     CHECKIN_ALL: () => {},
     COPY_CHECKOUTS: () => {},
+    SET_RECENTLY_SEEN_TERRITORIES: (state, terrs) => state.recentlySeenTerritories = terrs,
   },
   actions: {
     async fetchTerritories({ commit }, params) {
@@ -296,6 +301,50 @@ export const territories = {
       } catch (exception) {
         console.error('Unable to copy checkouts', exception);
       }
+    },
+
+    setSeenTerritories({ commit }) {
+      const seenList = JSON.parse(localStorage.getItem('seenTerritories')) || [];
+      commit(SET_RECENTLY_SEEN_TERRITORIES, seenList);
+    },
+
+    saveSeenTerritory({ commit }, terr) {
+      if (!terr && !terr.name) return;
+
+      // create a basic territory and save it to local storage
+      const basicTerritory = {
+        name: terr.name,
+        description: terr.description,
+        group_id: terr.group_id,
+        id: terr.id,
+        lastVisited: (new Date()).toISOString(),
+      };
+
+      let seenList;
+      try {
+        seenList = JSON.parse(localStorage.getItem('seenTerritories')) || [];
+      } catch (e) {
+        seenList = [];
+      }
+
+      const idx = seenList.findIndex(t => t.id === terr.id);
+      if (idx >= 0) {
+        seenList.splice(idx, 1, basicTerritory);
+      } else {
+        seenList.push(basicTerritory);
+      }
+      // filter out old ones
+      seenList = seenList.filter(t => differenceInDays(new Date(), new Date(t.lastVisited)) < 60);
+      seenList = orderBy(seenList, 'lastVisited', 'desc');
+      seenList.length = seenList.length <= 5 ? seenList.length : 5;
+      const parsed = JSON.stringify(seenList);
+      localStorage.setItem('seenTerritories', parsed);
+      commit(SET_RECENTLY_SEEN_TERRITORIES, seenList);
+    },
+    removeSeenTerritory({ commit, state }, id) {
+      const filtered = state.recentlySeenTerritories.filter(t => t.id !== id);
+      localStorage.setItem('seenTerritories', JSON.stringify(filtered));
+      commit(SET_RECENTLY_SEEN_TERRITORIES, filtered);
     },
   },
 };

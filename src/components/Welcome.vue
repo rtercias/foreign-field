@@ -41,13 +41,13 @@
         </div>
       </div>
       <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
-        <span v-if="!seenTerritories.length" class="text-center small">
+        <span v-if="!recentlySeenTerritories.length" class="text-center small">
           I have not visited any territories lately.
         </span>
         <div v-else>
           <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
-            <b-list-group-item v-for="terr in seenTerritories" :key="terr.id" class="px-2">
+            <b-list-group-item v-for="terr in recentlySeenTerritories" :key="terr.id" class="px-2">
               <div class="d-flex justify-content-between align-items-center">
                 <MyTerritory :territory="terr"></MyTerritory>
                 <b-button class="text-danger"
@@ -94,7 +94,6 @@ export default {
     return {
       msgBoxOpen: '',
       msgDismissed: JSON.parse(localStorage.getItem('updateMsgDismissed')),
-      seenTerritories: [],
     };
   },
   computed: {
@@ -106,6 +105,7 @@ export default {
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
       myTerritoriesLoading: 'auth/myTerritoriesLoading',
+      recentlySeenTerritories: 'territories/recentlySeenTerritories',
     }),
     territories() {
       return this.user && this.user.territories || [];
@@ -117,17 +117,9 @@ export default {
   methods: {
     ...mapActions({
       getUserTerritories: 'auth/getUserTerritories',
+      setSeenTerritories: 'territories/setSeenTerritories',
+      removeSeenTerritory: 'territories/removeSeenTerritory',
     }),
-    getSeenTerritories() {
-      if (localStorage.getItem('seenTerritories')) {
-        try {
-          const seen = JSON.parse(localStorage.getItem('seenTerritories')).filter(s => 'id' in s);
-          this.seenTerritories = seen.filter(s => this.territories.some(t => t.id !== s.id));
-        } catch (e) {
-          localStorage.removeItem('seenTerritories');
-        }
-      }
-    },
     advertiseMsg() {
       if (!this.msgDismissed) {
         this.msgBoxOpen = true;
@@ -139,23 +131,15 @@ export default {
       localStorage.setItem('updateMsgDismissed', true);
       this.msgBoxOpen = false;
     },
-    removeSeenTerritory(id) {
-      const filtered = this.seenTerritories.filter(t => t.id !== id);
-      localStorage.setItem('seenTerritories', JSON.stringify(filtered));
-      this.seenTerritories = filtered;
-    },
   },
   async mounted() {
     this.advertiseMsg();
-    this.getSeenTerritories();
+    this.setSeenTerritories();
     if (this.user && !this.user.territories) {
       await this.getUserTerritories(this.user.username);
     }
   },
   watch: {
-    territories() {
-      this.getSeenTerritories();
-    },
     async user() {
       if (this.user && !this.user.territories) {
         await this.getUserTerritories(this.user.username);

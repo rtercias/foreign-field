@@ -198,7 +198,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
-      saveSeenTerritory: 'territory/saveSeenTerritory',
+      saveSeenTerritory: 'territories/saveSeenTerritory',
     }),
 
     async checkIn() {
