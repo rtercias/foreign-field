@@ -46,7 +46,7 @@ const required = ['code', 'description'];
 
 export default {
   name: 'GroupForm',
-  props: ['id'],
+  props: ['groupId'],
   components: {
     Loading,
   },
@@ -68,8 +68,8 @@ export default {
       addGroup: 'group/addGroup',
       updateGroup: 'group/updateGroup',
       deleteGroup: 'group/deleteGroup',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       fetchPublishers: 'publishers/fetchPublishers',
+      back: 'auth/back',
     }),
     async submit() {
       try {
@@ -105,11 +105,7 @@ export default {
 
     cancel() {
       this.model = {};
-      if (this.leftNavRoute) {
-        this.$router.push(this.leftNavRoute);
-      } else {
-        this.$router.go(-1);
-      }
+      this.back(this);
     },
 
     async remove() {
@@ -132,10 +128,9 @@ export default {
     async refresh() {
       this.isLoading = true;
       if (this.mode === Modes.edit) {
-        await this.getGroup({ id: this.id });
+        await this.getGroup({ id: this.groupId });
         this.model = this.group;
       }
-      this.setLeftNavRoute(`/congregation/${this.congregation.id}`);
       await this.fetchPublishers(this.congregation.id);
       this.isLoading = false;
     },
@@ -150,7 +145,7 @@ export default {
       publishers: 'publishers/publishers',
     }),
     mode() {
-      return this.id ? Modes.edit : Modes.add;
+      return this.groupId ? Modes.edit : Modes.add;
     },
     isFormComplete() {
       for (const field of required) {

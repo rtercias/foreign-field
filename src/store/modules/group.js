@@ -84,6 +84,10 @@ export const group = {
   actions: {
     async getGroup({ commit, getters, rootGetters }, { id }) {
       if (!id) {
+        if (id === 0) {
+          commit(GET_GROUP_SUCCESS, 'ALL group selected');
+          return;
+        }
         commit(GET_GROUP_FAIL, 'id is required');
         return;
       }

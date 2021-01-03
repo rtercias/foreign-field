@@ -94,7 +94,6 @@
               :to="{
                 name: 'activity-history-checkout',
                 params: {
-                  group: territory.group_id,
                   territoryId: territory.id,
                   addressId: item.type === 'Phone' ? item.id : address.id,
                   checkoutId: territory.status && territory.status.checkout_id,

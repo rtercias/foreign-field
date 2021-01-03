@@ -24,7 +24,7 @@
         <div v-else class="address col-9 flex-column pt-2 pb-4">
           <div>
             <h5 class="mb-0">
-              <b-link :to="`/territories/${territoryId}/addresses/${address.id}/detail`">
+              <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
                 {{address.addr1}}
               </b-link>&nbsp;
             </h5>

@@ -25,22 +25,22 @@
             <b-button-group size="sm" class="badge px-0">
               <b-button
                 variant="outline-info"
-                :to="{ name: 'address-list', params: { id } }"
+                :to="{ name: 'address-list', params: { territoryId } }"
                 :pressed="viewMode === 'address-list'">
                 Address
               </b-button>
               <b-button
                 variant="outline-info"
-                :to="{ name: 'phone-list', params: { id } }"
+                :to="{ name: 'phone-list', params: { territoryId } }"
                 :pressed="viewMode === 'phone-list'">
                 Phone
               </b-button>
-              <b-button variant="outline-info" :to="`/territories/${id}/map`" :pressed="viewMode==='map-view'">
+              <b-button variant="outline-info" :to="`/territories/${territoryId}/map`" :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
-              <b-button variant="primary" :to="`/territories/${id}/optimize`">
+              <b-button variant="primary" :to="`/territories/${territoryId}/optimize`">
                 Optimize
               </b-button>
             </b-button-group>
@@ -52,7 +52,7 @@
               <b-button
                 v-if="canWrite && ['address-list', 'phone-list'].includes(viewMode)"
                 variant="success"
-                :to="`/territories/${id}/addresses/add`">
+                :to="`/territories/${territoryId}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon> New Address
               </b-button>
             </b-button-group>
@@ -79,15 +79,19 @@ export default {
     TerritoryMap,
     Loading,
   },
-  props: ['id'],
+  props: ['territoryId'],
   beforeRouteEnter(to, from, next) {
-    const { options = defaultOptions } = store.state.auth;
-    const name = get(options, 'territory.defaultView');
-    const { id } = to.params;
-    if (name !== to.name) {
-      next({ name, params: { id } });
+    try {
+      const { options = defaultOptions } = store.state.auth;
+      const name = get(options, 'territory.defaultView');
+      const { territoryId } = to.params;
+      if (name !== to.name) {
+        next({ name, params: { territoryId } });
+      }
+      next();
+    } catch (e) {
+      console.error(e);
     }
-    next();
   },
   data() {
     return {
@@ -100,7 +104,7 @@ export default {
   async mounted() {
     const routesRequiringLastActivity = ['address-list', 'phone-list'];
     const getLastActivity = routesRequiringLastActivity.includes(this.$route.name);
-    await this.getTerritory({ id: this.id, getLastActivity });
+    await this.getTerritory({ id: this.territoryId, getLastActivity });
 
     channel.bind('add-log', (log) => {
       if (log && this.territory && this.territory.addresses) {
@@ -215,7 +219,7 @@ export default {
     async checkInAndReset() {
       this.isCheckingIn = true;
       await this.checkinTerritory({
-        territoryId: this.id,
+        territoryId: this.territoryId,
         userId: get(this.territory, 'status.publisher.id'),
         username: this.user.username,
       });

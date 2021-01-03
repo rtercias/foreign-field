@@ -36,15 +36,13 @@ import format from 'date-fns/format';
 
 export default {
   name: 'AssignmentReport',
-  props: ['id'],
+  props: ['congregationId'],
   async mounted() {
-    this.setLeftNavRoute('/');
-    await this.fetchAssignmentRecords(this.id);
+    await this.fetchAssignmentRecords(this.congregationId);
   },
   methods: {
     ...mapActions({
       fetchAssignmentRecords: 'reports/fetchAssignmentRecords',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
   },
   computed: {

@@ -34,7 +34,7 @@
       </div>
     </div>
     <div class="text-right">
-      <b-link :to="{ name: 'territory-edit', params: { id: terr.id } }" v-if="canManage">
+      <b-link :to="{ name: 'territory-edit', params: { territoryId: terr.id } }" v-if="canManage">
         <font-awesome-icon
           class="small text-primary"
           icon="pencil-alt"

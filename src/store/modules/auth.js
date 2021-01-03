@@ -15,7 +15,6 @@ const FORCEOUT = 'FORCEOUT';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
-const MASTHEAD_LEFT_NAV_ROUTE = 'MASTHEAD_LEFT_NAV_ROUTE';
 const UPDATE_TOKEN = 'UPDATE_TOKEN';
 const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
 
@@ -30,7 +29,6 @@ function initialState() {
     congId: 0,
     congregation: {},
     loading: false,
-    mastheadLeftNavRoute: '',
     token: '',
     options: null,
     myTerritoriesLoading: false,
@@ -59,11 +57,22 @@ export const auth = {
       state.user.role === 'TS' || state.user.role === 'SO' || state.user.role === 'Admin'
     ),
     canLead: state => state.user && state.user.role === 'SO',
-    mastheadLeftNavRoute: state => state.mastheadLeftNavRoute,
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
     options: state => state.options,
     myTerritoriesLoading: state => state.myTerritoriesLoading,
+    leftNavRouteParams: (state, getters, rootState, rootGetters) => ({
+      congregationId: get(rootGetters['congregation/congregation'], 'id')
+        || get(rootGetters['auth/user'], 'congregation.id'),
+      groupId: get(rootGetters['group/group'], 'id')
+        || get(rootGetters['territory/territory'], 'group_id'),
+      territoryId: get(rootGetters['territory/territory'], 'id')
+        || get(rootGetters['address/address'], 'territory_id'),
+      addressId: get(rootGetters['address/address'], 'id'),
+      phoneId: get(rootGetters['phone/phone'], 'id'),
+      publisherId: get(rootGetters['publisher/publisher'], 'id'),
+      checkoutId: get(rootGetters['territory/territory'], 'status.checkout_id'),
+    }),
   },
 
   mutations: {
@@ -107,10 +116,6 @@ export const auth = {
     },
     USER_TERRITORIES_LOADING(state, value) {
       state.myTerritoriesLoading = value;
-    },
-
-    MASTHEAD_LEFT_NAV_ROUTE(state, value) {
-      state.mastheadLeftNavRoute = value;
     },
 
     UPDATE_TOKEN(state, value) {
@@ -324,8 +329,13 @@ export const auth = {
       });
     },
 
-    setLeftNavRoute({ commit }, value) {
-      commit(MASTHEAD_LEFT_NAV_ROUTE, value);
+    back({ getters }, vm) {
+      const back = get(Vue.$route, 'query.back') || get(vm.$route, 'meta.back');
+      if (back) {
+        vm.$router.push({ name: back, params: getters.leftNavRouteParams });
+      } else {
+        vm.$router.go(-1);
+      }
     },
   },
 };

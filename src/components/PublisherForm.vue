@@ -54,7 +54,7 @@ const required = ['firstname', 'lastname', 'username', 'role'];
 
 export default {
   name: 'PublisherForm',
-  props: ['id'],
+  props: ['publisherId'],
   components: {
     Loading,
   },
@@ -77,7 +77,7 @@ export default {
       addPublisher: 'publisher/addPublisher',
       updatePublisher: 'publisher/updatePublisher',
       deletePublisher: 'publisher/deletePublisher',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
+      back: 'auth/back',
     }),
     async submit() {
       try {
@@ -113,11 +113,7 @@ export default {
 
     cancel() {
       this.model = {};
-      if (this.leftNavRoute) {
-        this.$router.push(this.leftNavRoute);
-      } else {
-        this.$router.go(-1);
-      }
+      this.back(this);
     },
 
     async remove() {
@@ -135,10 +131,9 @@ export default {
     async refresh() {
       this.isLoading = true;
       if (this.mode === Modes.edit) {
-        await this.fetchPublisher({ id: this.id, congId: this.congregation.id });
+        await this.fetchPublisher({ id: this.publisherId, congId: this.congregation.id });
         this.model = this.publisher;
       }
-      this.setLeftNavRoute(`/congregation/${this.congregation.id}`);
       this.isLoading = false;
     },
 
@@ -151,7 +146,7 @@ export default {
       congregation: 'congregation/congregation',
     }),
     mode() {
-      return this.id ? Modes.edit : Modes.add;
+      return this.publisherId ? Modes.edit : Modes.add;
     },
     isFormComplete() {
       for (const field of required) {

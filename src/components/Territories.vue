@@ -279,12 +279,14 @@ export default {
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
       fetchTerritories: 'territories/fetchTerritories',
+      getGroup: 'group/getGroup',
     }),
   },
 
   async mounted() {
     const congId = this.congId || (this.user && this.user.congId);
     this.selectedGroup = this.groupId;
+    await this.getGroup({ id: this.groupId });
     await this.fetch();
     await this.fetchPublishers(congId);
 

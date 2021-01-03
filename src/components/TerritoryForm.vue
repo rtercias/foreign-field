@@ -68,7 +68,7 @@ const required = ['congregationid', 'group_id', 'name', 'description', 'type'];
 
 export default {
   name: 'TerritoryForm',
-  props: ['id'],
+  props: ['territoryId'],
   components: {
     Loading,
   },
@@ -91,8 +91,8 @@ export default {
       addTerritory: 'territory/addTerritory',
       updateTerritory: 'territory/updateTerritory',
       deleteTerritory: 'territory/deleteTerritory',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       getGroups: 'group/getGroups',
+      back: 'auth/back',
     }),
     async submit() {
       try {
@@ -127,11 +127,7 @@ export default {
 
     cancel() {
       this.model = {};
-      if (this.leftNavRoute) {
-        this.$router.push(this.leftNavRoute);
-      } else {
-        this.$router.go(-1);
-      }
+      this.back(this);
     },
 
     async remove() {
@@ -158,7 +154,7 @@ export default {
       }
 
       if (this.mode === Modes.edit) {
-        await this.getTerritoryInfo({ id: this.id });
+        await this.getTerritoryInfo({ id: this.territoryId });
         this.model = this.territory;
       } else {
         this.model = {
@@ -168,7 +164,6 @@ export default {
           create_user: this.user && this.user.username,
         };
       }
-      this.setLeftNavRoute(`/groups/${this.defaultGroup}`);
       this.isLoading = false;
     },
   },
@@ -181,10 +176,9 @@ export default {
       isAdmin: 'auth/isAdmin',
       groups: 'group/groups',
       territory: 'territory/territory',
-      leftNavRoute: 'auth/mastheadLeftNavRoute',
     }),
     mode() {
-      return this.id ? Modes.edit : Modes.add;
+      return this.territoryId ? Modes.edit : Modes.add;
     },
     defaultGroup() {
       return get(this.$route, 'query.group') || this.territory.group_id;

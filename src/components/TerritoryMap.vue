@@ -80,7 +80,6 @@ export default {
   methods: {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     centerMarker(address) {
       this.heading = address.addr1;
@@ -96,7 +95,6 @@ export default {
     },
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.id}`);
     if (this.token && !this.territory) {
       await this.getTerritory({ id: this.id });
     }

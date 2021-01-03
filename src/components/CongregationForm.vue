@@ -81,7 +81,7 @@ const required = ['name', 'language', 'admin_email'];
 
 export default {
   name: 'CongregationForm',
-  props: ['id'],
+  props: ['congregationId'],
   components: {
     Loading,
     OptionTree,
@@ -106,6 +106,7 @@ export default {
       getCongregation: 'congregation/getCongregation',
       addCongregation: 'congregation/addCongregation',
       updateCongregation: 'congregation/updateCongregation',
+      back: 'auth/back',
     }),
     edit() {
       this.readOnly = false;
@@ -142,14 +143,13 @@ export default {
     },
 
     async cancel() {
-      await this.refresh();
-      this.readOnly = true;
+      this.back(this);
     },
 
     async refresh() {
       this.isLoading = true;
       if (this.mode === Modes.edit) {
-        await this.getCongregation({ id: this.id });
+        await this.getCongregation({ id: this.congregationId });
         this.model = this.congregation;
       }
       this.isLoading = false;
@@ -200,10 +200,10 @@ export default {
       congregation: 'congregation/congregation',
     }),
     canEditCongregation() {
-      return this.isAdmin || this.user.congregation.id === this.id;
+      return this.isAdmin || this.user.congregation.id === this.congregationId;
     },
     mode() {
-      return this.id ? Modes.edit : Modes.add;
+      return this.congregationId ? Modes.edit : Modes.add;
     },
     isFormComplete() {
       for (const field of required) {
