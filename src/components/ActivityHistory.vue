@@ -74,7 +74,6 @@ export default {
     };
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.territoryId}`);
     await this.fetchPublishers(this.congId);
     await this.fetch();
   },
@@ -106,7 +105,6 @@ export default {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
       fetchPublishers: 'publishers/fetchPublishers',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
     }),
     async fetch() {
       this.isLoading = true;

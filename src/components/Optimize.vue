@@ -136,7 +136,6 @@ export default {
     };
   },
   async mounted() {
-    this.setLeftNavRoute(`/territories/${this.id}`);
     if (this.territory && this.territory.id !== this.id) {
       await this.getTerritory({ id: this.id });
     }
@@ -144,7 +143,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       getTerritory: 'territory/getTerritory',
       updateSort: 'addresses/updateSort',
       optimize: 'addresses/optimize',

@@ -29,7 +29,7 @@ export default {
       return format(new Date(date), 'MM/dd/yyyy');
     },
     url(terr) {
-      return `/territories/${terr.id}`;
+      return `/territories/${terr.id}?back=home`;
     },
   },
   computed: {

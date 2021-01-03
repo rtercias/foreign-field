@@ -11,22 +11,22 @@
         variant="primary"
         toggleable
         fill>
-        <b-link class="button text-white-50" @click="back">
-          <font-awesome-icon icon="chevron-left" v-show="showLeftNav && !isDesktop"></font-awesome-icon>
+        <b-link class="button text-white-50" @click="goBack" v-show="showLeftNav && !isDesktop">
+          <font-awesome-icon icon="chevron-left"></font-awesome-icon>
         </b-link>
         <b-nav-text class="campaign-mode" v-if="isSearchHidden">
           <span v-if="!isDesktop && isCampaignMode">CAMPAIGN MODE</span>
         </b-nav-text>
         <b-nav-text id="nav-search-bar" class="py-1" :class="{ 'w-full': !isSearchHidden, 'w-100': isDesktop }">
           <search-bar
-            v-if="!isSearchHidden || isDesktop"
+            v-if="(!isSearchHidden || isDesktop) && isAuthorized"
             class="search-bar w-100"
             :search-text="'Search address or territory'"
             @on-click="search"
             :no-padding="true"
           />
           <font-awesome-icon
-            v-if="isSearchHidden && !isDesktop"
+            v-if="(isSearchHidden && !isDesktop) && isAuthorized"
             icon="search"
             class="text-white-50 mt-2"
             @click="isSearchHidden = false"
@@ -38,7 +38,7 @@
             <b-nav-item to="/">Home</b-nav-item>
             <b-nav-item
               v-if="canWrite"
-              :to="{ name: 'congregation-edit', params: { id: congregation.id } }">
+              :to="{ name: 'congregation-edit', params: { congregationId: congregation.id } }">
               {{congregation.name}}
             </b-nav-item>
             <b-nav-item v-if="canWrite" :to="`/groups/${groupId}`">Territories</b-nav-item>
@@ -120,7 +120,11 @@ export default {
     ...mapActions({
       checkinAll: 'territories/checkinAll',
       copyCheckouts: 'territories/copyCheckouts',
+      back: 'auth/back',
     }),
+    goBack() {
+      this.back(this);
+    },
     logout() {
       this.$store.dispatch('auth/logout');
       this.$router.push('/signout');
@@ -132,13 +136,6 @@ export default {
           resolve();
         }, 1000);
       });
-    },
-    back() {
-      if (this.leftNavRoute) {
-        this.$router.push(this.leftNavRoute);
-      } else {
-        this.$router.go(-1);
-      }
     },
     search(keyword) {
       this.isSearchHidden = true;
@@ -278,7 +275,6 @@ export default {
       name: 'auth/name',
       congId: 'auth/congId',
       groups: 'group/groups',
-      leftNavRoute: 'auth/mastheadLeftNavRoute',
       canManage: 'auth/canManage',
       canWrite: 'auth/canWrite',
       canRead: 'auth/canRead',
@@ -303,7 +299,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .masthead .navbar {
   min-height: 52px;
 }
@@ -330,6 +326,9 @@ export default {
   .search-bar {
     input {
       background: aliceblue;
+    }
+    .search-btn {
+      top: 0;
     }
   }
 }

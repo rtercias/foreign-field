@@ -80,13 +80,11 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    this.setLeftNavRoute(this.returnRoute);
     this.refresh();
   },
   methods: {
     ...mapActions({
       getChangeLog: 'addresses/getChangeLog',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       fetchAddress: 'address/fetchAddress',
     }),
     async refresh() {

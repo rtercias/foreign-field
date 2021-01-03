@@ -184,7 +184,6 @@ export default {
     };
   },
   async mounted() {
-    this.setLeftNavRoute(this.returnRoute);
     await this.refresh();
   },
   methods: {
@@ -195,7 +194,6 @@ export default {
       fetchAddress: 'address/fetchAddress',
       addressLookup: 'address/addressLookup',
       getTerritory: 'territory/getTerritory',
-      setLeftNavRoute: 'auth/setLeftNavRoute',
       setAddress: 'address/setAddress',
       fetchAllTerritories: 'territories/fetchAllTerritories',
       addressSearch: 'addresses/addressSearch',

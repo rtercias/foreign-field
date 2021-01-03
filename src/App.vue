@@ -6,10 +6,10 @@
         v-if="isDesktop"
         :sticky="true"
         :class="`desktop-nav alert-secondary d-flex justify-content-between
-          border-medium border-bottom border-left-0 border-right-0 pt-0`">
-        <b-link class="button" @click="back">
-          <font-awesome-icon icon="chevron-left" v-show="false && showLeftNav"></font-awesome-icon>
-        </b-link>
+          border-medium border-bottom border-left-0 border-right-0 py-0`">
+        <b-button variant="link" class="button p-0" @click="goBack" v-show="showLeftNav">
+          <font-awesome-icon icon="chevron-left"></font-awesome-icon>
+        </b-button>
         <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
         <b-nav-text></b-nav-text>
       </b-navbar>
@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import Masthead from './components/Masthead';
 
@@ -33,7 +33,6 @@ export default {
       isForcedOut: 'auth/isForcedOut',
       isDesktop: 'auth/isDesktop',
       user: 'auth/user',
-      leftNavRoute: 'auth/mastheadLeftNavRoute',
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
@@ -46,12 +45,11 @@ export default {
     },
   },
   methods: {
-    back() {
-      if (this.leftNavRoute) {
-        this.$router.push(this.leftNavRoute);
-      } else {
-        this.$router.go(-1);
-      }
+    ...mapActions({
+      back: 'auth/back',
+    }),
+    goBack() {
+      this.back(this);
     },
   },
 };
