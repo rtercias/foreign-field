@@ -7,7 +7,7 @@
         :sticky="true"
         :class="`desktop-nav alert-secondary d-flex justify-content-between
           border-medium border-bottom border-left-0 border-right-0 py-0`">
-        <b-button variant="link" class="button p-0" @click="goBack" v-show="showLeftNav">
+        <b-button variant="link" class="back-button button p-0" @click="goBack" v-show="showLeftNav">
           <font-awesome-icon icon="chevron-left"></font-awesome-icon>
         </b-button>
         <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
@@ -80,6 +80,11 @@ router-link {
     min-height: 52px;
     padding-top: 14px;
     border-bottom: solid 6px;
+  }
+  .back-button {
+    &:focus {
+      box-shadow: 0 0 0 rgb(255, 255, 255);
+    }
   }
 }
 .view {
