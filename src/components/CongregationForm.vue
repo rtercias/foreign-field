@@ -1,7 +1,7 @@
 <template>
   <b-container>
     <b-row>
-      <b-col md="12" lg="7" class="cong-form">
+      <b-col md="12" :lg="mode === modes.edit ? 7 : 12" class="cong-form">
         <div class="cong-header justify-content-around align-items-center lead py-4">
           <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Congregation</span>
           <div v-else-if="mode===modes.edit" class="lead w-100 d-flex justify-content-between px-4">
@@ -56,7 +56,7 @@
           <hr />
         </b-form>
       </b-col>
-      <b-col md="12" lg="5" class="border-left">
+      <b-col v-if="mode === modes.edit" md="12" lg="5" class="border-left">
         <group-list :congregation-id="congregation.id" class="border-bottom pb-5 p-4"></group-list>
         <publisher-list :congregation-id="congregation.id" class="p-4"></publisher-list>
       </b-col>
@@ -99,6 +99,7 @@ export default {
     };
   },
   async mounted() {
+    this.readOnly = this.mode === Modes.edit;
     await this.refresh();
   },
   methods: {
