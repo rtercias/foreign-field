@@ -126,6 +126,7 @@ export default {
     },
     updateLatLng(coordinates) {
       this.center = [coordinates.lat, coordinates.lng];
+      this.$emit('updated', coordinates);
     },
     selectTerritory(terr) {
       this.selectedTerritory = terr;
