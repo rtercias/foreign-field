@@ -21,7 +21,7 @@ import GroupForm from './components/GroupForm';
 import PublisherForm from './components/PublisherForm';
 
 const routes = [
-  { name: 'home', path: '/', component: Welcome },
+  { name: 'home', path: '/', component: Welcome, meta: { label: 'Home' } },
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
   { name: 'unauthorized', path: '/unauthorized', component: Unauthorized },
@@ -36,6 +36,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       back: 'home',
+      label: 'Congregation Profile',
     },
   },
   {
@@ -65,6 +66,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
       back: 'congregation-edit',
+      label: 'Add Group',
     },
   },
   {
@@ -75,6 +77,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
       back: 'congregation-edit',
+      label: 'Edit Group',
     },
   },
   {
@@ -85,6 +88,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
       back: 'home',
+      label: 'Territories',
     },
   },
   {
@@ -103,6 +107,7 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
         back: 'group',
+        label: 'Territory',
       },
     }, {
       name: 'map-view',
@@ -112,6 +117,7 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
         back: 'group',
+        label: 'Territory Map',
       },
     }, {
       name: 'phone-list',
@@ -121,6 +127,7 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
         back: 'group',
+        label: 'Territory',
       },
     }, {
       name: 'optimize',
@@ -130,6 +137,7 @@ const routes = [
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO'],
         back: 'map-view',
+        label: 'Territory Optimize',
       },
     }],
   },
@@ -141,6 +149,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       back: 'group',
+      label: 'Edit Territory',
     },
   },
   {
@@ -167,6 +176,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      label: 'Global Search',
     },
   },
   {
@@ -176,6 +186,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
+      label: 'S-13 Assignment Report',
     },
   },
   {
@@ -185,6 +196,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
+      label: 'Change Log',
     },
   },
   {
@@ -195,6 +207,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       back: 'address-links',
+      label: 'Address Change Log',
     },
   },
   {
@@ -205,6 +218,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       back: 'address-list',
+      label: 'Address Info',
     },
   },
   {
@@ -215,6 +229,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       back: 'address-links',
+      label: 'Address Activity History',
     },
   },
   {
@@ -225,6 +240,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       back: 'address-list',
+      label: 'Current Checkout Activity History',
     },
   },
   {
@@ -234,6 +250,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
+      label: 'Add Address',
     },
   },
   {
@@ -244,6 +261,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       back: 'address-list',
+      label: 'Add Address',
     },
   },
   {
@@ -254,6 +272,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       back: 'address-links',
+      label: 'Edit Address',
     },
   },
   {
@@ -282,6 +301,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       back: 'group',
+      label: 'Add Territory',
     },
   },
   {
@@ -292,6 +312,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
       back: 'congregation-edit',
+      label: 'Add Publisher',
     },
   },
   {
@@ -302,6 +323,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO'],
       back: 'congregation-edit',
+      label: 'Edit Publisher',
     },
   },
 ];

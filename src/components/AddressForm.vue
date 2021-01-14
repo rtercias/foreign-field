@@ -324,7 +324,7 @@ export default {
     },
 
     done() {
-      this.$router.push(this.returnRoute);
+      this.$router.go(-1);
     },
 
     async remove() {

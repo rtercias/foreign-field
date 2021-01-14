@@ -65,7 +65,7 @@
                 class="m-0 w-100"
                 :to="{
                   name: 'publisher-edit',
-                  params: { publisherId: user.id },
+                  params: { publisherId: get(user, 'id') },
                 }">
                 Profile
               </b-dropdown-item>
@@ -130,8 +130,9 @@ export default {
       copyCheckouts: 'territories/copyCheckouts',
       back: 'auth/back',
     }),
+    get,
     goBack() {
-      this.back(this);
+      this.back({ vm: this });
     },
     logout() {
       this.$store.dispatch('auth/logout');

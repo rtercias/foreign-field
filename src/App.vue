@@ -7,9 +7,14 @@
         :sticky="true"
         :class="`desktop-nav alert-secondary d-flex justify-content-between
           border-medium border-bottom border-left-0 border-right-0 py-0`">
-        <b-button variant="link" class="back-button button p-0" @click="goBack" v-show="showLeftNav">
-          <font-awesome-icon icon="chevron-left"></font-awesome-icon>
-        </b-button>
+        <div class="app-breadcrumb d-flex align-items-center">
+          <b-button variant="link" class="back-button button p-0" @click="goBack" v-show="showLeftNav">
+            <font-awesome-icon icon="chevron-left"></font-awesome-icon>
+            {{backLabel}}
+          </b-button>
+          <span v-if="!!backLabel" class="px-1">/</span>
+          {{routeLabel}}
+        </div>
         <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
         <b-nav-text></b-nav-text>
       </b-navbar>
@@ -28,6 +33,14 @@ export default {
   components: {
     Masthead,
   },
+  data() {
+    return {
+      backLabel: '',
+    };
+  },
+  mounted() {
+    this.setBackLabel();
+  },
   computed: {
     ...mapGetters({
       isForcedOut: 'auth/isForcedOut',
@@ -43,13 +56,26 @@ export default {
     showLeftNav() {
       return this.$route.name !== 'home';
     },
+    routeLabel() {
+      return get(this.$route, 'meta.label');
+    },
   },
   methods: {
     ...mapActions({
       back: 'auth/back',
     }),
     goBack() {
-      this.back(this);
+      this.back({ vm: this });
+    },
+    setBackLabel() {
+      const back = get(this.$route, 'meta.back');
+      const backRoute = this.$router.resolve({ name: back });
+      this.backLabel = back ? get(backRoute, 'route.meta.label') : '';
+    },
+  },
+  watch: {
+    $route() {
+      this.setBackLabel();
     },
   },
 };
@@ -81,9 +107,13 @@ router-link {
     padding-top: 14px;
     border-bottom: solid 6px;
   }
-  .back-button {
-    &:focus {
-      box-shadow: 0 0 0 rgb(255, 255, 255);
+  .app-breadcrumb {
+    font-size: 20px;
+    .back-button {
+      font-size: 20px;
+      &:focus {
+        box-shadow: 0 0 0 rgb(255, 255, 255);
+      }
     }
   }
 }
