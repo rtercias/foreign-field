@@ -414,7 +414,7 @@ export default {
       }
     },
 
-    // apply tag to address of phone
+    // apply tag to address or phone
     async applyTag(entity, item, close) {
       if (typeof close === 'function') close();
       const newTag = item.description.toLowerCase();

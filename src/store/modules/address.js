@@ -91,10 +91,12 @@ export const address = {
         }
       }
     },
-    ADD_TAG(state, tag) {
-      const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
-      arrTags.push(tag);
-      state.address.notes = arrTags.join(',');
+    ADD_TAG(state, { addressId, tag }) {
+      if (state.address.id === addressId) {
+        const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
+        arrTags.push(tag);
+        state.address.notes = arrTags.join(',');
+      }
     },
 
     REMOVE_TAG(state, tag) {
@@ -558,7 +560,7 @@ export const address = {
 
         const { addNote } = get(response, 'data.data');
         if (addNote) {
-          commit(ADD_TAG, tag);
+          commit(ADD_TAG, { addressId, tag });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);

@@ -55,10 +55,12 @@ export const phone = {
     UPDATE_PHONE_FAIL(state, error) { state.error = error; },
     PHONE_LOOKUP_SUCCESS(state, search) { state.search = search; },
     PHONE_LOOKUP_FAIL(state, exception) { console.error(PHONE_LOOKUP_FAIL, exception); },
-    ADD_TAG(state, tag) {
-      const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
-      arrTags.push(tag);
-      state.phone.notes = arrTags.join(',');
+    ADD_TAG(state, { phoneId, tag }) {
+      if (state.phone.id === phoneId) {
+        const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
+        arrTags.push(tag);
+        state.phone.notes = arrTags.join(',');
+      }
     },
     ADD_TAG_FAIL(state, error) { state.error = error; },
     REMOVE_TAG(state, tag) {
@@ -233,7 +235,7 @@ export const phone = {
         }
         const { addPhoneTag } = get(response, 'data.data');
         if (addPhoneTag) {
-          commit(ADD_TAG, tag);
+          commit(ADD_TAG, { phoneId, tag });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);
