@@ -6,7 +6,7 @@
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
             <div class="text-left w-50">
-              <h4 class="mb-0">
+              <h4>
                 {{territory.description}}
                 <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
               </h4>
@@ -21,7 +21,11 @@
                   @click="openSMSMobile()">
                 </font-awesome-icon> {{territoryName}}
               </h4>
-              <div class="small">{{currentPublisher}}</div>
+              <div class="small">
+                {{currentPublisher}}
+                <span v-if="currentPublisher" class="font-weight-bold">|</span>
+                Count: {{count}}
+              </div>
             </div>
           </div>
           <div class="header-buttons w-100 d-flex justify-content-between py-2">
@@ -209,6 +213,16 @@ export default {
     },
     showCheckInButton() {
       return this.viewMode !== 'optimize' && this.isCheckedOut && (this.canWrite || this.isOwnedByUser);
+    },
+    count() {
+      if (this.viewMode === 'phone-list') {
+        const addresses = this.territory.addresses.map(a => a.phones.length) || [];
+        if (addresses.length) {
+          return addresses.reduce((acc, current) => (acc || 0) + current);
+        }
+        return 0;
+      }
+      return this.territory.addresses.length;
     },
   },
   methods: {
