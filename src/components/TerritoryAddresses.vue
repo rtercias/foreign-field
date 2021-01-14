@@ -23,13 +23,12 @@
               'border-success border-medium': item.id === foundId
             }"
             :address="item"
-            :reset="reset"
-            :territoryId="id"
+            :territoryId="territoryId"
             :incomingResponse="item.lastActivity"
             :revealed="revealed"
             :disabled="disabled"
             @update-response="updateResponse"
-            @togglePanel="openSwipe">
+            @toggle-right-panel="openSwipe">
           </AddressCard>
         </template>
         <template v-slot:right="{ item, close }">
@@ -71,7 +70,7 @@ export default {
     Loading,
     SearchBar,
   },
-  props: ['territory', 'id', 'disabled'],
+  props: ['territory', 'territoryId', 'disabled'],
   data() {
     return {
       isLoading: true,

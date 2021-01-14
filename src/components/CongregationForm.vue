@@ -57,8 +57,8 @@
         </b-form>
       </b-col>
       <b-col v-if="mode === modes.edit" md="12" lg="5" class="border-left">
-        <group-list :congregation-id="congregation.id" class="border-bottom pb-5 p-4"></group-list>
-        <publisher-list :congregation-id="congregation.id" class="p-4"></publisher-list>
+        <group-list :congregation-id="congregationId" class="border-bottom pb-5 p-4"></group-list>
+        <publisher-list :congregation-id="congregationId" class="p-4"></publisher-list>
       </b-col>
     </b-row>
   </b-container>
@@ -144,7 +144,8 @@ export default {
     },
 
     async cancel() {
-      this.back(this);
+      await this.refresh();
+      this.readOnly = true;
     },
 
     async refresh() {

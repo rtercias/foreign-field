@@ -258,7 +258,6 @@ export default {
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
       if (phoneEditing) this.$set(phoneEditing, 'editMode', false);
-      this.$refs.list.closeActions();
     },
     isActiveAddress(id) {
       return this.territory.lastActivity ? id === this.territory.lastActivity.address_id : false;
@@ -414,7 +413,7 @@ export default {
       }
     },
 
-    // apply tag to address of phone
+    // apply tag to address or phone
     async applyTag(entity, item, close) {
       if (typeof close === 'function') close();
       const newTag = item.description.toLowerCase();

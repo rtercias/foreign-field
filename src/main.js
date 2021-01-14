@@ -54,6 +54,7 @@ import {
   faDirections,
   faEdit,
   faChevronLeft,
+  faChevronRight,
   faChevronUp,
   faChevronDown,
   faPlus,
@@ -75,6 +76,11 @@ import {
   faSlash,
   faUser,
   faBolt,
+  faExclamationTriangle,
+  faMap,
+  faEyeSlash,
+  faExpandAlt,
+  faCompressAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -103,6 +109,7 @@ library.add(
   faDirections,
   faEdit,
   faChevronLeft,
+  faChevronRight,
   faChevronUp,
   faChevronDown,
   faPlus,
@@ -124,6 +131,11 @@ library.add(
   faSlash,
   faUser,
   faBolt,
+  faExclamationTriangle,
+  faMap,
+  faEyeSlash,
+  faExpandAlt,
+  faCompressAlt,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

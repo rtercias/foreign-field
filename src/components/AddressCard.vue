@@ -65,7 +65,7 @@
         :class="{ 'pl-3': mode === 'phoneAddress'}">
       </AddressTags>
     </div>
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
+    <font-awesome-layers v-show="!isTerritoryBusy" class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
   </div>
@@ -108,10 +108,7 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
-      if (this.mode === 'phoneAddress') {
-        this.$emit('toggle-right-panel', this.index, this.revealed);
-      }
-      this.$emit('togglePanel', this.index, this.revealed);
+      this.$emit('toggle-right-panel', this.index, this.revealed);
     },
     toggleLeftPanel() {
       this.$emit('toggle-left-panel', this.index, this.revealed);
@@ -171,6 +168,7 @@ export default {
       actionButtonList: 'address/actionButtonList',
       user: 'auth/user',
       publisher: 'publisher/publisher',
+      isTerritoryBusy: 'territory/isBusy',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;

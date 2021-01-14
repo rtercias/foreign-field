@@ -1,5 +1,5 @@
 export const RoleOptions = [
-  { value: 'Admin', text: 'Administrator' },
+  { value: 'Admin', text: 'Administrator', adminOnly: true },
   { value: 'TS', text: 'Territory Servant' },
   { value: 'SO', text: 'Service Overseer' },
   { value: 'GO', text: 'Group Overseer' },

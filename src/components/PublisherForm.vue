@@ -3,7 +3,7 @@
     <div class="group-header justify-content-around align-items-center lead py-3">
       <span v-if="isAdmin && mode===modes.add" class="lead font-weight-bold w-100">Add New Publisher</span>
       <div v-else-if="mode===modes.edit" class="lead w-100 d-flex justify-content-between px-4">
-        <div class="font-weight-bold">Edit Publisher</div>
+        <div class="font-weight-bold">{{self ? 'Profile' : 'Edit Publisher'}}</div>
         <div>{{model.displayName}}</div>
       </div>
     </div>
@@ -11,7 +11,7 @@
     <Loading v-if="isLoading"></Loading>
     <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
       <b-form-group label="User Name" class="mt-3">
-        <b-form-input v-model="model.username"></b-form-input>
+        <b-form-input v-model="model.username" :disabled="self"></b-form-input>
       </b-form-group>
       <b-form-group label="First Name" class="mt-3">
         <b-form-input v-model="model.firstname"></b-form-input>
@@ -20,17 +20,19 @@
         <b-form-input v-model="model.lastname"></b-form-input>
       </b-form-group>
       <b-form-group class="mt-3">
-        <b-form-checkbox :checked="model.status" v-model="model.status">
+        <b-form-checkbox :checked="model.status" v-model="model.status" :disabled="self">
           Active
         </b-form-checkbox>
       </b-form-group>
       <b-form-group label="Role" class="mt-3">
-        <b-form-select :options="roleOptions" v-model="model.role"></b-form-select>
+        <b-form-select :options="roleOptions" v-model="model.role" :disabled="self"></b-form-select>
       </b-form-group>
       <hr />
       <div class="buttons justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
-        <b-button type="button" v-if="mode===modes.edit" variant="danger" @click="remove">Delete</b-button>
+        <b-button type="button" v-if="mode===modes.edit && !self" variant="danger" @click="remove">
+          Delete
+        </b-button>
         <b-button
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
@@ -49,6 +51,7 @@ import Loading from './Loading';
 import { InvalidPublisherError } from '../store/exceptions/custom-errors';
 import { Modes } from '../utils/modes';
 import { RoleOptions } from '../store/modules/models/RoleOptions';
+import get from 'lodash/get';
 
 const required = ['firstname', 'lastname', 'username', 'role'];
 
@@ -65,7 +68,6 @@ export default {
       isSaving: false,
       model: {},
       error: '',
-      roleOptions: RoleOptions,
     };
   },
   async mounted() {
@@ -113,7 +115,7 @@ export default {
 
     cancel() {
       this.model = {};
-      this.back(this);
+      this.$router.go(-1);
     },
 
     async remove() {
@@ -159,6 +161,13 @@ export default {
         return `${this.model.firstname} ${this.model.lastname}`;
       }
       return this.model.username;
+    },
+    self() {
+      return get(this.model, 'id') === get(this.user, 'id');
+    },
+    roleOptions() {
+      if (this.isAdmin) return RoleOptions;
+      return RoleOptions.filter(r => !r.adminOnly);
     },
   },
   watch: {

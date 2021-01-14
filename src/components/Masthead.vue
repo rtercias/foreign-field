@@ -61,7 +61,15 @@
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown v-if="isAuthenticated" right>
               <span slot="text">{{name}}</span>
-              <b-dropdown-item class="m-0 w-100 text-center" @click="logout">Logout</b-dropdown-item>
+              <b-dropdown-item
+                class="m-0 w-100"
+                :to="{
+                  name: 'publisher-edit',
+                  params: { publisherId: get(user, 'id') },
+                }">
+                Profile
+              </b-dropdown-item>
+              <b-dropdown-item class="m-0 w-100" @click="logout">Logout</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-collapse>
@@ -122,8 +130,9 @@ export default {
       copyCheckouts: 'territories/copyCheckouts',
       back: 'auth/back',
     }),
+    get,
     goBack() {
-      this.back(this);
+      this.back({ vm: this });
     },
     logout() {
       this.$store.dispatch('auth/logout');

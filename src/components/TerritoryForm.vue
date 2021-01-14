@@ -127,7 +127,7 @@ export default {
 
     cancel() {
       this.model = {};
-      this.back(this);
+      this.$router.go(-1);
     },
 
     async remove() {

@@ -13,7 +13,14 @@
       <div v-if="step === 1">
         <div v-if="canWrite && mode !== modes.phoneAdd && mode !== modes.phoneEdit">
           <b-form-group>
-            <b-form-checkbox v-model="useGeocodedAddress">Use geocoded address</b-form-checkbox>
+            <div class="d-flex align-items-center">
+              <b-form-checkbox v-model="useGeocodedAddress" class="text-nowrap">Auto-fix address</b-form-checkbox>
+              <font-awesome-icon class="help ml-1 text-info" icon="info-circle" @click="showGeocodeHelp=!showGeocodeHelp" />
+            </div>
+            <div v-if="showGeocodeHelp">
+              This will update your entry based on its geocoded location.<br/>
+              Uncheck if you want to preserve existing GPS coordinates for this address.
+            </div>
           </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
             <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
@@ -35,7 +42,7 @@
           <div class="text-left" v-if="showTerrHelp">
             <hr/>
             <p>
-              <font-awesome-icon class="help ml-1 text-info" icon="info-circle" @click="showTerrHelp=!showTerrHelp">
+              <font-awesome-icon class="help ml-1 text-info" icon="info-circle">
               </font-awesome-icon>
               Select a territory for this address from the dropdown,
               or click on <b>Locate on Map</b> to find the nearest territories.
@@ -82,7 +89,7 @@
           First, let's check the address location. Drag and drop the marker to make adjustments.
           Click on <b>Select Territory</b> when finished.
         </p>
-        <AddressMap :address="model" :zoom="17" :step="step" :key="step"></AddressMap>
+        <AddressMap :address="model" :zoom="17" :step="step" :key="step" @updated="updateCoordinates" />
       </div>
       <div v-else-if="step === 3" class="step-3">
         <div v-if="territoriesLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
@@ -108,7 +115,7 @@
           <span v-if="mode === 'add'">the addition of this new address.</span>
           <span v-if="mode === 'edit'">this address update.</span>
         </p>
-        <b-button v-if="canManage" variant="info" :to="`/territories/${territory.id}/optimize`">
+        <b-button v-if="canManage" variant="info" :to="`/territories/${territoryId}/optimize`">
           Optimize
         </b-button>
       </div>
@@ -179,8 +186,10 @@ export default {
       },
       error: '',
       useGeocodedAddress: true,
+      saveGPSCoordinates: false,
       geocodedAddress: {},
       showTerrHelp: true,
+      showGeocodeHelp: false,
     };
   },
   async mounted() {
@@ -253,6 +262,7 @@ export default {
       this.isLoading = false;
     },
     async geocodeAddress() {
+      if (!this.useGeocodedAddress) return;
       if (!this.model.addr1) return;
       if (!this.model.city && !this.model.state_province && !this.model.postal_code) return;
       if (this.model.city && !this.model.state_province && !this.model.postal_code) return;
@@ -262,23 +272,12 @@ export default {
       const fullAddress = `${addr1 || ''}+${addr2 || ''}+${city || ''}+${state || ''}+${zip || ''}`;
 
       await this.addressLookup(fullAddress);
-      this.geocodedAddress = {
-        addr1: startCase(this.address.addr1),
-        city: startCase(this.address.city),
-        state_province: startCase(this.address.state_province),
-        postal_code: startCase(this.address.postal_code),
-        longitude: this.address.longitude,
-        latitude: this.address.latitude,
-      };
-
-      if (this.useGeocodedAddress) {
-        this.model.addr1 = this.geocodedAddress.addr1;
-        this.model.city = this.geocodedAddress.city;
-        this.model.state_province = this.geocodedAddress.state_province;
-        this.model.postal_code = this.geocodedAddress.postal_code;
-        this.model.longitude = this.geocodedAddress.longitude;
-        this.model.latitude = this.geocodedAddress.latitude;
-      }
+      this.model.addr1 = startCase(this.address.addr1);
+      this.model.city = startCase(this.address.city);
+      this.model.state_province = startCase(this.address.state_province);
+      this.model.postal_code = startCase(this.address.postal_code);
+      this.model.longitude = this.address.longitude;
+      this.model.latitude = this.address.latitude;
     },
 
     async applyGeocode() {
@@ -300,12 +299,8 @@ export default {
         this.isSearching = false;
       }
 
-      if (!this.geocodedAddress.latitude || !this.geocodedAddress.longitude) {
-        await this.geocodeAddress();
-      }
+      await this.geocodeAddress();
       this.step = 2;
-      this.model.longitude = this.geocodedAddress.longitude;
-      this.model.latitude = this.geocodedAddress.latitude;
     },
 
     async goToSelectTerritory() {
@@ -324,7 +319,7 @@ export default {
     },
 
     done() {
-      this.$router.push(this.returnRoute);
+      this.$router.go(-1);
     },
 
     async remove() {
@@ -336,6 +331,13 @@ export default {
       if (confirm) {
         await this.deleteAddress(this.address.id);
         this.$router.push(`/territories/${this.territoryId}`);
+      }
+    },
+
+    updateCoordinates(coordinates) {
+      if (coordinates) {
+        this.model.longitude = coordinates.lng;
+        this.model.latitude = coordinates.lat;
       }
     },
   },

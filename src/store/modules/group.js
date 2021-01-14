@@ -51,7 +51,7 @@ export const group = {
     },
     GET_GROUPS_FAIL(state, exception) {
       state.error = exception;
-      console.error(GET_GROUP_FAIL, exception);
+      console.error(GET_GROUPS_FAIL, exception);
     },
     GET_GROUPS_SUCCESS(state, _groups) {
       state.groups = _groups;

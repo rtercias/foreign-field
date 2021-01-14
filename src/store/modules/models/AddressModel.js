@@ -1,6 +1,9 @@
 import gql from 'graphql-tag';
 import clone from 'lodash/clone';
+import intersection from 'lodash/intersection';
 import { InvalidAddressError } from '../../exceptions/custom-errors';
+
+const GEOCODE_CITY_TYPES = ['locality', 'sublocality'];
 
 export const model = gql`fragment AddressModel on Address {
   congregationId
@@ -146,4 +149,9 @@ export function validate(_address, isNew) {
   }
 
   return address;
+}
+
+export function isCity(types) {
+  const i = intersection(types, GEOCODE_CITY_TYPES);
+  return i.length;
 }

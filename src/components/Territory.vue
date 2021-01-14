@@ -6,7 +6,10 @@
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
             <div class="text-left w-50">
-              <h4 class="mb-0">{{territory.description}}</h4>
+              <h4>
+                {{territory.description}}
+                <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
+              </h4>
               <span class="cities">{{cities}}</span>
             </div>
             <div class="text-right w-50">
@@ -18,7 +21,11 @@
                   @click="openSMSMobile()">
                 </font-awesome-icon> {{territoryName}}
               </h4>
-              <div class="small">{{currentPublisher}}</div>
+              <div class="small">
+                {{currentPublisher}}
+                <span v-if="currentPublisher" class="font-weight-bold">|</span>
+                Count: {{count}}
+              </div>
             </div>
           </div>
           <div class="header-buttons w-100 d-flex justify-content-between py-2">
@@ -45,7 +52,7 @@
               </b-button>
             </b-button-group>
             <b-button-group v-else size="sm" class="badge px-0">
-              <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
+              <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Check In</span>
               </b-button>
@@ -72,6 +79,7 @@ import Loading from './Loading';
 import { store, defaultOptions } from '../store';
 import { channel } from '../main';
 import { displayName } from '../utils/publisher';
+import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 
 export default {
   name: 'Territory',
@@ -82,13 +90,19 @@ export default {
   props: ['territoryId'],
   beforeRouteEnter(to, from, next) {
     try {
-      const { options = defaultOptions } = store.state.auth;
-      const name = get(options, 'territory.defaultView');
-      const { territoryId } = to.params;
-      if (name !== to.name) {
-        next({ name, params: { territoryId } });
+      const views = get(CongDefault.options, 'territory.defaultView.options', []).map(o => o.value);
+      if (!views.includes(to.name)) {
+        next();
+      } else {
+        const { options = defaultOptions } = store.state.auth;
+        const name = get(options, 'territory.defaultView');
+        const { territoryId } = to.params;
+        if (name !== to.name) {
+          next({ name, params: { territoryId } });
+        } else {
+          next();
+        }
       }
-      next();
     } catch (e) {
       console.error(e);
     }
@@ -147,6 +161,7 @@ export default {
       options: 'auth/options',
       token: 'auth/token',
       territoryIsLoading: 'territory/isLoading',
+      isTerritoryBusy: 'territory/isBusy',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -195,6 +210,19 @@ export default {
       }
 
       return '';
+    },
+    showCheckInButton() {
+      return this.viewMode !== 'optimize' && this.isCheckedOut && (this.canWrite || this.isOwnedByUser);
+    },
+    count() {
+      if (this.viewMode === 'phone-list') {
+        const addresses = this.territory.addresses.map(a => a.phones.length) || [];
+        if (addresses.length) {
+          return addresses.reduce((acc, current) => (acc || 0) + current);
+        }
+        return 0;
+      }
+      return this.territory.addresses.length;
     },
   },
   methods: {
