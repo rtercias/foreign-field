@@ -156,7 +156,7 @@ export default {
         { value: 'BUSINESS', text: 'Business', variant: 'success' },
         { value: 'Test', text: 'Test', variant: 'danger' },
       ],
-      sortOption: 'Description',
+      sortOption: '',
       sortOptions: [
         'Name',
         'Description',
@@ -168,6 +168,7 @@ export default {
   computed: {
     ...mapGetters({
       congId: 'auth/congId',
+      congregation: 'congregation/congregation',
       user: 'auth/user',
       token: 'auth/token',
       territories: 'territories/territories',
@@ -235,6 +236,7 @@ export default {
     async fetch() {
       const congId = this.congId || (this.user && this.user.congId);
       this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
+      this.sortOption = get(this.congregation, 'options.territories.defaultSort') || 'Description';
       await this.fetchTerritories({
         congId,
         groupId: this.selectedGroup === 0 ? null : this.groupId,
