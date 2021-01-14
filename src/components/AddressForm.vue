@@ -115,7 +115,7 @@
           <span v-if="mode === 'add'">the addition of this new address.</span>
           <span v-if="mode === 'edit'">this address update.</span>
         </p>
-        <b-button v-if="canManage" variant="info" :to="`/territories/${territory.id}/optimize`">
+        <b-button v-if="canManage" variant="info" :to="`/territories/${territoryId}/optimize`">
           Optimize
         </b-button>
       </div>

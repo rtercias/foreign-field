@@ -45,7 +45,7 @@
               </b-button>
             </b-button-group>
             <b-button-group v-else size="sm" class="badge px-0">
-              <b-button v-if="isCheckedOut && (canWrite || isOwnedByUser)" variant="warning" @click="checkIn(true)">
+              <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Check In</span>
               </b-button>
@@ -72,6 +72,7 @@ import Loading from './Loading';
 import { store, defaultOptions } from '../store';
 import { channel } from '../main';
 import { displayName } from '../utils/publisher';
+import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 
 export default {
   name: 'Territory',
@@ -82,13 +83,19 @@ export default {
   props: ['territoryId'],
   beforeRouteEnter(to, from, next) {
     try {
-      const { options = defaultOptions } = store.state.auth;
-      const name = get(options, 'territory.defaultView');
-      const { territoryId } = to.params;
-      if (name !== to.name) {
-        next({ name, params: { territoryId } });
+      const views = get(CongDefault.options, 'territory.defaultView.options', []).map(o => o.value);
+      if (!views.includes(to.name)) {
+        next();
+      } else {
+        const { options = defaultOptions } = store.state.auth;
+        const name = get(options, 'territory.defaultView');
+        const { territoryId } = to.params;
+        if (name !== to.name) {
+          next({ name, params: { territoryId } });
+        } else {
+          next();
+        }
       }
-      next();
     } catch (e) {
       console.error(e);
     }
@@ -195,6 +202,9 @@ export default {
       }
 
       return '';
+    },
+    showCheckInButton() {
+      return this.viewMode !== 'optimize' && this.isCheckedOut && (this.canWrite || this.isOwnedByUser);
     },
   },
   methods: {

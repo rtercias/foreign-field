@@ -121,6 +121,7 @@ export const addresses = {
         })));
       } catch (exception) {
         commit(OPTIMIZE_FAIL, exception);
+        throw exception;
       }
     },
 

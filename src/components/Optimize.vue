@@ -5,8 +5,7 @@
       <div class="optimize-header w-100 p-2">
         <div class="d-flex justify-content-center align-items-center">
           <h5>Territory Optimizer</h5>
-          <font-awesome-icon class="help ml-1 text-info" icon="question-circle" @click="showHelp=!showHelp">
-          </font-awesome-icon>
+          <font-awesome-icon class="help ml-1 text-info" icon="question-circle" @click="showHelp=!showHelp" />
         </div>
         <hr class="mt-0" />
         <div class="text-left" v-if="showHelp">
@@ -14,90 +13,102 @@
             Use <b>Manual Sort</b><span v-if="canManage"> or <b>Optimize</b></span> to sort addresses.
           </p>
         </div>
-        <b-button-group v-if="state===''" size="sm" class="w-100">
-          <b-button variant="outline-success" @click="switchToManual">Manual Sort</b-button>
-          <b-button variant="primary" @click="runOptimizer">Optimize</b-button>
-        </b-button-group>
-        <b-button-group v-else size="sm" class="w-100">
-          <b-button variant="outline-secondary" @click="reset">Cancel</b-button>
-          <b-button variant="primary" @click="finalize" :disabled="!hasChanges">Finalize</b-button>
-        </b-button-group>
+        <div class="d-flex justify-content-end">
+          <b-button-group v-if="state===''" size="sm">
+            <b-button variant="outline-success" @click="switchToManual">Manual Sort</b-button>
+            <b-button variant="primary" @click="runOptimizer">Optimize</b-button>
+          </b-button-group>
+          <b-button-group v-else size="sm">
+            <b-button variant="outline-info" @click="reset">Cancel</b-button>
+            <b-button variant="primary" @click="finalize" :disabled="!hasChanges">Finalize</b-button>
+          </b-button-group>
+        </div>
         <div v-if="isManual">
-          <div v-if="hasChanges">
             <hr/>
-            <p>You have pending changes. Click <b>Finalize</b> to save.</p>
+          <div v-if="hasChanges">
+            You have pending changes. Click <b>Finalize</b> to save.
           </div>
           <div v-else>
-            <hr/>
-            <p>Drag and drop address cards...</p>
+            Drag and drop address cards...
           </div>
         </div>
         <div v-if="isOptimize">
-          <div v-if="hasChanges">
-            <hr/>
-            <p class="text-left">
-              This is a preview of the optimized addresses.<br/>
-              Drag and drop to make further changes or click <b>Finalize</b> to save.
-            </p>
+          <hr/>
+          <div v-if="optimizing">
+            Optimizing.
+          </div>
+          <div v-else-if="hasChanges" class="text-primary font-weight-bold">
+            🎉 Success! Here's a preview of the optimized addresses.<br/>
+            Drag and drop to make further changes or click <b>Finalize</b> to save.
+          </div>
+          <div v-else-if="isError" class="text-danger font-weight-bold">
+            <font-awesome-icon icon="exclamation-triangle" />
+            Something went wrong. Optimize service may be down. Try again a bit later.
           </div>
           <div v-else>
-            <hr/>
-            <p>Optimizing</p>
+            No changes. Click <b>Cancel</b> to abort.
           </div>
         </div>
       </div>
       <Loading v-if="optimizing"></Loading>
       <div class="optimize-body h-50" v-else>
-        <div class="d-flex justify-content-end pt-2 pr-2 small">
-          <span class="toggle-map" @click="toggleMap">
-            <span v-if="showMap">hide</span><span v-else>show</span> map
-            <font-awesome-icon :icon="mapToggleIcon"></font-awesome-icon>
-          </span>
+        <div class="optimize-map-buttons text-primary d-flex justify-content-start p-2">
+          <b-badge variant="outline" class="toggle-map" @click="showMap = !showMap">
+            <div v-if="showMap"><font-awesome-icon icon="eye-slash" class="mr-1" />Hide Map</div>
+            <div v-else><font-awesome-icon icon="map" class="mr-1" />Show Map</div>
+          </b-badge>
+          <b-badge v-if="showMap" variant="outline" @click="fullscreen = !fullscreen">
+            <div v-if="fullscreen"><font-awesome-icon icon="compress-alt" class="mr-1" />Full screen</div>
+            <div v-else><font-awesome-icon icon="expand-alt" class="mr-1" />Half screen</div>
+          </b-badge>
         </div>
-        <TerritoryMap
-          class="optimize-map p-0"
-          v-show="showMap"
-          :territory="{ addresses: mappedAddresses }"
-          :options="{ showSortOrder: true, simple: true }">
-        </TerritoryMap>
-        <div class="d-flex p-0">
-          <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-5': isOptimize }">
-            <div v-if="isOptimize" class="bg-secondary text-white">Old Position</div>
-            <draggable
-              :list="manualAddresses"
-              class="list-group"
-              ghost-class="ghost"
-              handle=".grip"
-              @update="onDragUpdate"
-            >
-              <b-list-group-item
-                class="col-sm-12 overflow-auto p-0"
-                v-for="(address, index) in manualAddresses"
-                v-bind:key="address.id"
-                data-toggle="collapse">
-                <OptimizeCard :address="address" mode="manual" :state="state" :pos="index + 1">
-                </OptimizeCard>
-              </b-list-group-item>
-            </draggable>
-          </b-list-group>
-          <b-list-group class="columns col-7 pr-0" v-if="isOptimize">
-            <div class="bg-info text-white">New Position</div>
-            <draggable
-              :list="optimizedAddresses"
-              class="list-group"
-              ghost-class="ghost"
-              handle=".grip"
-              @update="onDragUpdate"
-            >
-              <b-list-group-item
-                class="col-sm-12 overflow-auto p-0"
-                v-for="(address, index) in optimizedAddresses"
-                v-bind:key="address.id"
-                data-toggle="collapse">
-                <OptimizeCard :address="address" mode="optimize" :state="state" :pos="index + 1"></OptimizeCard>
-              </b-list-group-item>
-            </draggable>
-          </b-list-group>
+        <div class="row">
+          <TerritoryMap
+            class="optimize-map px-0 col-sm-12"
+            :class="{ 'col-md-6': !fullscreen }"
+            v-show="showMap"
+            :territory="{ addresses: mappedAddresses }"
+            :options="{ showSortOrder: true, simple: true }">
+          </TerritoryMap>
+          <div class="d-flex px-0 col-sm-12" :class="{ 'col-md-6': showMap, 'col-md-12': fullscreen }">
+            <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-5': isOptimize }">
+              <div v-if="isOptimize" class="bg-info text-white">Old Position</div>
+              <draggable
+                :list="manualAddresses"
+                class="list-group"
+                ghost-class="ghost"
+                handle=".grip"
+                @update="onDragUpdate"
+              >
+                <b-list-group-item
+                  class="col-sm-12 overflow-auto p-0"
+                  v-for="(address, index) in manualAddresses"
+                  v-bind:key="address.id"
+                  data-toggle="collapse">
+                  <OptimizeCard :address="address" mode="manual" :state="state" :pos="index + 1">
+                  </OptimizeCard>
+                </b-list-group-item>
+              </draggable>
+            </b-list-group>
+            <b-list-group class="columns col-7 pr-0" v-if="isOptimize">
+              <div class="bg-info text-white">New Position</div>
+              <draggable
+                :list="optimizedAddresses"
+                class="list-group"
+                ghost-class="ghost"
+                handle=".grip"
+                @update="onDragUpdate"
+              >
+                <b-list-group-item
+                  class="col-sm-12 overflow-auto p-0"
+                  v-for="(address, index) in optimizedAddresses"
+                  v-bind:key="address.id"
+                  data-toggle="collapse">
+                  <OptimizeCard :address="address" mode="optimize" :state="state" :pos="index + 1"></OptimizeCard>
+                </b-list-group-item>
+              </draggable>
+            </b-list-group>
+          </div>
         </div>
       </div>
     </div>
@@ -114,7 +125,7 @@ import TerritoryMap from './TerritoryMap';
 
 export default {
   name: 'Optimize',
-  props: ['groupId', 'id'],
+  props: ['groupId', 'territoryId'],
   components: {
     OptimizeCard,
     Draggable,
@@ -132,7 +143,8 @@ export default {
       showHelp: false,
       mappedAddresses: [],
       showMap: true,
-      mapToggleIcon: 'chevron-up',
+      fullscreen: false,
+      isError: false,
     };
   },
   async mounted() {
@@ -155,23 +167,29 @@ export default {
       this.hasChanges = true;
     },
     async runOptimizer() {
-      this.state = 'optimize';
-      this.optimizing = true;
-      await this.optimize(this.id);
-      if (this.optimized && this.optimized.length) {
-        const optimized = this.optimizedAddresses.map((address) => {
-          const opt = this.optimized.find(o => o.id === address.id) || {};
-          return {
-            ...address,
-            sort: opt.sort,
-          };
-        });
+      try {
+        this.state = 'optimize';
+        this.optimizing = true;
+        await this.optimize(this.territoryId);
+        if (this.optimized && this.optimized.length) {
+          const optimized = this.optimizedAddresses.map((address) => {
+            const opt = this.optimized.find(o => o.id === address.id) || {};
+            return {
+              ...address,
+              sort: opt.sort,
+            };
+          });
 
-        this.optimizedAddresses = orderBy(optimized, 'sort');
-        this.mappedAddresses = this.optimizedAddresses;
-        this.hasChanges = true;
+          this.optimizedAddresses = orderBy(optimized, 'sort');
+          this.mappedAddresses = this.optimizedAddresses;
+          this.hasChanges = true;
+        }
+        this.optimizing = false;
+      } catch (e) {
+        this.isError = true;
+        this.optimizing = false;
+        this.hasChanges = false;
       }
-      this.optimizing = false;
     },
     reset() {
       this.state = '';
@@ -204,10 +222,6 @@ export default {
         this.reset();
       }
     },
-    toggleMap() {
-      this.showMap = !this.showMap;
-      this.mapToggleIcon = this.mapToggleIcon === 'chevron-up' ? 'chevron-down' : 'chevron-up';
-    },
   },
   computed: {
     ...mapGetters({
@@ -216,6 +230,7 @@ export default {
       token: 'auth/token',
       canManage: 'auth/canManage',
       optimized: 'addresses/optimized',
+      isDesktop: 'auth/isDesktop',
     }),
     isManual() {
       return this.state === 'manual';
@@ -235,6 +250,10 @@ export default {
   }
   .optimize-map {
     height: 300px;
+  }
+  .optimize-map-buttons {
+    font-size: 20px;
+    cursor: pointer;
   }
   .toggle-map {
     cursor: pointer;
