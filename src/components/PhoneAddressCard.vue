@@ -258,7 +258,6 @@ export default {
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
       if (phoneEditing) this.$set(phoneEditing, 'editMode', false);
-      this.$refs.list.closeActions();
     },
     isActiveAddress(id) {
       return this.territory.lastActivity ? id === this.territory.lastActivity.address_id : false;

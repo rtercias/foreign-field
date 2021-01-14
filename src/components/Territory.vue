@@ -6,7 +6,10 @@
         <div class="w-100">
           <div class="w-100 d-flex justify-content-between pt-3">
             <div class="text-left w-50">
-              <h4 class="mb-0">{{territory.description}}</h4>
+              <h4 class="mb-0">
+                {{territory.description}}
+                <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
+              </h4>
               <span class="cities">{{cities}}</span>
             </div>
             <div class="text-right w-50">
@@ -154,6 +157,7 @@ export default {
       options: 'auth/options',
       token: 'auth/token',
       territoryIsLoading: 'territory/isLoading',
+      isTerritoryBusy: 'territory/isBusy',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
