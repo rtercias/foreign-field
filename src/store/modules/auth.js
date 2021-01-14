@@ -329,7 +329,12 @@ export const auth = {
       });
     },
 
-    back({ getters }, vm) {
+    back({ getters }, params) {
+      const { vm, route } = params;
+      if (route) {
+        vm.$router.push(route);
+        return;
+      }
       const back = get(Vue.$route, 'query.back') || get(vm.$route, 'meta.back');
       if (back) {
         vm.$router.push({ name: back, params: getters.leftNavRouteParams });
