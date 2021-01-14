@@ -3,7 +3,7 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import { model as addressModel, validate, ACTION_BUTTON_LIST, ADDRESS_STATUS } from './models/AddressModel';
+import { model as addressModel, validate, isCity, ACTION_BUTTON_LIST, ADDRESS_STATUS } from './models/AddressModel';
 import { model as activityModel, createActivityLog } from './models/ActivityModel';
 
 const FETCH_ADDRESS = 'FETCH_ADDRESS';
@@ -616,12 +616,12 @@ export const address = {
         if (response && response.data) {
           const { geometry, address_components: addressComponent } = get(response, 'data.results[0]', {});
           if (geometry) {
-            const country = addressComponent.find(c => c.types[0] === 'country') || {};
-            const streetNumber = addressComponent.find(c => c.types[0] === 'street_number') || {};
-            const route = addressComponent.find(c => c.types[0] === 'route') || {};
-            const city = addressComponent.find(c => c.types[0] === 'locality') || {};
-            const stateProvince = addressComponent.find(c => c.types[0] === 'administrative_area_level_1') || {};
-            const zip = addressComponent.find(c => c.types[0] === 'postal_code') || {};
+            const country = addressComponent.find(c => c.types.includes('country')) || {};
+            const streetNumber = addressComponent.find(c => c.types.includes('street_number')) || {};
+            const route = addressComponent.find(c => c.types.includes('route')) || {};
+            const city = addressComponent.find(c => isCity(c.types)) || {};
+            const stateProvince = addressComponent.find(c => c.types.includes('administrative_area_level_1')) || {};
+            const zip = addressComponent.find(c => c.types.includes('postal_code')) || {};
             const longitude = get(geometry, 'location.lng');
             const latitude = get(geometry, 'location.lat');
 
