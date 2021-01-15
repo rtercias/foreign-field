@@ -67,8 +67,8 @@ export const territory = {
       state.territory.status = newStatus;
       store.cache.clear();
     },
-    SET_TERRITORY(state, terr) {
-      if (terr && terr.addresses) {
+    SET_TERRITORY(state, { terr, getLastActivity }) {
+      if (terr && terr.addresses && getLastActivity) {
         for (const address of terr.addresses) {
           address.isBusy = true;
           if (address.phones) {
@@ -272,7 +272,7 @@ export const territory = {
         if (terr && terr.addresses) {
           terr.addresses = orderBy(terr.addresses, 'sort');
         }
-        commit(SET_TERRITORY, terr);
+        commit(SET_TERRITORY, { terr, getLastActivity });
         commit(GET_TERRITORY_SUCCESS);
 
         if (getLastActivity) {

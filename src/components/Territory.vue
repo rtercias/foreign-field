@@ -10,10 +10,10 @@
                 {{territory.description}}
                 <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
               </h4>
-              <span class="cities">{{cities}}</span>
+              <span class="small">{{displayCount}}</span>
             </div>
             <div class="text-right w-50">
-              <h4 class="territory-name">
+              <h4>
                 <font-awesome-icon
                   class="text-primary d-xl-none"
                   icon="sms"
@@ -21,11 +21,7 @@
                   @click="openSMSMobile()">
                 </font-awesome-icon> {{territoryName}}
               </h4>
-              <div class="small">
-                {{currentPublisher}}
-                <span v-if="currentPublisher" class="font-weight-bold">|</span>
-                Count: {{count}}
-              </div>
+              <span class="small">{{currentPublisher}}</span>
             </div>
           </div>
           <div class="header-buttons w-100 d-flex justify-content-between py-2">
@@ -78,7 +74,7 @@ import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
 import { store, defaultOptions } from '../store';
 import { channel } from '../main';
-import { displayName } from '../utils/publisher';
+import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 
 export default {
@@ -162,6 +158,7 @@ export default {
       token: 'auth/token',
       territoryIsLoading: 'territory/isLoading',
       isTerritoryBusy: 'territory/isBusy',
+      isDesktop: 'auth/isDesktop',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -206,9 +203,8 @@ export default {
       const status = get(this.territory, 'status.status');
       const publisher = get(this.territory, 'status.publisher');
       if (status === 'Checked Out') {
-        return `Checked out to: ${displayName(publisher)}`;
+        return `Checked out to: ${this.isDesktop ? displayName(publisher) : displayShortName(publisher)}`;
       }
-
       return '';
     },
     showCheckInButton() {
@@ -223,6 +219,9 @@ export default {
         return 0;
       }
       return this.territory.addresses.length;
+    },
+    displayCount() {
+      return `Count: ${this.count}`;
     },
   },
   methods: {

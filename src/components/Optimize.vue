@@ -57,12 +57,12 @@
             <div v-if="showMap"><font-awesome-icon icon="eye-slash" class="mr-1" />Hide Map</div>
             <div v-else><font-awesome-icon icon="map" class="mr-1" />Show Map</div>
           </b-badge>
-          <b-badge v-if="showMap" variant="outline" @click="fullscreen = !fullscreen">
-            <div v-if="fullscreen"><font-awesome-icon icon="compress-alt" class="mr-1" />Full screen</div>
-            <div v-else><font-awesome-icon icon="expand-alt" class="mr-1" />Half screen</div>
+          <b-badge v-if="showMap && isDesktop" variant="outline" @click="fullscreen = !fullscreen">
+            <div v-if="fullscreen"><font-awesome-icon icon="compress-alt" class="mr-1" />Half Screen</div>
+            <div v-else><font-awesome-icon icon="expand-alt" class="mr-1" />Full Screen</div>
           </b-badge>
         </div>
-        <div class="row">
+        <div class="row mx-0">
           <TerritoryMap
             class="optimize-map px-0 col-sm-12"
             :class="{ 'col-md-6': !fullscreen }"
@@ -71,7 +71,7 @@
             :options="{ showSortOrder: true, simple: true }">
           </TerritoryMap>
           <div class="d-flex px-0 col-sm-12" :class="{ 'col-md-6': showMap, 'col-md-12': fullscreen }">
-            <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-5': isOptimize }">
+            <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-6': isOptimize }">
               <div v-if="isOptimize" class="bg-info text-white">Old Position</div>
               <draggable
                 :list="manualAddresses"
@@ -90,7 +90,7 @@
                 </b-list-group-item>
               </draggable>
             </b-list-group>
-            <b-list-group class="columns col-7 pr-0" v-if="isOptimize">
+            <b-list-group class="columns col-6 pr-0" v-if="isOptimize">
               <div class="bg-info text-white">New Position</div>
               <draggable
                 :list="optimizedAddresses"
@@ -110,6 +110,16 @@
             </b-list-group>
           </div>
         </div>
+      </div>
+      <div class="d-flex justify-content-end py-3 px-2">
+        <b-button-group v-if="state===''" size="sm">
+          <b-button variant="outline-success" @click="switchToManual">Manual Sort</b-button>
+          <b-button variant="primary" @click="runOptimizer">Optimize</b-button>
+        </b-button-group>
+        <b-button-group v-else size="sm">
+          <b-button variant="outline-info" @click="reset">Cancel</b-button>
+          <b-button variant="primary" @click="finalize" :disabled="!hasChanges">Finalize</b-button>
+        </b-button-group>
       </div>
     </div>
   </div>
@@ -244,7 +254,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
   .help {
     margin-top: -10px;
   }
@@ -253,7 +263,9 @@ export default {
   }
   .optimize-map-buttons {
     font-size: 20px;
-    cursor: pointer;
+    .badge {
+      cursor: pointer;
+    }
   }
   .toggle-map {
     cursor: pointer;
