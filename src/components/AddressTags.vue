@@ -15,7 +15,7 @@
             <span v-if="mode === 'phoneAddress' && !readOnlyTag(tag) && !disabled" class="mr-1">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
-              {{ tag }}
+              {{ formatLanguage(tag, language) }}
           </b-badge>
         </div>
       </b-button-group>
@@ -39,7 +39,7 @@
             <span v-if="tag.state && !readOnlyTag(tag)">
               <font-awesome-icon icon="times"></font-awesome-icon>
             </span>
-              {{ tag.caption.toLowerCase() }}
+              {{ formatLanguage(tag.caption.toLowerCase(), language) }}
           </b-badge>
         </div>
       </b-button-group>
@@ -63,7 +63,7 @@ import startsWith from 'lodash/startsWith';
 import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
-import { language } from '../utils/tags';
+import { formatLanguage } from '../utils/tags';
 
 const PHONE_ADDRESS_TAGS = ['no number', 'do not mail', 'verify', 'business'];
 const READ_ONLY_PHONE_ADDRESS_TAGS = ['verify', 'business'];
@@ -88,6 +88,7 @@ export default {
       updateAddress: 'address/updateAddress',
       getTerritory: 'territory/getTerritory',
     }),
+    formatLanguage,
     async updateTag(tag) {
       if (this.disabled || this.readOnlyTag(tag.caption)) return;
       this.isSaving = true;
@@ -101,7 +102,7 @@ export default {
         if (confirm) {
           this.$set(this.address, 'isBusy', true);
           this.setAddress(this.address);
-          this.$set(this.selectedTags, index, tag);
+          this.$set(this.selectedTags, index, tag.caption);
           await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
         }
       } else if (startsWith(tag.caption, 'do not call')) {
@@ -131,7 +132,7 @@ export default {
     loadSelectedTags() {
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
-          e.caption = language(e.caption, this.language);
+          e.caption = formatLanguage(e.caption, this.language);
           e.state = true;
         }
       });
@@ -143,10 +144,12 @@ export default {
       }
     },
     async confirmRemoveTag(tag) {
-      const response = await this.$bvModal.msgBoxConfirm(`Remove "${tag.caption}" tag?`, {
-        title: `${this.address.addr1} ${this.address.addr2}`,
-        centered: true,
-      });
+      const response = await this.$bvModal.msgBoxConfirm(
+        `Remove "${formatLanguage(tag.caption, this.language)}" tag?`, {
+          title: `${this.address.addr1} ${this.address.addr2}`,
+          centered: true,
+        }
+      );
 
       return response;
     },
@@ -232,12 +235,12 @@ export default {
       const all = [
         'verify',
         'day sleeper',
-        `wife speaks ${this.language}`,
-        `husband speaks ${this.language}`,
+        'wife speaks #language#',
+        'husband speaks #language#',
         'business',
         'no number',
         'do not mail',
-        `does not speak ${this.language}`,
+        'does not speak #language#',
         'do not call',
         // 'deaf/mute',
         // 'blind',
@@ -259,7 +262,7 @@ export default {
       return finalArr;
     },
     selectedTags() {
-      const notes = String(get(this.address, 'notes')).replaceAll('#language#', this.language);
+      const notes = get(this.address, 'notes');
       return (notes.toLowerCase().split(',').filter(n => n.length)) || [];
     },
     preview() {

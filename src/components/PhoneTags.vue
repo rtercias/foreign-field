@@ -12,7 +12,7 @@
             :variant="highlight(tag) ? 'success' : 'danger'"
             @click="() => remove(tag)">
             <span class="mr-1" v-if="!disabled"><font-awesome-icon icon="times"></font-awesome-icon></span>
-            {{tag}}
+            {{formatLanguage(tag, language)}}
           </b-badge>
         </div>
       </b-button-group>
@@ -26,7 +26,7 @@ import unionWith from 'lodash/unionWith';
 import map from 'lodash/map';
 import get from 'lodash/get';
 import { format } from '../utils/phone';
-import { language } from '../utils/tags';
+import { formatLanguage } from '../utils/tags';
 
 export default {
   name: 'PhoneTags',
@@ -43,10 +43,11 @@ export default {
       removeTag: 'phone/removeTag',
       updateAddress: 'address/updateAddress',
     }),
+    formatLanguage,
     loadSelectedTags() {
       this.availableTags.forEach((e) => {
         if (this.selectedTags.includes(e.caption)) {
-          e.caption = language(e.caption, this.language);
+          e.caption = formatLanguage(e.caption, this.language);
           e.state = true;
         }
       });
@@ -61,7 +62,7 @@ export default {
 
       if (index !== -1) {
         const isAddressPhone = this.address.phone === this.phone.phone;
-        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${tag}" tag?`, {
+        const confirm = await this.$bvModal.msgBoxConfirm(`Remove "${formatLanguage(tag, this.language)}" tag?`, {
           title: `${format(this.phone.phone)}`,
           centered: true,
         });
