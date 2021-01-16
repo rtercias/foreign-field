@@ -329,17 +329,17 @@ export const auth = {
       });
     },
 
-    back({ getters }, params) {
+    back({ getters, state }, params) {
       const { vm, route } = params;
       if (route) {
         vm.$router.push(route);
         return;
       }
       const back = get(Vue.$route, 'query.back') || get(vm.$route, 'meta.back');
-      if (back) {
+      if (state.canWrite && back) {
         vm.$router.push({ name: back, params: getters.leftNavRouteParams });
       } else {
-        vm.$router.go(-1);
+        vm.$router.back();
       }
     },
   },

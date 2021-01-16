@@ -10,10 +10,10 @@
         <div class="app-breadcrumb d-flex align-items-center">
           <b-button variant="link" class="back-button button p-0" @click="goBack" v-show="showLeftNav">
             <font-awesome-icon icon="chevron-left"></font-awesome-icon>
-            {{backLabel}}
+            <span v-if="canWrite">{{backLabel}}</span>
           </b-button>
-          <span v-if="!!backLabel" class="px-1">/</span>
-          {{routeLabel}}
+          <span v-if="!!backLabel && canWrite" class="px-1">/</span>
+          <span v-if="canWrite">{{routeLabel}}</span>
         </div>
         <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
         <b-nav-text></b-nav-text>
@@ -46,6 +46,7 @@ export default {
       isForcedOut: 'auth/isForcedOut',
       isDesktop: 'auth/isDesktop',
       user: 'auth/user',
+      canWrite: 'auth/canWrite',
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
