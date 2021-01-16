@@ -38,8 +38,8 @@ export default {
       backLabel: '',
     };
   },
-  mounted() {
-    this.setBackLabel();
+  async mounted() {
+    await this.refresh();
   },
   computed: {
     ...mapGetters({
@@ -64,19 +64,25 @@ export default {
   methods: {
     ...mapActions({
       back: 'auth/back',
+      authorize: 'auth/authorize',
     }),
     goBack() {
       this.back({ vm: this });
     },
-    setBackLabel() {
+    async refresh() {
+      if (this.user) await this.authorize(get(this.user, 'username'));
       const back = get(this.$route, 'meta.back');
       const backRoute = this.$router.resolve({ name: back });
       this.backLabel = back ? get(backRoute, 'route.meta.label') : '';
     },
   },
   watch: {
-    $route() {
-      this.setBackLabel();
+    async $route() {
+      try {
+        await this.refresh();
+      } catch (e) {
+        this.$router.replace({ name: 'unauthorized' });
+      }
     },
   },
 };

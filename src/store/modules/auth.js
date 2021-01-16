@@ -143,57 +143,61 @@ export const auth = {
     },
 
     async authorize({ commit, dispatch }, username) {
-      commit(LOADING, true);
-      return new Promise(async (resolve, reject) => {
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          data: {
-            query: print(gql`query Publisher($username: String) {
-              user (username: $username) {
-                id 
-                username
-                firstname
-                lastname
-                role
-                status
-                congregation {
-                  id
-                  name
-                  description
-                  language
-                  admin_email
-                  campaign
-                  options
+      try {
+        commit(LOADING, true);
+        return new Promise(async (resolve, reject) => {
+          const response = await axios({
+            url: process.env.VUE_APP_ROOT_API,
+            method: 'post',
+            data: {
+              query: print(gql`query Publisher($username: String) {
+                user (username: $username) {
+                  id 
+                  username
+                  firstname
+                  lastname
+                  role
+                  status
+                  congregation {
+                    id
+                    name
+                    description
+                    language
+                    admin_email
+                    campaign
+                    options
+                  }
                 }
-              }
-            }`),
-            variables: {
-              username,
+              }`),
+              variables: {
+                username,
+              },
             },
-          },
+          });
+
+          if (!response || !response.data || !response.data.data || !response.data.data.user) {
+            reject(new IncompleteRegistrationError('Unauthorized'));
+          }
+
+          const { user } = (response && response.data && response.data.data) || {};
+          const options = JSON.parse(get(user, 'congregation.options', '{}'));
+          const congregation = user && { ...user.congregation, options };
+          const userRoles = get(user, 'role', '').split(',');
+          const { permissions = [] } = router.currentRoute.meta;
+          const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
+          if (hasPermission) {
+            commit(AUTHORIZE, { ...user, congregation });
+            dispatch('congregation/setCongregation', congregation, { root: true });
+            resolve();
+          } else {
+            reject(new UnauthorizedUserError('Unauthorized'));
+          }
+
+          commit(LOADING, false);
         });
-
-        if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject(new IncompleteRegistrationError('Unauthorized'));
-        }
-
-        const { user } = (response && response.data && response.data.data) || {};
-        const options = JSON.parse(get(user, 'congregation.options', '{}'));
-        const congregation = user && { ...user.congregation, options };
-        const userRoles = get(user, 'role', '').split(',');
-        const { permissions = [] } = router.currentRoute.meta;
-        const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
-        if (hasPermission) {
-          commit(AUTHORIZE, { ...user, congregation });
-          dispatch('congregation/setCongregation', congregation, { root: true });
-          resolve();
-        } else {
-          reject(new UnauthorizedUserError('Unauthorized'));
-        }
-
-        commit(LOADING, false);
-      });
+      } catch (e) {
+        throw e;
+      }
     },
 
     async getUserTerritories({ commit }, username) {

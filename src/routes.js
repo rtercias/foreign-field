@@ -270,7 +270,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
       back: 'address-links',
       label: 'Edit Address',
     },
@@ -321,7 +321,7 @@ const routes = [
     component: PublisherForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       back: 'congregation-edit',
       label: 'Edit Publisher',
     },
