@@ -19,6 +19,7 @@ import TerritoryForm from './components/TerritoryForm';
 import CongregationForm from './components/CongregationForm';
 import GroupForm from './components/GroupForm';
 import PublisherForm from './components/PublisherForm';
+import DNCReport from './components/DNCReport';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome, meta: { label: 'Home' } },
@@ -187,6 +188,16 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       label: 'S-13 Assignment Report',
+    },
+  },
+  {
+    name: 'dnc-report',
+    path: '/reports/dnc/:congregationId',
+    component: DNCReport,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO'],
+      label: 'Do Not Call Report',
     },
   },
   {

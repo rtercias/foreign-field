@@ -1,5 +1,5 @@
 <template>
-  <div :key="key">
+  <div>
     <div class="lead pt-3">Search</div>
     <div class="w-100 justify-content-center pb-3">
       <font-awesome-icon icon="spinner" v-if="loading"></font-awesome-icon>
@@ -80,9 +80,6 @@ export default {
     }),
     language() {
       return (get(this.congregation, 'language') || 'Tagalog');
-    },
-    key() {
-      return `${Date.now()}`;
     },
   },
   methods: {

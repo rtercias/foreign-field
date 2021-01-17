@@ -62,9 +62,9 @@ export const addresses = {
           return;
         }
         if (!params.keyword) {
-          commit(DNC_SUCCESS, []);
-          return;
+          params.keyword = '';
         }
+
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -81,6 +81,7 @@ export const addresses = {
                 state_province
                 postal_code
                 territory_id
+                notes
               }
             }`),
             variables: {

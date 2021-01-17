@@ -7,6 +7,11 @@
           S-13 Assignment Record
         </b-link>
       </b-list-group-item>
+      <b-list-group-item class="px-2">
+        <b-link :to="`/reports/dnc/${congId}`" class="pr-4 column">
+          Do Not Call Report
+        </b-link>
+      </b-list-group-item>
     </b-list-group>
   </div>
 </template>

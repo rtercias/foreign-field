@@ -37,7 +37,9 @@
         </b-dropdown>
       </div>
     </div>
-    <b-form-checkbox v-model="excludeTests" v-if="canManage" class="pr-3 text-right">exclude tests</b-form-checkbox>
+    <b-form-checkbox v-model="excludeTests" v-if="isFullScreen && canManage" class="pr-3 text-right">
+      exclude tests
+    </b-form-checkbox>
     <Loading v-if="loading && isFullScreen"></Loading>
     <font-awesome-icon v-else-if="loading" class="loading text-info text-center w-100" icon="circle-notch" :spin="true" />
     <div v-else>
@@ -192,7 +194,7 @@ export default {
       return this.cleanLogs.slice(0, 3);
     },
     logs() {
-      if (this.keywordFilter || this.selectedStatus) {
+      if (this.keywordFilter || this.selectedStatus.value) {
         return this.cleanLogs
           .filter(log => get(log.changes, 'status.new') === this.selectedStatus.value)
           .filter(log => this.compareToKeyword([
