@@ -64,7 +64,7 @@ export default {
   data() {
     return {
       modes: Modes,
-      isLoading: false,
+      isLoading: true,
       isSaving: false,
       model: {},
       error: '',
@@ -131,12 +131,16 @@ export default {
     },
 
     async refresh() {
-      this.isLoading = true;
-      if (this.mode === Modes.edit) {
-        await this.fetchPublisher({ id: this.publisherId, congId: this.congregation.id });
-        this.model = this.publisher;
+      if (!this.isLoading && !this.self && !this.canWrite) {
+        this.$router.replace({ name: 'unauthorized' });
+      } else {
+        this.isLoading = true;
+        if (this.mode === Modes.edit) {
+          await this.fetchPublisher({ id: this.publisherId, congId: this.congregation.id });
+          this.model = this.publisher;
+        }
+        this.isLoading = false;
       }
-      this.isLoading = false;
     },
 
   },
@@ -146,6 +150,7 @@ export default {
       isAdmin: 'auth/isAdmin',
       publisher: 'publisher/publisher',
       congregation: 'congregation/congregation',
+      canWrite: 'auth/canWrite',
     }),
     mode() {
       return this.publisherId ? Modes.edit : Modes.add;

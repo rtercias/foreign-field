@@ -42,7 +42,7 @@ export const territory = {
     territory: state => state.territory,
     congId: state => state.territory.congregationid,
     isLoading: state => state.isLoading,
-    isBusy: state => state.territory.addresses.some(a => a.isBusy),
+    isBusy: state => get(state.territory, 'addresses', []).some(a => a.isBusy),
     isCheckedOut: state => state.territory && state.territory.status && state.territory.status.status === 'Checked Out',
     isOwnedByUser: (state, getters, rootState, rootGetters) => {
       const user = rootGetters['auth/user'];
@@ -201,7 +201,7 @@ export const territory = {
 
     async getTerritory({ commit, getters, rootGetters, dispatch }, { id, getLastActivity }) {
       if (!id) {
-        commit(GET_TERRITORY_FAIL, 'id is required');
+        commit(RESET_TERRITORY);
         return;
       }
       const token = rootGetters['auth/token'];

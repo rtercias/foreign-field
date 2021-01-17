@@ -3,8 +3,8 @@
     <div class="address-header justify-content-around align-items-center lead py-3">
       <span v-if="mode===modes.add" class="lead font-weight-bold w-100">Add New Address</span>
       <div v-else-if="mode===modes.edit" class="lead font-weight-bold w-100">
-        <div>{{address.addr1}} {{address.addr2}}</div>
-        <div>{{address.city}} {{address.state_province}} {{address.postal_code}}</div>
+        <div>{{model.addr1}} {{model.addr2}}</div>
+        <div>{{model.city}} {{model.state_province}} {{model.postal_code}}</div>
       </div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">ERROR: {{error}}</div>
@@ -21,6 +21,9 @@
               This will update your entry based on its geocoded location.<br/>
               Uncheck if you want to preserve existing GPS coordinates for this address.
             </div>
+          </b-form-group>
+          <b-form-group>
+            <b-badge variant="danger" v-if="model.status !== 'Active'">{{statusText(address.status)}}</b-badge>
           </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
             <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
@@ -149,10 +152,15 @@
 import { mapGetters, mapActions } from 'vuex';
 import startCase from 'lodash/startCase';
 import { TheMask } from 'vue-the-mask';
+import get from 'lodash/get';
+import addYears from 'date-fns/addYears';
+import format from 'date-fns/format';
 import AddressMap from './AddressMap';
 import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 import { Modes as _Modes } from '../utils/modes';
+import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
+import { formatLanguage, NF_TAG, DNC_TAG } from '../utils/tags';
 
 const Modes = {
   ..._Modes,
@@ -161,6 +169,7 @@ const Modes = {
 };
 
 const required = ['congregationId', 'territory_id', 'addr1', 'city', 'state_province'];
+const requiredInactive = ['congregationId', 'addr1', 'city', 'state_province'];
 const requiredAddress = ['addr1', 'city', 'state_province'];
 
 export default {
@@ -206,6 +215,8 @@ export default {
       setAddress: 'address/setAddress',
       fetchAllTerritories: 'territories/fetchAllTerritories',
       addressSearch: 'addresses/addressSearch',
+      markAsDoNotCall: 'address/markAsDoNotCall',
+      markAsNotForeign: 'address/markAsNotForeign',
     }),
     async submitAddress() {
       try {
@@ -218,7 +229,19 @@ export default {
           await this.addAddress(this.model);
           await this.getTerritory({ id: this.model.territory_id });
         } else if (this.mode === Modes.edit) {
+          if (this.model.status !== ADDRESS_STATUS.Active.value) {
+            const statusTag = ADDRESS_STATUS[this.model.status].value;
+            this.model.notes = this.removeStatusTag(statusTag);
+          }
+
           await this.updateAddress(this.model);
+
+          if (this.model.status === ADDRESS_STATUS.NF.value) {
+            await this.markAsNotForeign({ addressId: this.model.id, userid: this.user.id, tag: NF_TAG });
+          } else if (this.model.status === ADDRESS_STATUS.DNC.value) {
+            const dncTag = `${DNC_TAG} until ${format(addYears(new Date(), 1), 'P')}`;
+            await this.markAsDoNotCall({ addressId: this.model.id, userid: this.user.id, tag: dncTag });
+          }
         }
 
         if (this.canManage) {
@@ -241,8 +264,8 @@ export default {
       this.isLoading = true;
       await this.fetchAllTerritories({ congId: this.congId });
       if (this.mode === Modes.edit) {
-        await this.fetchAddress({ addressId: this.addressId });
-        this.model = this.address;
+        await this.fetchAddress({ addressId: this.addressId, status: '*' });
+        this.model = { ...this.address } || {};
         if (!this.model.sort) {
           this.model.sort = 0;
         }
@@ -340,11 +363,20 @@ export default {
         this.model.latitude = coordinates.lat;
       }
     },
+    statusText(status) {
+      return formatLanguage(ADDRESS_STATUS[status].text, this.language);
+    },
+    removeStatusTag(status) {
+      const notes = get(this.model, 'notes') || '';
+      const tags = notes.split(',') || [];
+      return tags.filter(t => t.includes(status)).join(',');
+    },
   },
   computed: {
     ...mapGetters({
       user: 'auth/user',
       congId: 'auth/congId',
+      congregation: 'congregation/congregation',
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
       isAdmin: 'auth/isAdmin',
@@ -367,7 +399,9 @@ export default {
     },
 
     isFormComplete() {
-      for (const field of required) {
+      const isActive = get(this.model, 'status') === ADDRESS_STATUS.Active.value;
+      const requiredSet = isActive ? required : requiredInactive;
+      for (const field of requiredSet) {
         if (!this.model[field]) return false;
       }
 
@@ -391,7 +425,10 @@ export default {
     },
 
     statusOptions() {
-      return ['Active', 'NF', 'DNC'].map(s => ({ value: s, text: s }));
+      return Object.values(ADDRESS_STATUS).map(s => ({ ...s, text: formatLanguage(s.text, this.language) }));
+    },
+    language() {
+      return (get(this.congregation, 'language') || 'Tagalog').toLowerCase();
     },
   },
   watch: {
