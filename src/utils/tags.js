@@ -27,6 +27,6 @@ export const READ_ONLY_PHONE_ADDRESS_TAGS = [
 export const NF_TAG = 'does not speak #language#';
 export const DNC_TAG = 'do not call';
 
-export function formatLanguage(tag, value) {
+export function formatLanguage(tag = '', value) {
   return String(tag).replaceAll('#language#', value);
 }

@@ -79,7 +79,7 @@ export default {
       congregation: 'congregation/congregation',
     }),
     language() {
-      return (get(this.congregation, 'language') || 'Tagalog').toLowerCase();
+      return (get(this.congregation, 'language') || 'Tagalog');
     },
     key() {
       return `${Date.now()}`;

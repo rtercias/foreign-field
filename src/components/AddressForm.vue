@@ -428,7 +428,7 @@ export default {
       return Object.values(ADDRESS_STATUS).map(s => ({ ...s, text: formatLanguage(s.text, this.language) }));
     },
     language() {
-      return (get(this.congregation, 'language') || 'Tagalog').toLowerCase();
+      return (get(this.congregation, 'language') || 'Tagalog');
     },
   },
   watch: {
