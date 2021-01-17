@@ -5,7 +5,6 @@
         <div class="d-flex flex-wrap">
           <b-badge
             v-for="(tag, index) in preview"
-            v-show="!hide(tag)"
             pill
             class="tag-button mr-1 mb-1 border-primary text-white d-flex "
             size='sm'
@@ -28,7 +27,6 @@
         <div class="combined-tags text-left">
           <b-badge
             v-for="(tag, index) in combinedTags"
-            v-show="!hide(tag.caption)"
             pill
             class="tag-button mr-1 mb-1 border-primary"
             :class="{ active: false, 'text-primary': !tag.state }"
@@ -56,17 +54,22 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import unionWith from 'lodash/unionWith';
+import union from 'lodash/union';
 import map from 'lodash/map';
 import get from 'lodash/get';
 import startsWith from 'lodash/startsWith';
 import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
-import { formatLanguage } from '../utils/tags';
+import {
+  formatLanguage,
+  ADDRESS_TAGS,
+  PHONE_ADDRESS_TAGS,
+  READ_ONLY_PHONE_ADDRESS_TAGS,
+  NF_TAG,
+  DNC_TAG,
+} from '../utils/tags';
 
-const PHONE_ADDRESS_TAGS = ['no number', 'do not mail', 'verify', 'business'];
-const READ_ONLY_PHONE_ADDRESS_TAGS = ['verify', 'business'];
 const READ_ONLY_ADDRESS_TAGS = [];
 
 export default {
@@ -105,18 +108,10 @@ export default {
           this.$set(this.selectedTags, index, tag.caption);
           await this.removeTag({ addressId: this.address.id, userid: this.user.id, tag: tag.caption });
         }
-      } else if (startsWith(tag.caption, 'do not call')) {
+      } else if (startsWith(tag.caption, DNC_TAG)) {
         await this.doNotCall(tag);
-      } else if (startsWith(tag.caption, 'does not speak')) {
+      } else if (startsWith(tag.caption, NF_TAG)) {
         await this.notForeign(tag);
-      } else if (startsWith(tag.caption, 'invalid #')) {
-        await this.invalidPhoneNumber(tag);
-      } else if (startsWith(tag.caption, 'confirmed phone')) {
-        if (this.hasPhone()) {
-          await this.addAddressTag(tag);
-        } else {
-          tag.state = false;
-        }
       } else {
         await this.addAddressTag(tag);
       }
@@ -190,26 +185,6 @@ export default {
 
       return true;
     },
-    async invalidPhoneNumber(tag) {
-      if (!this.hasPhone()) {
-        return;
-      }
-
-      const response = await this.$bvModal.msgBoxConfirm(`Make phone # "${this.formattedPhone}" invalid`, {
-        title: `${this.address.addr1} ${this.address.addr2} - Remove phone`,
-        centered: true,
-      });
-
-      if (response) {
-        const invalidPhoneNumberTag = `${tag.caption} ${this.formattedPhone}`;
-        const updatedAddress = { ...this.address, phone: '' };
-
-        this.setAddress(this.address);
-        await this.updateAddress(updatedAddress);
-        await this.addTag({ addressId: this.address.id, userid: this.user.id, tag: invalidPhoneNumberTag });
-        await this.getTerritory({ id: this.address.territory_id });
-      }
-    },
     readOnlyTag(tag = '') {
       const readOnlyTags = this.mode === 'phoneAddress' ? READ_ONLY_PHONE_ADDRESS_TAGS : READ_ONLY_ADDRESS_TAGS;
       return readOnlyTags.some(t => tag === t);
@@ -227,24 +202,13 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       updatedAddress: 'address/address',
+      congregation: 'congregation/congregation',
     }),
     language() {
-      return (get(this.user, 'congregation.language') || 'Tagalog').toLowerCase();
+      return (get(this.congregation, 'language') || 'Tagalog').toLowerCase();
     },
     availableTags() {
-      const all = [
-        'verify',
-        'day sleeper',
-        'wife speaks #language#',
-        'husband speaks #language#',
-        'business',
-        'no number',
-        'do not mail',
-        'does not speak #language#',
-        'do not call',
-        // 'deaf/mute',
-        // 'blind',
-      ];
+      const all = ADDRESS_TAGS;
 
       if (this.mode === 'phoneAddress') {
         return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
@@ -253,16 +217,16 @@ export default {
       return all;
     },
     combinedTags() {
-      const newArr = unionWith(this.selectedTags, this.availableTags,
-        (t1, t2) => t1.toLowerCase() === t2.toLowerCase())
+      const newArr = union(this.selectedTags, this.availableTags)
         .map(t => t.toLowerCase())
+        .filter(t => !this.hide(t))
         .sort();
       const finalArr = map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
 
       return finalArr;
     },
     selectedTags() {
-      const notes = get(this.address, 'notes');
+      const notes = get(this.address, 'notes') || '';
       return (notes.toLowerCase().split(',').filter(n => n.length)) || [];
     },
     preview() {
@@ -271,7 +235,7 @@ export default {
         return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
       }
 
-      return all;
+      return all.filter(t => !this.hide(t));
     },
     formattedPhone() {
       const { phone } = this.address;

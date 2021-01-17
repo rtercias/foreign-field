@@ -7,9 +7,13 @@
           <div>{{address.addr1}} {{address.addr2}}</div>
           <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
         </div>
-        <b-link class="pr-4" :to="`/territories/${territoryId}/addresses/${address.id}/edit${queryParamOrigin}`">
-          <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
-        </b-link>
+        <div class="pr-4">
+          <b-link
+            v-if="canWrite"
+            :to="`/territories/${territoryId}/addresses/${address.id}/edit${queryParamOrigin}`">
+            <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
+          </b-link>
+        </div>
       </div>
       <div class="lead border-top py-2">Link to...</div>
       <b-list-group>

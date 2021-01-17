@@ -14,13 +14,32 @@
         <div>{{title1}}</div>
         <div>{{title2}}</div>
       </div>
-      <b-dropdown v-if="showDateFilter" class="date-filter" right variant="secondary">
-        <span slot="button-content">Range: {{selectedRange.text}}</span>
-        <b-dropdown-item v-for='(range, index) in dateRanges' :key="index" @click="() => selectRange(range)">
-          {{range.text}}
-        </b-dropdown-item>
-      </b-dropdown>
+      <div>
+        <b-dropdown v-if="showFilters" class="status-filter pr-3" right variant="primary">
+          <span slot="button-content">Status Change: {{formatLanguage(selectedStatus.text, language)}}</span>
+          <b-dropdown-item
+            v-for='(status, index) in ADDRESS_STATUS'
+            :key="index"
+            class="w-100 mx-0"
+            @click="() => selectStatus(status)">
+            {{formatLanguage(status.text, language)}}
+          </b-dropdown-item>
+        </b-dropdown>
+        <b-dropdown v-if="showFilters" class="date-filter" right variant="secondary">
+          <span slot="button-content">Range: {{selectedRange.text}}</span>
+          <b-dropdown-item
+            v-for='(range, index) in dateRanges'
+            :key="index"
+            class="w-100 mx-0"
+            @click="() => selectRange(range)">
+            {{range.text}}
+          </b-dropdown-item>
+        </b-dropdown>
+      </div>
     </div>
+    <b-form-checkbox v-model="excludeTests" v-if="isFullScreen && canManage" class="pr-3 text-right">
+      exclude tests
+    </b-form-checkbox>
     <Loading v-if="loading && isFullScreen"></Loading>
     <font-awesome-icon v-else-if="loading" class="loading text-info text-center w-100" icon="circle-notch" :spin="true" />
     <div v-else>
@@ -47,6 +66,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import toLower from 'lodash/toLower';
 import ChangeLogAddressCard from './ChangeLogAddressCard';
 import Loading from './Loading';
 import SearchBar from './SearchBar';
@@ -56,6 +76,8 @@ import addMonths from 'date-fns/addMonths';
 import startOfDay from 'date-fns/startOfDay';
 import format from 'date-fns/format';
 import { unmask } from '../utils/phone';
+import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
+import { formatLanguage } from '../utils/tags';
 
 export default {
   name: 'ChangeLog',
@@ -76,6 +98,9 @@ export default {
         text: 'One Day',
         startDate: format(addDays(this.startOfCurrentDay(), -1), 'yyyy-MM-dd pp'),
       },
+      selectedStatus: {},
+      ADDRESS_STATUS,
+      excludeTests: true,
     };
   },
   async mounted() {
@@ -87,6 +112,7 @@ export default {
       getChangeLog: 'addresses/getChangeLog',
       fetchAddress: 'address/fetchAddress',
     }),
+    formatLanguage,
     async refresh() {
       this.$set(this, 'loading', true);
       await this.getChangeLog({
@@ -117,9 +143,12 @@ export default {
       this.selectedRange = range;
       await this.refresh();
     },
+    async selectStatus(status) {
+      this.selectedStatus = status;
+    },
     compareToKeyword(values) {
       return values.reduce(
-        (acc, value) => acc || String(value).toLowerCase().includes(this.keywordFilter.toLowerCase()),
+        (acc, value) => acc || toLower(value).includes(toLower(this.keywordFilter)),
         false,
       );
     },
@@ -130,9 +159,11 @@ export default {
   computed: {
     ...mapGetters({
       congId: 'auth/congId',
+      congregation: 'congregation/congregation',
       user: 'auth/user',
       storeLogs: 'addresses/logs',
       address: 'address/address',
+      canManage: 'auth/canManage',
     }),
     title1() {
       const record = this.logs && this.logs.length && this.logs[0].address;
@@ -151,6 +182,9 @@ export default {
       if (this.isSingleRecord) {
         return this.storeLogs;
       }
+
+      if (!this.excludeTests) return this.storeLogs;
+
       return this.storeLogs.filter((log) => {
         const { name } = get(log, 'address.territory') || {};
         return name && !name.includes('TEST');
@@ -160,17 +194,19 @@ export default {
       return this.cleanLogs.slice(0, 3);
     },
     logs() {
-      if (this.keywordFilter) {
-        return this.cleanLogs.filter(log => this.compareToKeyword([
-          log.address.addr1,
-          log.address.addr2,
-          log.address.city,
-          log.address.postal_code,
-          log.publisher.firstname,
-          log.publisher.lastname,
-          log.address.territory.name,
-          unmask(log.address.phone),
-        ]));
+      if (this.keywordFilter || this.selectedStatus.value) {
+        return this.cleanLogs
+          .filter(log => get(log.changes, 'status.new') === this.selectedStatus.value)
+          .filter(log => this.compareToKeyword([
+            log.address.addr1,
+            log.address.addr2,
+            log.address.city,
+            log.address.postal_code,
+            log.publisher.firstname,
+            log.publisher.lastname,
+            log.address.territory.name,
+            unmask(log.address.phone),
+          ]));
       }
 
       return this.isFullScreen ? this.cleanLogs : this.preview;
@@ -190,7 +226,7 @@ export default {
         { text: 'Three Months', startDate: format(addMonths(this.startOfCurrentDay(), -3), 'yyyy-MM-dd pp') },
       ];
     },
-    showDateFilter() {
+    showFilters() {
       return this.isFullScreen;
     },
     returnRoute() {
@@ -202,6 +238,9 @@ export default {
     },
     isSingleRecord() {
       return !!this.recordId || !!this.publisherId;
+    },
+    language() {
+      return (get(this.congregation, 'language') || 'Tagalog');
     },
   },
   watch: {

@@ -30,9 +30,9 @@ export const model = gql`fragment AddressModel on Address {
 }`;
 
 export const ADDRESS_STATUS = {
-  Active: 'Active',
-  NF: 'NF',
-  DNC: 'DNC',
+  Active: { value: 'Active', text: 'Active' },
+  NF: { value: 'NF', text: 'Does not speak #language#' },
+  DNC: { value: 'DNC', text: 'Do not call' },
 };
 
 export const ACTION_BUTTON_LIST = [

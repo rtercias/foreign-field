@@ -62,9 +62,9 @@ export const addresses = {
           return;
         }
         if (!params.keyword) {
-          commit(DNC_SUCCESS, []);
-          return;
+          params.keyword = '';
         }
+
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -81,6 +81,7 @@ export const addresses = {
                 state_province
                 postal_code
                 territory_id
+                notes
               }
             }`),
             variables: {
@@ -151,7 +152,7 @@ export const addresses = {
       }
     },
 
-    async addressSearch({ commit }, { congId, searchTerm }) {
+    async addressSearch({ commit }, { congId, searchTerm, status }) {
       try {
         if (!congId) return;
         if (!searchTerm) {
@@ -166,8 +167,8 @@ export const addresses = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query Search($congId: Int, $searchTerm: String) {
-              addresses(congId:$congId, keyword: $searchTerm) {
+            query: print(gql`query Search($congId: Int, $searchTerm: String, $status: String) {
+              addresses(congId:$congId, keyword: $searchTerm, status: $status) {
                 id
                 addr1
                 addr2
@@ -175,6 +176,7 @@ export const addresses = {
                 state_province
                 phone
                 notes
+                status
                 parent_id
                 territory_id
                 territory {
@@ -188,6 +190,7 @@ export const addresses = {
             variables: {
               congId,
               searchTerm,
+              status,
             },
           },
         });

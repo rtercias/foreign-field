@@ -131,7 +131,7 @@ export const address = {
       commit(SET_ADDRESS, addr);
     },
 
-    async fetchAddress({ commit }, { addressId, checkoutId }) {
+    async fetchAddress({ commit }, { addressId, checkoutId, status }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -142,8 +142,8 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query Address($addressId: Int $checkoutId: Int) { 
-              address(id: $addressId) { 
+            query: print(gql`query Address($addressId: Int $checkoutId: Int $status: String) { 
+              address(id: $addressId, status: $status) { 
                 ...AddressModel
                 activityLogs(checkout_id: $checkoutId) {
                   ...ActivityModel
@@ -158,6 +158,7 @@ export const address = {
             variables: {
               addressId,
               checkoutId,
+              status,
             },
           },
         });
@@ -469,7 +470,7 @@ export const address = {
             }`),
             variables: {
               addressId,
-              status: ADDRESS_STATUS.NF,
+              status: ADDRESS_STATUS.NF.value,
               userid,
               tag,
             },
@@ -482,7 +483,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.NF);
+          commit(CHANGE_STATUS, ADDRESS_STATUS.NF.value);
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -508,7 +509,7 @@ export const address = {
             }`),
             variables: {
               addressId,
-              status: ADDRESS_STATUS.DNC,
+              status: ADDRESS_STATUS.DNC.value,
               userid,
               tag,
             },
@@ -521,7 +522,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.DNC);
+          commit(CHANGE_STATUS, ADDRESS_STATUS.DNC.value);
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);

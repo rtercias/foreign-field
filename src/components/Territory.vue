@@ -212,7 +212,7 @@ export default {
     },
     count() {
       if (this.viewMode === 'phone-list') {
-        const addresses = this.territory.addresses.map(a => a.phones.length) || [];
+        const addresses = get(this.territory, 'addresses', []).map(a => a.phones.length) || [];
         if (addresses.length) {
           return addresses.reduce((acc, current) => (acc || 0) + current);
         }

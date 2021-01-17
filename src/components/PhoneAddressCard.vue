@@ -96,7 +96,7 @@
                 params: {
                   territoryId: territory.id,
                   addressId: item.type === 'Phone' ? item.id : address.id,
-                  checkoutId: territory.status && territory.status.checkout_id,
+                  checkoutId: territory.status && territory.status.checkout_id || '',
                 }
               }">
               <span class="w-100 d-block pt-1">

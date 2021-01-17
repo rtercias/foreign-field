@@ -13,19 +13,27 @@
   </div>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
+import get from 'lodash/get';
+import { formatLanguage } from '../utils/tags';
 
 export default {
   name: 'Change',
   props: ['change', 'field'],
   computed: {
+    ...mapGetters({
+      congregation: 'congregation/congregation',
+    }),
     oldValue() {
-      const val = this.change.old;
+      const val = formatLanguage(this.change.old, this.language);
       return val === undefined || val === null ? 'nothing' : val;
     },
     newValue() {
-      const val = this.change.new;
+      const val = formatLanguage(this.change.new, this.language);
       return val === undefined || val === null ? 'nothing' : val;
+    },
+    language() {
+      return (get(this.congregation, 'language') || 'Tagalog');
     },
   },
   methods: {
