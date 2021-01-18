@@ -1,6 +1,6 @@
 <template>
   <div class="column">
-    <div class="row justify-content-between px-2">
+    <div class="row justify-content-between">
       <div>
         <b-link :to="`/territories/${terr.id}`" class="column">
           <h5 class="mb-0">
@@ -33,20 +33,20 @@
         </b-btn>
       </div>
     </div>
-    <div class="text-right">
-      <b-badge
-        :to="{ name: 'territory-edit', params: { territoryId: terr.id } }"
-        class="px-2 py-1 small"
-        v-if="canManage">
-        <font-awesome-icon
-          class="text-primary mr-2"
-          icon="pencil-alt"
-        />
-        <span>ID: {{terr.id}}</span>
-      </b-badge>
-      <hr class="my-2" />
-      <div class="assigned-to-info">{{assignedTo}}</div>
-      <div class="d-flex justify-content-between">
+    <div class="row">
+      <div class="w-100 d-flex justify-content-between align-items-end">
+        <span class="small text-black-50">ID {{terr.id}}
+        </span>
+        <b-link :to="{ name: 'territory-edit', params: { territoryId: terr.id } }" v-if="canManage">
+          <font-awesome-icon
+            class="small text-primary"
+            icon="pencil-alt"
+          /> Edit
+        </b-link>
+      </div>
+      <hr class="my-2 w-100" />
+      <div class="assigned-to-info w-100 text-right">{{assignedTo}}</div>
+      <div class="d-flex justify-content-between w-100">
         <div>
           <b-badge
             alert
