@@ -3,22 +3,27 @@
     <div
       class="d-flex justify-content-between pb-0 text-center"
       :class="{ 'py-3 px-2': isFullScreen }">
-      <div :class="{ small: !isFullScreen, lead: isFullScreen }">{{subtitle}}</div>
+      <div :class="{ small: !isFullScreen, lead: isFullScreen,  'text-left': !isDesktop }">{{subtitle}}</div>
       <div
         v-if="isSingleRecord"
         :class="{
           small: !isFullScreen,
           lead: isFullScreen,
-          'font-weight-bold': isFullScreen
+          'font-weight-bold': isFullScreen,
         }">
         <div>{{title1}}</div>
         <div>{{title2}}</div>
       </div>
-      <div>
-        <b-dropdown v-if="showFilters" class="status-filter pr-3" right variant="primary">
-          <span slot="button-content">Status Change: {{formatLanguage(selectedStatus.text, language)}}</span>
+      <div :class="{ 'text-right': !isDesktop }">
+        <b-dropdown
+          v-if="showFilters"
+          class="status-filter"
+          :class="{ 'pr-3': isDesktop, 'pb-3': !isDesktop }"
+          right
+          variant="primary">
+          <span slot="button-content">Status: {{formatLanguage(selectedStatus.text, language)}}</span>
           <b-dropdown-item
-            v-for='(status, index) in ADDRESS_STATUS'
+            v-for='(status, index) in addressStatus'
             :key="index"
             class="w-100 mx-0"
             @click="() => selectStatus(status)">
@@ -79,6 +84,8 @@ import { unmask } from '../utils/phone';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
 import { formatLanguage } from '../utils/tags';
 
+const ALL = { value: '', text: 'All' };
+
 export default {
   name: 'ChangeLog',
   props: ['territoryId', 'type', 'recordId', 'publisherId'],
@@ -98,8 +105,8 @@ export default {
         text: 'One Day',
         startDate: format(addDays(this.startOfCurrentDay(), -1), 'yyyy-MM-dd pp'),
       },
-      selectedStatus: {},
-      ADDRESS_STATUS,
+      selectedStatus: ALL,
+      addressStatus: { All: ALL, ...ADDRESS_STATUS },
       excludeTests: true,
     };
   },
@@ -144,7 +151,11 @@ export default {
       await this.refresh();
     },
     async selectStatus(status) {
-      this.selectedStatus = status;
+      if (!status || status.value === '') {
+        this.selectedStatus = ALL;
+      } else {
+        this.selectedStatus = status;
+      }
     },
     compareToKeyword(values) {
       return values.reduce(
@@ -164,6 +175,7 @@ export default {
       storeLogs: 'addresses/logs',
       address: 'address/address',
       canManage: 'auth/canManage',
+      isDesktop: 'auth/isDesktop',
     }),
     title1() {
       const record = this.logs && this.logs.length && this.logs[0].address;
@@ -250,7 +262,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
   .loading {
     font-size: 40px;
   }

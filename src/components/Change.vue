@@ -2,7 +2,7 @@
   <div class="w-100 d-flex justify-content-between">
     <div v-if="!change.new">
       <span>removed</span>&nbsp;
-      <span v-if="!!change.old"><b-badge>{{change.old}}</b-badge></span>&nbsp;
+      <span v-if="!!change.old"><b-badge>{{oldValue}}</b-badge></span>&nbsp;
       <span>from {{field}}</span>&nbsp;
     </div>
     <div v-else>
