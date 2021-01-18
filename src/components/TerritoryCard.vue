@@ -34,18 +34,19 @@
       </div>
     </div>
     <div class="text-right">
-      <b-link :to="{ name: 'territory-edit', params: { territoryId: terr.id } }" v-if="canManage">
+      <b-badge
+        :to="{ name: 'territory-edit', params: { territoryId: terr.id } }"
+        class="px-2 py-1 small"
+        v-if="canManage">
         <font-awesome-icon
-          class="small text-primary"
+          class="text-primary mr-2"
           icon="pencil-alt"
         />
-      </b-link>
+        <span>ID: {{terr.id}}</span>
+      </b-badge>
       <hr class="my-2" />
       <div class="assigned-to-info">{{assignedTo}}</div>
-      <div class="d-flex" :class="{
-          'justify-content-end': terr.type === 'Regular',
-          'justify-content-between': terr.type !== 'Regular',
-        }">
+      <div class="d-flex justify-content-between">
         <div>
           <b-badge
             alert
