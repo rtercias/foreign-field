@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import axios from 'axios';
+import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
@@ -190,6 +191,7 @@ export const address = {
           headers: {
             'Content-Type': 'application/json',
           },
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`query Address($addressId: Int) { 
               address(id: $addressId) { 

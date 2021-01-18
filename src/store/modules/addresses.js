@@ -109,8 +109,8 @@ export const addresses = {
         }
 
         const url = `https://admin.foreignfield.com/api/addresses/getOptimizedRouteForTerritory?territoryId=${territoryId}`;
-        const proxy = 'https://cors-anywhere.herokuapp.com';
-        const response = await axios.get(`${proxy}/${url}`);
+        // const proxy = 'https://cors-anywhere.herokuapp.com';
+        const response = await axios.get(url);
         const { data } = response;
         commit(OPTIMIZE_SUCCESS, data.map(d => ({
           id: d.Id,

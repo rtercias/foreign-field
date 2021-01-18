@@ -1,4 +1,5 @@
 import VueRouter from 'vue-router';
+// import { axiosToken } from './store';
 import Auth from './components/Auth';
 import Welcome from './components/Welcome';
 import Unauthorized from './components/Unauthorized';
@@ -359,6 +360,12 @@ function convertIdsToNumber(to) {
 router.beforeEach((to, from, next) => {
   try {
     convertIdsToNumber(to);
+    // const CANCELLABLE_ROUTES = ['phone-list', 'address-list'];
+    // // eslint-disable-next-line
+    // console.log('from.name', from.name);
+    // if (CANCELLABLE_ROUTES.includes(from.name)) {
+    //   axiosToken.cancel('API request aborted on route change');
+    // }
     next();
   } catch (e) {
     console.warn('route beforeEach guard error', e);

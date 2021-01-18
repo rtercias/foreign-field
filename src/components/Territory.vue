@@ -218,7 +218,7 @@ export default {
         }
         return 0;
       }
-      return this.territory.addresses.length;
+      return get(this.territory, 'addresses.length', 0);
     },
     displayCount() {
       return `Count: ${this.count}`;

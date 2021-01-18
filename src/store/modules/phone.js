@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
@@ -93,6 +94,7 @@ export const phone = {
           headers: {
             'Content-Type': 'application/json',
           },
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`query Phone($phoneId: Int) {
               phone(id: $phoneId) {

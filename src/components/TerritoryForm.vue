@@ -3,8 +3,8 @@
     <div class="territory-header justify-content-around align-items-center lead py-3">
       <span v-if="mode===modes.add" class="lead font-weight-bold w-100">Add New Territory</span>
       <div v-else-if="mode===modes.edit" class="lead font-weight-bold w-100 d-flex justify-content-between px-4">
-        <div>Edit Territory: {{territory.name}}</div>
-        <div>{{territory.description}}</div>
+        <div>Edit Territory: {{get(territory, 'name')}}</div>
+        <div>{{get(territory, 'description')}}</div>
       </div>
     </div>
     <div class="text-danger font-weight-bold" v-if="error">{{error}}</div>
@@ -14,30 +14,39 @@
         label="Territory Name"
         class="mt-3"
         description="Hint: Territory names are usually enumerated, like 'NYC-001'">
-        <b-form-input v-model="model.name"></b-form-input>
+        <b-form-input v-model="model.name" :disabled="disabled"></b-form-input>
       </b-form-group>
       <b-form-group
         label="Description"
         class="mt-3"
         description="Hint: Use an easily recognizable description, like 'Manhattan'">
-        <b-form-input v-model="model.description"></b-form-input>
+        <b-form-input v-model="model.description" :disabled="disabled"></b-form-input>
       </b-form-group>
       <b-form-group label="Group" class="mt-3">
-        <b-form-select v-model="model.group_id"
+        <b-form-select
+          v-model="model.group_id"
+          :disabled="disabled"
           :options="groupOptions" required>
         </b-form-select>
       </b-form-group>
       <b-form-group label="Type" class="mt-3">
-        <b-form-select v-model="model.type"
+        <b-form-select
+          v-model="model.type"
+          :disabled="disabled"
           :options="typeOptions" required>
         </b-form-select>
       </b-form-group>
       <b-form-group label="Tags" class="mt-3">
-        <b-form-input v-model="model.tags"></b-form-input>
+        <b-form-input v-model="model.tags" :disabled="disabled"></b-form-input>
       </b-form-group>
       <div class="buttons py-4 justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
-        <b-button type="button" v-if="mode===modes.edit" variant="danger" @click="remove">Delete</b-button>
+        <b-button
+          type="button"
+          v-if="mode===modes.edit"
+          variant="danger"
+          :disabled="disabled"
+          @click="remove">Delete</b-button>
         <b-button
           :disabled="!isFormComplete || isSaving"
           class="submit-button"
@@ -79,6 +88,7 @@ export default {
       isSaving: false,
       model: {},
       error: '',
+      disabled: false,
     };
   },
   async mounted() {
@@ -94,11 +104,12 @@ export default {
       getGroups: 'group/getGroups',
       back: 'auth/back',
     }),
+    get,
     async submit() {
       try {
         const message = 'Are you sure you want to save your changes?';
         const confirm = await this.$bvModal.msgBoxConfirm(message, {
-          title: this.territory.name,
+          title: get(this.territory, 'name'),
           centered: true,
         });
         if (confirm) {
@@ -109,7 +120,7 @@ export default {
             await this.updateTerritory(this.model);
           }
           this.$bvToast.toast('Territory saved.', {
-            title: this.territory.name,
+            title: get(this.territory, 'name'),
             solid: true,
           });
         }
@@ -155,7 +166,13 @@ export default {
 
       if (this.mode === Modes.edit) {
         await this.getTerritoryInfo({ id: this.territoryId });
-        this.model = this.territory;
+        if (!this.territory) {
+          this.error = 'Unable to load the territory';
+          this.model = {};
+          this.disabled = true;
+        } else {
+          this.model = this.territory;
+        }
       } else {
         this.model = {
           congregationid: this.congId,

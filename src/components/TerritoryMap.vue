@@ -35,6 +35,7 @@ import {
   LControlZoom,
 } from 'vue2-leaflet';
 import { latLngBounds } from 'leaflet';
+import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import MapLinks from './MapLinks';
 
@@ -68,7 +69,7 @@ export default {
       token: 'auth/token',
     }),
     bounds() {
-      return latLngBounds(this.territory.addresses.map(terr => [terr.latitude, terr.longitude]));
+      return latLngBounds(get(this.territory, 'addresses', []).map(terr => [terr.latitude, terr.longitude]));
     },
     mapOptions() {
       return this.options || defaultOptions;

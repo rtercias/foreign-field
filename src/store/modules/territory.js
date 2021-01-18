@@ -380,7 +380,7 @@ export const territory = {
         });
 
         const { territory: terr } = get(response, 'data.data');
-        commit(SET_TERRITORY, terr);
+        commit(SET_TERRITORY, { terr });
         commit(GET_TERRITORY_SUCCESS);
         commit(LOADING_TERRITORY_FALSE);
       } catch (exception) {

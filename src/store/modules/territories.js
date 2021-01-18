@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
@@ -77,6 +78,7 @@ export const territories = {
           headers: {
             'Content-Type': 'application/json',
           },
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int) { 
               territories (congId: $congId, group_id: $groupId) { 
@@ -131,6 +133,7 @@ export const territories = {
           headers: {
             'Content-Type': 'application/json',
           },
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`query TerritoriesByCong($congId: Int, $keyword: String) {
               territories (congId: $congId, keyword: $keyword) {
@@ -182,6 +185,7 @@ export const territories = {
           headers: {
             'Content-Type': 'application/json',
           },
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`query NearestAddresses($congId: Int $coordinates: [Float] $radius: Int, $unit: String) { 
               nearestAddresses (congId: $congId, coordinates: $coordinates, radius: $radius, unit: $unit) { 
@@ -222,6 +226,7 @@ export const territories = {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`query Territory($terrId: Int) { 
               territory (id: $terrId) {
@@ -253,6 +258,7 @@ export const territories = {
         await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
+          cancelToken: axiosToken.token,
           data: {
             query: print(
               gql`
@@ -285,6 +291,7 @@ export const territories = {
         await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
+          cancelToken: axiosToken.token,
           data: {
             query: print(gql`mutation CopyCheckouts($congId: Int! $username: String! $campaign: Boolean) { 
               copyCheckouts (congId: $congId, username: $username, campaign: $campaign)

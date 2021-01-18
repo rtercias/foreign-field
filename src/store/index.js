@@ -17,6 +17,7 @@ import { group } from './modules/group';
 
 Vue.use(Vuex);
 
+export const axiosToken = axios.CancelToken.source();
 axios.defaults.baseURL = process.env.VUE_APP_ROOT_API;
 axios.defaults.method = 'post';
 axios.defaults.headers.common['Content-Type'] = 'application/json';

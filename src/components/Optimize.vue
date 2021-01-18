@@ -135,7 +135,7 @@ import TerritoryMap from './TerritoryMap';
 
 export default {
   name: 'Optimize',
-  props: ['groupId', 'territoryId'],
+  props: ['groupId', 'territoryId', 'territory'],
   components: {
     OptimizeCard,
     Draggable,
@@ -158,7 +158,7 @@ export default {
     };
   },
   async mounted() {
-    if (this.territory && this.territory.id !== this.id) {
+    if (this.territory && this.territory.id !== this.territoryId) {
       await this.getTerritory({ id: this.id });
     }
     this.reset();
@@ -235,7 +235,6 @@ export default {
   },
   computed: {
     ...mapGetters({
-      territory: 'territory/territory',
       user: 'auth/user',
       token: 'auth/token',
       canManage: 'auth/canManage',
