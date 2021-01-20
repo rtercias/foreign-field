@@ -23,7 +23,7 @@
                 unassigned
               </b-badge>
               <b-badge v-if="isNF(address)" variant="danger" class="text-lowercase">
-                {{formatLanguage(address.status, language)}}
+                {{formatLanguage(statusText(address.status), language)}}
               </b-badge>
               <b-badge v-if="isDNC(address)" variant="danger" class="text-lowercase">
                 {{ADDRESS_STATUS.DNC.text}}
@@ -119,6 +119,9 @@ export default {
     },
     isInactive(address) {
       return this.isUnassigned(address) || this.isNF(address) || this.isDNC(address);
+    },
+    statusText(status) {
+      return ADDRESS_STATUS[status].text;
     },
     link(address) {
       if (this.isInactive(address)) {

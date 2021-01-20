@@ -25,6 +25,11 @@
           <b-form-group>
             <b-badge variant="danger" v-if="model.status !== 'Active'">{{statusText(address.status)}}</b-badge>
           </b-form-group>
+          <b-form-group label="Status" class="mt-3" v-if="canManage">
+            <b-form-select v-model="model.status"
+              :options="statusOptions" required>
+            </b-form-select>
+          </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
             <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
           </b-form-group>
@@ -56,20 +61,15 @@
               :options="territoryOptions" required>
             </b-form-select>
           </b-form-group>
+          <b-form-group label="Notes" class="mt-3" v-if="canManage">
+            <b-form-input v-model="model.notes"></b-form-input>
+          </b-form-group>
         </div>
         <div v-if="isAdmin" class="mt-5">
           <hr />
           <label class="mb-0">ADMIN ONLY</label>
           <b-form-group label="Congregation ID" class="mt-3">
             <b-form-input v-model="model.congregationId"></b-form-input>
-          </b-form-group>
-          <b-form-group label="Status" class="mt-3">
-            <b-form-select v-model="model.status"
-              :options="statusOptions" required>
-            </b-form-select>
-          </b-form-group>
-          <b-form-group label="Notes" class="mt-3">
-            <b-form-input v-model="model.notes"></b-form-input>
           </b-form-group>
           <b-form-group label="Sort" class="mt-3">
             <b-form-input v-model="model.sort"></b-form-input>
