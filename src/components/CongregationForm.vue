@@ -16,16 +16,16 @@
         <Loading v-if="isLoading"></Loading>
         <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
           <b-form-group label="Congregation Name" class="mt-3" :disabled="readOnly">
-            <b-form-input v-model="model.name"></b-form-input>
+            <b-form-input v-model="model.name" maxlength="50"></b-form-input>
           </b-form-group>
           <b-form-group label="Description" class="mt-3" :disabled="readOnly">
-            <b-form-input v-model="model.description"></b-form-input>
+            <b-form-input v-model="model.description" maxlength="255"></b-form-input>
           </b-form-group>
           <b-form-group label="Language" class="mt-3" :disabled="readOnly">
-            <b-form-input v-model="model.language"></b-form-input>
+            <b-form-input v-model="model.language" maxlength="45"></b-form-input>
           </b-form-group>
           <b-form-group label="Admin Email" class="mt-3" :disabled="readOnly">
-            <b-form-input v-model="model.admin_email"></b-form-input>
+            <b-form-input v-model="model.admin_email" maxlength="255"></b-form-input>
           </b-form-group>
           <b-form-group class="mt-3" :disabled="readOnly">
             <b-form-checkbox :checked="model.campaign" v-model="model.campaign">

@@ -31,19 +31,23 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
-            <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
+            <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress" maxlength="50">
+            </b-form-input>
           </b-form-group>
           <b-form-group label="Address 2" class="mt-3">
-            <b-form-input v-model="model.addr2" :readonly="readOnly"></b-form-input>
+            <b-form-input v-model="model.addr2" :readonly="readOnly" maxlength="50"></b-form-input>
           </b-form-group>
           <b-form-group label="City" class="mt-3">
-            <b-form-input v-model="model.city" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
+            <b-form-input v-model="model.city" :readonly="readOnly" @change="geocodeAddress" maxlength="50">
+            </b-form-input>
           </b-form-group>
           <b-form-group label="State" class="mt-3">
-            <b-form-input v-model="model.state_province" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
+            <b-form-input v-model="model.state_province" :readonly="readOnly" @change="geocodeAddress" maxlength="50">
+            </b-form-input>
           </b-form-group>
           <b-form-group label="Zip" class="mt-3">
-            <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="geocodeAddress"></b-form-input>
+            <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="geocodeAddress" maxlength="15">
+            </b-form-input>
           </b-form-group>
         </div>
         <div v-if="canWrite" class="mt-5">

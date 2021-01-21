@@ -13,13 +13,15 @@
       <b-form-group
         label="Territory Name"
         class="mt-3"
-        description="Hint: Territory names are usually enumerated, like 'NYC-001'">
+        description="Hint: Territory names are usually enumerated, like 'NYC-001'"
+        maxlength="50">
         <b-form-input v-model="model.name" :disabled="disabled"></b-form-input>
       </b-form-group>
       <b-form-group
         label="Description"
         class="mt-3"
-        description="Hint: Use an easily recognizable description, like 'Manhattan'">
+        description="Hint: Use an easily recognizable description, like 'Manhattan'"
+        maxlength="50">
         <b-form-input v-model="model.description" :disabled="disabled"></b-form-input>
       </b-form-group>
       <b-form-group label="Group" class="mt-3">
@@ -37,7 +39,7 @@
         </b-form-select>
       </b-form-group>
       <b-form-group label="Tags" class="mt-3">
-        <b-form-input v-model="model.tags" :disabled="disabled"></b-form-input>
+        <b-form-input v-model="model.tags" :disabled="disabled" maxlength="1000"></b-form-input>
       </b-form-group>
       <div class="buttons py-4 justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>

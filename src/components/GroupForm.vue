@@ -11,10 +11,10 @@
     <Loading v-if="isLoading"></Loading>
     <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
       <b-form-group label="Group Code" class="mt-3">
-        <b-form-input v-model="model.code"></b-form-input>
+        <b-form-input v-model="model.code" maxlength="11"></b-form-input>
       </b-form-group>
       <b-form-group label="Description" class="mt-3">
-        <b-form-input v-model="model.description"></b-form-input>
+        <b-form-input v-model="model.description" maxlength="45"></b-form-input>
       </b-form-group>
       <b-form-group label="Overseer" class="mt-3">
         <b-form-select :options="overseerOptions" v-model="model.overseer"></b-form-select>
@@ -75,7 +75,7 @@ export default {
       try {
         const message = 'Are you sure you want to save your changes?';
         const confirm = await this.$bvModal.msgBoxConfirm(message, {
-          title: this.group.description,
+          title: this.model.description,
           centered: true,
         });
         if (confirm) {
@@ -87,7 +87,7 @@ export default {
             await this.updateGroup(this.model);
           }
           this.$bvToast.toast('Group saved.', {
-            title: this.group.description,
+            title: this.model.description,
             solid: true,
           });
           this.cancel();
@@ -112,11 +112,11 @@ export default {
       try {
         const message = 'Are you sure you want to delete this group?';
         const confirm = await this.$bvModal.msgBoxConfirm(message, {
-          title: this.group.description,
+          title: this.model.description,
           centered: true,
         });
         if (confirm) {
-          await this.deleteGroup(this.group.id);
+          await this.deleteGroup(this.model.id);
           this.cancel();
         }
       } catch (err) {
@@ -130,8 +130,9 @@ export default {
       if (this.mode === Modes.edit) {
         await this.getGroup({ id: this.groupId });
         this.model = this.group;
+      } else {
+        this.model = {};
       }
-      await this.fetchPublishers(this.congregation.id);
       this.isLoading = false;
     },
 
