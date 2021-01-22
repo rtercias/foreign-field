@@ -136,17 +136,27 @@
         <b-list-group-item
           class="d-flex pb-2 px-2 border-0"
           :class="{ 'pt-0': isDesktop }">
-          <the-mask
-            class="form-control mr-2 phone-input w-100"
-            type="tel"
-            :mask="'###-###-####'"
-            :masked="false"
-            v-model="newPhone"
-            @mousedown.native="onActive">
-          </the-mask>
-          <b-button class="text-primary" variant="light" @click="addNewPhone">
-            <font-awesome-icon icon="plus"></font-awesome-icon>
-          </b-button>
+          <b-input-group size="lg">
+            <b-input-group-prepend>
+              <b-input-group-text class="text-gray bg-white">
+                <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+              </b-input-group-text>
+            </b-input-group-prepend>
+            <the-mask
+              class="form-control phone-input"
+              type="tel"
+              :mask="'###-###-####'"
+              :masked="false"
+              v-model="newPhone"
+              @mousedown.native="onActive">
+            </the-mask>
+            <b-input-group-append>
+              <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
+                <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
+                <font-awesome-icon v-else icon="plus"></font-awesome-icon>
+              </b-button>
+            </b-input-group-append>
+          </b-input-group>
         </b-list-group-item>
       </b-list-group>
     </div>
@@ -192,6 +202,7 @@ export default {
       oldPhone: '',
       isAddressBusy: false,
       addressLeftButtonList: ADDRESS_LEFT_BUTTON_LIST,
+      isAdding: false,
     };
   },
   computed: {
@@ -284,12 +295,12 @@ export default {
     async addNewPhone() {
       if (!this.newPhone) return;
 
-      this.isAddressBusy = true;
+      this.isAdding = true;
       const rawPhone = unmask(this.newPhone);
 
       const isDuplicate = await this.checkDuplicates(rawPhone);
       if (isDuplicate) {
-        this.isAddressBusy = false;
+        this.isAdding = false;
         return;
       }
       const sort = get(this.storeAddress, 'phones.length') || 0;
@@ -308,7 +319,7 @@ export default {
       this.address.phones.push(this.phone);
       this.newPhone = '';
       this.toggleNoNumberTag({ forceRemove: true });
-      this.isAddressBusy = false;
+      this.isAdding = false;
     },
     cancel(phone) {
       if (this.oldPhone) this.$set(phone, 'phone', this.formatPhone(this.oldPhone));
