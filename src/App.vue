@@ -81,7 +81,11 @@ export default {
       try {
         await this.refresh();
       } catch (e) {
-        this.$router.replace({ name: 'unauthorized' });
+        if (e === 'Unauthorized') {
+          this.$router.replace({ name: 'unauthorized' });
+        } else {
+          this.$router.replace({ name: 'error' });
+        }
       }
     },
   },

@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import Auth from './components/Auth';
 import Welcome from './components/Welcome';
 import Unauthorized from './components/Unauthorized';
+import Error from './components/Error';
 import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
@@ -27,6 +28,7 @@ const routes = [
   { name: 'auth', path: '/auth', component: Auth },
   { name: 'welcome', path: '/welcome', component: Welcome },
   { name: 'unauthorized', path: '/unauthorized', component: Unauthorized },
+  { name: 'error', path: '/error', component: Error },
   {
     name: 'signout', path: '/signout', component: Signout, props: true,
   },
