@@ -30,6 +30,11 @@ export default {
     SearchBar,
     Loading,
   },
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
+    if (token) token.cancel();
+    next();
+  },
   props: ['territory', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', async (log) => {
@@ -79,6 +84,7 @@ export default {
       canCheckout: 'auth/canCheckout',
       phone: 'phone/phone',
       territoryIsLoading: 'territory/isLoading',
+      territoryCancelTokens: 'territory/cancelTokens',
     }),
     lastActivity() {
       return this.territory.lastActivity;

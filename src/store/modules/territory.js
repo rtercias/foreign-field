@@ -13,6 +13,7 @@ const SET_TERRITORY = 'SET_TERRITORY';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
+const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
 const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
@@ -30,6 +31,7 @@ const initialState = {
     description: '',
     addresses: [],
   },
+  cancelTokens: {},
 };
 
 export const territory = {
@@ -40,6 +42,7 @@ export const territory = {
 
   getters: {
     territory: state => state.territory,
+    cancelTokens: state => state.cancelTokens,
     congId: state => state.territory.congregationid,
     isLoading: state => state.isLoading,
     isBusy: state => get(state.territory, 'addresses', []).some(a => a.isBusy),
@@ -89,6 +92,9 @@ export const territory = {
     },
     RESET_TERRITORY(state) {
       state.territory = {};
+    },
+    FETCH_LAST_ACTIVITY(state, cancelToken) {
+      state.cancelTokens = { ...state.cancelTokens, FETCH_LAST_ACTIVITY: cancelToken };
     },
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
       const address = state.territory.addresses.find(a => a.id === addressId);
@@ -288,12 +294,16 @@ export const territory = {
     },
 
     async fetchLastActivities({ commit, dispatch, getters }, terr) {
+      const tokenSource = axios.CancelToken.source();
+      const cancelToken = tokenSource.token;
+      commit(FETCH_LAST_ACTIVITY, tokenSource);
+
       for (const address of terr.addresses) {
         for (const phone of address.phones) {
-          await dispatch('phone/fetchLastActivity', { phoneId: phone.id }, { root: true });
+          await dispatch('phone/fetchLastActivity', { phoneId: phone.id, cancelToken }, { root: true });
           if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
         }
-        await dispatch('address/fetchLastActivity', { addressId: address.id }, { root: true });
+        await dispatch('address/fetchLastActivity', { addressId: address.id, cancelToken }, { root: true });
         if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
       }
       commit(LOADING_TERRITORY_FALSE);

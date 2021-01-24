@@ -49,7 +49,7 @@ export const publishers = {
         },
       });
 
-      const { publishers: pubs } = get(response, 'data.data');
+      const { publishers: pubs } = get(response, 'data.data') || [];
       for (const pub of pubs) {
         pub.status = pub.status === 'active';
       }

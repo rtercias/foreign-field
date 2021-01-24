@@ -135,7 +135,11 @@ export default {
     SearchBar,
     GroupsSelect,
   },
-
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.territoriesCancelTokens, 'FETCH_TERRITORIES');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       selectedTerritory: {},
@@ -175,6 +179,7 @@ export default {
       groups: 'group/groups',
       isDesktop: 'auth/isDesktop',
       canManage: 'auth/canManage',
+      territoriesCancelTokens: 'territories/cancelTokens',
     }),
     searchedTerritories() {
       const { territories = [] } = this;

@@ -21,18 +21,27 @@
         </h3>
         <Loading v-if="loading"></Loading>
       </div>
-      <div v-if="!loading" class="panel col-sm-12 col-md-5 py-3 border-info m-2 d-flex">
+      <div class="panel col-sm-12 col-md-5 py-3 border-info m-2 d-flex">
         <font-awesome-icon
           icon="circle-notch"
           spin
           v-if="myTerritoriesLoading"
           class="my-territories-loading text-info text-center w-100 align-self-center"
         />
+        <span v-else-if="isUserError" class="text-center small">
+          Unable to retrieve user data
+          <b-button @click="refresh">Refresh</b-button>
+        </span>
         <span v-else-if="!(territories && territories.length)" class="text-center small">
           I have no territories checked out.
         </span>
         <div v-else class="text-left w-100">
-          <span class="small">Territories I've checked out:</span>
+          <div class="d-flex justify-content-between align-items-center pb-1">
+            <span class="small">Territories I've checked out:</span>
+            <b-button class="p-0" variant="link">
+              <font-awesome-icon icon="redo-alt" class="text-info fa-sm" @click="refreshTerritories" />
+            </b-button>
+          </div>
           <b-list-group>
             <b-list-group-item v-for="terr in territories" :key="terr.id" class="px-2">
               <MyTerritory :territory="terr"></MyTerritory>
@@ -73,6 +82,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import get from 'lodash/get';
 import Auth from './Auth';
 import Loading from './Loading.vue';
 import Reports from './Reports';
@@ -90,10 +100,17 @@ export default {
     ChangeLog,
     GroupsSelect,
   },
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.addressesCancelTokens, 'GET_CHANGE_LOG');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       msgBoxOpen: '',
       msgDismissed: JSON.parse(localStorage.getItem('updateMsgDismissed')),
+      isUserError: false,
+      forceUpdate: false,
     };
   },
   computed: {
@@ -105,13 +122,21 @@ export default {
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
       myTerritoriesLoading: 'auth/myTerritoriesLoading',
+      userTerritories: 'auth/userTerritories',
       recentlySeenTerritories: 'territories/recentlySeenTerritories',
+      addressesCancelTokens: 'addresses/cancelTokens',
     }),
+    username() {
+      return get(this.user, 'username');
+    },
     territories() {
-      return this.user && this.user.territories || [];
+      return this.userTerritories || [];
     },
     isPWA() {
       return window.matchMedia('(display-mode: standalone)').matches;
+    },
+    doUpdateTerritories() {
+      return !this.userTerritories.length || this.forceUpdate;
     },
   },
   methods: {
@@ -131,19 +156,32 @@ export default {
       localStorage.setItem('updateMsgDismissed', true);
       this.msgBoxOpen = false;
     },
+    async refresh() {
+      this.isUserError = false;
+      if (this.user) {
+        if (this.user.username && this.doUpdateTerritories) {
+          await this.getUserTerritories(this.user.username);
+        }
+
+        if (!this.userTerritories.length) {
+          this.isUserError = true;
+        }
+      }
+      this.forceUpdate = false;
+    },
+    async refreshTerritories() {
+      this.forceUpdate = true;
+      await this.refresh();
+    },
   },
   async mounted() {
     this.advertiseMsg();
     this.setSeenTerritories();
-    if (this.user && !this.user.territories) {
-      await this.getUserTerritories(this.user.username);
-    }
+    await this.refresh();
   },
   watch: {
-    async user() {
-      if (this.user && !this.user.territories) {
-        await this.getUserTerritories(this.user.username);
-      }
+    async username() {
+      await this.refresh();
     },
   },
 };

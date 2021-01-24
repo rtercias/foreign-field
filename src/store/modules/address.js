@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import axios from 'axios';
-import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
@@ -35,6 +34,7 @@ export const address = {
   namespaced: true,
   state: {
     address: {},
+    cancelTokens: {},
   },
 
   getters: {
@@ -116,7 +116,6 @@ export const address = {
         state.address.postal_code = zip;
       }
     },
-
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
       console.error(FETCH_LAST_ACTIVITY_FAIL, exception);
@@ -178,7 +177,7 @@ export const address = {
       }
     },
 
-    async fetchLastActivity({ commit, dispatch }, { addressId }) {
+    async fetchLastActivity({ commit, dispatch }, { addressId, cancelToken }) {
       try {
         if (!addressId) {
           commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
@@ -191,7 +190,7 @@ export const address = {
           headers: {
             'Content-Type': 'application/json',
           },
-          cancelToken: axiosToken.token,
+          cancelToken,
           data: {
             query: print(gql`query Address($addressId: Int) { 
               address(id: $addressId) { 

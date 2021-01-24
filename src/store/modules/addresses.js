@@ -10,6 +10,7 @@ const OPTIMIZE_FAIL = 'OPTIMIZE_FAIL';
 const SORT_UPDATED = 'SORT_UPDATED';
 const ADDRESS_LOOKUP_SUCCESS = 'ADDRESS_LOOKUP_SUCCESS';
 const ADDRESS_LOOKUP_FAIL = 'ADDRESS_LOOKUP_FAIL';
+const GET_CHANGE_LOG = 'GET_CHANGE_LOG';
 const CHANGE_LOGS_SUCCESS = 'CHANGE_LOGS_SUCCESS';
 const CHANGE_LOGS_FAIL = 'CHANGE_LOGS_FAIL';
 
@@ -21,12 +22,14 @@ export const addresses = {
     optimized: [],
     search: [],
     logs: [],
+    cancelTokens: {},
   },
   getters: {
     dnc: state => state.dnc,
     optimized: state => state.optimized,
     search: state => state.search,
     logs: state => orderBy(state.logs, 'date', 'desc'),
+    cancelTokens: state => state.cancelTokens,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -47,6 +50,9 @@ export const addresses = {
     },
     ADDRESS_LOOKUP_FAIL(state, exception) {
       console.error(ADDRESS_LOOKUP_FAIL, exception);
+    },
+    GET_CHANGE_LOG(state, cancelToken) {
+      state.cancelTokens = { ...state.cancelTokens, GET_CHANGE_LOG: cancelToken };
     },
     CHANGE_LOGS_SUCCESS(state, logs) {
       state.logs = logs;
@@ -211,12 +217,17 @@ export const addresses = {
       try {
         if (!congId) return;
 
+        const tokenSource = axios.CancelToken.source();
+        const cancelToken = tokenSource.token;
+        commit(GET_CHANGE_LOG, tokenSource);
+
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
             'Content-Type': 'application/json',
           },
+          cancelToken,
           data: {
             query: print(gql`query AddressChangeLog($congId: Int, $minDate: String, $recordId: Int) {
               addressChangeLogs(congId: $congId, minDate: $minDate, recordId: $recordId) {
