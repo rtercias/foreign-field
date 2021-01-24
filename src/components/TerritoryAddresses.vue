@@ -62,6 +62,7 @@ const BUTTON_LIST = ['NH', 'HOME', 'LW'];
 
 export default {
   name: 'TerritoryAddresses',
+  props: ['territory', 'territoryId', 'disabled'],
   components: {
     SwipeList,
     AddressCard,
@@ -70,7 +71,11 @@ export default {
     Loading,
     SearchBar,
   },
-  props: ['territory', 'territoryId', 'disabled'],
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       isLoading: true,
@@ -88,6 +93,7 @@ export default {
       canCheckout: 'auth/canCheckout',
       actionButtonList: 'address/actionButtonList',
       address: 'address/address',
+      territoryCancelTokens: 'territory/cancelTokens',
     }),
     lastActivity() {
       return this.territory.lastActivity;

@@ -22,7 +22,7 @@ export default {
         firebase.auth.PhoneAuthProvider.PROVIDER_ID,
       ],
       callbacks: {
-        signInSuccess: () => {
+        signInSuccessWithAuthResult: () => {
           const redirectUrl = this.$router.currentRoute.query.redirect;
           this.$router.push(redirectUrl || '/welcome');
           // Do not automatically redirect.

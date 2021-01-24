@@ -94,6 +94,11 @@ export default {
     Loading,
     SearchBar,
   },
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.addressesCancelTokens, 'GET_CHANGE_LOG');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       interval: 'week',
@@ -120,14 +125,16 @@ export default {
       fetchAddress: 'address/fetchAddress',
     }),
     formatLanguage,
-    async refresh() {
-      this.$set(this, 'loading', true);
-      await this.getChangeLog({
-        congId: this.congId,
-        minDate: this.selectedRange.startDate,
-        recordId: this.recordId,
-        publisherId: this.publisherId,
-      });
+    async refresh(force) {
+      if (this.isFullScreen || this.preview.length === 0 || force) {
+        this.$set(this, 'loading', true);
+        await this.getChangeLog({
+          congId: this.congId,
+          minDate: this.selectedRange.startDate,
+          recordId: this.recordId,
+          publisherId: this.publisherId,
+        });
+      }
 
       if (this.isFullScreen && this.logs && this.logs.length
         && this.logs[0].address && this.logs[0].address.type === 'Phone') {
@@ -176,6 +183,7 @@ export default {
       address: 'address/address',
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
+      addressesCancelTokens: 'addresses/cancelTokens',
     }),
     title1() {
       const record = this.logs && this.logs.length && this.logs[0].address;

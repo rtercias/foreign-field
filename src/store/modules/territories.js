@@ -13,6 +13,7 @@ export const TEST_TERRITORIES = [
   'TEST-000',
 ];
 
+const FETCH_TERRITORIES = 'FETCH_TERRITORIES';
 const SET_TERRITORIES = 'SET_TERRITORIES';
 const RESET_TERRITORIES = 'RESET_TERRITORIES';
 const SET_LOADING = 'SET_LOADING';
@@ -31,15 +32,20 @@ export const territories = {
     error: '',
     nearestTerritories: [],
     recentlySeenTerritories: [],
+    cancelTokens: {},
   },
   getters: {
     territories: state => orderBy(state.territories, 'description', 'name'),
+    cancelTokens: state => state.cancelTokens,
     loading: state => state.loading,
     error: state => state.error,
     nearestTerritories: state => state.nearestTerritories,
     recentlySeenTerritories: state => state.recentlySeenTerritories,
   },
   mutations: {
+    FETCH_TERRITORIES(state, cancelToken) {
+      state.cancelTokens = { ...state.cancelTokens, FETCH_TERRITORIES: cancelToken };
+    },
     SET_TERRITORIES: (state, terrs) => state.territories = terrs,
     RESET_TERRITORIES: state => state.territories = [],
     SET_LOADING: (state, value) => state.loading = value,
@@ -71,6 +77,9 @@ export const territories = {
       }
 
       commit(SET_LOADING, true);
+      const tokenSource = axios.CancelToken.source();
+      const cancelToken = tokenSource.token;
+      commit(FETCH_TERRITORIES, tokenSource);
 
       try {
         const response = await axios({
@@ -78,7 +87,7 @@ export const territories = {
           headers: {
             'Content-Type': 'application/json',
           },
-          cancelToken: axiosToken.token,
+          cancelToken,
           data: {
             query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int) { 
               territories (congId: $congId, group_id: $groupId) { 

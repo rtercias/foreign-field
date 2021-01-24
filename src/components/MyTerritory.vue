@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :key="key">
     <b-link :to="url(territory)">
       {{territory.name}} ({{territory.description}})
     </b-link>
@@ -33,6 +33,9 @@ export default {
     },
   },
   computed: {
+    key() {
+      return `${this.territory.id}`;
+    },
     lastActivity() {
       return this.territory.lastActivity;
     },

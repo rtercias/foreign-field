@@ -32,6 +32,7 @@ function initialState() {
     token: '',
     options: null,
     myTerritoriesLoading: false,
+    userTerritories: [],
   };
 }
 
@@ -61,6 +62,7 @@ export const auth = {
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
     options: state => state.options,
     myTerritoriesLoading: state => state.myTerritoriesLoading,
+    userTerritories: state => state.userTerritories,
     leftNavRouteParams: (state, getters, rootState, rootGetters) => ({
       congregationId: get(rootGetters['congregation/congregation'], 'id')
         || get(rootGetters['auth/user'], 'congregation.id'),
@@ -124,6 +126,7 @@ export const auth = {
 
     USER_TERRITORIES_ADDED(state, territories) {
       Vue.set(state.user, 'territories', territories);
+      Vue.set(state, 'userTerritories', territories);
       Vue.set(state, 'myTerritoriesLoading', false);
     },
   },
@@ -185,7 +188,7 @@ export const auth = {
           const userRoles = get(user, 'role', '').split(',');
           const { permissions = [] } = router.currentRoute.meta;
           const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
-          if (hasPermission) {
+          if (user && hasPermission) {
             commit(AUTHORIZE, { ...user, congregation });
             dispatch('congregation/setCongregation', congregation, { root: true });
             resolve();

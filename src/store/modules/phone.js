@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
@@ -27,6 +26,7 @@ export const phone = {
   state: {
     phone: {},
     search: [],
+    cancelTokens: {},
   },
 
   getters: {
@@ -81,7 +81,7 @@ export const phone = {
       commit(SET_PHONE, _phone);
     },
 
-    async fetchLastActivity({ commit, dispatch }, { phoneId }) {
+    async fetchLastActivity({ commit, dispatch }, { phoneId, cancelToken }) {
       try {
         if (!phoneId) {
           commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
@@ -94,7 +94,7 @@ export const phone = {
           headers: {
             'Content-Type': 'application/json',
           },
-          cancelToken: axiosToken.token,
+          cancelToken,
           data: {
             query: print(gql`query Phone($phoneId: Int) {
               phone(id: $phoneId) {
