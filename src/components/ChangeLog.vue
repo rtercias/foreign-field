@@ -94,11 +94,6 @@ export default {
     Loading,
     SearchBar,
   },
-  beforeRouteLeave(to, from, next) {
-    const token = get(this.addressesCancelTokens, 'GET_CHANGE_LOG');
-    if (token) token.cancel();
-    next();
-  },
   data() {
     return {
       interval: 'week',
