@@ -273,7 +273,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP-E'],
       back: 'address-list',
       label: 'Add Address',
     },

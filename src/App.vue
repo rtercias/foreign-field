@@ -81,7 +81,7 @@ export default {
       try {
         await this.refresh();
       } catch (e) {
-        if (e === 'Unauthorized') {
+        if (String(e).includes('Unauthorized')) {
           this.$router.replace({ name: 'unauthorized' });
         } else {
           this.$router.replace({ name: 'error' });
