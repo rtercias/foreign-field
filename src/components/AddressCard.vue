@@ -193,11 +193,9 @@ export default {
     },
 
     formattedSelectedResponseTS() {
-      const timestamp = Number(this.lastActivity.timestamp);
-      if (!Number.isNaN(timestamp)) {
-        return format(new Date(timestamp), 'MM/dd/yy p');
-      }
-      return '';
+      const parsed = Number(this.lastActivity.timestamp);
+      const timestamp = Number.isNaN(parsed) ? this.lastActivity.timestamp : parsed;
+      return format(new Date(timestamp), 'MM/dd/yy p');
     },
     lastActivity() {
       return get(this.address, 'lastActivity') || { value: 'START', timestamp: '' };
