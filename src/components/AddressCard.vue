@@ -121,8 +121,12 @@ export default {
           publisherName = 'you';
         } else {
           await this.getLastActivityPublisher();
-          publisherName = this.publisher.firstname && this.publisher.lastname
-            && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          if (this.publisher) {
+            publisherName = this.publisher.firstname && this.publisher.lastname
+              && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          } else {
+            publisherName = 'a guest publisher';
+          }
         }
 
         const message = h('p', {
