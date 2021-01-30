@@ -71,6 +71,11 @@ export default {
     Loading,
     SearchBar,
   },
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       isLoading: true,

@@ -135,6 +135,11 @@ export default {
     SearchBar,
     GroupsSelect,
   },
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.territoriesCancelTokens, 'FETCH_TERRITORIES');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       selectedTerritory: {},

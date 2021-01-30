@@ -101,6 +101,11 @@ export default {
     ChangeLog,
     GroupsSelect,
   },
+  beforeRouteLeave(to, from, next) {
+    const token = get(this.addressesCancelTokens, 'GET_CHANGE_LOG');
+    if (token) token.cancel();
+    next();
+  },
   data() {
     return {
       msgBoxOpen: '',
