@@ -73,7 +73,10 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
-    if (token) token.cancel();
+    if (token && this.isTerritoryBusy) {
+      token.cancel();
+      this.cancelFetchLastActivity();
+    }
     next();
   },
   data() {
@@ -94,6 +97,7 @@ export default {
       actionButtonList: 'address/actionButtonList',
       address: 'address/address',
       territoryCancelTokens: 'territory/cancelTokens',
+      isTerritoryBusy: 'territory/isBusy',
     }),
     lastActivity() {
       return this.territory.lastActivity;
@@ -110,6 +114,7 @@ export default {
       resetNHRecords: 'territory/resetNHRecords',
       setAddress: 'address/setAddress',
       addLog: 'address/addLog',
+      cancelFetchLastActivity: 'territory/cancelFetchLastActivity',
     }),
 
     openSwipe(index, revealed) {

@@ -121,8 +121,12 @@ export default {
           publisherName = 'you';
         } else {
           await this.getLastActivityPublisher();
-          publisherName = this.publisher.firstname && this.publisher.lastname
-            && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          if (this.publisher) {
+            publisherName = this.publisher.firstname && this.publisher.lastname
+              && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          } else {
+            publisherName = 'a guest publisher';
+          }
         }
 
         const message = h('p', {
@@ -193,11 +197,9 @@ export default {
     },
 
     formattedSelectedResponseTS() {
-      const timestamp = Number(this.lastActivity.timestamp);
-      if (!Number.isNaN(timestamp)) {
-        return format(new Date(timestamp), 'MM/dd/yy p');
-      }
-      return '';
+      const parsed = Number(this.lastActivity.timestamp);
+      const timestamp = Number.isNaN(parsed) ? this.lastActivity.timestamp : parsed;
+      return format(new Date(timestamp), 'MM/dd/yy p');
     },
     lastActivity() {
       return get(this.address, 'lastActivity') || { value: 'START', timestamp: '' };

@@ -2,7 +2,6 @@ import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
-import { store } from '..';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
@@ -14,6 +13,7 @@ const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
 const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
+const CANCEL_FETCH_LAST_ACTIVITY = 'CANCEL_FETCH_LAST_ACTIVITY';
 const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
@@ -24,6 +24,9 @@ const UPDATE_TERRITORY = 'UPDATE_TERRITORY';
 const UPDATE_TERRITORY_FAIL = 'UPDATE_TERRITORY_FAIL';
 const DELETE_TERRITORY = 'DELETE_TERRITORY';
 const DELETE_TERRITORY_FAIL = 'DELETE_TERRITORY_FAIL';
+const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+const UPDATE_ADDRESS_NOTES = 'UPDATE_ADDRESS_NOTES';
+const UPDATE_PHONE_NOTES = 'UPDATE_PHONE_NOTES';
 
 const initialState = {
   territory: {
@@ -68,7 +71,6 @@ export const territory = {
   mutations: {
     CHANGE_STATUS(state, newStatus) {
       state.territory.status = newStatus;
-      store.cache.clear();
     },
     SET_TERRITORY(state, { terr, getLastActivity }) {
       if (terr && terr.addresses && getLastActivity) {
@@ -95,6 +97,9 @@ export const territory = {
     },
     FETCH_LAST_ACTIVITY(state, cancelToken) {
       state.cancelTokens = { ...state.cancelTokens, FETCH_LAST_ACTIVITY: cancelToken };
+    },
+    CANCEL_FETCH_LAST_ACTIVITY(state) {
+      state.cancelTokens.FETCH_LAST_ACTIVITY = null;
     },
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
       const address = state.territory.addresses.find(a => a.id === addressId);
@@ -137,6 +142,29 @@ export const territory = {
     DELETE_TERRITORY_FAIL(state, exception) {
       state.error = exception;
       console.error(DELETE_TERRITORY_FAIL, exception);
+    },
+    UPDATE_ADDRESS(state, newAddress) {
+      if (state.territory && state.territory.addresses && state.territory.id === newAddress.territory_id) {
+        const origAddress = state.territory.addresses.find(a => a.id === newAddress.id);
+        if (origAddress) {
+          for (const property in newAddress) {
+            origAddress[property] = newAddress[property];
+          }
+        }
+      }
+    },
+    UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes }) {
+      if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
+        const address = state.territory.addresses.find(a => a.id === addressId);
+        if (address) address.notes = notes;
+      }
+    },
+    UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes }) {
+      if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
+        const address = state.territory.addresses.find(a => a.phones.some(p => p.id === phoneId));
+        const phone = address && address.phones.find(p => p.id === phoneId);
+        if (phone) phone.notes = notes;
+      }
     },
   },
 
@@ -307,6 +335,10 @@ export const territory = {
         if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
       }
       commit(LOADING_TERRITORY_FALSE);
+    },
+
+    cancelFetchLastActivity({ commit }) {
+      commit(CANCEL_FETCH_LAST_ACTIVITY);
     },
 
     async setTerritory({ commit }, terr) {
@@ -520,6 +552,15 @@ export const territory = {
       } finally {
         commit('auth/LOADING', false, { root: true });
       }
+    },
+    updateAddress({ commit }, address) {
+      commit(UPDATE_ADDRESS, address);
+    },
+    updateAddressNotes({ commit }, { territoryId, addressId, notes }) {
+      commit(UPDATE_ADDRESS_NOTES, { territoryId, addressId, notes });
+    },
+    updatePhoneNotes({ commit }, { territoryId, phoneId, notes }) {
+      commit(UPDATE_PHONE_NOTES, { territoryId, phoneId, notes });
     },
   },
 };

@@ -64,10 +64,12 @@ export const phone = {
       }
     },
     ADD_TAG_FAIL(state, error) { state.error = error; },
-    REMOVE_TAG(state, tag) {
-      const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
-      const newTags = arrTags.filter(t => t !== tag);
-      state.phone.notes = newTags.join(',');
+    REMOVE_TAG(state, { phoneId, tag }) {
+      if (state.phone.id === phoneId) {
+        const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
+        const newTags = arrTags.filter(t => t !== tag);
+        state.phone.notes = newTags.join(',');
+      }
     },
     REMOVE_TAG_FAIL(state, error) { state.error = error; },
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
@@ -275,7 +277,7 @@ export const phone = {
         }
         const { removePhoneTag } = get(response, 'data.data');
         if (removePhoneTag) {
-          commit(REMOVE_TAG, tag);
+          commit(REMOVE_TAG, { phoneId, tag });
         }
       } catch (e) {
         commit(REMOVE_TAG_FAIL, e);
