@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex, { Store } from 'vuex';
-import createCache from 'vuex-cache';
 import axios from 'axios';
 import { auth } from './modules/auth';
 import { territory } from './modules/territory';
@@ -13,7 +12,6 @@ import { phone } from './modules/phone';
 import { reports } from './modules/reports';
 import { congregation } from './modules/congregation';
 import { group } from './modules/group';
-// import { router } from '../routes';
 
 Vue.use(Vuex);
 
@@ -21,15 +19,6 @@ export const axiosToken = axios.CancelToken.source();
 axios.defaults.baseURL = process.env.VUE_APP_ROOT_API;
 axios.defaults.method = 'post';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
-// axios.interceptors.response.use(
-//   response => response,
-//   (error) => {
-//     if (error.response.status === 403) {
-//       return router.push('/unauthorized');
-//     }
-//     return Promise.reject(error);
-//   }
-// );
 
 export const defaultOptions = {
   territory: {
@@ -53,7 +42,6 @@ export const AddressStatus = {
 };
 
 export const store = new Store({
-  plugins: [createCache()],
   modules: {
     auth,
     territory,

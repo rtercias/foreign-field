@@ -32,35 +32,29 @@ export default {
   },
   beforeRouteLeave(to, from, next) {
     const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
-    if (token) token.cancel();
+    if (token && this.isTerritoryBusy) {
+      token.cancel();
+      this.cancelFetchLastActivity();
+    }
     next();
   },
   props: ['territory', 'id', 'disabled'],
   async mounted() {
     channel.bind('add-log', async (log) => {
-      if (this.territory && this.territory.addresses) {
-        const phoneAddress = this.territory.addresses.find(a => a.id === log.parent_id);
-        if (phoneAddress) {
-          const id = log.address_id;
-          const phone = phoneAddress.phones.find(p => p.id === id);
-          if (phone) {
-            this.$set(phone, 'lastActivity', log);
-          }
-        }
+      if (log && this.territory && this.territory.addresses) {
+        this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
       }
     });
     channel.bind('add-phone-tag', (args) => {
       if (args && this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.phones.some(p => p.id === args.phoneId));
-        const phone = address && address.phones.find(p => p.id === args.phoneId);
-        if (phone) this.$set(phone, 'notes', args.notes);
+        const { phoneId, notes } = args;
+        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
       }
     });
     channel.bind('remove-phone-tag', (args) => {
       if (args && this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.phones.some(p => p.id === args.phoneId));
-        const phone = address && address.phones.find(p => p.id === args.phoneId);
-        if (phone) this.$set(phone, 'notes', args.notes);
+        const { phoneId, notes } = args;
+        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
       }
     });
 
@@ -84,6 +78,7 @@ export default {
       canCheckout: 'auth/canCheckout',
       phone: 'phone/phone',
       territoryIsLoading: 'territory/isLoading',
+      isTerritoryBusy: 'territory/isBusy',
       territoryCancelTokens: 'territory/cancelTokens',
     }),
     lastActivity() {
@@ -100,6 +95,9 @@ export default {
     ...mapActions({
       resetNHRecords: 'territory/resetNHRecords',
       fetchPhone: 'address/fetchAddress',
+      updatePhoneNotes: 'territory/updatePhoneNotes',
+      setPhoneLastActivity: 'territory/setPhoneLastActivity',
+      cancelFetchLastActivity: 'territory/cancelFetchLastActivity',
     }),
 
     search(_keyword) {

@@ -70,10 +70,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import { channel } from '../main';
 import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
 import { store, defaultOptions } from '../store';
-import { channel } from '../main';
 import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 
@@ -112,36 +112,30 @@ export default {
     };
   },
   async mounted() {
-    const routesRequiringLastActivity = ['address-list', 'phone-list'];
-    const getLastActivity = routesRequiringLastActivity.includes(this.$route.name);
-    await this.getTerritory({ id: this.territoryId, getLastActivity });
+    if (this.territory.id !== this.territoryId || !this.cancelTokens.FETCH_LAST_ACTIVITY) {
+      await this.getTerritory({ id: this.territoryId, getLastActivity: true });
+    }
 
+    channel.bind('update-address', (address) => {
+      if (address && this.territory && this.territory.addresses) {
+        this.updateAddress(address);
+      }
+    });
     channel.bind('add-log', (log) => {
       if (log && this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === log.address_id);
-        if (address) {
-          this.$set(address, 'lastActivity', log);
-        }
+        this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
       }
     });
     channel.bind('add-note', (args) => {
-      if (this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === args.addressId);
-        if (address && !address.notes.includes(args.note)) {
-          const notesArray = address.notes ? address.notes.split(',') : [];
-          notesArray.push(args.note);
-          this.$set(address, 'notes', notesArray.join(','));
-        }
+      if (args && this.territory && this.territory.addresses) {
+        const { addressId, notes } = args;
+        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
       }
     });
     channel.bind('remove-note', (args) => {
-      if (this.territory && this.territory.addresses) {
-        const address = this.territory.addresses.find(a => a.id === args.addressId);
-        if (address && address.notes.includes(args.note)) {
-          const notesArray = address.notes ? address.notes.split(',') : [];
-          const filtered = notesArray.filter(n => n !== args.note);
-          this.$set(address, 'notes', filtered.join(','));
-        }
+      if (args && this.territory && this.territory.addresses) {
+        const { addressId, notes } = args;
+        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
       }
     });
   },
@@ -159,6 +153,7 @@ export default {
       territoryIsLoading: 'territory/isLoading',
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
+      cancelTokens: 'territory/cancelTokens',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -230,6 +225,9 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
+      updateAddress: 'territory/updateAddress',
+      updateAddressNotes: 'territory/updateAddressNotes',
+      setAddressLastActivity: 'territory/setAddressLastActivity',
     }),
 
     async checkIn() {
