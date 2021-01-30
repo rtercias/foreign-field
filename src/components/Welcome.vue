@@ -50,13 +50,13 @@
         </div>
       </div>
       <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
-        <span v-if="!recentlySeenTerritories.length" class="text-center small">
+        <span v-if="!recentlySeenWithoutCheckout.length" class="text-center small">
           I have not visited any territories lately.
         </span>
         <div v-else>
           <span class="small">Other territories I've recently seen:</span>
           <b-list-group>
-            <b-list-group-item v-for="terr in recentlySeenTerritories" :key="terr.id" class="px-2">
+            <b-list-group-item v-for="terr in recentlySeenWithoutCheckout" :key="terr.id" class="px-2">
               <div class="d-flex justify-content-between align-items-center">
                 <MyTerritory :territory="terr"></MyTerritory>
                 <b-button class="text-danger"
@@ -83,6 +83,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import differenceBy from 'lodash/differenceBy';
 import Auth from './Auth';
 import Loading from './Loading.vue';
 import Reports from './Reports';
@@ -137,6 +138,9 @@ export default {
     },
     doUpdateTerritories() {
       return !this.userTerritories.length || this.forceUpdate;
+    },
+    recentlySeenWithoutCheckout() {
+      return differenceBy(this.recentlySeenTerritories, this.userTerritories, 'id');
     },
   },
   methods: {
