@@ -118,7 +118,6 @@ export const address = {
     },
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
-      console.error(FETCH_LAST_ACTIVITY_FAIL, exception);
     },
     FETCH_LAST_ACTIVITY_SUCCESS(state, lastActivity) {
       state.error = null;
@@ -215,7 +214,6 @@ export const address = {
         dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
       } catch (e) {
         commit(FETCH_LAST_ACTIVITY_FAIL, e);
-        console.error(FETCH_LAST_ACTIVITY_FAIL, e);
       }
     },
 

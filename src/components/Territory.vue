@@ -70,7 +70,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
-import { channel } from '../main';
 import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
 import { store, defaultOptions } from '../store';
@@ -112,32 +111,7 @@ export default {
     };
   },
   async mounted() {
-    if (this.territory.id !== this.territoryId || !this.cancelTokens.FETCH_LAST_ACTIVITY) {
-      await this.getTerritory({ id: this.territoryId, getLastActivity: true });
-    }
-
-    channel.bind('update-address', (address) => {
-      if (address && this.territory && this.territory.addresses) {
-        this.updateAddress(address);
-      }
-    });
-    channel.bind('add-log', (log) => {
-      if (log && this.territory && this.territory.addresses) {
-        this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
-      }
-    });
-    channel.bind('add-note', (args) => {
-      if (args && this.territory && this.territory.addresses) {
-        const { addressId, notes } = args;
-        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
-      }
-    });
-    channel.bind('remove-note', (args) => {
-      if (args && this.territory && this.territory.addresses) {
-        const { addressId, notes } = args;
-        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
-      }
-    });
+    await this.refresh();
   },
   computed: {
     ...mapGetters({
@@ -225,10 +199,18 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
-      updateAddress: 'territory/updateAddress',
-      updateAddressNotes: 'territory/updateAddressNotes',
-      setAddressLastActivity: 'territory/setAddressLastActivity',
+      fetchLastActivities: 'territory/fetchLastActivities',
     }),
+
+    async refresh() {
+      if (this.territory.id === this.territoryId) {
+        if (!this.cancelTokens.FETCH_LAST_ACTIVITY) {
+          await this.fetchLastActivities(this.territory);
+        }
+      } else {
+        await this.getTerritory({ id: this.territoryId, getLastActivity: true });
+      }
+    },
 
     async checkIn() {
       const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
@@ -288,6 +270,9 @@ export default {
       if (this.territory.name !== '') {
         this.saveSeenTerritory(this.territory);
       }
+    },
+    async user() {
+      await this.refresh();
     },
   },
 };

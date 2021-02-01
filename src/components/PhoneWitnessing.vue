@@ -1,6 +1,6 @@
 <template>
   <div class="phone-witnessing w-100 d-flex flex-row flex-wrap">
-    <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="176px"></SearchBar>
+    <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="135px"></SearchBar>
     <PhoneAddressCard
       v-for="(a, index) in territory.addresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
@@ -20,7 +20,6 @@ import get from 'lodash/get';
 import PhoneAddressCard from './PhoneAddressCard';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
-import { channel } from '../main';
 
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 export default {
@@ -40,24 +39,6 @@ export default {
   },
   props: ['territory', 'id', 'disabled'],
   async mounted() {
-    channel.bind('add-log', async (log) => {
-      if (log && this.territory && this.territory.addresses) {
-        this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
-      }
-    });
-    channel.bind('add-phone-tag', (args) => {
-      if (args && this.territory && this.territory.addresses) {
-        const { phoneId, notes } = args;
-        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
-      }
-    });
-    channel.bind('remove-phone-tag', (args) => {
-      if (args && this.territory && this.territory.addresses) {
-        const { phoneId, notes } = args;
-        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
-      }
-    });
-
     if (this.$route.query.addressId) {
       this.foundId = Number.parseInt(this.$route.query.addressId, 10);
       this.scrollToView();
@@ -95,8 +76,6 @@ export default {
     ...mapActions({
       resetNHRecords: 'territory/resetNHRecords',
       fetchPhone: 'address/fetchAddress',
-      updatePhoneNotes: 'territory/updatePhoneNotes',
-      setPhoneLastActivity: 'territory/setPhoneLastActivity',
       cancelFetchLastActivity: 'territory/cancelFetchLastActivity',
     }),
 

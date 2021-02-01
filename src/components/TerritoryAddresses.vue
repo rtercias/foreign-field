@@ -1,9 +1,6 @@
 <template>
   <div class="territory-addresses pb-5">
-    <SearchBar :search-text="'Search this territory'" @on-click="search" top="176px"></SearchBar>
-    <!-- <h3 v-if="territory.addresses.length === 0" class="w-100 text-center">
-      There are no addresses in this territory.
-    </h3> -->
+    <SearchBar :search-text="'Search this territory'" @on-click="search" top="135px"></SearchBar>
     <b-list-group>
       <swipe-list
         ref="list"

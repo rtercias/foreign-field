@@ -316,7 +316,6 @@ export default {
       };
 
       await this.addPhone(phone);
-      this.address.phones.push(this.phone);
       this.newPhone = '';
       this.toggleNoNumberTag({ forceRemove: true });
       this.isAdding = false;
@@ -377,8 +376,6 @@ export default {
       if (response) {
         this.isAddressBusy = true;
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
-        const index = this.address.phones.findIndex(p => p.id === phone.id);
-        this.address.phones.splice(index, 1);
         this.isAddressBusy = false;
       }
       this.$set(phone, 'isBusy', false);

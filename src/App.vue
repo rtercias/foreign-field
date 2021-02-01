@@ -26,7 +26,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import { channel } from './main';
 import Masthead from './components/Masthead';
+import { AddressStatus } from './store';
 
 export default {
   name: 'app',
@@ -40,6 +42,75 @@ export default {
   },
   async mounted() {
     await this.refresh();
+
+    channel.bind('add-address', (address) => {
+      if (address) {
+        this.addAddress(address);
+      }
+    });
+    channel.bind('update-address', (address) => {
+      if (address && address.status !== AddressStatus.Active) {
+        this.deleteAddress(address);
+      } else {
+        this.updateAddress(address);
+      }
+    });
+    channel.bind('change-address-status', (address) => {
+      if (address && address.status !== AddressStatus.Active) {
+        this.deleteAddress(address);
+      } else {
+        this.updateAddress(address);
+      }
+    });
+    channel.bind('add-phone', (phone) => {
+      if (phone) {
+        this.addPhone(phone);
+      }
+    });
+    channel.bind('update-phone', (phone) => {
+      if (phone && phone.status !== AddressStatus.Active) {
+        this.deletePhone(phone);
+      } else {
+        this.updatePhone(phone);
+      }
+    });
+    channel.bind('change-phone-status', (phone) => {
+      if (phone && phone.status !== AddressStatus.Active) {
+        this.deletePhone(phone);
+      } else {
+        this.updatePhone(phone);
+      }
+    });
+    channel.bind('add-log', (log) => {
+      if (log) {
+        this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
+        this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
+      }
+    });
+    channel.bind('add-note', (args) => {
+      if (args && this.territory) {
+        const { addressId, notes } = args;
+        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
+      }
+    });
+    channel.bind('remove-note', (args) => {
+      if (args && this.territory) {
+        const { addressId, notes } = args;
+        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
+      }
+    });
+    channel.bind('add-phone-tag', (args) => {
+      if (args && this.territory) {
+        const { phoneId, notes } = args;
+        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
+      }
+    });
+    channel.bind('remove-phone-tag', (args) => {
+      if (args && this.territory) {
+        const { phoneId, notes } = args;
+        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
+      }
+    });
   },
   computed: {
     ...mapGetters({
@@ -47,6 +118,7 @@ export default {
       isDesktop: 'auth/isDesktop',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
+      territory: 'territory/territory',
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
@@ -65,6 +137,16 @@ export default {
     ...mapActions({
       back: 'auth/back',
       authorize: 'auth/authorize',
+      addAddress: 'territory/addAddress',
+      addPhone: 'territory/addPhone',
+      updateAddress: 'territory/updateAddress',
+      updatePhone: 'territory/updatePhone',
+      deleteAddress: 'territory/deleteAddress',
+      deletePhone: 'territory/deletePhone',
+      updateAddressNotes: 'territory/updateAddressNotes',
+      updatePhoneNotes: 'territory/updatePhoneNotes',
+      setAddressLastActivity: 'territory/setAddressLastActivity',
+      setPhoneLastActivity: 'territory/setPhoneLastActivity',
     }),
     goBack() {
       this.back({ vm: this });
