@@ -23,6 +23,7 @@ export const addresses = {
     search: [],
     logs: [],
     cancelTokens: {},
+    error: null,
   },
   getters: {
     dnc: state => state.dnc,
@@ -58,7 +59,7 @@ export const addresses = {
       state.logs = logs;
     },
     CHANGE_LOGS_FAIL(state, exception) {
-      console.error(CHANGE_LOGS_FAIL, exception);
+      state.error = exception;
     },
   },
   actions: {

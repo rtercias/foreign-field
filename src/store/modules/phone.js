@@ -74,7 +74,6 @@ export const phone = {
     REMOVE_TAG_FAIL(state, error) { state.error = error; },
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
-      console.error(FETCH_LAST_ACTIVITY_FAIL, exception);
     },
   },
 
@@ -120,7 +119,6 @@ export const phone = {
         dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
       } catch (e) {
         commit(FETCH_LAST_ACTIVITY_FAIL, e);
-        console.error(`Unable to fetch last activity for phone id ${phoneId}.`, e);
       }
     },
 

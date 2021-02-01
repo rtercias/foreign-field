@@ -6,6 +6,7 @@ import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import { model, validate } from './models/TerritoryModel';
+import { AddressStatus, AddressType } from '..';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
@@ -24,7 +25,12 @@ const UPDATE_TERRITORY = 'UPDATE_TERRITORY';
 const UPDATE_TERRITORY_FAIL = 'UPDATE_TERRITORY_FAIL';
 const DELETE_TERRITORY = 'DELETE_TERRITORY';
 const DELETE_TERRITORY_FAIL = 'DELETE_TERRITORY_FAIL';
+const ADD_ADDRESS = 'ADD_ADDRESS';
+const ADD_PHONE = 'ADD_PHONE';
 const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+const DELETE_ADDRESS = 'DELETE_ADDRESS';
+const UPDATE_PHONE = 'UPDATE_PHONE';
+const DELETE_PHONE = 'DELETE_PHONE';
 const UPDATE_ADDRESS_NOTES = 'UPDATE_ADDRESS_NOTES';
 const UPDATE_PHONE_NOTES = 'UPDATE_PHONE_NOTES';
 
@@ -143,13 +149,62 @@ export const territory = {
       state.error = exception;
       console.error(DELETE_TERRITORY_FAIL, exception);
     },
-    UPDATE_ADDRESS(state, newAddress) {
-      if (state.territory && state.territory.addresses && state.territory.id === newAddress.territory_id) {
-        const origAddress = state.territory.addresses.find(a => a.id === newAddress.id);
+    ADD_ADDRESS(state, newAddress) {
+      if (state.territory && state.territory.addresses) {
+        const exists = state.territory.addresses.some(a => a.id === newAddress.id);
+        if (!exists) {
+          newAddress.phones = [];
+          newAddress.type = AddressType.Regular;
+          state.territory.addresses.push(newAddress);
+        }
+      }
+    },
+    ADD_PHONE(state, newPhone) {
+      if (state.territory && state.territory.addresses && state.territory.id === newPhone.territory_id) {
+        const address = state.territory.addresses.find(a => a.id === newPhone.parent_id);
+        const exists = address && address.phones.some(p => p.id === newPhone.id);
+        if (address && address.phones && !exists) address.phones.push(newPhone);
+      }
+    },
+    UPDATE_ADDRESS(state, address) {
+      if (state.territory && state.territory.addresses) {
+        address.id = address.addressId;
+        const origAddress = state.territory.addresses.find(a => a.id === address.id);
         if (origAddress) {
-          for (const property in newAddress) {
-            origAddress[property] = newAddress[property];
+          for (const property in address) {
+            origAddress[property] = address[property];
           }
+        }
+      }
+    },
+    DELETE_ADDRESS(state, address) {
+      address.id = address.addressId;
+      if (state.territory && state.territory.addresses) {
+        const origAddress = state.territory.addresses.find(a => a.id === address.id);
+        if (origAddress && address.status !== AddressStatus.Active) {
+          const index = state.territory.addresses.findIndex(a => a.id === address.id);
+          state.territory.addresses.splice(index, 1);
+        }
+      }
+    },
+    UPDATE_PHONE(state, phone) {
+      if (state.territory && state.territory.addresses) {
+        const address = state.territory.addresses.find(a => a.id === phone.parent_id);
+        const origPhone = address && address.phones.find(p => p.id === phone.id);
+        if (origPhone) {
+          for (const property in phone) {
+            origPhone[property] = phone[property];
+          }
+        }
+      }
+    },
+    DELETE_PHONE(state, phone) {
+      if (state.territory && state.territory.addresses) {
+        const address = state.territory.addresses.find(a => a.id === phone.parent_id);
+        const origPhone = address && address.phones.find(p => p.id === phone.id);
+        if (origPhone && phone.status !== AddressStatus.Active) {
+          const index = address.phones.findIndex(p => p.id === phone.id);
+          address.phones.splice(index, 1);
         }
       }
     },
@@ -553,8 +608,23 @@ export const territory = {
         commit('auth/LOADING', false, { root: true });
       }
     },
+    addAddress({ commit }, address) {
+      commit(ADD_ADDRESS, address);
+    },
     updateAddress({ commit }, address) {
       commit(UPDATE_ADDRESS, address);
+    },
+    deleteAddress({ commit }, address) {
+      commit(DELETE_ADDRESS, address);
+    },
+    addPhone({ commit }, phone) {
+      commit(ADD_PHONE, phone);
+    },
+    updatePhone({ commit }, phone) {
+      commit(UPDATE_PHONE, phone);
+    },
+    deletePhone({ commit }, phone) {
+      commit(DELETE_PHONE, phone);
     },
     updateAddressNotes({ commit }, { territoryId, addressId, notes }) {
       commit(UPDATE_ADDRESS_NOTES, { territoryId, addressId, notes });
