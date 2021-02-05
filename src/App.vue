@@ -44,41 +44,49 @@ export default {
     await this.refresh();
 
     channel.bind('add-address', (address) => {
-      if (address) {
+      if (address && this.territory.id === address.territory_id) {
         this.addAddress(address);
       }
     });
     channel.bind('update-address', (address) => {
-      if (address && address.status !== AddressStatus.Active) {
-        this.deleteAddress(address);
-      } else {
-        this.updateAddress(address);
+      if (address && this.territory.id === address.territory_id) {
+        if (address.status !== AddressStatus.Active) {
+          this.deleteAddress(address);
+        } else {
+          this.updateAddress(address);
+        }
       }
     });
     channel.bind('change-address-status', (address) => {
-      if (address && address.status !== AddressStatus.Active) {
-        this.deleteAddress(address);
-      } else {
-        this.updateAddress(address);
+      if (address && this.territory.id === address.territory_id) {
+        if (address.status !== AddressStatus.Active) {
+          this.deleteAddress(address);
+        } else {
+          this.updateAddress(address);
+        }
       }
     });
     channel.bind('add-phone', (phone) => {
-      if (phone) {
+      if (phone && this.territory.id === phone.territory_id) {
         this.addPhone(phone);
       }
     });
     channel.bind('update-phone', (phone) => {
-      if (phone && phone.status !== AddressStatus.Active) {
-        this.deletePhone(phone);
-      } else {
-        this.updatePhone(phone);
+      if (phone && this.territory.id === phone.territory_id) {
+        if (phone.status !== AddressStatus.Active) {
+          this.deletePhone(phone);
+        } else {
+          this.updatePhone(phone);
+        }
       }
     });
     channel.bind('change-phone-status', (phone) => {
-      if (phone && phone.status !== AddressStatus.Active) {
-        this.deletePhone(phone);
-      } else {
-        this.updatePhone(phone);
+      if (phone && this.territory.id === phone.territory_id) {
+        if (phone.status !== AddressStatus.Active) {
+          this.deletePhone(phone);
+        } else {
+          this.updatePhone(phone);
+        }
       }
     });
     channel.bind('add-log', (log) => {
