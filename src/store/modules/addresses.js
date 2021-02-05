@@ -13,6 +13,7 @@ const ADDRESS_LOOKUP_FAIL = 'ADDRESS_LOOKUP_FAIL';
 const GET_CHANGE_LOG = 'GET_CHANGE_LOG';
 const CHANGE_LOGS_SUCCESS = 'CHANGE_LOGS_SUCCESS';
 const CHANGE_LOGS_FAIL = 'CHANGE_LOGS_FAIL';
+const RESET_CHANGE_LOG_PAYLOAD = 'RESET_CHANGE_LOG_PAYLOAD';
 
 export const addresses = {
   namespaced: true,
@@ -22,6 +23,7 @@ export const addresses = {
     optimized: [],
     search: [],
     logs: [],
+    logsPayload: {},
     cancelTokens: {},
     error: null,
   },
@@ -55,11 +57,15 @@ export const addresses = {
     GET_CHANGE_LOG(state, cancelToken) {
       state.cancelTokens = { ...state.cancelTokens, GET_CHANGE_LOG: cancelToken };
     },
-    CHANGE_LOGS_SUCCESS(state, logs) {
+    CHANGE_LOGS_SUCCESS(state, { logs, payload }) {
       state.logs = logs;
+      state.logsPayload = payload;
     },
     CHANGE_LOGS_FAIL(state, exception) {
       state.error = exception;
+    },
+    RESET_CHANGE_LOG_PAYLOAD(state) {
+      state.logsPayload = {};
     },
   },
   actions: {
@@ -214,9 +220,16 @@ export const addresses = {
       }
     },
 
-    async getChangeLog({ commit }, { congId, minDate, recordId }) {
+    async getChangeLog({ commit, state }, { congId, minDate, recordId }) {
       try {
         if (!congId) return;
+
+        if (state.logsPayload.congId === congId
+          && state.logsPayload.minDate === minDate
+          && state.logsPayload.recordId === recordId
+        ) {
+          return;
+        }
 
         const tokenSource = axios.CancelToken.source();
         const cancelToken = tokenSource.token;
@@ -284,10 +297,14 @@ export const addresses = {
           }
         }
 
-        commit(CHANGE_LOGS_SUCCESS, logs);
+        commit(CHANGE_LOGS_SUCCESS, { logs, payload: { congId, minDate, recordId } });
       } catch (exception) {
         commit(CHANGE_LOGS_FAIL, exception);
       }
+    },
+
+    resetChangeLogPayload({ commit }) {
+      commit(RESET_CHANGE_LOG_PAYLOAD);
     },
   },
 };

@@ -128,6 +128,7 @@ export default {
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
+      userTerritories: 'auth/userTerritories',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -238,6 +239,8 @@ export default {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
 
+      this.saveSeenTerritory(this.territory);
+
       this.isCheckingIn = false;
       await this.$router.push({ name: 'home' });
       this.checkInToast('success');
@@ -267,7 +270,7 @@ export default {
       immediate: true,
     },
     territory() {
-      if (this.territory.name !== '') {
+      if (this.territory.name !== '' && !this.userTerritories.find(t => t.id === this.territory.id)) {
         this.saveSeenTerritory(this.territory);
       }
     },

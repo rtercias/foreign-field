@@ -324,8 +324,11 @@ export const territories = {
       commit(SET_RECENTLY_SEEN_TERRITORIES, seenList);
     },
 
-    saveSeenTerritory({ commit }, terr) {
+    saveSeenTerritory({ commit, rootGetters }, terr) {
       if (!terr && !terr.name) return;
+
+      const userTerritories = rootGetters['auth/userTerritories'];
+      if (userTerritories.find(t => t.id === terr.id)) return;
 
       // create a basic territory and save it to local storage
       const basicTerritory = {

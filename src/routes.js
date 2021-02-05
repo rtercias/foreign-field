@@ -53,15 +53,15 @@ const routes = [
       back: 'home',
     },
   },
-  {
-    name: 'territories',
-    path: '/territories',
-    props: true,
-    meta: {
-      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
-    },
-    redirect: '/groups/0',
-  },
+  // {
+  //   name: 'territories',
+  //   path: '/territories',
+  //   props: true,
+  //   meta: {
+  //     permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
+  //   },
+  //   redirect: '/groups/0',
+  // },
   {
     name: 'group-add',
     path: '/groups/add',
@@ -156,23 +156,23 @@ const routes = [
       label: 'Edit Territory',
     },
   },
-  {
-    name: 'territory-group',
-    path: '/territories/:groupId/:territoryId',
-    props: true,
-    redirect: (to) => {
-      if (to.params.territoryId && Number.isSafeInteger(Number(to.params.territoryId))) {
-        return '/territories/:territoryId';
-      }
-      if (to.params.groupId) {
-        return '/groups/:groupId';
-      }
-      return '';
-    },
-    meta: {
-      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
-    },
-  },
+  // {
+  //   name: 'territory-group',
+  //   path: '/territories/:groupId/:territoryId',
+  //   props: true,
+  //   redirect: (to) => {
+  //     if (to.params.territoryId && Number.isSafeInteger(Number(to.params.territoryId))) {
+  //       return '/territories/:territoryId';
+  //     }
+  //     if (to.params.groupId) {
+  //       return '/groups/:groupId';
+  //     }
+  //     return '';
+  //   },
+  //   meta: {
+  //     permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
+  //   },
+  // },
   {
     name: 'search',
     path: '/search/:keyword',

@@ -33,6 +33,7 @@ const UPDATE_PHONE = 'UPDATE_PHONE';
 const DELETE_PHONE = 'DELETE_PHONE';
 const UPDATE_ADDRESS_NOTES = 'UPDATE_ADDRESS_NOTES';
 const UPDATE_PHONE_NOTES = 'UPDATE_PHONE_NOTES';
+const UPDATE_STATUS = 'UPDATE_STATUS';
 
 const initialState = {
   territory: {
@@ -108,14 +109,16 @@ export const territory = {
       state.cancelTokens.FETCH_LAST_ACTIVITY = null;
     },
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
-      const address = state.territory.addresses.find(a => a.id === addressId);
+      const addresses = get(state, 'territory.addresses') || [];
+      const address = addresses.find(a => a.id === addressId);
       if (address) {
         Vue.set(address, 'lastActivity', lastActivity);
         Vue.set(address, 'isBusy', false);
       }
     },
     SET_PHONE_LAST_ACTIVITY(state, { phoneId, lastActivity }) {
-      for (const address of state.territory.addresses) {
+      const addresses = get(state, 'territory.addresses') || [];
+      for (const address of addresses) {
         const phone = address.phones && address.phones.find(p => p.id === phoneId);
         if (phone) {
           Vue.set(phone, 'lastActivity', lastActivity);
@@ -221,10 +224,13 @@ export const territory = {
         if (phone) phone.notes = notes;
       }
     },
+    UPDATE_STATUS(state, status) {
+      if (state.territory) state.territory.status = status;
+    },
   },
 
   actions: {
-    async checkinTerritory(vuex, args) {
+    async checkinTerritory({ dispatch }, args) {
       try {
         if (!args) {
           throw new Error('Unable to check in territory because the required arguments were not provided');
@@ -248,12 +254,14 @@ export const territory = {
             },
           },
         });
+
+        await dispatch('auth/getUserTerritories', args.username, { root: true });
       } catch (e) {
         console.error('Unable to check in territory', e);
       }
     },
 
-    async checkoutTerritory({ commit }, args) {
+    async checkoutTerritory({ commit, dispatch }, args) {
       try {
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -283,6 +291,7 @@ export const territory = {
           const { status } = response.data.data;
           commit(CHANGE_STATUS, status);
         }
+        await dispatch('auth/getUserTerritories', args.username, { root: true });
       } catch (e) {
         console.error('Unable to checkout territory', e);
       }
@@ -404,9 +413,9 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async resetTerritoryActivities({ commit }, { checkoutId, userid, tzOffset, timezone }) {
+    async resetTerritoryActivities(vuex, { checkoutId, userid, tzOffset, timezone }) {
       try {
-        const response = await axios({
+        await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -429,10 +438,6 @@ export const territory = {
             },
           },
         });
-
-        if (response && response.data && response.data.data && response.data.data.resetTerritoryActivity) {
-          commit(RESET_TERRITORY);
-        }
       } catch (e) {
         console.error('Unable to reset territory activities', e);
       }
@@ -631,6 +636,10 @@ export const territory = {
     },
     updatePhoneNotes({ commit }, { territoryId, phoneId, notes }) {
       commit(UPDATE_PHONE_NOTES, { territoryId, phoneId, notes });
+    },
+    updateStatus({ commit }, status) {
+      const result = status.status === 'OUT' ? status : null;
+      commit(UPDATE_STATUS, result);
     },
   },
 };

@@ -3,7 +3,12 @@
     <div
       class="d-flex justify-content-between pb-0 text-center"
       :class="{ 'py-3 px-2': isFullScreen }">
-      <div :class="{ small: !isFullScreen, lead: isFullScreen,  'text-left': !isDesktop }">{{subtitle}}</div>
+      <div :class="{ small: !isFullScreen, lead: isFullScreen,  'text-left': !isDesktop }">
+        {{subtitle}}
+        <b-button v-if="isFullScreen" class="p-0" variant="link">
+          <font-awesome-icon icon="redo-alt" class="text-info fa-sm" :spin="loading" @click="() => refresh(true)" />
+        </b-button>
+      </div>
       <div
         v-if="isSingleRecord"
         :class="{
@@ -123,22 +128,26 @@ export default {
     ...mapActions({
       getChangeLog: 'addresses/getChangeLog',
       fetchAddress: 'address/fetchAddress',
+      resetChangeLogPayload: 'addresses/resetChangeLogPayload',
     }),
     formatLanguage,
     async refresh(force) {
+      if (force) {
+        this.resetChangeLogPayload();
+      }
+
       if (this.isFullScreen || this.preview.length === 0 || force) {
         this.$set(this, 'loading', true);
         await this.getChangeLog({
           congId: this.congId,
           minDate: this.selectedRange.startDate,
           recordId: this.recordId,
-          publisherId: this.publisherId,
         });
       }
 
-      if (this.isFullScreen && this.logs && this.logs.length
+      if (this.recordId && this.isFullScreen && this.logs && this.logs.length
         && this.logs[0].address && this.logs[0].address.type === 'Phone') {
-        await this.fetchAddress({ addressId: this.logs[0].address.parent_id });
+        await this.fetchAddress({ addressId: this.recordId });
       }
 
       this.loading = false;
