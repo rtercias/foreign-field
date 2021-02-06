@@ -101,7 +101,7 @@ export default {
         const { user } = this.$store.state.auth;
         await this.checkinTerritory({
           territoryId: territory.id,
-          userId: publisher.id,
+          publisher: publisher || {},
           username: user.username,
         });
 

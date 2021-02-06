@@ -45,7 +45,7 @@ export default {
     async checkout() {
       await this.checkoutTerritory({
         territoryId: this.territory.id,
-        userId: this.selectedPublisher.id,
+        publisher: this.selectedPublisher,
         username: this.user.username,
       });
 

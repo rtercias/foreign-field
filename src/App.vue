@@ -155,6 +155,7 @@ export default {
       updatePhoneNotes: 'territory/updatePhoneNotes',
       setAddressLastActivity: 'territory/setAddressLastActivity',
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
+      updateStatus: 'territory/updateStatus',
     }),
     goBack() {
       this.back({ vm: this });

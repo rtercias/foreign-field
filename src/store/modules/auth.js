@@ -145,8 +145,10 @@ export const auth = {
       });
     },
 
-    async authorize({ commit, dispatch }, username) {
+    async authorize({ commit, dispatch, getters }, username) {
       try {
+        if (getters.isAuthorized) return true;
+
         commit(LOADING, true);
         return new Promise(async (resolve, reject) => {
           const response = await axios({
@@ -205,59 +207,41 @@ export const auth = {
 
     async getUserTerritories({ commit }, username) {
       commit(USER_TERRITORIES_LOADING, true);
-      return new Promise(async (resolve, reject) => {
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          data: {
-            query: print(gql`query Publisher($username: String) {
-              user (username: $username) {
-                territories {
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        data: {
+          query: print(gql`query Publisher($username: String) {
+            user (username: $username) {
+              territories {
+                id
+                name
+                description
+                group_id
+                type
+                status {
+                  status
+                  date
+                }
+                lastActivity {
                   id
-                  name
-                  description
-                  group_id
-                  type
-                  status {
-                    status
-                    date
-                  }
-                  addresses {
-                    addr1
-                    addr2
-                    city
-                    state_province
-                    postal_code
-                    activityLogs {
-                      publisher_id
-                      value
-                      timestamp
-                    }
-                  }
-                  lastActivity {
-                    id
-                    address_id
-                    checkout_id
-                    value
-                    timestamp
-                  }
+                  address_id
+                  checkout_id
+                  value
+                  timestamp
                 }
               }
-            }`),
-            variables: {
-              username,
-            },
+            }
+          }`),
+          variables: {
+            username,
           },
-        });
-
-        if (!response || !response.data || !response.data.data || !response.data.data.user) {
-          reject(new Error('user not found'));
-        }
-
-        const { territories } = (response && response.data && response.data.data.user) || {};
-        commit(USER_TERRITORIES_ADDED, territories);
-        commit(USER_TERRITORIES_LOADING, false);
+        },
       });
+
+      const { territories } = (response && response.data && response.data.data.user) || {};
+      commit(USER_TERRITORIES_ADDED, territories);
+      commit(USER_TERRITORIES_LOADING, false);
     },
 
     forceout({ commit }) {

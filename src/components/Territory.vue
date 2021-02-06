@@ -128,6 +128,7 @@ export default {
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
+      userTerritories: 'auth/userTerritories',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -181,7 +182,7 @@ export default {
     },
     count() {
       if (this.viewMode === 'phone-list') {
-        const addresses = get(this.territory, 'addresses', []).map(a => a.phones.length) || [];
+        const addresses = get(this.territory, 'addresses', []).map(a => get(a, 'phones.length')) || [];
         if (addresses.length) {
           return addresses.reduce((acc, current) => (acc || 0) + current);
         }
@@ -226,8 +227,9 @@ export default {
     async checkInAndReset() {
       this.isCheckingIn = true;
       await this.checkinTerritory({
+        checkout_id: get(this.territory, 'status.checkout_id'),
         territoryId: this.territoryId,
-        userId: get(this.territory, 'status.publisher.id'),
+        publisher: get(this.territory, 'status.publisher') || {},
         username: this.user.username,
       });
 
@@ -237,6 +239,8 @@ export default {
         tzOffset: new Date().getTimezoneOffset().toString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
+
+      this.saveSeenTerritory(this.territory);
 
       this.isCheckingIn = false;
       await this.$router.push({ name: 'home' });
@@ -267,7 +271,7 @@ export default {
       immediate: true,
     },
     territory() {
-      if (this.territory.name !== '') {
+      if (this.territory.name !== '' && !this.userTerritories.find(t => t.id === this.territory.id)) {
         this.saveSeenTerritory(this.territory);
       }
     },

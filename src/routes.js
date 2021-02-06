@@ -54,15 +54,6 @@ const routes = [
     },
   },
   {
-    name: 'territories',
-    path: '/territories',
-    props: true,
-    meta: {
-      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
-    },
-    redirect: '/groups/0',
-  },
-  {
     name: 'group-add',
     path: '/groups/add',
     component: GroupForm,
@@ -154,23 +145,6 @@ const routes = [
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       back: 'group',
       label: 'Edit Territory',
-    },
-  },
-  {
-    name: 'territory-group',
-    path: '/territories/:groupId/:territoryId',
-    props: true,
-    redirect: (to) => {
-      if (to.params.territoryId && Number.isSafeInteger(Number(to.params.territoryId))) {
-        return '/territories/:territoryId';
-      }
-      if (to.params.groupId) {
-        return '/groups/:groupId';
-      }
-      return '';
-    },
-    meta: {
-      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'PUB'],
     },
   },
   {

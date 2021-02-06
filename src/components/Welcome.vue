@@ -167,7 +167,7 @@ export default {
           await this.getUserTerritories(this.user.username);
         }
 
-        if (!this.userTerritories.length) {
+        if (!get(this.userTerritories, 'length')) {
           this.isUserError = true;
         }
       }
