@@ -81,7 +81,10 @@
         </div>
       </div>
       <div v-else-if="step === 1.5">
-        <p>Similar addresses found. Please make sure the address you entered is unique.</p>
+        <p>
+          <font-awesome-icon icon="exclamation-triangle" class="text-danger"></font-awesome-icon>
+          Similar address(es) found. Please make sure the address you entered is unique.
+        </p>
         <b-list-group>
           <b-list-group-item v-for="(search, index) in searchedAddresses" :key="index">
             {{search.addr1}} {{search.addr2}} {{search.city}} {{search.state_province}} {{search.postal_code}}
@@ -110,7 +113,7 @@
         </p>
         <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
       </div>
-      <div v-else-if="step === 4" class="step-4">
+      <div v-else-if="step === 4" class="step-4 pb-5">
         <div v-if="mode === 'add'">
           <div>{{model.addr1}} {{model.addr2}}</div>
           <div>{{model.city}} {{model.state_province}} {{model.postal_code}}</div>
@@ -126,12 +129,12 @@
           Optimize
         </b-button>
       </div>
-      <div class="buttons py-4" :class="{ 'justify-content-between': step!==4, 'justify-content-end': step===4 }">
+      <div class="buttons py-4 justify-content-between">
         <b-button v-if="step === 1" type="button" variant="light" @click="done">Cancel</b-button>
         <b-button v-if="canManage && step === 1 && mode===modes.edit" type="button" variant="danger" @click="remove">
           Delete
         </b-button>
-        <b-button v-else v-show="step !== 4" type="button" variant="light" @click="prev">Previous</b-button>
+        <b-button v-else v-show="step > 1" type="button" variant="light" @click="prev">Previous</b-button>
         <b-button v-if="canWrite && (step === 1 || step === 1.5)" type="button" variant="light" @click="applyGeocode">
           Locate on Map
         </b-button>
@@ -145,6 +148,7 @@
           type="submit"
           variant="primary">
           <font-awesome-icon v-if="isSaving" icon="circle-notch" spin></font-awesome-icon>
+          <span v-else-if="step === 1.5">Confirm</span>
           <span v-else>Submit</span>
         </b-button>
         <b-button v-if="step === 4" type="button" variant="success" @click="done">Done</b-button>
@@ -224,12 +228,19 @@ export default {
     }),
     async submitAddress() {
       try {
+        if (this.step !== 1.5) {
+          const addressExists = await this.checkForExistingAddress();
+          if (addressExists) {
+            return;
+          }
+        }
+
         if (!this.model.longitude || !this.model.latitude) {
           await this.geocodeAddress();
         }
-        this.isSaving = true;
 
         if (this.mode === Modes.add) {
+          this.isSaving = true;
           await this.addAddress(this.model);
           await this.getTerritory({ id: this.model.territory_id });
         } else if (this.mode === Modes.edit) {
@@ -262,6 +273,20 @@ export default {
         }
       }
       this.isSaving = false;
+    },
+
+    async checkForExistingAddress() {
+      if (this.mode === Modes.add) {
+        this.isSearching = true;
+        await this.addressSearch({ congId: this.congId, searchTerm: this.model.addr1, status: '*' });
+        if (this.searchedAddresses && this.searchedAddresses.length) {
+          this.step = 1.5;
+          this.isSearching = false;
+          return true;
+        }
+        this.isSearching = false;
+      }
+      return false;
     },
 
     async refresh() {
@@ -315,17 +340,6 @@ export default {
         return;
       }
 
-      if (this.mode === Modes.add) {
-        this.isSearching = true;
-        await this.addressSearch({ congId: this.congId, searchTerm: this.model.addr1 });
-        if (this.searchedAddresses && this.searchedAddresses.length) {
-          this.step = 1.5;
-          this.isSearching = false;
-          return;
-        }
-        this.isSearching = false;
-      }
-
       await this.geocodeAddress();
       this.step = 2;
     },
@@ -336,7 +350,7 @@ export default {
 
     prev() {
       if (this.step > 0) {
-        this.step = this.step - 1;
+        this.step = Math.ceil(this.step) - 1;
       }
     },
 
