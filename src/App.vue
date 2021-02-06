@@ -119,20 +119,6 @@ export default {
         this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
       }
     });
-    channel.bind('check-out', (status) => {
-      // eslint-disable-next-line
-      console.log('check-out', status);
-      if (status && this.territory) {
-        this.updateStatus(status);
-      }
-    });
-    channel.bind('check-in', (status) => {
-      // eslint-disable-next-line
-      console.log('check-in', status);
-      if (status && this.territory) {
-        this.updateStatus(status);
-      }
-    });
   },
   computed: {
     ...mapGetters({
