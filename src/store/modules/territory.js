@@ -179,7 +179,7 @@ export const territory = {
     },
     UPDATE_ADDRESS(state, address) {
       if (state.territory && state.territory.addresses) {
-        address.id = address.addressId;
+        address.id = address.id || address.addressId;
         const origAddress = state.territory.addresses.find(a => a.id === address.id);
         if (origAddress && address) {
           for (const property in address) {
@@ -189,7 +189,7 @@ export const territory = {
       }
     },
     DELETE_ADDRESS(state, address) {
-      address.id = address.addressId;
+      address.id = address.id || address.addressId;
       if (state.territory && state.territory.addresses) {
         const origAddress = state.territory.addresses.find(a => a.id === address.id);
         if (origAddress && address.status !== AddressStatus.Active) {

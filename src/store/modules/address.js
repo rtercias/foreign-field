@@ -322,7 +322,7 @@ export const address = {
 
       commit('auth/LOADING', false, { root: true });
     },
-    async addAddress({ commit, rootGetters }, _address) {
+    async addAddress({ commit, rootGetters, dispatch }, _address) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -356,6 +356,7 @@ export const address = {
 
         const { addAddress } = get(response, 'data.data');
         commit(ADD_ADDRESS, addAddress);
+        dispatch('territory/addAddress', addr, { root: true });
       } catch (e) {
         commit(ADD_ADDRESS_FAIL, e);
         console.error(ADD_ADDRESS_FAIL, e);
@@ -364,7 +365,7 @@ export const address = {
       }
     },
 
-    async updateAddress({ commit, rootGetters }, _address) {
+    async updateAddress({ commit, rootGetters, dispatch }, _address) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -403,6 +404,7 @@ export const address = {
         }
         const { updateAddress } = get(response, 'data.data');
         commit(UPDATE_ADDRESS, updateAddress);
+        dispatch('territory/updateAddress', addr, { root: true });
       } catch (e) {
         commit(UPDATE_ADDRESS_FAIL, e);
         console.error(UPDATE_ADDRESS_FAIL, e);
@@ -411,7 +413,7 @@ export const address = {
       }
     },
 
-    async deleteAddress({ commit, rootGetters }, id) {
+    async deleteAddress({ commit, rootGetters, dispatch }, id) {
       try {
         if (!id) {
           throw new Error('no id to delete');
@@ -445,6 +447,7 @@ export const address = {
           throw new Error(errors[0].message);
         }
         commit(DELETE_ADDRESS);
+        dispatch('territory/deleteAddress', { id }, { root: true });
       } catch (e) {
         commit(DELETE_ADDRESS_FAIL, e);
         console.error(DELETE_ADDRESS_FAIL, e);
