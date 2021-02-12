@@ -226,12 +226,13 @@ export default {
     },
     logs() {
       if (this.keywordFilter) {
-        let logs = cloneDeep(this.cleanLogs);
+        let logs = cloneDeep(this.cleanLogs)
+          .filter(log => !isEmpty(log.changes));
+
         if (this.selectedStatus.value) {
           logs = logs.filter(log => get(log.changes, 'status.new') === this.selectedStatus.value);
         }
         return logs
-          .filter(log => !isEmpty(log.changes))
           .filter(log => this.compareToKeyword([
             log.address.addr1,
             log.address.addr2,

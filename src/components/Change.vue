@@ -12,6 +12,7 @@
         <span>tag</span>
       </div>
     </div>
+    <div v-else-if="field === 'status' && change.new === 'Inactive'">removed this entry</div>
     <div v-else>
       <div v-if="!change.new">
         <span>removed</span>&nbsp;
