@@ -1,4 +1,5 @@
 export function unmask(phone) {
+  if (!phone) return '';
   return phone.replace(/\D+/g, '');
 }
 
