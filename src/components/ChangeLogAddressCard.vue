@@ -1,6 +1,6 @@
 <template>
   <div class="change-log-address-card d-flex flex-column justify-content-between">
-    <div class="d-flex justify-content-between pb-3">
+    <div class="d-flex justify-content-between">
       <div>
         <div v-if="!isSingleRecord">
           <b-link

@@ -77,6 +77,8 @@
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import toLower from 'lodash/toLower';
+import isEmpty from 'lodash/isEmpty';
+import cloneDeep from 'lodash/cloneDeep';
 import ChangeLogAddressCard from './ChangeLogAddressCard';
 import Loading from './Loading';
 import SearchBar from './SearchBar';
@@ -223,9 +225,13 @@ export default {
       return this.cleanLogs.slice(0, 3);
     },
     logs() {
-      if (this.keywordFilter || this.selectedStatus.value) {
-        return this.cleanLogs
-          .filter(log => get(log.changes, 'status.new') === this.selectedStatus.value)
+      if (this.keywordFilter) {
+        let logs = cloneDeep(this.cleanLogs);
+        if (this.selectedStatus.value) {
+          logs = logs.filter(log => get(log.changes, 'status.new') === this.selectedStatus.value);
+        }
+        return logs
+          .filter(log => !isEmpty(log.changes))
           .filter(log => this.compareToKeyword([
             log.address.addr1,
             log.address.addr2,

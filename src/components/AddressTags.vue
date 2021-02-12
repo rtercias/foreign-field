@@ -6,7 +6,8 @@
           <b-badge
             v-for="(tag, index) in preview"
             pill
-            class="tag-button mr-1 mb-1 border-primary text-white d-flex "
+            class="tag-button mr-1 mb-1 text-white d-flex "
+            :class="highlight(tag) ? 'border-danger' : 'border-primary'"
             size='sm'
             :key="index"
             :variant="highlight(tag) ? 'danger' : 'primary'"
