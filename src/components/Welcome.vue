@@ -162,16 +162,18 @@ export default {
     },
     async refresh() {
       this.isUserError = false;
-      if (this.user) {
-        if (this.user.username && this.doUpdateTerritories) {
-          await this.getUserTerritories(this.user.username);
+      try {
+        if (this.user) {
+          if (this.user.username && this.doUpdateTerritories) {
+            await this.getUserTerritories(this.user.username);
+          }
         }
-
+        this.forceUpdate = false;
+      } catch (e) {
         if (!get(this.userTerritories, 'length')) {
           this.isUserError = true;
         }
       }
-      this.forceUpdate = false;
     },
     async refreshTerritories() {
       this.forceUpdate = true;
