@@ -172,42 +172,19 @@ export default {
       cong.campaign = !cong.campaign;
       await this.updateCongregation(cong);
 
-      const checkinAll = await this.$bvModal.msgBoxConfirm(
-        'Do you want to check in ALL territories, or allow publishers to keep their checked out territories', {
-          title: `${cong.name} Campaign`,
-          centered: true,
-          okTitle: 'Check In',
-          cancelTitle: 'Keep Checkouts',
-        }
-      );
+      // Step 2a: check in all
+      this.$bvToast.toast('Checking in all territories. The page will refresh when it\'s done.', {
+        variant: 'warning',
+        noAutoHide: true,
+      });
 
-      if (checkinAll) {
-        // Step 2a: check in all
-        this.$bvToast.toast('Checking in all territories. The page will refresh when it\'s done.', {
-          variant: 'warning',
-          noAutoHide: true,
-        });
-
-        await this.checkinAll({
-          congId: cong.id,
-          username: this.user.username,
-          tzOffset: new Date().getTimezoneOffset().toString(),
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          campaign: false,
-        });
-      } else {
-        // Step 2b: copy existing checkouts for campaign
-        this.$bvToast.toast('Copying existing checkouts. The page will refresh when it\'s done.', {
-          variant: 'warning',
-          noAutoHide: true,
-        });
-
-        await this.copyCheckouts({
-          congId: cong.id,
-          username: this.user.username,
-          campaign: true,
-        });
-      }
+      await this.checkinAll({
+        congId: cong.id,
+        username: this.user.username,
+        tzOffset: new Date().getTimezoneOffset().toString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        campaign: false,
+      });
 
       this.togglingCampaignMode = false;
       this.$router.go();
@@ -254,8 +231,7 @@ export default {
             innerHTML:
             `<p><b>IMPORTANT: CAMPAIGNS WILL RESET ALL ACTIVITIES! PLEASE USE RESPONSIBLY.</b></p>
             <p>Campaigns allow territories to be worked separately from regular territory coverage.
-            When a new campaign is started, you are given the option to <u>check in all territories</u> or
-            allow publishers to <u>keep territories</u> they've already checked out.</p>
+            When a new campaign is started, all territories will be checked in.</p>
             <p>To begin, press "New Campaign".</p>
             <p>After the campaign, press "End Campaign".<br/>This will <u>check in all campaign territories</u>
             and reset them back to regular territories.</p>
