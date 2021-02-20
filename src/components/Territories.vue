@@ -177,6 +177,7 @@ export default {
       token: 'auth/token',
       territories: 'territories/territories',
       groups: 'group/groups',
+      group: 'group/group',
       isDesktop: 'auth/isDesktop',
       canManage: 'auth/canManage',
       territoriesCancelTokens: 'territories/cancelTokens',
@@ -239,7 +240,7 @@ export default {
     },
 
     async fetch() {
-      const congId = this.congId || (this.user && this.user.congId);
+      const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
       this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
       this.sortOption = get(this.congregation, 'options.territories.defaultSort') || 'Description';
       await this.fetchTerritories({
@@ -291,9 +292,10 @@ export default {
   },
 
   async mounted() {
-    const congId = this.congId || (this.user && this.user.congId);
+    const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
     this.selectedGroup = this.groupId;
     await this.getGroup({ id: this.groupId });
+    if (this.group.congregation_id !== congId) this.selectedGroup = 0;
     await this.fetch();
     await this.fetchPublishers(congId);
 
