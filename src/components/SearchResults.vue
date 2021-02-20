@@ -37,7 +37,7 @@
         <div class="text-uppercase pt-4">Territories</div>
         <b-list-group-item v-for="terr in territories" :key="terr.id">
           <div class="text-left">
-            <b-link :to="`/groups/${terr.group_id}?territory=${terr.name}`" :disabled="!canWrite">
+            <b-link :to="`/territories/${terr.id}`">
               {{terr.name}} {{terr.description}}
             </b-link>
           </div>
