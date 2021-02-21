@@ -327,7 +327,12 @@ export const auth = {
         return;
       }
       const back = get(Vue.$route, 'query.back') || get(vm.$route, 'meta.back');
-      if (state.canWrite && back) {
+      const userRoles = get(state.user, 'role', '').split(',');
+      const resolvedTo = vm.$router.resolve({ name: back });
+      const permissions = get(resolvedTo, 'route.meta.permissions') || [];
+      const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
+
+      if (back && hasPermission) {
         vm.$router.push({ name: back, params: getters.leftNavRouteParams });
       } else {
         vm.$router.back();
