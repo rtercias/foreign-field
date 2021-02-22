@@ -29,7 +29,7 @@ import get from 'lodash/get';
 import { channel } from './main';
 import Masthead from './components/Masthead';
 import { AddressStatus } from './store';
-import { unmask } from '../utils/phone';
+import { unmask } from './utils/phone';
 
 export default {
   name: 'app',
