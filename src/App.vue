@@ -29,6 +29,7 @@ import get from 'lodash/get';
 import { channel } from './main';
 import Masthead from './components/Masthead';
 import { AddressStatus } from './store';
+import { unmask } from '../utils/phone';
 
 export default {
   name: 'app',
@@ -68,6 +69,7 @@ export default {
     });
     channel.bind('add-phone', (phone) => {
       if (phone && this.territory.id === phone.territory_id) {
+        phone.phone = unmask(phone);
         this.addPhone(phone);
       }
     });
@@ -76,6 +78,7 @@ export default {
         if (phone.status !== AddressStatus.Active) {
           this.deletePhone(phone);
         } else {
+          phone.phone = unmask(phone);
           this.updatePhone(phone);
         }
       }
