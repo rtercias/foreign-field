@@ -17,11 +17,15 @@
         <b-nav-text class="campaign-mode" v-if="isSearchHidden">
           <span v-if="!isDesktop && isCampaignMode">CAMPAIGN MODE</span>
         </b-nav-text>
-        <b-nav-text id="nav-search-bar" class="py-1" :class="{ 'w-full': !isSearchHidden, 'w-100': isDesktop }">
+        <b-nav-text id="nav-search-bar" class="py-1" :class="{
+          'w-full ml-3': !isSearchHidden,
+          'ml-5': isSearchHidden && !isDesktop,
+          'w-100': isDesktop
+          }">
           <search-bar
             v-if="(!isSearchHidden || isDesktop) && isAuthorized"
             class="search-bar w-100"
-            :search-text="'Search address or territory'"
+            :search-text="'Search address, phone or territory'"
             @on-click="search"
             :no-padding="true"
           />
@@ -147,8 +151,9 @@ export default {
       });
     },
     search(keyword) {
+      const scrubbed = keyword.replace(/\W/g, '');
       this.isSearchHidden = true;
-      if (keyword) this.$router.push({ name: 'search', params: { keyword } });
+      if (scrubbed) this.$router.push({ name: 'search', params: { keyword: scrubbed } });
     },
     async toggleCampaignMode() {
       if (this.isCampaignMode) {
@@ -305,7 +310,7 @@ export default {
 }
 #nav-search-bar {
   &.w-full {
-    width: 240px;
+    width: 260px;
   }
 
   .search-bar {

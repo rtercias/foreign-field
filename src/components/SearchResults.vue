@@ -19,17 +19,27 @@
             <b-link :to="link(address)" :disabled="!canWrite">
               <div>{{address.addr1}} {{address.addr2}}</div>
               <div>{{address.city}}, {{address.state_province}} {{address.postal_code}}</div>
-              <b-badge v-if="isUnassigned(address)" variant="warning" class="text-lowercase">
-                unassigned
-              </b-badge>
-              <b-badge v-if="isNF(address)" variant="danger" class="text-lowercase">
-                {{formatLanguage(statusText(address.status), language)}}
-              </b-badge>
-              <b-badge v-if="isDNC(address)" variant="danger" class="text-lowercase">
-                {{ADDRESS_STATUS.DNC.text}}
-              </b-badge>
-              <div v-else>({{get(address, 'territory.name')}})</div>
             </b-link>
+            <b-badge v-if="isUnassigned(address)" variant="warning" class="text-lowercase">
+              unassigned
+            </b-badge>
+            <b-badge v-if="isNF(address)" variant="danger" class="text-lowercase">
+              {{formatLanguage(statusText(address.status), language)}}
+            </b-badge>
+            <b-badge v-if="isDNC(address)" variant="danger" class="text-lowercase">
+              {{ADDRESS_STATUS.DNC.text}}
+            </b-badge>
+            <div v-else>({{get(address, 'territory.name')}})</div>
+          </div>
+        </b-list-group-item>
+        <b-list-group-item v-for="phone in phones" :key="phone.id">
+          <div class="text-left">
+            <b-link :to="link(phone.address)" :disabled="!canWrite">
+              <div>{{phone.address.addr1}} {{phone.address.addr2}}</div>
+              <div>{{phone.address.city}}, {{phone.address.state_province}} {{phone.address.postal_code}}</div>
+              <div>{{formatPhone(phone.phone)}}</div>
+            </b-link>
+            <div>({{get(phone, 'territory.name')}})</div>
           </div>
         </b-list-group-item>
       </b-list-group>
@@ -53,6 +63,7 @@ import get from 'lodash/get';
 import SearchBar from './SearchBar';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
 import { formatLanguage } from '../utils/tags';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'SearchResults',
@@ -75,6 +86,7 @@ export default {
       user: 'auth/user',
       addresses: 'addresses/search',
       territories: 'territories/territories',
+      phones: 'phone/search',
       canWrite: 'auth/canWrite',
       congregation: 'congregation/congregation',
     }),
@@ -86,9 +98,11 @@ export default {
     ...mapActions({
       addressSearch: 'addresses/addressSearch',
       fetchAllTerritories: 'territories/fetchAllTerritories',
+      phoneSearch: 'phone/phoneSearch',
     }),
     get,
     formatLanguage,
+    formatPhone,
     reset() {
       this.text = '';
     },
@@ -104,6 +118,7 @@ export default {
       this.text = keyword;
       await this.addressSearch({ congId, searchTerm: keyword, status: '*' });
       await this.fetchAllTerritories({ congId, keyword });
+      await this.phoneSearch({ congId, searchTerm: keyword, status: '*' });
     },
     async clickedSearch(keyword) {
       this.$router.push({ name: 'search', params: { keyword } });
@@ -124,6 +139,7 @@ export default {
       return ADDRESS_STATUS[status].text;
     },
     link(address) {
+      if (!address) return null;
       if (this.isInactive(address)) {
         return `/territories/${address.territory_id}/addresses/${address.id}/edit`;
       }

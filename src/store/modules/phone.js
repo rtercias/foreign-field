@@ -309,6 +309,15 @@ export const phone = {
                   description
                   group_id
                 }
+                address {
+                  id
+                  addr1
+                  addr2
+                  city
+                  state_province
+                  postal_code
+                  territory_id
+                }
               }
             }`),
             variables: {
