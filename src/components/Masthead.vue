@@ -290,8 +290,10 @@ export default {
 </script>
 
 <style lang="scss">
-.masthead .navbar {
-  min-height: 52px;
+.masthead {
+  .navbar {
+    min-height: 52px;
+  }
 }
 .pull-down-header {
   background-color: unset;
