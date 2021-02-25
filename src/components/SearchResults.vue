@@ -121,7 +121,9 @@ export default {
       this.text = keyword;
       await this.addressSearch({ congId, searchTerm: keyword, status: '*' });
       await this.fetchAllTerritories({ congId, keyword });
-      await this.phoneSearch({ congId, searchTerm: keyword, status: '*' });
+
+      const phone = keyword.replace(/\W/g, '');
+      await this.phoneSearch({ congId, searchTerm: phone, status: '*' });
     },
     async clickedSearch(keyword) {
       this.$router.push({ name: 'search', params: { keyword } });

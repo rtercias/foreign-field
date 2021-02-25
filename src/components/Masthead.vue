@@ -11,14 +11,16 @@
         variant="primary"
         toggleable
         fill>
-        <b-link class="button text-white-50" @click="goBack" v-show="showLeftNav && !isDesktop">
-          <font-awesome-icon icon="chevron-left"></font-awesome-icon>
-        </b-link>
+        <div>
+          <b-link class="button text-white-50" @click="goBack" v-show="showLeftNav && !isDesktop">
+            <font-awesome-icon icon="chevron-left"></font-awesome-icon>
+          </b-link>
+        </div>
         <b-nav-text class="campaign-mode" v-if="isSearchHidden">
           <span v-if="!isDesktop && isCampaignMode">CAMPAIGN MODE</span>
         </b-nav-text>
         <b-nav-text id="nav-search-bar" class="py-1" :class="{
-          'w-full ml-3': !isSearchHidden,
+          'w-full mx-0': !isSearchHidden,
           'ml-5': isSearchHidden && !isDesktop,
           'w-100': isDesktop
           }">
@@ -156,9 +158,8 @@ export default {
         this.isSearchHidden = true;
         return;
       }
-      const scrubbed = keyword.replace(/\W/g, '');
       this.isSearchHidden = true;
-      if (scrubbed) this.$router.push({ name: 'search', params: { keyword: scrubbed } });
+      this.$router.push({ name: 'search', params: { keyword } });
     },
     async toggleCampaignMode() {
       if (this.isCampaignMode) {
