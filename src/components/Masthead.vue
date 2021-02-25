@@ -51,7 +51,8 @@
               :to="`/territories/${territory && territory.id}/optimize`">
               Optimize
             </b-nav-item>
-            <b-nav-item>
+            <b-nav-item
+              v-if="canLead">
               <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">
                 <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
                 <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
