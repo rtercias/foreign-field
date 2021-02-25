@@ -152,6 +152,10 @@ export default {
       });
     },
     search(keyword) {
+      if (!keyword) {
+        this.isSearchHidden = true;
+        return;
+      }
       const scrubbed = keyword.replace(/\W/g, '');
       this.isSearchHidden = true;
       if (scrubbed) this.$router.push({ name: 'search', params: { keyword: scrubbed } });
@@ -213,7 +217,7 @@ export default {
 
       // Step 1: toggle campaign mode
       cong.campaign = !cong.campaign;
-      await this.updateCongregation({ cong });
+      await this.updateCongregation(cong);
 
       // Step 2: check in all
       await this.checkinAll({

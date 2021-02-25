@@ -54,10 +54,9 @@ export const auth = {
     canCheckout: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canWrite: state => state.user && ['Admin', 'TS', 'SO', 'GO', 'RP-E'].includes(state.user.role),
     canRead: (state, getters) => getters.canWrite || state.user && ['RP', 'RP-E', 'TS'].includes(state.user.role),
-    canManage: state => state.user && (
-      state.user.role === 'TS' || state.user.role === 'SO' || state.user.role === 'Admin'
-    ),
-    canLead: state => state.user && state.user.role === 'SO',
+    canManage: state => get(state.user, 'role') === 'TS' || get(state.user, 'role') === 'SO'
+      || get(state.user, 'role') === 'Admin',
+    canLead: state => get(state.user, 'role') === 'SO',
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
     options: state => state.options,

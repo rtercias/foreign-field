@@ -16,7 +16,6 @@
           <span v-if="canWrite">{{routeLabel}}</span>
         </div>
         <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
-        <b-nav-text></b-nav-text>
       </b-navbar>
       <router-view class="view" :key="key"></router-view>
     </div>
