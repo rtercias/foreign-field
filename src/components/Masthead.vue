@@ -51,14 +51,13 @@
               :to="`/territories/${territory && territory.id}/optimize`">
               Optimize
             </b-nav-item>
-            <b-nav-item
-              v-if="canLead">
+            <b-nav-item>
               <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">
                 <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
                 <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
                 {{isCampaignMode ? 'End Campaign' : 'New Campaign'}}
               </span>
-              <font-awesome-icon v-if="canLead" class="ml-1 text-info" icon="info-circle" @click="toggleCampaignHelp" />
+              <font-awesome-icon class="ml-1 text-info" icon="info-circle" @click="toggleCampaignHelp" />
               <b-toaster name="campaign-help"></b-toaster>
             </b-nav-item>
           </b-navbar-nav>
@@ -133,6 +132,7 @@ export default {
       checkinAll: 'territories/checkinAll',
       copyCheckouts: 'territories/copyCheckouts',
       back: 'auth/back',
+      updateCongregation: 'congregation/updateCongregation',
     }),
     get,
     goBack() {
