@@ -12,7 +12,7 @@
         class="buttons"
         :class="{
         'align-items-center d-flex justify-content-between mx-2': showFilter,
-        'position-absolute mr-2 mt-2 d-inline': !showFilter,
+        'position-absolute mr-1 mt-1 d-inline': !showFilter,
       }">
         <i title="Filter">
           <font-awesome-icon
@@ -35,13 +35,14 @@
           <font-awesome-icon
             v-if="allowExclude"
             :disabled="!keywordFilter"
-            class="text-primary mr-3"
-            :class="{ 'text-light no-pointer': !keywordFilter }"
+            class="text-primary"
+            :class="{ 'text-light no-pointer': !keywordFilter, 'mr-3': showSearch }"
             :icon="!exclude ? 'not-equal' : 'equals'"
             @click="exclude = !exclude" />
       </i>
       <i title="Search">
         <font-awesome-icon
+          v-if="showSearch"
           :disabled="!keywordFilter"
           class="text-primary"
           :class="{ 'text-light no-pointer': !keywordFilter }"
@@ -90,11 +91,15 @@ export default {
   },
   computed: {
     showFilter() {
-      return !!this.$listeners['on-filter'];
+      return !!this.$listeners['on-filter'] || !!this.$listeners['on-change'];
+    },
+    showSearch() {
+      return !!this.$listeners['on-click'];
     },
   },
   watch: {
     keywordFilter() {
+      if (!this.keywordFilter) this.clear();
       this.$emit('on-change', this.keywordFilter, this.exclude);
     },
     exclude() {
