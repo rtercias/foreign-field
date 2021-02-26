@@ -1,11 +1,19 @@
 <template>
   <div class="territory-addresses pb-5">
-    <SearchBar :search-text="'Search this territory'" @on-click="search" top="187px"></SearchBar>
+    <SearchBar
+      :search-text="'Search this territory'"
+      @on-click="search"
+      @on-filter="filter"
+      :model="keywordFilter"
+      :results="filteredAddresses"
+      :allow-exclude="true"
+      top="187px"
+    />
     <b-list-group>
       <swipe-list
         ref="list"
         class="card"
-        :items="territory.addresses"
+        :items="filteredAddresses"
         item-key="id"
         :revealed.sync="revealed"
         :disabled="disabled"
@@ -83,6 +91,8 @@ export default {
       workInProgress: {},
       revealed: {},
       foundId: 0,
+      keywordFilter: '',
+      exclude: false,
     };
   },
   computed: {
@@ -104,6 +114,16 @@ export default {
     },
     doNotMail() {
       return (get(this.address, 'notes') || '').includes('do not mail');
+    },
+    filteredAddresses() {
+      const keyword = this.keywordFilter.toLowerCase();
+      return this.territory.addresses.filter((a) => {
+        const addressFound = this.compareToKeyword(
+          keyword,
+          [a.addr1, a.addr2, a.city, a.notes],
+        );
+        return this.exclude !== addressFound;
+      });
     },
   },
   methods: {
@@ -176,6 +196,11 @@ export default {
         (acc, value) => acc || String(value).toLowerCase().includes(keyword.toLowerCase()),
         false,
       );
+    },
+    filter(_keyword, exclude) {
+      this.keywordFilter = _keyword;
+      this.exclude = exclude;
+      this.$emit('update-count', this.filteredAddresses.length);
     },
   },
 };

@@ -1,8 +1,17 @@
 <template>
   <div class="phone-witnessing w-100 d-flex flex-row flex-wrap">
-    <SearchBar class="w-100" :search-text="'Search this territory'" @on-click="search" top="187px"></SearchBar>
+    <SearchBar
+      class="w-100"
+      :search-text="'Search this territory'"
+      @on-click="search"
+      @on-filter="filter"
+      :model="keywordFilter"
+      :results="filteredAddresses"
+      :allow-exclude="true"
+      top="187px"
+    />
     <PhoneAddressCard
-      v-for="(a, index) in territory.addresses" :key="a.id"
+      v-for="(a, index) in filteredAddresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"
       :class="{ 'border-success border-medium': a.id === foundId }"
@@ -50,6 +59,8 @@ export default {
       workInProgress: {},
       foundId: 0,
       isLoading: true,
+      keywordFilter: '',
+      exclude: false,
     };
   },
   computed: {
@@ -69,7 +80,18 @@ export default {
       return this.actionButtonList.filter(b => BUTTON_LIST.includes(b.value));
     },
     addressCount() {
-      return get(this.territory, 'addresses.length') || 0;
+      return get(this.filteredAddresses, 'length') || 0;
+    },
+    filteredAddresses() {
+      const keyword = this.keywordFilter.toLowerCase();
+      return this.territory.addresses.filter((a) => {
+        const phoneFound = a.phones.find(p => this.compareToKeyword(keyword, [p.phone, p.notes]));
+        const addressFound = this.compareToKeyword(
+          keyword,
+          [a.addr1, a.addr2, a.city, a.notes],
+        );
+        return this.exclude !== (phoneFound || addressFound);
+      });
     },
   },
   methods: {
@@ -96,6 +118,12 @@ export default {
 
       this.foundId = foundAddress && foundAddress.id || foundPhone && foundPhone.id || 0;
       this.scrollToView();
+    },
+
+    filter(_keyword, exclude) {
+      this.keywordFilter = _keyword;
+      this.exclude = exclude;
+      this.$emit('update-count', this.filteredAddresses.length);
     },
 
     scrollToView() {
