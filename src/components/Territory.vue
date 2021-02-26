@@ -10,7 +10,7 @@
                 {{territory.description}}
                 <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
               </h4>
-              <span class="small">{{displayCount}}</span>
+              <span class="small">{{filteredCount || displayCount}}</span>
             </div>
             <div class="text-right w-50">
               <h4>
@@ -62,7 +62,7 @@
           </div>
         </div>
       </header>
-      <router-view :disabled="!isCheckedOut" :territory="territory"></router-view>
+      <router-view :disabled="!isCheckedOut" :territory="territory" @update-count="updateCount"></router-view>
     </div>
   </div>
 </template>
@@ -108,6 +108,7 @@ export default {
       workInProgress: {},
       viewMode: this.defaultView,
       isCheckingIn: false,
+      filteredCount: '',
     };
   },
   async mounted() {
@@ -258,6 +259,10 @@ export default {
     openSMSMobile() {
       window.open(`sms:&body=Work this territory with me!%0a%0a${window.location.href}`, '_self');
       return false;
+    },
+
+    updateCount(count) {
+      this.filteredCount = `Count: ${count}`;
     },
   },
   watch: {

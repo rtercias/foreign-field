@@ -81,6 +81,8 @@ import {
   faEyeSlash,
   faExpandAlt,
   faCompressAlt,
+  faNotEqual,
+  faEquals,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 
@@ -136,6 +138,8 @@ library.add(
   faEyeSlash,
   faExpandAlt,
   faCompressAlt,
+  faNotEqual,
+  faEquals,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
