@@ -7,9 +7,12 @@
       <span class="blockquote" v-if="activityLogs.length === 0">
         No activity logs. This address is fresh!
       </span>
-      <div v-else>
+      <span v-else>
+        Activity history for current checkout only.
+      </span>
+      <div>
         <div class="pb-3" v-if="!!checkoutId">
-          Activity history for current checkout only. Click
+          Click
           <b-button class="p-0" variant="link" @click="toggleCheckout">here</b-button>
           <span v-if="useCheckoutId"> to see all history.</span>
           <span v-else> to see only the current checkout.</span>
