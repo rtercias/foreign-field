@@ -84,7 +84,8 @@ export default {
     },
     filteredAddresses() {
       const keyword = this.keywordFilter.toLowerCase();
-      return this.territory.addresses.filter((a) => {
+      const addresses = get(this.territory, 'addresses') || [];
+      return addresses.filter((a) => {
         const phoneFound = a.phones.find(p => this.compareToKeyword(keyword, [p.phone, p.notes]));
         const addressFound = this.compareToKeyword(
           keyword,

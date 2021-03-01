@@ -205,7 +205,7 @@ export default {
     }),
 
     async refresh() {
-      if (this.territory.id === this.territoryId) {
+      if (this.territory.id === this.territoryId && !!this.territory.addresses) {
         if (!this.cancelTokens.FETCH_LAST_ACTIVITY) {
           await this.fetchLastActivities(this.territory);
         }
