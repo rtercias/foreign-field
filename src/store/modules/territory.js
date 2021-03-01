@@ -244,7 +244,7 @@ export const territory = {
           throw new Error('Unable to check in territory because the required arguments were not provided');
         }
 
-        await axios({
+        const response = await axios({
           data: {
             query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
               checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user)
@@ -257,8 +257,9 @@ export const territory = {
           },
         });
 
+        const checkoutId = get(response, 'data.data.checkinTerritory');
         commit(CHANGE_STATUS, {
-          checkoutId: args.checkout_id,
+          checkoutId,
           status: 'Recently Worked',
           publisher: args.publisher,
         });
@@ -270,7 +271,7 @@ export const territory = {
 
     async checkoutTerritory({ commit, dispatch }, args) {
       try {
-        await axios({
+        const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           headers: {
@@ -288,7 +289,8 @@ export const territory = {
           },
         });
 
-        commit(CHANGE_STATUS, { status: 'Checked Out', publisher: args.publisher });
+        const checkoutId = get(response, 'data.data.checkoutTerritory');
+        commit(CHANGE_STATUS, { checkoutId, status: 'Checked Out', publisher: args.publisher });
         await dispatch('auth/getUserTerritories', args.username, { root: true });
       } catch (e) {
         console.error('Unable to checkout territory', e);
