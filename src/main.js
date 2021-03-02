@@ -83,8 +83,10 @@ import {
   faCompressAlt,
   faNotEqual,
   faEquals,
+  faLink,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
+import VueClipboard from 'vue-clipboard2';
 
 library.add(
   faCheck,
@@ -140,6 +142,7 @@ library.add(
   faCompressAlt,
   faNotEqual,
   faEquals,
+  faLink,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);
@@ -148,6 +151,9 @@ Vue.component('font-awesome-layers-text', FontAwesomeLayersText);
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(BootstrapVue);
+
+VueClipboard.config.autoSetContainer = true;
+Vue.use(VueClipboard);
 
 /* eslint-disable */
 delete Icon.Default.prototype._getIconUrl;
