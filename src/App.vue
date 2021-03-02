@@ -23,7 +23,7 @@
       <b-navbar :class="isDesktop ? 'w-75' : 'w-100'"
         class="desktop-nav alert-secondary d-flex justify-content-end border-medium
           border-top border-bottom-0 border-left-0 border-right-0 py-0">
-        <b-link class="button" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
+        <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
           <font-awesome-icon icon="link"></font-awesome-icon>
         </b-link>
       </b-navbar>
@@ -138,6 +138,7 @@ export default {
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       territory: 'territory/territory',
+      isAuthenticated: 'auth/isAuthenticated',
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
