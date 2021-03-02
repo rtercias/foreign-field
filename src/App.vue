@@ -19,6 +19,15 @@
       </b-navbar>
       <router-view class="view" :key="key"></router-view>
     </div>
+    <footer class="app-footer w-100 d-flex justify-content-end">
+      <b-navbar :class="isDesktop ? 'w-75' : 'w-100'"
+        class="desktop-nav alert-secondary d-flex justify-content-end border-medium
+          border-top border-bottom-0 border-left-0 border-right-0 py-0">
+        <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
+          <font-awesome-icon icon="link"></font-awesome-icon>
+        </b-link>
+      </b-navbar>
+    </footer>
   </div>
 </template>
 
@@ -129,6 +138,7 @@ export default {
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       territory: 'territory/territory',
+      isAuthenticated: 'auth/isAuthenticated',
     }),
     isCampaignMode() {
       return !!get(this.user, 'congregation.campaign') || false;
@@ -141,6 +151,9 @@ export default {
     },
     routeLabel() {
       return get(this.$route, 'meta.label');
+    },
+    location() {
+      return document.location;
     },
   },
   methods: {
@@ -167,6 +180,14 @@ export default {
       const back = get(this.$route, 'meta.back');
       const backRoute = this.$router.resolve({ name: back });
       this.backLabel = back ? get(backRoute, 'route.meta.label') : '';
+    },
+    urlCopied() {
+      this.$bvToast.toast(`Copied link: ${document.location.href}`, {
+        variant: 'success',
+        toaster: 'b-toaster-bottom-right mr-5',
+        noCloseButton: true,
+        autoHideDelay: 1000,
+      });
     },
   },
   watch: {
