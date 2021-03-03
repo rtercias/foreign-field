@@ -19,10 +19,10 @@
       </b-navbar>
       <router-view class="view" :key="key"></router-view>
     </div>
-    <footer class="app-footer w-100 d-flex justify-content-end">
+    <footer v-if="isDesktop || isPWA" class="app-footer w-100 d-flex justify-content-end">
       <b-navbar :class="isDesktop ? 'w-75' : 'w-100'"
         class="desktop-nav alert-secondary d-flex justify-content-end border-medium
-          border-top border-bottom-0 border-left-0 border-right-0 py-0">
+          border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
         <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
           <font-awesome-icon icon="link"></font-awesome-icon>
         </b-link>
@@ -135,6 +135,7 @@ export default {
     ...mapGetters({
       isForcedOut: 'auth/isForcedOut',
       isDesktop: 'auth/isDesktop',
+      isPWA: 'auth/isPWA',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       territory: 'territory/territory',

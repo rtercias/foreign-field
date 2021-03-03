@@ -122,6 +122,7 @@ export default {
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
+      isPWA: 'auth/isPWA',
       myTerritoriesLoading: 'auth/myTerritoriesLoading',
       userTerritories: 'auth/userTerritories',
       recentlySeenTerritories: 'territories/recentlySeenTerritories',
@@ -132,9 +133,6 @@ export default {
     },
     territories() {
       return this.userTerritories || [];
-    },
-    isPWA() {
-      return window.matchMedia('(display-mode: standalone)').matches;
     },
     doUpdateTerritories() {
       return !this.userTerritories.length || this.forceUpdate;

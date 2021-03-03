@@ -59,6 +59,7 @@ export const auth = {
     canLead: state => get(state.user, 'role') === 'SO',
     token: state => state.token,
     isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
+    isPWA: () => window.matchMedia('(display-mode: standalone)').matches,
     options: state => state.options,
     myTerritoriesLoading: state => state.myTerritoriesLoading,
     userTerritories: state => state.userTerritories,
