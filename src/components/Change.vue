@@ -57,13 +57,13 @@ export default {
       return (get(this.congregation, 'language') || 'Tagalog');
     },
     newItems() {
-      const newValues = this.change.new.length ? this.change.new.split(',') : [];
-      const oldValues = this.change.old.length ? this.change.old.split(',') : [];
+      const newValues = get(this.change, 'new.length') ? this.change.new.split(',') : [];
+      const oldValues = get(this.change, 'old.length') ? this.change.old.split(',') : [];
       return difference(newValues, oldValues) || [];
     },
     oldItems() {
-      const newValues = this.change.new.length ? this.change.new.split(',') : [];
-      const oldValues = this.change.old.length ? this.change.old.split(',') : [];
+      const newValues = get(this.change, 'new.length') ? this.change.new.split(',') : [];
+      const oldValues = get(this.change, 'old.length') ? this.change.old.split(',') : [];
       return difference(oldValues, newValues) || [];
     },
   },

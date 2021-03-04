@@ -48,6 +48,10 @@
               </b-button>
             </b-button-group>
             <b-button-group v-else size="sm" class="badge px-0">
+              <b-button v-if="canManage" variant="danger" @click="reset">
+                <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
+                <span v-else>Reset</span>
+              </b-button>
               <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Check In</span>
@@ -56,7 +60,7 @@
                 v-if="canWrite && ['address-list', 'phone-list'].includes(viewMode)"
                 variant="success"
                 :to="`/territories/${territoryId}/addresses/add`">
-                <font-awesome-icon icon="plus"></font-awesome-icon> New Address
+                <font-awesome-icon icon="plus"></font-awesome-icon>Address
               </b-button>
             </b-button-group>
           </div>
@@ -104,10 +108,10 @@ export default {
   },
   data() {
     return {
-      reset: false,
       workInProgress: {},
       viewMode: this.defaultView,
       isCheckingIn: false,
+      isResetting: false,
       filteredCount: '',
     };
   },
@@ -222,6 +226,24 @@ export default {
 
       if (response) {
         this.checkInAndReset();
+      }
+    },
+
+    async reset() {
+      const response = await this.$bvModal.msgBoxConfirm('Are you sure you want to reset this territory?', {
+        title: `${this.territory.name}`,
+        centered: true,
+        okTitle: 'Reset',
+      });
+
+      if (response) {
+        await this.resetTerritoryActivities({
+          checkoutId: this.territory.status.checkout_id,
+          userid: this.user.id,
+          tzOffset: new Date().getTimezoneOffset().toString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        });
+        this.$router.go();
       }
     },
 
