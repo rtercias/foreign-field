@@ -17,12 +17,14 @@ const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
 const UPDATE_TOKEN = 'UPDATE_TOKEN';
 const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
+const WINDOW_RESIZE = 'WINDOW_RESIZE';
 
 function initialState() {
   return {
     isAuthenticated: false,
     isPending: false,
     isForcedOut: false,
+    isSwitchedToDesktop: false,
     name: '',
     user: undefined,
     photoUrl: '',
@@ -58,7 +60,7 @@ export const auth = {
       || get(state.user, 'role') === 'Admin',
     canLead: state => get(state.user, 'role') === 'SO',
     token: state => state.token,
-    isDesktop: () => window.matchMedia('(min-width: 801px)').matches,
+    isDesktop: state => state.isSwitchedToDesktop || window.matchMedia('(min-width: 801px)').matches,
     isPWA: () => window.matchMedia('(display-mode: standalone)').matches,
     options: state => state.options,
     myTerritoriesLoading: state => state.myTerritoriesLoading,
@@ -128,6 +130,9 @@ export const auth = {
       Vue.set(state.user, 'territories', territories);
       Vue.set(state, 'userTerritories', territories);
       Vue.set(state, 'myTerritoriesLoading', false);
+    },
+    WINDOW_RESIZE(state) {
+      state.isSwitchedToDesktop = window.matchMedia('(min-width: 801px)').matches;
     },
   },
 
@@ -337,6 +342,10 @@ export const auth = {
       } else {
         vm.$router.back();
       }
+    },
+
+    changeWindowSize({ commit }) {
+      commit(WINDOW_RESIZE);
     },
   },
 };

@@ -49,6 +49,12 @@ export default {
       backLabel: '',
     };
   },
+  created() {
+    window.addEventListener('resize', this.changeWindowSize);
+  },
+  destroyed() {
+    window.removeEventListener('resize', this.changeWindowSize);
+  },
   async mounted() {
     await this.refresh();
 
@@ -161,6 +167,7 @@ export default {
     ...mapActions({
       back: 'auth/back',
       authorize: 'auth/authorize',
+      changeWindowSize: 'auth/changeWindowSize',
       addAddress: 'territory/addAddress',
       addPhone: 'territory/addPhone',
       updateAddress: 'territory/updateAddress',
