@@ -82,7 +82,7 @@ export const phone = {
       commit(SET_PHONE, _phone);
     },
 
-    async fetchLastActivity({ commit, dispatch }, { phoneId, cancelToken }) {
+    async fetchLastActivity({ commit, dispatch }, { phoneId, checkoutId, cancelToken }) {
       try {
         if (!phoneId) {
           commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
@@ -97,9 +97,9 @@ export const phone = {
           },
           cancelToken,
           data: {
-            query: print(gql`query Phone($phoneId: Int) {
+            query: print(gql`query Phone($phoneId: Int $checkoutId: Int) {
               phone(id: $phoneId) {
-                lastActivity {
+                lastActivity(checkout_id: $checkoutId) {
                   ...ActivityModel
                 }
               }
@@ -107,6 +107,7 @@ export const phone = {
             ${activityModel}`),
             variables: {
               phoneId,
+              checkoutId,
             },
           },
         });

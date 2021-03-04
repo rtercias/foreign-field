@@ -391,13 +391,14 @@ export const territory = {
       commit(FETCH_LAST_ACTIVITY, tokenSource);
 
       const addresses = terr.addresses || [];
+      const checkoutId = get(terr, 'status.checkout_id');
       for (const address of addresses) {
         const phones = address.phones || [];
         for (const phone of phones) {
-          await dispatch('phone/fetchLastActivity', { phoneId: phone.id, cancelToken }, { root: true });
+          await dispatch('phone/fetchLastActivity', { phoneId: phone.id, checkoutId, cancelToken }, { root: true });
           if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
         }
-        await dispatch('address/fetchLastActivity', { addressId: address.id, cancelToken }, { root: true });
+        await dispatch('address/fetchLastActivity', { addressId: address.id, checkoutId, cancelToken }, { root: true });
         if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
       }
       commit(LOADING_TERRITORY_FALSE);

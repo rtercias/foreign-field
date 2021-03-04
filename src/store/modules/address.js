@@ -176,7 +176,7 @@ export const address = {
       }
     },
 
-    async fetchLastActivity({ commit, dispatch }, { addressId, cancelToken }) {
+    async fetchLastActivity({ commit, dispatch }, { addressId, checkoutId, cancelToken }) {
       try {
         if (!addressId) {
           commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
@@ -191,9 +191,9 @@ export const address = {
           },
           cancelToken,
           data: {
-            query: print(gql`query Address($addressId: Int) { 
+            query: print(gql`query Address($addressId: Int $checkoutId: Int) { 
               address(id: $addressId) { 
-                lastActivity {
+                lastActivity(checkout_id: $checkoutId) {
                   ...ActivityModel
                 }
               }
@@ -201,6 +201,7 @@ export const address = {
             ${activityModel}`),
             variables: {
               addressId,
+              checkoutId,
             },
           },
         });
