@@ -18,6 +18,7 @@ const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
 const UPDATE_TOKEN = 'UPDATE_TOKEN';
 const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
 const WINDOW_RESIZE = 'WINDOW_RESIZE';
+const COLLAPSE_NAV = 'COLLAPSE_NAV';
 
 function initialState() {
   return {
@@ -25,6 +26,7 @@ function initialState() {
     isPending: false,
     isForcedOut: false,
     isSwitchedToDesktop: false,
+    isNavCollapsed: true,
     name: '',
     user: undefined,
     photoUrl: '',
@@ -77,6 +79,7 @@ export const auth = {
       publisherId: get(rootGetters['publisher/publisher'], 'id'),
       checkoutId: get(rootGetters['territory/territory'], 'status.checkout_id'),
     }),
+    isNavCollapsed: state => state.isNavCollapsed,
   },
 
   mutations: {
@@ -133,6 +136,9 @@ export const auth = {
     },
     WINDOW_RESIZE(state) {
       state.isSwitchedToDesktop = window.matchMedia('(min-width: 801px)').matches;
+    },
+    COLLAPSE_NAV(state) {
+      state.isNavCollapsed = true;
     },
   },
 
@@ -346,6 +352,10 @@ export const auth = {
 
     changeWindowSize({ commit }) {
       commit(WINDOW_RESIZE);
+    },
+
+    collapseNav({ commit }) {
+      commit(COLLAPSE_NAV);
     },
   },
 };
