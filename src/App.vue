@@ -81,7 +81,7 @@ export default {
     });
     channel.bind('add-phone', (phone) => {
       if (phone && this.territory.id === phone.territory_id) {
-        phone.phone = unmask(phone);
+        phone.phone = unmask(phone.phone);
         this.addPhone(phone);
       }
     });
@@ -90,7 +90,7 @@ export default {
         if (phone.status !== AddressStatus.Active) {
           this.deletePhone(phone);
         } else {
-          phone.phone = unmask(phone);
+          phone.phone = unmask(phone.phone);
           this.updatePhone(phone);
         }
       }
