@@ -4,7 +4,7 @@
     <header class="page-header sticky-top d-flex flex-column align-items-center p-3 border-bottom">
       <div class="w-100 d-flex align-items-start">
         <groups-select :selected-id="selectedGroup" class="col-md-3"></groups-select>
-        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 d-block text-right">
+        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 text-right d-flex">
           <b-badge
             variant="warning"
             class="btn alert p-2 border-medium mb-0"
@@ -35,8 +35,8 @@
           </b-badge>
         </b-button-group>
       </div>
-      <div class="d-flex w-100 justify-content-between w-100 pt-2">
-        <b-dropdown left variant="secondary">
+      <div class="w-100 pt-2 d-md-flex">
+        <b-dropdown left variant="secondary" class="col-12 col-sm-12 col-md-3 px-0 text-left">
           <span slot="button-content">
             <font-awesome-icon icon="filter" />
             {{`${typeText ? `${typeText} - ` : ''}${availabilityText(availability)}`}}
@@ -59,7 +59,8 @@
             {{availabilityText(avail.value)}}
           </b-dropdown-item>
         </b-dropdown>
-        <div>
+        <div class="col-12 col-sm-12 col-md-9 px-0 pt-2 pt-sm-2 pt-md-0
+          text-right d-md-block d-sm-flex justify-content-between">
           <b-dropdown class="sort-btn pr-2" right variant="secondary">
             <span slot="button-content">
               <font-awesome-icon icon="sort-amount-down-alt" />
@@ -322,8 +323,12 @@ export default {
   .availability-filter, .sort-btn li {
     width: calc(100% - 1rem);
   }
-  header {
+  .page-header {
     padding: 1.25rem 2rem;
+
+    .dropdown {
+      max-height: 38px;
+    }
   }
   .list-group {
     display: flex;

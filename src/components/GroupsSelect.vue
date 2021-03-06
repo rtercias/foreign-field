@@ -1,6 +1,6 @@
 <template>
   <b-dropdown
-    class="selected-group text-left h-100 alert p-sm-0 px-0 mb-0"
+    class="selected-group text-left h-100 alert p-sm-0 p-0 mb-0"
     :text="`Service Group: ${truncate(selectedGroup.code, { length: 21 }) || ''}`">
     <b-dropdown-item
       v-for="group in groupsList"
