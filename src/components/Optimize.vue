@@ -159,7 +159,7 @@ export default {
   },
   async mounted() {
     if (this.territory && this.territory.id !== this.territoryId) {
-      await this.getTerritory({ id: this.id });
+      await this.getTerritory({ id: this.territoryId });
     }
     this.reset();
   },
@@ -228,7 +228,7 @@ export default {
         if (addressIds) {
           await this.updateSort({ addressIds, userid: this.user.id });
         }
-        await this.getTerritory({ id: this.id });
+        await this.getTerritory({ id: this.territoryId });
         this.reset();
       }
     },
