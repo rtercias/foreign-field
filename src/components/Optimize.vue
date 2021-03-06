@@ -100,7 +100,7 @@
                 @update="onDragUpdate"
               >
                 <b-list-group-item
-                  class="col-sm-12 overflow-auto p-0"
+                  class="p-0"
                   v-for="(address, index) in optimizedAddresses"
                   v-bind:key="address.id"
                   data-toggle="collapse">
