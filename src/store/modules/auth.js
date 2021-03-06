@@ -18,6 +18,7 @@ const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
 const UPDATE_TOKEN = 'UPDATE_TOKEN';
 const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
 const WINDOW_RESIZE = 'WINDOW_RESIZE';
+const COLLAPSE_NAV = 'COLLAPSE_NAV';
 
 function initialState() {
   return {
@@ -346,6 +347,10 @@ export const auth = {
 
     changeWindowSize({ commit }) {
       commit(WINDOW_RESIZE);
+    },
+
+    collapseNav({ commit }) {
+      commit(COLLAPSE_NAV);
     },
   },
 };

@@ -1,23 +1,16 @@
 <template>
   <div id="app" class="d-flex min-vh-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
-    <Masthead :class="{ 'w-25': isDesktop }"></Masthead>
+    <b-navbar
+      v-if="isDesktop"
+      class="align-items-start mb-n5"
+      :class="{ 'w-25': isDesktop }"
+      type="dark"
+      variant="primary">
+      <nav-menu />
+    </b-navbar>
     <div :class="{ 'w-75': isDesktop }">
-      <b-navbar
-        v-if="isDesktop"
-        :sticky="true"
-        :class="`desktop-nav alert-secondary d-flex justify-content-between
-          border-medium border-bottom border-left-0 border-right-0 py-0`">
-        <div class="app-breadcrumb d-flex align-items-center">
-          <b-button variant="link" class="back-button button p-0" @click="goBack" v-show="showLeftNav">
-            <font-awesome-icon icon="chevron-left"></font-awesome-icon>
-            <span v-if="canWrite">{{backLabel}}</span>
-          </b-button>
-          <span v-if="!!backLabel && canWrite" class="px-1">/</span>
-          <span v-if="canWrite">{{routeLabel}}</span>
-        </div>
-        <b-nav-text v-if="isCampaignMode"><font-awesome-icon icon="bolt" /> CAMPAIGN MODE</b-nav-text>
-      </b-navbar>
-      <router-view class="view" :key="key"></router-view>
+      <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
+      <router-view class="h-100" :key="key"></router-view>
     </div>
     <footer v-if="isDesktop || isPWA" class="app-footer w-100 d-flex justify-content-end">
       <b-navbar :class="isDesktop ? 'w-75' : 'w-100'"
@@ -34,8 +27,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import throttle from 'lodash/throttle';
 import { channel } from './main';
 import Masthead from './components/Masthead';
+import NavMenu from './components/NavMenu';
 import { AddressStatus } from './store';
 import { unmask } from './utils/phone';
 
@@ -43,17 +38,20 @@ export default {
   name: 'app',
   components: {
     Masthead,
+    NavMenu,
   },
   data() {
     return {
-      backLabel: '',
+      hideMenu: false,
     };
   },
   created() {
-    window.addEventListener('resize', this.changeWindowSize);
+    window.addEventListener('resize', throttle(this.changeWindowSize, 100));
+    window.addEventListener('scroll', throttle(this.handleScroll, 100));
   },
   destroyed() {
-    window.removeEventListener('resize', this.changeWindowSize);
+    window.removeEventListener('resize', throttle(this.changeWindowSize, 100));
+    window.removeEventListener('scroll', throttle(this.handleScroll, 100));
   },
   async mounted() {
     await this.refresh();
@@ -156,9 +154,6 @@ export default {
     showLeftNav() {
       return this.$route.name !== 'home';
     },
-    routeLabel() {
-      return get(this.$route, 'meta.label');
-    },
     location() {
       return document.location;
     },
@@ -179,15 +174,10 @@ export default {
       setAddressLastActivity: 'territory/setAddressLastActivity',
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       updateStatus: 'territory/updateStatus',
+      collapseNav: 'auth/collapseNav',
     }),
-    goBack() {
-      this.back({ vm: this });
-    },
     async refresh() {
       if (this.user) await this.authorize(get(this.user, 'username'));
-      const back = get(this.$route, 'meta.back');
-      const backRoute = this.$router.resolve({ name: back });
-      this.backLabel = back ? get(backRoute, 'route.meta.label') : '';
     },
     urlCopied() {
       this.$bvToast.toast(`Copied link: ${document.location.href}`, {
@@ -196,6 +186,12 @@ export default {
         noCloseButton: true,
         autoHideDelay: 1000,
       });
+    },
+    handleScroll() {
+      this.hideMenu = true;
+    },
+    resetHideMenu() {
+      this.hideMenu = false;
     },
   },
   watch: {
@@ -236,7 +232,7 @@ router-link {
   color: $dark;
 
   .desktop-nav {
-    min-height: 52px;
+    min-height: $header-height;
     padding-top: 14px;
     border-bottom: solid 6px;
   }
@@ -249,8 +245,5 @@ router-link {
       }
     }
   }
-}
-.view {
-  height: calc(100% - 52px);
 }
 </style>
