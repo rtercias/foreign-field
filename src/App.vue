@@ -46,12 +46,12 @@ export default {
     };
   },
   created() {
-    window.addEventListener('resize', throttle(this.changeWindowSize, 100));
-    window.addEventListener('scroll', throttle(this.handleScroll, 100));
+    window.addEventListener('resize', throttle(this.changeWindowSize, 0));
+    window.addEventListener('scroll', throttle(this.handleScroll, 0));
   },
   destroyed() {
-    window.removeEventListener('resize', throttle(this.changeWindowSize, 100));
-    window.removeEventListener('scroll', throttle(this.handleScroll, 100));
+    window.removeEventListener('resize', throttle(this.changeWindowSize, 0));
+    window.removeEventListener('scroll', throttle(this.handleScroll, 0));
   },
   async mounted() {
     await this.refresh();
@@ -197,6 +197,7 @@ export default {
   watch: {
     async $route() {
       try {
+        this.hideMenu = true;
         await this.refresh();
       } catch (e) {
         if (String(e).includes('Unauthorized')) {

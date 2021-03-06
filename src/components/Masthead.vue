@@ -42,11 +42,11 @@
             v-if="isSearchHidden && !isDesktop && isAuthorized"
             icon="search"
             class="mt-2"
-            @click="isSearchHidden = false"
+            @click="showMenu = isSearchHidden = false"
           />
         </b-nav-text>
-        <b-navbar-toggle v-if="!isDesktop" target="nav_dropdown_collapse" @click="toggleClick" />
-        <b-collapse is-nav id="nav_dropdown_collapse" v-model="showMenu">
+        <b-navbar-toggle class="px-1" v-if="!isDesktop" target="nav_dropdown_collapse" @click="toggleClick" />
+        <b-collapse is-nav id="nav_dropdown_collapse" v-model="showMenu" @input="toggleMenuComplete">
           <nav-menu />
         </b-collapse>
       </b-navbar>
@@ -114,6 +114,7 @@ export default {
     }),
     get,
     goBack() {
+      this.showMenu = false;
       this.back({ vm: this });
     },
     async onPageRefresh() {
@@ -130,6 +131,7 @@ export default {
       this.backLabel = back ? get(backRoute, 'route.meta.label') : '';
     },
     search(keyword) {
+      this.showMenu = false;
       if (!keyword) {
         this.isSearchHidden = true;
         return;
@@ -137,9 +139,12 @@ export default {
       this.isSearchHidden = true;
       this.$router.push({ name: 'search', params: { keyword } });
     },
-    toggleClick(e) {
+    toggleClick() {
       window.scrollTo({ top: 0 });
-      if (e.returnValue) {
+      if (!this.showMenu) this.toggleMenuComplete(false);
+    },
+    toggleMenuComplete(visible) {
+      if (visible) {
         this.$emit('hide-complete');
       }
     },
