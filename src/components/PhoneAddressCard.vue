@@ -375,7 +375,7 @@ export default {
 
       if (response) {
         this.isAddressBusy = true;
-        phone.phone = unmask(phone);
+        phone.phone = unmask(phone.phone);
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
