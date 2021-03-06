@@ -9,7 +9,7 @@
       <nav-menu />
     </b-navbar>
     <div :class="{ 'w-75': isDesktop }">
-      <Masthead></Masthead>
+      <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view class="h-100" :key="key"></router-view>
     </div>
     <footer v-if="isDesktop || isPWA" class="app-footer w-100 d-flex justify-content-end">
@@ -27,6 +27,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import throttle from 'lodash/throttle';
 import { channel } from './main';
 import Masthead from './components/Masthead';
 import NavMenu from './components/NavMenu';
@@ -39,13 +40,18 @@ export default {
     Masthead,
     NavMenu,
   },
+  data() {
+    return {
+      hideMenu: false,
+    };
+  },
   created() {
-    window.addEventListener('resize', this.changeWindowSize);
-    window.addEventListener('scroll', this.handleScroll);
+    window.addEventListener('resize', throttle(this.changeWindowSize, 100));
+    window.addEventListener('scroll', throttle(this.handleScroll, 100));
   },
   destroyed() {
-    window.removeEventListener('resize', this.changeWindowSize);
-    window.removeEventListener('scroll', this.handleScroll);
+    window.removeEventListener('resize', throttle(this.changeWindowSize, 100));
+    window.removeEventListener('scroll', throttle(this.handleScroll, 100));
   },
   async mounted() {
     await this.refresh();
@@ -182,7 +188,10 @@ export default {
       });
     },
     handleScroll() {
-      this.collapseNav();
+      this.hideMenu = true;
+    },
+    resetHideMenu() {
+      this.hideMenu = false;
     },
   },
   watch: {

@@ -46,7 +46,7 @@
           />
         </b-nav-text>
         <b-navbar-toggle v-if="!isDesktop" target="nav_dropdown_collapse" @click="toggleClick" />
-        <b-collapse is-nav id="nav_dropdown_collapse">
+        <b-collapse is-nav id="nav_dropdown_collapse" v-model="showMenu">
           <nav-menu />
         </b-collapse>
       </b-navbar>
@@ -69,6 +69,7 @@ export default {
     NavMenu,
     SearchBar,
   },
+  props: ['hideMenu'],
   data() {
     return {
       permissions: {
@@ -82,6 +83,7 @@ export default {
       },
       isSearchHidden: true,
       backLabel: '',
+      showMenu: false,
     };
   },
   async mounted() {
@@ -135,8 +137,11 @@ export default {
       this.isSearchHidden = true;
       this.$router.push({ name: 'search', params: { keyword } });
     },
-    toggleClick() {
+    toggleClick(e) {
       window.scrollTo({ top: 0 });
+      if (e.returnValue) {
+        this.$emit('hide-complete');
+      }
     },
   },
 
@@ -164,6 +169,9 @@ export default {
   watch: {
     async $route() {
       await this.refresh();
+    },
+    hideMenu() {
+      this.showMenu = !this.hideMenu;
     },
   },
 };

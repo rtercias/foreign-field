@@ -26,7 +26,6 @@ function initialState() {
     isPending: false,
     isForcedOut: false,
     isSwitchedToDesktop: false,
-    isNavCollapsed: true,
     name: '',
     user: undefined,
     photoUrl: '',
@@ -79,7 +78,6 @@ export const auth = {
       publisherId: get(rootGetters['publisher/publisher'], 'id'),
       checkoutId: get(rootGetters['territory/territory'], 'status.checkout_id'),
     }),
-    isNavCollapsed: state => state.isNavCollapsed,
   },
 
   mutations: {
@@ -136,9 +134,6 @@ export const auth = {
     },
     WINDOW_RESIZE(state) {
       state.isSwitchedToDesktop = window.matchMedia('(min-width: 801px)').matches;
-    },
-    COLLAPSE_NAV(state) {
-      state.isNavCollapsed = true;
     },
   },
 
