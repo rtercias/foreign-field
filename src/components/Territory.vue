@@ -47,7 +47,7 @@
                 Optimize
               </b-button>
             </b-button-group>
-            <b-button-group v-else size="sm" class="badge px-0">
+            <b-button-group v-else-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
               <b-button v-if="canManage" variant="danger" @click="reset">
                 <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Reset</span>
@@ -57,7 +57,7 @@
                 <span v-else>Check In</span>
               </b-button>
               <b-button
-                v-if="canWrite && ['address-list', 'phone-list'].includes(viewMode)"
+                v-if="canWrite"
                 variant="success"
                 :to="`/territories/${territoryId}/addresses/add`">
                 <font-awesome-icon icon="plus"></font-awesome-icon>Address
@@ -183,7 +183,7 @@ export default {
       return '';
     },
     showCheckInButton() {
-      return this.viewMode !== 'optimize' && this.isCheckedOut && (this.canWrite || this.isOwnedByUser);
+      return this.isCheckedOut && (this.canWrite || this.isOwnedByUser);
     },
     count() {
       if (this.viewMode === 'phone-list') {
