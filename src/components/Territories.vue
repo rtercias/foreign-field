@@ -67,8 +67,7 @@
                   class="d-block"
                   @click="() => sort(option.value)">
                   <font-awesome-icon class="selected" icon="check" v-if="sortOption === option.value" />
-                  <span :class="{ 'pl-1': sortOption === option.value }" v-if="isDesktop">{{option.text}}</span>
-                  <span :class="{ 'pl-1': sortOption === option.value }" v-else>{{option.short}}</span>
+                  <span :class="{ 'pl-1': sortOption === option.value }">{{option.text}}</span>
                 </b-dropdown-item>
               </b-dropdown>
               <b-button v-if="canManage" variant="success" :to="`/territories/add?group=${selectedGroup}`">
@@ -182,8 +181,8 @@ export default {
       ],
       sortOption: 'Description',
       sortOptions: [
-        { value: 'Name', text: 'Name', short: 'Name' },
-        { value: 'Description', text: 'Description', short: 'Desc' },
+        { value: 'Name', text: 'Name' },
+        { value: 'Description', text: 'Description' },
       ],
       loading: true,
       DEFAULT_FILTER,
