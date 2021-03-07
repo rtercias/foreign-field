@@ -7,7 +7,7 @@
       <span class="blockquote" v-if="activityLogs.length === 0">
         No activity logs. This address is fresh!
       </span>
-      <span v-else>
+      <span v-else-if="checkoutId">
         Activity history for current checkout only.
       </span>
       <div>
