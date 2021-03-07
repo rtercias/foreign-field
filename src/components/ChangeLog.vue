@@ -19,11 +19,10 @@
         <div>{{title1}}</div>
         <div>{{title2}}</div>
       </div>
-      <div :class="{ 'text-right': !isDesktop }">
+      <div :class="{ 'text-right': !isDesktop }" v-if="showFilters">
         <b-dropdown
-          v-if="showFilters"
           class="status-filter"
-          :class="{ 'pr-3': isDesktop, 'pb-3': !isDesktop }"
+          :class="{ 'pr-3': isDesktop && !recordId, 'pb-3': !isDesktop }"
           right
           variant="primary">
           <span slot="button-content">Status: {{formatLanguage(selectedStatus.text, language)}}</span>
@@ -35,7 +34,7 @@
             {{formatLanguage(status.text, language)}}
           </b-dropdown-item>
         </b-dropdown>
-        <b-dropdown v-if="showFilters" class="date-filter" right variant="secondary">
+        <b-dropdown v-if="!recordId" class="date-filter" right variant="secondary">
           <span slot="button-content">Range: {{selectedRange.text}}</span>
           <b-dropdown-item
             v-for='(range, index) in dateRanges'
@@ -47,7 +46,7 @@
         </b-dropdown>
       </div>
     </div>
-    <b-form-checkbox v-model="excludeTests" v-if="isFullScreen && canManage" class="pr-3 text-right">
+    <b-form-checkbox v-model="excludeTests" v-if="isFullScreen && canManage" class="px-2 text-right">
       exclude tests
     </b-form-checkbox>
     <Loading v-if="loading && isFullScreen"></Loading>
