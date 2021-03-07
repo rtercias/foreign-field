@@ -89,7 +89,6 @@ import Loading from './Loading.vue';
 import Reports from './Reports';
 import MyTerritory from './MyTerritory';
 import ChangeLog from './ChangeLog';
-import GroupsSelect from './GroupsSelect';
 
 export default {
   name: 'Welcome',
@@ -99,7 +98,6 @@ export default {
     Reports,
     MyTerritory,
     ChangeLog,
-    GroupsSelect,
   },
   beforeRouteLeave(to, from, next) {
     const token = get(this.addressesCancelTokens, 'GET_CHANGE_LOG');

@@ -1,78 +1,96 @@
 <template>
   <Loading v-if="loading"></Loading>
   <div v-else class="territories" :key="groupId">
-    <header class="page-header sticky-top d-flex flex-column align-items-center p-3 border-bottom">
-      <div class="w-100 d-flex align-items-start">
-        <groups-select :selected-id="selectedGroup" class="col-md-3"></groups-select>
-        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-3 p-sm-0 text-right d-flex">
-          <b-badge
-            variant="warning"
-            class="btn alert p-2 border-medium mb-0"
-            :class="{ 'border-primary': typeFilter === 'SEARCH' }"
-            @click="() => setTypeFilter('SEARCH')">
-            Survey ({{count('SEARCH')}})
-          </b-badge>
-          <b-badge
-            variant="success"
-            class="btn alert p-2 border-medium mb-0"
-            :class="{ 'border-primary': typeFilter === 'BUSINESS' }"
-            @click="() => setTypeFilter('BUSINESS')">
-            Business ({{count('Business')}})
-          </b-badge>
-        </b-button-group>
-        <b-button-group v-if="isDesktop" class="col-sm-12 col-md-6 text-right p-sm-0 d-block">
-          <b-badge
-            v-for="avail in availabilityFilters.filter(a => a.value !== 'All')"
-            :key="avail.value"
-            class="btn alert p-2 border-medium mb-0"
-            :class="{
-              'border-primary': availability === avail.value,
-              'border-secondary bg-white': avail.value === 'Available' && availability !== 'Available',
-              [`alert-${avail.variant}`]: avail.variant,
-            }"
-            @click="() => setAvailability(avail.value)">
-            {{availabilityText(avail.value)}} ({{count(avail.value)}})
-          </b-badge>
-        </b-button-group>
-      </div>
-      <div class="w-100 pt-2 d-md-flex">
-        <b-dropdown left variant="secondary" class="col-12 col-sm-12 col-md-3 px-0 text-left">
-          <span slot="button-content">
-            <font-awesome-icon icon="filter" />
-            {{`${typeText ? `${typeText} - ` : ''}${availabilityText(availability)}`}}
-          </span>
-          <b-dropdown-item
-            class="availability-filter p-0"
-            v-for="type in typeFilters"
-            v-bind:key="type.value"
-            @click="() => setTypeFilter(type.value)">
-            <font-awesome-icon class="selected" icon="check" v-if="typeFilter === type.value" />
-            {{type.text}}
-          </b-dropdown-item>
-          <b-dropdown-divider class="w-100 pr-4"></b-dropdown-divider>
-          <b-dropdown-item
-            class="availability-filter p-0"
-            v-for="avail in availabilityFilters"
-            v-bind:key="avail.value"
-            @click="() => setAvailability(avail.value)">
-            <font-awesome-icon class="selected" icon="check" v-if="availability === avail" />
-            {{availabilityText(avail.value)}}
-          </b-dropdown-item>
-        </b-dropdown>
-        <div class="col-12 col-sm-12 col-md-9 px-0 pt-2 pt-sm-2 pt-md-0
-          text-right d-md-block d-sm-flex justify-content-between">
-          <b-dropdown class="sort-btn pr-2" right variant="secondary">
-            <span slot="button-content">
-              <font-awesome-icon icon="sort-amount-down-alt" />
-              {{sortOption}}
-            </span>
-            <b-dropdown-item v-for='option in sortOptions' :key="option" @click="() => sort(option)">
-              <font-awesome-icon class="selected" icon="check" v-if="sortOption === option" /> {{option}}
-            </b-dropdown-item>
-          </b-dropdown>
-          <b-button v-if="canManage" variant="success" :to="`/territories/add?group=${selectedGroup}`">
-            <font-awesome-icon icon="plus"></font-awesome-icon> Territory
-          </b-button>
+    <header class="page-header sticky-top d-flex flex-column align-items-center py-3 px-2 border-bottom">
+      <div class="d-flex w-100 justify-content-between">
+        <div class="d-flex flex-column pl-0 pr-4" :class="{ 'col-4': !isDesktop }">
+          <groups-select :selected-id="selectedGroup" />
+          <b-button-group v-if="isDesktop" class="p-sm-0 d-block mt-2">
+            <b-badge
+              variant="warning"
+              class="btn alert p-2 border-medium mb-0"
+              :class="{ 'border-primary': typeFilter === 'SEARCH' }"
+              @click="() => setTypeFilter('SEARCH')">
+              Survey ({{count('SEARCH')}})
+            </b-badge>
+            <b-badge
+              variant="success"
+              class="btn alert p-2 border-medium mb-0"
+              :class="{ 'border-primary': typeFilter === 'BUSINESS' }"
+              @click="() => setTypeFilter('BUSINESS')">
+              Business ({{count('Business')}})
+            </b-badge>
+          </b-button-group>
+        </div>
+        <div class="d-flex flex-column text-nowrap" :class="{ 'col-4 p-0': !isDesktop }">
+          <div class="d-flex justify-content-end">
+            <b-dropdown left :variant="typeFilter || availability? 'warning' : 'secondary'" class="pr-2 text-left">
+              <span slot="button-content">
+                <font-awesome-icon icon="filter" />
+                <span v-if="isDesktop">
+                  <span v-if="!typeText && !availabilityText(availability)" class="pl-1">Filter</span>
+                  {{
+                    `${typeText}
+                    ${typeText && availabilityText(availability) ? ' - ' : ''}
+                    ${availabilityText(availability)}`
+                  }}
+                </span>
+              </span>
+              <b-dropdown-item
+                class="availability-filter p-0 d-block"
+                v-for="type in typeFilters"
+                v-bind:key="type.value"
+                @click="() => setTypeFilter(type.value)">
+                <font-awesome-icon class="selected" icon="check" v-if="typeFilter === type.value" />
+                {{type.text}}
+              </b-dropdown-item>
+              <b-dropdown-divider class="w-100 pr-4"></b-dropdown-divider>
+              <b-dropdown-item
+                class="availability-filter p-0 d-block"
+                v-for="avail in availabilityFilters.filter(a => a.value !== DEFAULT_FILTER)"
+                v-bind:key="avail.value"
+                @click="() => setAvailability(avail.value)">
+                <font-awesome-icon class="selected" icon="check" v-if="availability === avail.value" />
+                {{availabilityText(avail.value)}}
+              </b-dropdown-item>
+            </b-dropdown>
+            <div class="px-0 pt-0
+              text-right d-md-block d-sm-flex justify-content-between">
+              <b-dropdown class="sort-btn pr-2" right variant="secondary">
+                <span slot="button-content">
+                  <font-awesome-icon icon="sort-amount-down-alt" />
+                  <span v-if="isDesktop" class="pl-1">{{sortOption}}</span>
+                </span>
+                <b-dropdown-item
+                  v-for='option in sortOptions'
+                  :key="option.value"
+                  class="d-block"
+                  @click="() => sort(option.value)">
+                  <font-awesome-icon class="selected" icon="check" v-if="sortOption === option.value" />
+                  <span :class="{ 'pl-1': sortOption === option.value }" v-if="isDesktop">{{option.text}}</span>
+                  <span :class="{ 'pl-1': sortOption === option.value }" v-else>{{option.short}}</span>
+                </b-dropdown-item>
+              </b-dropdown>
+              <b-button v-if="canManage" variant="success" :to="`/territories/add?group=${selectedGroup}`">
+                <font-awesome-icon icon="plus"></font-awesome-icon>
+                <span v-if="isDesktop" class="pl-1">Territory</span>
+              </b-button>
+            </div>
+          </div>
+          <b-button-group v-if="isDesktop" class="text-right p-sm-0 d-block mt-2">
+            <b-badge
+              v-for="avail in availabilityFilters.filter(a => a.value !== DEFAULT_FILTER)"
+              :key="avail.value"
+              class="btn alert p-2 border-medium mb-0"
+              :class="{
+                'border-primary': availability === avail.value,
+                'border-secondary bg-white': avail.value === 'Available' && availability !== 'Available',
+                [`alert-${avail.variant}`]: avail.variant,
+              }"
+              @click="() => setAvailability(avail.value)">
+              {{availabilityText(avail.value)}} ({{count(avail.value)}})
+            </b-badge>
+          </b-button-group>
         </div>
       </div>
       <SearchBar
@@ -107,8 +125,9 @@
       </b-list-group>
       <CheckoutModal :territory="selectedTerritory"></CheckoutModal>
     </div>
-    <span class="p-2" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
+    <span class="d-block p-3" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
       There are no {{availability}} territories
+      <span v-if="availability || typeFilter">matching the selected filters</span>
     </span>
   </div>
 </template>
@@ -124,7 +143,7 @@ import Loading from './Loading.vue';
 import orderBy from 'lodash/orderBy';
 import toLower from 'lodash/toLower';
 
-const DEFAULT_FILTER = 'All';
+const DEFAULT_FILTER = '';
 
 export default {
   name: 'Territories',
@@ -151,7 +170,7 @@ export default {
       availability: '',
       typeFilter: '',
       availabilityFilters: [
-        { value: 'All', text: 'All', campaignText: 'All' },
+        { value: '', text: '', campaignText: '' },
         { value: 'Available', text: 'Available', campaignText: 'Remainder' },
         { value: 'Checked Out', text: 'Checked Out', campaignText: 'In Progress', variant: 'warning' },
         { value: 'Recently Worked', text: 'Recently Completed', campaignText: 'Done', variant: 'success' },
@@ -161,12 +180,13 @@ export default {
         { value: 'BUSINESS', text: 'Business', variant: 'success' },
         { value: 'Test', text: 'Test', variant: 'danger' },
       ],
-      sortOption: '',
+      sortOption: 'Description',
       sortOptions: [
-        'Name',
-        'Description',
+        { value: 'Name', text: 'Name', short: 'Name' },
+        { value: 'Description', text: 'Description', short: 'Desc' },
       ],
       loading: true,
+      DEFAULT_FILTER,
     };
   },
 
@@ -197,7 +217,7 @@ export default {
       return territories;
     },
     filteredTerritories() {
-      if (this.availability === 'All') {
+      if (this.availability === DEFAULT_FILTER) {
         const allTerrs = this.searchedTerritories;
         return orderBy(allTerrs, toLower(this.sortOption));
       }
@@ -228,7 +248,7 @@ export default {
     },
 
     async setAvailability(value) {
-      this.availability = this.availability === value ? 'All' : value;
+      this.availability = this.availability === value ? DEFAULT_FILTER : value;
       sessionStorage.setItem('availability', this.availability);
     },
 
@@ -277,7 +297,7 @@ export default {
 
     availabilityText(availability) {
       const avail = this.availabilityFilters.find(t => t.value === availability);
-      if (!avail) return '';
+      if (!avail) return DEFAULT_FILTER;
       if (this.isCampaignMode) {
         return avail.campaignText;
       }
@@ -312,7 +332,11 @@ export default {
   .selected-group {
     .dropdown-toggle {
       width: 100%;
-      font-size: small;
+    }
+    &.alert {
+      .dropdown-toggle {
+        font-size: small;
+      }
     }
   }
   .availability-filter, .sort-btn {

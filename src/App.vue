@@ -8,7 +8,7 @@
       variant="primary">
       <nav-menu />
     </b-navbar>
-    <div :class="{ 'w-75': isDesktop }">
+    <div :class="{ 'w-75': isDesktop, 'mb-5': !isDesktop }">
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view class="h-100" :key="key"></router-view>
     </div>
