@@ -75,6 +75,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
+import { displayName } from '../utils/publisher';
 
 export default {
   name: 'TerritoryCard',
@@ -142,8 +143,8 @@ export default {
     assignedTo() {
       if (this.terr && this.terr.status && this.terr.status.publisher) {
         const pre = this.isRecentlyWorked
-          ? 'Recently completed'
-          : `Assigned to ${this.terr.status.publisher.firstname} ${this.terr.status.publisher.lastname}`;
+          ? `Completed by ${displayName(this.terr.status.publisher)}`
+          : `Assigned to ${displayName(this.terr.status.publisher)}`;
         const timestamp = Number(this.terr.status.date);
         const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
         return `${pre}${formattedDate}`;
@@ -181,7 +182,7 @@ export default {
   .check-in-out .btn {
     min-width: 100px;
   }
-  .assigned-to-info, .last-worked, .loading, .get-last-activity {
+  .assigned-to-info, .last-worked, .loading, .get-last-activity, .show-checkout-details {
     font-size: 12px;
   }
 </style>
