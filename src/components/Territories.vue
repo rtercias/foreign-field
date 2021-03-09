@@ -42,7 +42,7 @@
                 v-bind:key="type.value"
                 @click="() => setTypeFilter(type.value)">
                 <font-awesome-icon class="selected" icon="check" v-if="typeFilter === type.value" />
-                {{type.text}}
+                {{`${type.text} (${count(type.value)})`}}
               </b-dropdown-item>
               <b-dropdown-divider class="w-100 pr-4"></b-dropdown-divider>
               <b-dropdown-item
@@ -51,7 +51,16 @@
                 v-bind:key="avail.value"
                 @click="() => setAvailability(avail.value)">
                 <font-awesome-icon class="selected" icon="check" v-if="availability === avail.value" />
-                {{availabilityText(avail.value)}}
+                {{`${availabilityText(avail.value)} (${count(avail.value)})`}}
+              </b-dropdown-item>
+              <b-dropdown-divider class="w-100 pr-4"></b-dropdown-divider>
+              <b-dropdown-item
+                class="availability-filter p-0 d-block"
+                v-for="countFilter in countFilters"
+                v-bind:key="countFilter.value"
+                @click="() => selectCountFilter(countFilter.value)">
+                <font-awesome-icon class="selected" icon="check" v-if="selectedCountFilter === countFilter.value" />
+                {{countFilter.text}}
               </b-dropdown-item>
             </b-dropdown>
             <div class="px-0 pt-0
@@ -103,7 +112,7 @@
       </SearchBar>
     </header>
     <div>
-      <b-list-group class="columns flex-row flex-wrap">
+      <b-list-group class="columns flex-row flex-wrap border-top">
         <b-list-group-item
           v-for="terr in filteredTerritories"
           v-bind:key="terr.id"
@@ -179,6 +188,12 @@ export default {
         { value: 'BUSINESS', text: 'Business', variant: 'success' },
         { value: 'Test', text: 'Test', variant: 'danger' },
       ],
+      countFilters: [
+        { value: 1, text: 'With Addresses' },
+        { value: 2, text: 'Without Addresses' },
+        { value: 3, text: 'With Phones' },
+        { value: 4, text: 'Without Phones' },
+      ],
       sortOption: 'Description',
       sortOptions: [
         { value: 'Name', text: 'Name' },
@@ -186,6 +201,7 @@ export default {
       ],
       loading: true,
       DEFAULT_FILTER,
+      selectedCountFilter: 0,
     };
   },
 
@@ -217,12 +233,14 @@ export default {
     },
     filteredTerritories() {
       if (this.availability === DEFAULT_FILTER) {
-        const allTerrs = this.searchedTerritories;
+        let allTerrs = this.searchedTerritories;
+        allTerrs = this.applyCountFilter(allTerrs);
         return orderBy(allTerrs, toLower(this.sortOption));
       }
-      const filtered = this.searchedTerritories && this.searchedTerritories.filter(
+      let filtered = this.searchedTerritories && this.searchedTerritories.filter(
         t => get(t, 'status.status') === this.availability
       );
+      filtered = this.applyCountFilter(filtered);
       return orderBy(filtered, toLower(this.sortOption));
     },
     isCampaignMode() {
@@ -267,6 +285,8 @@ export default {
         congId,
         groupId: this.selectedGroup === 0 ? null : this.groupId,
       });
+      this.getAddressCountByTerritories(congId);
+      this.getPhoneCountByTerritories(congId);
       this.loading = false;
     },
 
@@ -303,12 +323,39 @@ export default {
       return avail.text;
     },
 
+    selectCountFilter(value) {
+      if (value === this.selectedCountFilter) {
+        this.selectedCountFilter = 0;
+      } else {
+        this.selectedCountFilter = value;
+      }
+    },
+
     ...mapActions({
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
       fetchTerritories: 'territories/fetchTerritories',
       getGroup: 'group/getGroup',
+      getAddressCountByTerritories: 'territories/getAddressCountByTerritories',
+      getPhoneCountByTerritories: 'territories/getPhoneCountByTerritories',
     }),
+
+    applyCountFilter(territories) {
+      if (this.selectedCountFilter === 1) {
+        return territories.filter(t => t.addressCount > 0);
+      }
+      if (this.selectedCountFilter === 2) {
+        return territories.filter(t => !t.addressCount || t.addressCount === 0);
+      }
+      if (this.selectedCountFilter === 3) {
+        return territories.filter(t => t.phoneCount > 0);
+      }
+      if (this.selectedCountFilter === 4) {
+        return territories.filter(t => !t.phoneCount || t.phoneCount === 0);
+      }
+
+      return territories;
+    },
   },
 
   async mounted() {
@@ -373,6 +420,10 @@ export default {
     padding: 0.75rem 2rem;
     border-width: 2px;
     cursor: default !important;
+
+    &:first-child {
+      border-top: none;
+    }
   }
   .list-group-item:hover {
     cursor: pointer;

@@ -35,8 +35,17 @@
     </div>
     <div class="row">
       <div class="w-100 d-flex justify-content-between align-items-end">
-        <span class="small text-black-50">ID {{terr.id}}
-        </span>
+        <div class="territory-details">
+          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
+            ID: {{terr.id}}
+          </b-badge>
+          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
+            A: {{terr.addressCount}}
+          </b-badge>
+          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
+            P: {{terr.phoneCount}}
+          </b-badge>
+        </div>
         <b-link :to="{ name: 'territory-edit', params: { territoryId: terr.id } }" v-if="canManage">
           <font-awesome-icon
             class="small text-primary"
@@ -75,11 +84,12 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
+import get from 'lodash/get';
 import { displayName } from '../utils/publisher';
 
 export default {
   name: 'TerritoryCard',
-  props: ['terr', 'groupId', 'selectTerritory', 'fetch', 'typeFilters'],
+  props: ['terr', 'groupId', 'selectTerritory', 'fetch', 'typeFilters', 'showAddressCount', 'showPhoneCount'],
   data() {
     return {
       saving: false,
@@ -128,6 +138,19 @@ export default {
     typeFilter(type) {
       return this.typeFilters.find(t => t.value === type) || {};
     },
+    showTerrInfo() {
+      const h = this.$createElement;
+      const message = h('p', {
+        domProps: {
+          innerHTML: `
+            <div>ID: ${this.terr.id}</div>
+            <div>Address Count: ${get(this.terr, 'addressCount', 0)}</div>
+            <div>Phone Count: ${get(this.terr, 'phoneCount', 0)}</div>
+          `,
+        },
+      });
+      this.$bvModal.msgBoxOk(message, { title: 'Territory Details', centered: true });
+    },
   },
   computed: {
     ...mapGetters({
@@ -175,9 +198,14 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style lang="scss" scoped>
   .terr-name {
     font-size: 18px;
+  }
+  .territory-details {
+    span {
+      cursor: pointer;
+    }
   }
   .check-in-out .btn {
     min-width: 100px;

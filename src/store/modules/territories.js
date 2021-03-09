@@ -8,6 +8,7 @@ import toArray from 'lodash/toArray';
 import differenceInDays from 'date-fns/differenceInDays';
 import { print } from 'graphql/language/printer';
 import { TEST_GROUPS } from './models/GroupModel';
+import Vue from 'vue';
 
 export const TEST_TERRITORIES = [
   'TEST-000',
@@ -23,6 +24,8 @@ const SET_LAST_ACTIVITY = 'SET_LAST_ACTIVITY';
 const CHECKIN_ALL = 'CHECKIN_ALL';
 const COPY_CHECKOUTS = 'COPY_CHECKOUTS';
 const SET_RECENTLY_SEEN_TERRITORIES = 'SET_RECENTLY_SEEN_TERRITORIES';
+const GET_ADDRESS_COUNT = 'GET_ADDRESS_COUNT';
+const GET_PHONE_COUNT = 'GET_PHONE_COUNT';
 
 export const territories = {
   namespaced: true,
@@ -69,6 +72,18 @@ export const territories = {
     CHECKIN_ALL: () => {},
     COPY_CHECKOUTS: () => {},
     SET_RECENTLY_SEEN_TERRITORIES: (state, terrs) => state.recentlySeenTerritories = terrs,
+    GET_ADDRESS_COUNT: (state, terrAddressCount) => {
+      for (const terr of state.territories) {
+        const count = terrAddressCount.find(t => t.id === terr.id);
+        if (count) Vue.set(terr, 'addressCount', count.addressCount);
+      }
+    },
+    GET_PHONE_COUNT: (state, terrPhoneCount) => {
+      for (const terr of state.territories) {
+        const count = terrPhoneCount.find(t => t.id === terr.id);
+        if (count) Vue.set(terr, 'phoneCount', count.phoneCount);
+      }
+    },
   },
   actions: {
     async fetchTerritories({ commit }, params) {
@@ -97,6 +112,7 @@ export const territories = {
                 type
                 congregationid
                 tags
+                group_id
                 status {
                   checkout_id
                   status
@@ -259,6 +275,58 @@ export const territories = {
         commit(SET_LAST_ACTIVITY, terr);
       } catch (exception) {
         console.error('Unable to get last activity', exception);
+      }
+    },
+
+    async getAddressCountByTerritories({ commit }, congId) {
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          cancelToken: axiosToken.token,
+          data: {
+            query: print(gql`query AddressCountByTerritories($congId: Int) { 
+              addressCountByTerritories (congId: $congId) {
+                id
+                addressCount
+              }
+            }`),
+            variables: {
+              congId,
+            },
+          },
+        });
+
+        const { addressCountByTerritories } = response.data.data;
+        commit(GET_ADDRESS_COUNT, addressCountByTerritories);
+      } catch (e) {
+        console.error('Unable to get address count by territories', e);
+      }
+    },
+
+    async getPhoneCountByTerritories({ commit }, congId) {
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          cancelToken: axiosToken.token,
+          data: {
+            query: print(gql`query PhoneCountByTerritories($congId: Int) { 
+              phoneCountByTerritories (congId: $congId) {
+                id
+                phoneCount
+              }
+            }`),
+            variables: {
+              congId,
+            },
+          },
+        });
+
+        const { phoneCountByTerritories } = response.data.data;
+        commit(GET_PHONE_COUNT, phoneCountByTerritories);
+      } catch (e) {
+        console.error('Unable to get phone count by territories', e);
       }
     },
 
