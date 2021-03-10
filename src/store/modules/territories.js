@@ -75,13 +75,13 @@ export const territories = {
     GET_ADDRESS_COUNT: (state, terrAddressCount) => {
       for (const terr of state.territories) {
         const count = terrAddressCount.find(t => t.id === terr.id);
-        if (count) Vue.set(terr, 'addressCount', count.addressCount);
+        Vue.set(terr, 'addressCount', get(count, 'addressCount', 0));
       }
     },
     GET_PHONE_COUNT: (state, terrPhoneCount) => {
       for (const terr of state.territories) {
         const count = terrPhoneCount.find(t => t.id === terr.id);
-        if (count) Vue.set(terr, 'phoneCount', count.phoneCount);
+        Vue.set(terr, 'phoneCount', get(count, 'phoneCount', 0));
       }
     },
   },
