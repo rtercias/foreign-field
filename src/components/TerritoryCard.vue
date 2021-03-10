@@ -40,10 +40,10 @@
             ID: {{terr.id}}
           </b-badge>
           <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
-            A: {{terr.addressCount}}
+            Addresses: {{terr.addressCount}}
           </b-badge>
           <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
-            P: {{terr.phoneCount}}
+            Phones: {{terr.phoneCount}}
           </b-badge>
         </div>
         <b-link :to="{ name: 'territory-edit', params: { territoryId: terr.id } }" v-if="canManage">
