@@ -7,6 +7,13 @@
           <groups-select :selected-id="selectedGroup" />
           <b-button-group v-if="isDesktop" class="p-sm-0 d-block mt-2">
             <b-badge
+              variant="primary"
+              class="btn alert p-2 border-medium mb-0"
+              :class="{ 'border-primary': typeFilter === 'REGULAR' }"
+              @click="() => setTypeFilter('REGULAR')">
+              Regular ({{count('Regular')}})
+            </b-badge>
+            <b-badge
               variant="warning"
               class="btn alert p-2 border-medium mb-0"
               :class="{ 'border-primary': typeFilter === 'SEARCH' }"
@@ -186,6 +193,7 @@ export default {
       typeFilters: [
         { value: 'SEARCH', text: 'Survey', variant: 'warning' },
         { value: 'BUSINESS', text: 'Business', variant: 'success' },
+        { value: 'REGULAR', text: 'Regular', variant: 'light' },
         { value: 'Test', text: 'Test', variant: 'danger' },
       ],
       countFilters: [

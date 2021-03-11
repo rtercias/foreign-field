@@ -10,7 +10,7 @@
       @click="selectGroup">
       <font-awesome-icon class="ml-n4" icon="check" v-if="group.id === selectedGroup.id" />
       {{group.code}}
-      <span v-if="terrCount(group.id)">{{`(${terrCount(group.id)})`}}</span>
+      <span v-if="selectedId === 0">{{`(${terrCount(group.id)})`}}</span>
     </b-dropdown-item>
   </b-dropdown>
 </template>

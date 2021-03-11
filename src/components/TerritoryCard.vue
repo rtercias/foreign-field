@@ -11,25 +11,34 @@
           <span class="terr-name">{{primaryDescription && terr.name}}</span>
         </b-link>
       </div>
-      <div class="check-in-out" size="small" role="group">
+      <div class="check-in-out text-right" size="small" role="group">
         <b-btn
-          class="text-light font-weight-bold"
+          class="font-weight-bold p-1 btn-sm"
           v-b-modal.checkoutModal
-          variant="info"
+          variant="primary"
           v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
           @click="selectTerritory(terr)"
           :disabled="saving">
           <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
-          check out
+          Check Out
         </b-btn>
-        <b-btn
-          class="font-weight-bold"
+        <!-- <b-btn
+          class="p-1 btn-sm mr-1"
           v-if="canWrite && status === 'Checked Out'"
-          variant="outline-info"
+          variant="link"
+          @click="reassign(terr)"
+          :disabled="saving">
+          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
+          Reassign
+        </b-btn> -->
+        <b-btn
+          class="font-weight-bold p-1 btn-sm"
+          v-if="canWrite && status === 'Checked Out'"
+          variant="warning"
           @click="checkin(terr)"
           :disabled="saving">
           <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
-          check in
+          Check In
         </b-btn>
       </div>
     </div>
@@ -46,7 +55,10 @@
             Phones: {{terr.phoneCount}}
           </b-badge>
         </div>
-        <b-link :to="{ name: 'territory-edit', params: { territoryId: terr.id } }" v-if="canManage">
+        <b-link
+          v-if="canManage"
+          :to="{ name: 'territory-edit', params: { territoryId: terr.id } }"
+          class="text-nowrap small">
           <font-awesome-icon
             class="small text-primary"
             icon="pencil-alt"
@@ -207,8 +219,8 @@ export default {
       cursor: pointer;
     }
   }
-  .check-in-out .btn {
-    min-width: 100px;
+  .check-in-out * {
+    font-size: 12px;
   }
   .assigned-to-info, .last-worked, .loading, .get-last-activity, .show-checkout-details {
     font-size: 12px;
