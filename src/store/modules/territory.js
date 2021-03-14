@@ -88,15 +88,16 @@ export const territory = {
       });
     },
     SET_TERRITORY(state, { terr, getLastActivity }) {
-      if (terr && terr.addresses && getLastActivity) {
+      if (terr && terr.addresses) {
         const addresses = terr.addresses || [];
         for (const address of addresses) {
-          address.isBusy = true;
-          if (address.phones) {
-            const phones = address.phones || [];
-            for (const phone of phones) {
-              phone.isBusy = true;
-            }
+          if (getLastActivity) address.isBusy = true;
+
+          const phones = terr.phones.filter(p => p.parent_id === address.id);
+          address.phones = phones;
+
+          for (const phone of address.phones) {
+            if (getLastActivity) phone.isBusy = true;
           }
         }
       }
@@ -334,18 +335,18 @@ export const territory = {
                   id addr1 addr2 city state_province postal_code
                   phone longitude latitude notes sort
                   territory_id congregationId status type
-                  phones {
-                    id
-                    congregationId
-                    territory_id
-                    parent_id
-                    type
-                    status
-                    phone
-                    notes
-                    sort
-                    create_user
-                  }
+                }
+                phones {
+                  id
+                  congregationId
+                  territory_id
+                  parent_id
+                  type
+                  status
+                  phone
+                  notes
+                  sort
+                  create_user
                 }
                 status {
                   checkout_id
