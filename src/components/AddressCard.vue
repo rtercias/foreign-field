@@ -44,12 +44,12 @@
             v-if="isLogging || address.isBusy"
           />
           <div
-            :class="{ hidden: address.selectedResponse === 'START' || isLogging || address.isBusy }"
+            :class="{ hidden: selectedResponse === 'START' || isLogging || address.isBusy }"
             class="d-flex flex-column w-100">
             <ActivityButton
               class="selected-response fa-2x d-flex"
               :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-              :value="address.selectedResponse"
+              :value="selectedResponse"
               :next="'START'"
               :selected="true"
               :actionButtonList="actionButtonList"
@@ -203,6 +203,9 @@ export default {
     },
     lastActivity() {
       return get(this.address, 'lastActivity') || { value: 'START', timestamp: '' };
+    },
+    selectedResponse() {
+      return this.lastActivity.value;
     },
     isMySelectedResponse() {
       const publisherId = get(this.lastActivity, 'publisher_id') || '';
