@@ -16,5 +16,11 @@ export const CongDefault = {
         ],
       },
     },
+    address: {
+      customTags: '',
+    },
+    phone: {
+      customTags: '',
+    },
   },
 };

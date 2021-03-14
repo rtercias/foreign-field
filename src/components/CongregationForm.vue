@@ -33,7 +33,7 @@
             </b-form-checkbox>
           </b-form-group>
           <hr />
-          <span class="d-block pb-2">Preferences</span>
+          <span class="d-block pb-2">Options</span>
           <option-tree
             v-for="node in getNodes()"
             :key="node.key"

@@ -27,18 +27,21 @@
       </div>
     </div>
     <div v-else class="d-flex align-items-center">
-      <span :style="indent" class="d-inline-block">{{node.label}}</span>
-      <span v-if="!node.options"></span>
+      <span :style="indent" class="d-inline-block mr-2">{{node.label}}</span>
       <b-form-select
-        v-else
+        v-if="node.options"
         :label="node.label"
         :options="node.options"
         v-model="node.value"
         :style="indent"
-        class="w-50 ml-2"
+        class="w-50"
         :disabled="disabled"
         @change="updateOption">
       </b-form-select>
+      <div v-else :style="indent">
+        <span v-if="disabled">{{!node.value ? 'None' : node.value}}</span>
+        <b-form-input v-else v-model="node.value" @change="updateOption"></b-form-input>
+      </div >
     </div>
   </div>
 </template>
