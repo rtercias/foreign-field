@@ -30,7 +30,7 @@
         class="m-0 w-100"
         :to="{
           name: 'publisher-edit',
-          params: { publisherId: get(user, 'id') },
+          params: { publisherId: get(user, 'id', 0) },
         }">
         Profile
       </b-dropdown-item>

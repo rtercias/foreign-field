@@ -6,6 +6,7 @@ import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import { model, validate } from './models/TerritoryModel';
+import { model as activityModel } from './models/ActivityModel';
 import { AddressStatus, AddressType } from '..';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
@@ -15,6 +16,7 @@ const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
 const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
 const CANCEL_FETCH_LAST_ACTIVITY = 'CANCEL_FETCH_LAST_ACTIVITY';
+const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
 const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
@@ -115,6 +117,9 @@ export const territory = {
     },
     CANCEL_FETCH_LAST_ACTIVITY(state) {
       state.cancelTokens.FETCH_LAST_ACTIVITY = null;
+    },
+    FETCH_LAST_ACTIVITY_FAIL(state, exception) {
+      state.error = exception;
     },
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
       const addresses = get(state, 'territory.addresses') || [];
@@ -385,23 +390,59 @@ export const territory = {
       }
     },
 
-    async fetchLastActivities({ commit, dispatch, getters }, terr) {
+    async fetchLastActivities({ commit }, terr) {
       const tokenSource = axios.CancelToken.source();
       const cancelToken = tokenSource.token;
       commit(FETCH_LAST_ACTIVITY, tokenSource);
 
       const addresses = terr.addresses || [];
       const checkoutId = get(terr, 'status.checkout_id');
-      for (const address of addresses) {
-        const phones = address.phones || [];
-        for (const phone of phones) {
-          await dispatch('phone/fetchLastActivity', { phoneId: phone.id, checkoutId, cancelToken }, { root: true });
-          if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cancelToken,
+          data: {
+            query: print(gql`query Territory($territoryId: Int $checkoutId: Int) { 
+              territory(id: $territoryId) { 
+                lastActivities(checkout_id: $checkoutId) {
+                  ...ActivityModel
+                }
+              }
+            }
+            ${activityModel}`),
+            variables: {
+              territoryId: terr.id,
+              checkoutId,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
         }
-        await dispatch('address/fetchLastActivity', { addressId: address.id, checkoutId, cancelToken }, { root: true });
-        if (getters.isLoading) commit(LOADING_TERRITORY_FALSE);
+
+        const { lastActivities = [] } = get(response, 'data.data.territory') || {};
+
+        for (const address of addresses) {
+          let lastActivity = lastActivities.find(l => l.address_id === address.id);
+          commit(SET_ADDRESS_LAST_ACTIVITY, { addressId: address.id, lastActivity });
+          const phones = address.phones || [];
+          for (const phone of phones) {
+            lastActivity = lastActivities.find(l => l.address_id === phone.id);
+            commit(SET_PHONE_LAST_ACTIVITY, { phoneId: phone.id, lastActivity });
+          }
+        }
+        commit(LOADING_TERRITORY_FALSE);
+      } catch (e) {
+        commit(FETCH_LAST_ACTIVITY_FAIL, e);
+        commit(LOADING_TERRITORY_FALSE);
       }
-      commit(LOADING_TERRITORY_FALSE);
     },
 
     cancelFetchLastActivity({ commit }) {
