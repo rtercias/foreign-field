@@ -6,7 +6,6 @@
       'min-height': $route.name === 'address-list'
     }">
     <font-awesome-layers
-      v-if="$route.name === 'phone-list'"
       class="ellipsis-v-static text-muted fa-1x"
       @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
