@@ -2,7 +2,7 @@
   <div
     class="address-card-container p-2 d-flex align-items-center"
     :class="{
-      'min-height-phone-address': $route.name === 'phone-list',
+      'min-height-phone-address mb-2': $route.name === 'phone-list',
       'min-height': $route.name === 'address-list'
     }">
     <font-awesome-layers
