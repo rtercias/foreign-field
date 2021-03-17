@@ -128,7 +128,7 @@
         </swipe-list>
         <b-list-group-item
           v-if="mode === 'phone-list'"
-          class="d-flex pb-2 px-2 border-0"
+          class="d-flex p-0 pb-2 border-0"
           :class="{ 'pt-0': isDesktop }">
           <b-input-group size="lg">
             <b-input-group-prepend>
