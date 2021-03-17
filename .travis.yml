@@ -31,5 +31,6 @@ deploy:
   edge: true
   token:
     secure: oybTO14svYyMEz9y9+LYSGB5Key3qY/4lnBuGOb4GaYk2bPo6ywpORJKjp7jZik9W+nW8Os3Cy9BX1oYb4x3ZwVCPivQLLMhhnRpTe/prTk3fWYGtzoAmsKjq5TjiriIybis/P3+wyKhxZGHEVhlUFRy5ZZOF3hZ5bsh3PVbpolRjkcClLVtqbDEVU8N+WqVcVVRnud7qmgu2+xIVdmxleta+DEJK224DZjFYi24sEEUBqbGRr7irnaUZJMoY3j6tkdH2bjTniycweH+TZ89+MF91KwdJMm+Wb56LXuj3EDZScGfPECeywn5YjwQ9dEeJD11UI3E07iPXWpfDc0cUsqwspMedVAtsuY1poLCYI1lw+6kj3LsNE+cDQZbigGBf8a/hPVoLroFrsY+46xsWBPsOSBNoVCLcfPentw3Jd/HFPiNZmPy4Di/H6vKUIVwau+45yCq6ayCXlOS6hehB07/FZK4FKmPevBVT+Tsbnhk1WjQOif2d5SrI0GWzRXrm+2XpFiktK1touICbVqaYgfjWSyrPq0qvURuRPWNrga0PSM+q2srkhRf5DCPnj5/dOFjkPnxcnuzj4AicQblewy8GNlSG2q6/fJorQfoitje+Xx2P11jylR07uy0JQnRY57ARz+OSZsIcBUHgsLBtj5Rb/Y+Ufk8ShIL4pBTMpE=
+  project: foreign-field-staging
   on:
-    branch: master
+    branch: staging
