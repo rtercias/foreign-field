@@ -32,7 +32,9 @@
             :class="`border-${variant}`"
             :variant="variant"
             size='sm'>
-            <span class="tag-text d-flex align-items-center small" :class="{ 'text-white': variant === 'info' }">
+            <span
+              class="tag-text d-flex align-items-center small font-weight-bold"
+              :class="{ 'text-white': variant === 'info' }">
               <span v-if="collapsed">add tag</span>
               <span v-else>done</span>
             </span>

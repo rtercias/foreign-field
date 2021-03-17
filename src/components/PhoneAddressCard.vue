@@ -112,7 +112,6 @@
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <b-button
-              v-if="item.type === 'Phone'"
               variant="link"
               v-show="!item.isBusy"
               class="interaction bg-danger">
@@ -276,9 +275,9 @@ export default {
         .filter(b => list.includes(b.value));
     },
     leftButtonList(type) {
-      const list = (type === 'Regular' ? PHONE_ADDRESS_LEFT_BUTTON_LIST : LEFT_BUTTON_LIST);
-      const buttons = this.actionButtonList(type);
-      return buttons.filter(b => list.includes(b.value));
+      const leftButtons = type === 'Regular' ? PHONE_ADDRESS_LEFT_BUTTON_LIST : LEFT_BUTTON_LIST;
+      const list = this.$route.name === 'address-list' ? [] : leftButtons;
+      return this.actionButtonList(type).filter(b => list.includes(b.value));
     },
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
