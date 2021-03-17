@@ -13,16 +13,26 @@
           @click="edit">
         </font-awesome-icon>
       </h5>
-      <PhoneTags :phone="phoneRecord" :address="address"></PhoneTags>
+      <Tags :record="phoneRecord" class="mt-3" variant="info" />
     </div>
     <div class="static-buttons col-3 pl-1">
       <font-awesome-icon class="logging-spinner text-info ml-3" icon="circle-notch" spin v-if="phoneRecord.isBusy" />
-      <span
-        :class="{ hidden: selectedResponse === 'START' || phoneRecord.isBusy }"
-        class="d-flex flex-column w-100">
+      <span v-else class="d-flex flex-column w-100">
         <ActivityButton
+          v-if="!allowedToCall"
+          class="fa-2x px-2 ml-n2"
+          :value="notAllowedTag"
+          :selected="true"
+          :display-only="true"
+          :actionButtonList="actionButtonList">
+        </ActivityButton>
+        <ActivityButton
+          v-else
           class="selected-response fa-2x px-2"
-          :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
+          :class="{
+            faded: !isMySelectedResponse || isIncomingResponse,
+            hidden: selectedResponse === 'START' || phoneRecord.isBusy,
+          }"
           :value="selectedResponse"
           :next="'START'"
           :selected="true"
@@ -43,15 +53,16 @@ import format from 'date-fns/format';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import ActivityButton from './ActivityButton';
-import PhoneTags from './PhoneTags';
+import Tags from './Tags';
 import { format as formatPhone } from '../utils/phone';
+import { NOT_ALLOWED } from '../store/modules/models/PhoneModel';
 
 export default {
   name: 'PhoneCard',
   props: ['phoneRecord', 'address', 'incomingResponse', 'revealed', 'index', 'editPhone', 'disabled'],
   components: {
     ActivityButton,
-    PhoneTags,
+    Tags,
   },
   data() {
     return {
@@ -175,13 +186,17 @@ export default {
       return publisherId.toString() === userId.toString();
     },
     allowedToCall() {
-      const notAllowed = ['invalid', 'do not call'];
       const tags = this.phoneRecord.notes ? this.phoneRecord.notes.split(',') : [];
-      return intersection(notAllowed, tags).length === 0;
+      return intersection(NOT_ALLOWED, tags).length === 0;
     },
     hasConfirmed() {
       const notes = get(this.phoneRecord, 'notes', '') || '';
       return notes.includes('confirmed');
+    },
+    notAllowedTag() {
+      const tags = this.phoneRecord.notes ? this.phoneRecord.notes.split(',') : [];
+      const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
+      return notAllowedTags[0];
     },
   },
   watch: {
@@ -216,7 +231,6 @@ export default {
 .selected-response {
   width: 60px;
   height: 40px;
-  border-radius: 50%;
 }
 .selected-response.faded {
   opacity: 0.6;

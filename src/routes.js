@@ -1,5 +1,4 @@
 import VueRouter from 'vue-router';
-// import { axiosToken } from './store';
 import Auth from './components/Auth';
 import Welcome from './components/Welcome';
 import Unauthorized from './components/Unauthorized';
@@ -7,7 +6,6 @@ import Error from './components/Error';
 import Signout from './components/Signout';
 import Territories from './components/Territories';
 import Territory from './components/Territory';
-import TerritoryAddresses from './components/TerritoryAddresses';
 import TerritoryMap from './components/TerritoryMap';
 import SearchResults from './components/SearchResults';
 import AssignmentReport from './components/AssignmentReport';
@@ -97,7 +95,7 @@ const routes = [
     children: [{
       name: 'address-list',
       path: '/',
-      component: TerritoryAddresses,
+      component: PhoneWitnessing,
       props: true,
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],

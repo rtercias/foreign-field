@@ -95,6 +95,26 @@ export const ACTION_BUTTON_LIST = [
   },
 ];
 
+export const ADDRESS_RIGHT_BUTTON_LIST = [
+  'NH',
+  'HOME',
+  'LW',
+];
+
+export const PHONE_ADDRESS_RIGHT_BUTTON_LIST = [
+  'LW',
+];
+export const PHONE_ADDRESS_LEFT_BUTTON_LIST = [
+  'no number',
+  'do not mail',
+];
+
+export const NOT_ALLOWED = [
+  'do not call',
+  'do not mail',
+];
+
+
 export function validate(_address, isNew) {
   const address = clone(_address);
 
