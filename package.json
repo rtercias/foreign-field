@@ -55,8 +55,7 @@
     "sass": "^1.26.10",
     "sass-loader": "^9.0.3",
     "vue-cli-plugin-pwa": "^1.0.0-alpha.1",
-    "vue-template-compiler": "^2.6.11",
-    "webpack-pwa-manifest": "git+https://github.com/rtercias/webpack-pwa-manifest.git"
+    "vue-template-compiler": "^2.6.11"
   },
   "babel": {
     "presets": [
