@@ -76,8 +76,7 @@
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success px-2 py-3"
-              @click="close"
-              :href="lookupFastPeopleSearch()" target="_blank">
+              @click="lookupFastPeopleSearch">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers
                   class="text-white fa-fw fa-stack mx-2">
@@ -91,16 +90,9 @@
             <b-button
               v-show="!item.isBusy"
               variant="link"
-              class="interaction bg-success"
+              class="interaction bg-success text-decoration-none"
               :class="{ 'py-3': item.type === 'Regular' }"
-              :to="{
-                name: 'activity-history-checkout',
-                params: {
-                  territoryId: territory.id,
-                  addressId: item.type === 'Phone' ? item.id : address.id,
-                  checkoutId: territory.status && territory.status.checkout_id || '',
-                }
-              }">
+              @click="() => goToActivityHistory(item)">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers class="text-white fa-2x mx-2">
                   <font-awesome-icon icon="history"></font-awesome-icon>
@@ -112,12 +104,11 @@
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <b-button
-              v-if="item.type === 'Phone'"
               variant="link"
               v-show="!item.isBusy"
               class="interaction bg-danger">
               <span class="w-100 d-block">
-                <font-awesome-layers class="remove-number text-white fa-2x" @click="() => removePhone(item)">
+                <font-awesome-layers class="remove-number text-white fa-2x" @click="() => remove(item, close)">
                   <font-awesome-icon icon="trash-alt"></font-awesome-icon>
                 </font-awesome-layers>
               </span>
@@ -137,7 +128,7 @@
         </swipe-list>
         <b-list-group-item
           v-if="mode === 'phone-list'"
-          class="d-flex pb-2 px-2 border-0"
+          class="d-flex p-0 pb-2 border-0"
           :class="{ 'pt-0': isDesktop }">
           <b-input-group size="lg">
             <b-input-group-prepend>
@@ -276,9 +267,9 @@ export default {
         .filter(b => list.includes(b.value));
     },
     leftButtonList(type) {
-      const list = (type === 'Regular' ? PHONE_ADDRESS_LEFT_BUTTON_LIST : LEFT_BUTTON_LIST);
-      const buttons = this.actionButtonList(type);
-      return buttons.filter(b => list.includes(b.value));
+      const leftButtons = type === 'Regular' ? PHONE_ADDRESS_LEFT_BUTTON_LIST : LEFT_BUTTON_LIST;
+      const list = this.$route.name === 'address-list' ? [] : leftButtons;
+      return this.actionButtonList(type).filter(b => list.includes(b.value));
     },
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
@@ -378,7 +369,11 @@ export default {
       this.$set(phone, 'editMode', false);
       this.$set(phone, 'isBusy', false);
     },
-    async removePhone(phone) {
+    async remove(item, close) {
+      if (item.type === 'Regular') await this.removeAddress(item, close);
+      else if (item.type === 'Phone') await this.removePhone(item, close);
+    },
+    async removePhone(phone, close) {
       this.$set(phone, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
         `Remove "${this.formatPhone(phone.phone)}" from the list?`, {
@@ -393,7 +388,25 @@ export default {
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
+      if (typeof close === 'function') close();
       this.$set(phone, 'isBusy', false);
+    },
+    async removeAddress(address, close) {
+      this.$set(address, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        'Remove address from the list?', {
+          title: `${address.addr1} ${address.addr2}`,
+          centered: true,
+        }
+      );
+
+      if (response) {
+        this.isAddressBusy = true;
+        await this.updateAddress({ ...address, status: AddressStatus.Inactive });
+        this.isAddressBusy = false;
+      }
+      if (typeof close === 'function') close();
+      this.$set(address, 'isBusy', false);
     },
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
@@ -509,7 +522,7 @@ export default {
       const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
       const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
       const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
-      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
+      window.open(`https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`, '_blank');
     },
 
     selectedNotAllowed(item) {
@@ -521,6 +534,17 @@ export default {
 
     allowedToCall(item) {
       return this.selectedNotAllowed(item).length === 0;
+    },
+
+    goToActivityHistory(item) {
+      this.$router.push({
+        name: 'activity-history-checkout',
+        params: {
+          territoryId: this.territory.id,
+          addressId: item.type === 'Phone' ? item.id : this.address.id,
+          checkoutId: this.territory.status && this.territory.status.checkout_id || '',
+        },
+      });
     },
   },
 };

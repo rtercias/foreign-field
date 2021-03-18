@@ -8,6 +8,7 @@ const GEOCODE_CITY_TYPES = ['locality', 'sublocality'];
 export const model = gql`fragment AddressModel on Address {
   congregationId
   territory_id
+  type
   id
   addr1
   addr2

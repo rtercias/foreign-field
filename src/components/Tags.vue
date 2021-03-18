@@ -1,5 +1,5 @@
 <template>
-  <div class="tags w-100">
+  <div class="tags w-100" :class="{ 'd-none': !selectedTags.length && !availableTags.length }">
     <div class="w-100 text-left">
       <b-button-group size="sm">
         <div class="combined-tags d-flex flex-wrap text-left">
@@ -32,7 +32,9 @@
             :class="`border-${variant}`"
             :variant="variant"
             size='sm'>
-            <span class="tag-text d-flex align-items-center small" :class="{ 'text-white': variant === 'info' }">
+            <span
+              class="tag-text d-flex align-items-center small font-weight-bold"
+              :class="{ 'text-white': variant === 'info' }">
               <span v-if="collapsed">add tag</span>
               <span v-else>done</span>
             </span>

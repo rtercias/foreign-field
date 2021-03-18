@@ -2,19 +2,18 @@
   <div
     class="address-card-container p-2 d-flex align-items-center"
     :class="{
-      'min-height-phone-address': $route.name === 'phone-list',
+      'min-height-phone-address mb-2': $route.name === 'phone-list',
       'min-height': $route.name === 'address-list'
     }">
     <font-awesome-layers
-      v-if="$route.name === 'phone-list'"
       class="ellipsis-v-static text-muted fa-1x"
       @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <div class="w-100">
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+    <div class="w-100 row">
+      <div class="address-card col-9 row justify-content-between align-items-start ml-0 mr-0 text-black-50"
         :class="{ 'min-height': $route.name === 'address-list' }">
-        <div v-if="$route.name === 'phone-list'" class="col-9 pb-2 pl-2">
+        <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
           <b-link
             class="w-100"
             :to="`/territories/${territory.id}/addresses/${address.id}/detail?origin=phone`">
@@ -26,7 +25,7 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address col-9 flex-column pt-2 pb-4">
+        <div v-else class="address flex-column pt-2 pb-4">
           <div>
             <h5 class="mb-0">
               <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
@@ -39,44 +38,47 @@
             </div>
           </div>
         </div>
-        <div
-          class="static-buttons col-3"
-          :class="{ 'pt-3': $route.name === 'address-list', 'align-self-center': $route.name === 'phone-list' }">
-          <font-awesome-icon
-            class="text-info text-left fa-2x"
-            icon="circle-notch"
-            spin
-            v-if="isLogging || address.isBusy"
-          />
-          <span
-            v-else
-            class="d-flex flex-column w-100">
-            <ActivityButton
-              v-if="!allowedToCall"
-              class="fa-2x px-2 ml-n2 selected-tag"
-              :value="notAllowedTag"
-              :selected="true"
-              :display-only="true"
-              :bg="$route.name === 'phone-list' ? 'light' : 'white'"
-              :actionButtonList="actionButtonList">
-            </ActivityButton>
-            <ActivityButton
-              v-else
-              class="selected-response fa-2x d-flex ml-n1"
-              :class="{
-                faded: !isMySelectedResponse || isIncomingResponse,
-                hidden: selectedResponse === 'START' || address.isBusy,
-              }"
-              :value="selectedResponse"
-              :next="'START'"
-              :selected="true"
-              :actionButtonList="actionButtonList"
-              @button-click="confirmClearStatus">
-            </ActivityButton>
-          </span>
-        </div>
+        <Tags
+          :record="address"
+          :variant="$route.name === 'phone-list' ? 'info' : ''"
+          :class="{'pl-2': $route.name === 'phone-list'}"></Tags>
       </div>
-      <Tags :record="address" :variant="$route.name === 'phone-list' ? 'info' : ''" class="pl-2"></Tags>
+      <div
+        class="static-buttons col-3 ml-n1"
+        :class="{ 'align-self-center': $route.name === 'phone-list' }">
+        <font-awesome-icon
+          class="text-info text-left fa-2x"
+          icon="circle-notch"
+          spin
+          v-if="isLogging || address.isBusy"
+        />
+        <span
+          v-else
+          class="d-flex flex-column w-100">
+          <ActivityButton
+            v-if="!allowedToCall"
+            class="fa-2x ml-n3 selected-tag"
+            :value="notAllowedTag"
+            :selected="true"
+            :display-only="true"
+            :bg="$route.name === 'phone-list' ? 'light' : 'white'"
+            :actionButtonList="actionButtonList">
+          </ActivityButton>
+          <ActivityButton
+            v-else
+            class="selected-response fa-2x d-flex"
+            :class="{
+              faded: !isMySelectedResponse || isIncomingResponse,
+              hidden: selectedResponse === 'START' || address.isBusy,
+            }"
+            :value="selectedResponse"
+            :next="'START'"
+            :selected="true"
+            :actionButtonList="actionButtonList"
+            @button-click="confirmClearStatus">
+          </ActivityButton>
+        </span>
+      </div>
     </div>
     <font-awesome-layers v-show="!isTerritoryBusy" class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
