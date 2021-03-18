@@ -2,7 +2,8 @@
   <div
     class="address-card-container p-2 d-flex align-items-center"
     :class="{
-      'min-height-phone-address mb-2': $route.name === 'phone-list',
+      'min-height-phone-address': $route.name === 'phone-list',
+      'mb-2': $route.name === 'phone-list' && isDesktop,
       'min-height': $route.name === 'address-list'
     }">
     <font-awesome-layers
@@ -190,6 +191,7 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
       isTerritoryBusy: 'territory/isBusy',
+      isDesktop: 'auth/isDesktop',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;

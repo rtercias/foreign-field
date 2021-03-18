@@ -63,6 +63,7 @@
           <template v-slot:right="{ item, close }" :disabled="true">
             <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <ActivityButton
+              :class="{ 'mb-2': isDesktop }"
               v-for="(button, index) in rightButtonList(item)"
               :key="index"
               :value="button.value"
@@ -76,6 +77,7 @@
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success px-2 py-3"
+              :class="{ 'mb-2': isDesktop }"
               @click="lookupFastPeopleSearch">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers
@@ -91,7 +93,7 @@
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success text-decoration-none"
-              :class="{ 'py-3': item.type === 'Regular' }"
+              :class="{ 'py-3': item.type === 'Regular', 'mb-2': isDesktop }"
               @click="() => goToActivityHistory(item)">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers class="text-white fa-2x mx-2">
@@ -106,7 +108,8 @@
             <b-button
               variant="link"
               v-show="!item.isBusy"
-              class="interaction bg-danger">
+              class="interaction bg-danger"
+              :class="{ 'mb-2': isDesktop }">
               <span class="w-100 d-block">
                 <font-awesome-layers class="remove-number text-white fa-2x" @click="() => remove(item, close)">
                   <font-awesome-icon icon="trash-alt"></font-awesome-icon>
@@ -119,6 +122,7 @@
               v-show="!item.isBusy"
               :key="button.value"
               class="fa-2x"
+              :class="{ 'mb-2': isDesktop }"
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
               :slashed="button.slashed"
@@ -129,7 +133,7 @@
         <b-list-group-item
           v-if="mode === 'phone-list'"
           class="d-flex p-0 pb-2 border-0"
-          :class="{ 'pt-0': isDesktop }">
+          :class="{ 'pt-0': isDesktop, 'mt-2': !isDesktop }">
           <b-input-group size="lg">
             <b-input-group-prepend>
               <b-input-group-text class="text-gray bg-white">

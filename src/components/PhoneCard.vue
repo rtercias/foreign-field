@@ -1,5 +1,7 @@
 <template>
-  <div class="phone-card p-2 mb-2 d-flex align-items-center justify-content-between">
+  <div
+    class="phone-card p-2 d-flex align-items-center justify-content-between"
+    :class="{ 'mb-2': isDesktop }">
     <font-awesome-layers class="left-panel-button ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
@@ -146,6 +148,7 @@ export default {
       actionButtonList: 'phone/actionButtonList',
       user: 'auth/user',
       publisher: 'publisher/publisher',
+      isDesktop: 'auth/isDesktop',
     }),
 
     overflowRatio() {
