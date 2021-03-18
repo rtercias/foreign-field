@@ -133,7 +133,7 @@
         <b-list-group-item
           v-if="mode === 'phone-list'"
           class="d-flex p-0 pb-2 border-0"
-          :class="{ 'pt-0': isDesktop, 'mt-2': !isDesktop }">
+          :class="{ 'pt-0': isDesktop, 'mt-2 mx-2': !isDesktop }">
           <b-input-group size="lg">
             <b-input-group-prepend>
               <b-input-group-text class="text-gray bg-white">
