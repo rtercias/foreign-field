@@ -166,11 +166,22 @@ li {
 .add-new {
   font-size: 24px;
 }
+
+.phone-address-card-container {
+  width: 100%;
+}
+
 @media (min-width: 769px) {
   .phone-address-card-container {
     width: 48%;
     flex: auto;
     border: 1px solid $secondary;
+  }
+}
+
+@media (min-width: 1400px) {
+  .phone-address-card-container {
+    width: 32%;
   }
 }
 
