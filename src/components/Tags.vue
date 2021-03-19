@@ -281,7 +281,7 @@ export default {
     font-size: 14px;
   }
   .tag-icon {
-    font-size: 16px;
+    font-size: 10px;
   }
   .tag-text {
     font-size: 14px;
