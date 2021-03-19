@@ -38,7 +38,7 @@
         :disabled="disabled"
         @change="updateOption">
       </b-form-select>
-      <div v-else :style="indent">
+      <div v-else :style="indent" class="w-75" :class="{'border px-1': disabled }">
         <span v-if="disabled">{{!node.value ? 'None' : node.value}}</span>
         <b-form-input v-else v-model="node.value" @change="updateOption"></b-form-input>
       </div >
