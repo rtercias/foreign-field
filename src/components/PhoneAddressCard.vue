@@ -2,8 +2,7 @@
   <div
     class="phone-address-card d-flex align-items-baseline"
     :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
-    <div
-      :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
+    <div class="w-100">
       <b-list-group>
         <swipe-list
           ref="list"
@@ -232,9 +231,6 @@ export default {
     },
     doNotMail() {
       return this.phoneAddressTags.includes(DO_NOT_MAIL);
-    },
-    isLastRecordAndOdd() {
-      return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
     },
     combinedAddressAndPhones() {
       if (this.mode === 'phone-list' && this.address && this.address.phones) {
