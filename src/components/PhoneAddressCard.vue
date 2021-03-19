@@ -1,7 +1,7 @@
 <template>
   <div
     class="phone-address-card d-flex align-items-baseline"
-    :class="{ 'm-0 p-2 pb-3': !disabled && mode === 'phone-list' }">
+    :class="{ 'm-0': !disabled, 'm-0 p-2 pb-3': mode === 'phone-list' }">
     <div
       :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
       <b-list-group>
@@ -63,7 +63,7 @@
           <template v-slot:right="{ item, close }" :disabled="true">
             <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <ActivityButton
-              :class="{ 'mb-2': isDesktop }"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
               v-for="(button, index) in rightButtonList(item)"
               :key="index"
               :value="button.value"
@@ -77,7 +77,7 @@
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success px-2 py-3"
-              :class="{ 'mb-2': isDesktop }"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
               @click="lookupFastPeopleSearch">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers
@@ -93,7 +93,7 @@
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success text-decoration-none"
-              :class="{ 'py-3': item.type === 'Regular', 'mb-2': isDesktop }"
+              :class="{ 'py-3': item.type === 'Regular', 'mb-2': isDesktop && mode === 'phone-list' }"
               @click="() => goToActivityHistory(item)">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers class="text-white fa-2x mx-2">
@@ -109,7 +109,7 @@
               variant="link"
               v-show="!item.isBusy"
               class="interaction bg-danger"
-              :class="{ 'mb-2': isDesktop }">
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }">
               <span class="w-100 d-block">
                 <font-awesome-layers class="remove-number text-white fa-2x" @click="() => remove(item, close)">
                   <font-awesome-icon icon="trash-alt"></font-awesome-icon>
@@ -122,7 +122,7 @@
               v-show="!item.isBusy"
               :key="button.value"
               class="fa-2x"
-              :class="{ 'mb-2': isDesktop }"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
               :slashed="button.slashed"
