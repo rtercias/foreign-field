@@ -14,7 +14,11 @@
       v-for="(a, index) in filteredAddresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"
-      :class="{ 'border-success border-medium': a.id === foundId, 'border m-2': $route.name === 'address-list' }"
+      :class="{
+        'border-success border-medium': a.id === foundId,
+        'border': $route.name === 'address-list',
+        'm-2': $route.name === 'address-list' && isDesktop,
+      }"
       :address="a"
       :territory="territory"
       :index="index"

@@ -1,7 +1,7 @@
 <template>
   <div
     class="phone-address-card d-flex align-items-baseline"
-    :class="{ 'm-0': !disabled, 'm-0 p-2 pb-3': mode === 'phone-list' }">
+    :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
     <div
       :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
       <b-list-group>

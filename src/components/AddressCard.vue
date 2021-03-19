@@ -1,10 +1,11 @@
 <template>
   <div
-    class="address-card-container p-2 d-flex align-items-center"
+    class="address-card-container d-flex align-items-center"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
       'mb-2': $route.name === 'phone-list' && isDesktop,
-      'min-height': $route.name === 'address-list'
+      'p-2': $route.name === 'phone-list',
+      'px-2 min-height': $route.name === 'address-list'
     }">
     <font-awesome-layers
       class="ellipsis-v-static text-muted fa-1x"
@@ -26,7 +27,7 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address flex-column pt-2 pb-4">
+        <div v-else class="address flex-column pb-4">
           <div>
             <h5 class="mb-0">
               <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
