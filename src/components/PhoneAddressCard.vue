@@ -1,7 +1,8 @@
 <template>
-  <div class="m-0 phone-address-card d-flex align-items-baseline" :class="{ 'pb-5': !disabled }">
-    <div
-      :class="isLastRecordAndOdd && isDesktop ? 'w-50 border-right border' : 'w-100'">
+  <div
+    class="phone-address-card d-flex align-items-baseline"
+    :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
+    <div class="w-100">
       <b-list-group>
         <swipe-list
           ref="list"
@@ -14,10 +15,10 @@
               v-if="item.type === 'Regular'"
               mode="phoneAddress"
               :index="index"
-              class="bg-light border-medium "
-              :class="isActiveAddress(item.id)
-                ? ['border-warning', 'active']
-                : ['border-light', 'border-right-0', 'border-left-0']"
+              :class="{
+                'border-warning active': isActiveAddress(item.id),
+                'bg-light border-right-0 border-left-0': mode === 'phone-list',
+              }"
               :address="item"
               :territoryId="territory.id"
               :incomingResponse="item.lastActivity"
@@ -28,7 +29,7 @@
             </AddressCard>
             <PhoneCard
               v-else-if="!item.editMode && item.type === 'Phone'"
-              class="h-100"
+              class="h-100 border"
               :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
               :index="index"
               :phoneRecord="item"
@@ -61,7 +62,8 @@
           <template v-slot:right="{ item, close }" :disabled="true">
             <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <ActivityButton
-              v-for="(button, index) in rightButtonList(item.type)"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
+              v-for="(button, index) in rightButtonList(item)"
               :key="index"
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
@@ -70,12 +72,12 @@
               @button-click="() => updateResponse(item, button.value, close)">
             </ActivityButton>
             <b-button
-              v-if="item.type === 'Regular'"
+              v-if="item.type === 'Regular' && $route.name === 'phone-list'"
               v-show="!item.isBusy"
               variant="link"
               class="interaction bg-success px-2 py-3"
-              @click="close"
-              :href="lookupFastPeopleSearch()" target="_blank">
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
+              @click="lookupFastPeopleSearch">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers
                   class="text-white fa-fw fa-stack mx-2">
@@ -89,16 +91,9 @@
             <b-button
               v-show="!item.isBusy"
               variant="link"
-              class="interaction bg-success"
-              :class="{ 'py-3': item.type === 'Regular' }"
-              :to="{
-                name: 'activity-history-checkout',
-                params: {
-                  territoryId: territory.id,
-                  addressId: item.type === 'Phone' ? item.id : address.id,
-                  checkoutId: territory.status && territory.status.checkout_id || '',
-                }
-              }">
+              class="interaction bg-success text-decoration-none"
+              :class="{ 'py-3': item.type === 'Regular', 'mb-2': isDesktop && mode === 'phone-list' }"
+              @click="() => goToActivityHistory(item)">
               <span class="w-100 d-block pt-1">
                 <font-awesome-layers class="text-white fa-2x mx-2">
                   <font-awesome-icon icon="history"></font-awesome-icon>
@@ -110,22 +105,23 @@
           <template v-slot:left="{ item, close }">
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <b-button
-              v-if="item.type === 'Phone'"
               variant="link"
               v-show="!item.isBusy"
-              class="interaction bg-danger">
+              class="interaction bg-danger"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }">
               <span class="w-100 d-block">
-                <font-awesome-layers class="remove-number text-white fa-2x" @click="() => removePhone(item)">
+                <font-awesome-layers class="remove-number text-white fa-2x" @click="() => remove(item, close)">
                   <font-awesome-icon icon="trash-alt"></font-awesome-icon>
                 </font-awesome-layers>
               </span>
               <span class="description text-white">Remove</span>
             </b-button>
             <ActivityButton
+              v-for="(button) in leftButtonList(item.type)"
               v-show="!item.isBusy"
-              v-for="(button, index) in leftButtonList(item.type)"
-              :key="index"
+              :key="button.value"
               class="fa-2x"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
               :value="button.value"
               :actionButtonList="actionButtonList(item.type)"
               :slashed="button.slashed"
@@ -134,8 +130,9 @@
           </template>
         </swipe-list>
         <b-list-group-item
-          class="d-flex pb-2 px-2 border-0"
-          :class="{ 'pt-0': isDesktop }">
+          v-if="mode === 'phone-list'"
+          class="d-flex p-0 pb-2 border-0"
+          :class="{ 'pt-0': isDesktop, 'mt-2 mx-2': !isDesktop }">
           <b-input-group size="lg">
             <b-input-group-prepend>
               <b-input-group-text class="text-gray bg-white">
@@ -175,14 +172,21 @@ import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import { REJECT_TAGS } from '../store/modules/phone';
 import { unmask } from '../utils/phone';
+import {
+  LEFT_BUTTON_LIST,
+  RIGHT_BUTTON_LIST,
+  NOT_ALLOWED as PHONE_NOT_ALLOWED,
+} from '../store/modules/models/PhoneModel';
+import {
+  ADDRESS_RIGHT_BUTTON_LIST,
+  PHONE_ADDRESS_LEFT_BUTTON_LIST,
+  PHONE_ADDRESS_RIGHT_BUTTON_LIST,
+  NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
+} from '../store/modules/models/AddressModel';
 
 const NO_NUMBER = 'no number';
 const DO_NOT_MAIL = 'do not mail';
 const LETTER_WRITING = 'mail sent';
-const RIGHT_BUTTON_LIST = ['NA', 'CT', 'VM'];
-const LEFT_BUTTON_LIST = ['do not call', 'invalid', 'confirmed'];
-const ADDRESS_RIGHT_BUTTON_LIST = ['LW'];
-const ADDRESS_LEFT_BUTTON_LIST = [NO_NUMBER, DO_NOT_MAIL];
 
 export default {
   name: 'PhoneAddressCard',
@@ -201,7 +205,7 @@ export default {
       newPhone: '',
       oldPhone: '',
       isAddressBusy: false,
-      addressLeftButtonList: ADDRESS_LEFT_BUTTON_LIST,
+      addressLeftButtonList: PHONE_ADDRESS_LEFT_BUTTON_LIST,
       isAdding: false,
     };
   },
@@ -215,21 +219,21 @@ export default {
       search: 'phone/search',
       isDesktop: 'auth/isDesktop',
     }),
+    mode() {
+      return this.$route.name;
+    },
     isEmpty() {
       return !this.address.phones || this.address.phones.length === 0;
     },
     phoneAddressTags() {
       const notes = this.address.notes ? this.address.notes.split(',') : [];
-      return intersection(notes, ADDRESS_LEFT_BUTTON_LIST);
+      return intersection(notes, PHONE_ADDRESS_LEFT_BUTTON_LIST);
     },
     doNotMail() {
       return this.phoneAddressTags.includes(DO_NOT_MAIL);
     },
-    isLastRecordAndOdd() {
-      return this.index === this.territory.addresses.length - 1 && this.index % 2 === 0;
-    },
     combinedAddressAndPhones() {
-      if (this.address && this.address.phones) {
+      if (this.mode === 'phone-list' && this.address && this.address.phones) {
         return [this.address, ...this.address.phones];
       }
       return this.address ? [this.address] : [];
@@ -254,17 +258,18 @@ export default {
       }
       return this.phoneButtonList;
     },
-    rightButtonList(type) {
-      if (type === 'Regular') {
-        return this.actionButtonList(type).filter(b => ADDRESS_RIGHT_BUTTON_LIST.includes(b.value));
-      }
-      return this.actionButtonList(type).filter(b => RIGHT_BUTTON_LIST.includes(b.value));
+    rightButtonList(item) {
+      const rightButtons = item.type === 'Regular' ? PHONE_ADDRESS_RIGHT_BUTTON_LIST : RIGHT_BUTTON_LIST;
+      const list = this.$route.name === 'address-list' ? ADDRESS_RIGHT_BUTTON_LIST : rightButtons;
+
+      if (!this.allowedToCall(item)) return [];
+      return this.actionButtonList(item.type)
+        .filter(b => list.includes(b.value));
     },
     leftButtonList(type) {
-      if (type === 'Regular') {
-        return this.actionButtonList(type).filter(b => ADDRESS_LEFT_BUTTON_LIST.includes(b.value));
-      }
-      return this.actionButtonList(type).filter(b => LEFT_BUTTON_LIST.includes(b.value));
+      const leftButtons = type === 'Regular' ? PHONE_ADDRESS_LEFT_BUTTON_LIST : LEFT_BUTTON_LIST;
+      const list = this.$route.name === 'address-list' ? [] : leftButtons;
+      return this.actionButtonList(type).filter(b => list.includes(b.value));
     },
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
@@ -364,7 +369,11 @@ export default {
       this.$set(phone, 'editMode', false);
       this.$set(phone, 'isBusy', false);
     },
-    async removePhone(phone) {
+    async remove(item, close) {
+      if (item.type === 'Regular') await this.removeAddress(item, close);
+      else if (item.type === 'Phone') await this.removePhone(item, close);
+    },
+    async removePhone(phone, close) {
       this.$set(phone, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
         `Remove "${this.formatPhone(phone.phone)}" from the list?`, {
@@ -379,7 +388,25 @@ export default {
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
+      if (typeof close === 'function') close();
       this.$set(phone, 'isBusy', false);
+    },
+    async removeAddress(address, close) {
+      this.$set(address, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        'Remove address from the list?', {
+          title: `${address.addr1} ${address.addr2}`,
+          centered: true,
+        }
+      );
+
+      if (response) {
+        this.isAddressBusy = true;
+        await this.updateAddress({ ...address, status: AddressStatus.Inactive });
+        this.isAddressBusy = false;
+      }
+      if (typeof close === 'function') close();
+      this.$set(address, 'isBusy', false);
     },
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
@@ -396,7 +423,7 @@ export default {
         this.$set(entity, 'isBusy', false);
         return;
       }
-      if (!this.rightButtonList(entity.type).some(b => b.value === value)) {
+      if (!this.actionButtonList(entity.type).some(b => b.value === value)) {
         value = 'START';
       }
 
@@ -495,7 +522,29 @@ export default {
       const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
       const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
       const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
-      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
+      window.open(`https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`, '_blank');
+    },
+
+    selectedNotAllowed(item) {
+      const notes = get(item, 'notes', '') || '';
+      const tags = notes ? notes.split(',') : [];
+      const notAllowed = item.type === 'Regular' ? ADDRESS_NOT_ALLOWED : PHONE_NOT_ALLOWED;
+      return intersection(notAllowed, tags) || [];
+    },
+
+    allowedToCall(item) {
+      return this.selectedNotAllowed(item).length === 0;
+    },
+
+    goToActivityHistory(item) {
+      this.$router.push({
+        name: 'activity-history-checkout',
+        params: {
+          territoryId: this.territory.id,
+          addressId: item.type === 'Phone' ? item.id : this.address.id,
+          checkoutId: this.territory.status && this.territory.status.checkout_id || '',
+        },
+      });
     },
   },
 };
@@ -535,7 +584,6 @@ export default {
 .selected-response {
   width: 60px;
   height: 40px;
-  border-radius: 50%;
 }
 .selected-response.faded {
   opacity: 0.6;
@@ -563,6 +611,8 @@ export default {
     border-top: 1px solid $secondary;
     border-bottom: 1px solid $secondary;
     min-height: 80px;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
   }
 }
 .no-phone {

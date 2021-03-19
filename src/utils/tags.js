@@ -4,12 +4,9 @@ export const ADDRESS_TAGS = [
   'wife speaks #language#',
   'husband speaks #language#',
   'business',
-  'no number',
-  'do not mail',
-  'does not speak #language#',
-  'do not call',
-  // 'deaf/mute',
-  // 'blind',
+];
+
+export const PHONE_TAGS = [
 ];
 
 export const PHONE_ADDRESS_TAGS = [

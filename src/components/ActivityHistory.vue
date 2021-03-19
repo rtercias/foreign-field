@@ -1,7 +1,8 @@
 <template>
   <div class="activity-history p-4" :key="checkoutId">
     <h3 class="w-100 mt-0">Activity History</h3>
-    <h5 class="w-100">{{address.addr1}} {{address.addr2}} {{address.city}}</h5>
+    <h5 class="w-100" v-if="address.type==='Regular'">{{address.addr1}} {{address.addr2}} {{address.city}}</h5>
+    <h5 class="w-100" v-if="address.type==='Phone'">{{formatPhone(address.phone)}}</h5>
     <Loading class="w-100" v-if="isLoading"></Loading>
     <div class="pt-3 w-100" v-else>
       <span class="blockquote" v-if="activityLogs.length === 0">
@@ -57,6 +58,7 @@ import groupBy from 'lodash/groupBy';
 import forEach from 'lodash/forEach';
 import Loading from './Loading.vue';
 import ActivityButton from './ActivityButton';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'ActivityHistory',
@@ -109,6 +111,7 @@ export default {
       fetchAddress: 'address/fetchAddress',
       fetchPublishers: 'publishers/fetchPublishers',
     }),
+    formatPhone,
     async fetch() {
       this.isLoading = true;
       if (this.useCheckoutId) {

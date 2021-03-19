@@ -1,19 +1,25 @@
 <template>
-  <div class="address-card-container p-2 d-flex align-items-center" :class="{ 'min-height': mode === 'phoneAddress' }">
+  <div
+    class="address-card-container d-flex align-items-center"
+    :class="{
+      'min-height-phone-address': $route.name === 'phone-list',
+      'mb-2': $route.name === 'phone-list' && isDesktop,
+      'p-2': $route.name === 'phone-list',
+      'px-2 min-height': $route.name === 'address-list'
+    }">
     <font-awesome-layers
-      v-if="mode === 'phoneAddress'"
       class="ellipsis-v-static text-muted fa-1x"
       @click="toggleLeftPanel">
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <div class="w-100">
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
-        :class="{ 'min-height': mode !== 'phoneAddress' }">
-        <div v-if="mode==='phoneAddress'" class="col-9 pb-2">
+    <div class="w-100 row">
+      <div class="address-card col-9 row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+        :class="{ 'min-height': $route.name === 'address-list' }">
+        <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
           <b-link
             class="w-100"
             :to="`/territories/${territory.id}/addresses/${address.id}/detail?origin=phone`">
-            <div class="address text-primary font-weight-bold" :class="{ 'phone-address': mode === 'phoneAddress' }">
+            <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
               {{address.addr1}} {{address.addr2}}
             </div>
             <div class="text-left small font-weight-bold">
@@ -21,7 +27,7 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address col-9 flex-column pt-2 pb-4">
+        <div v-else class="address flex-column pb-4">
           <div>
             <h5 class="mb-0">
               <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
@@ -34,36 +40,47 @@
             </div>
           </div>
         </div>
-        <div
-          class="static-buttons col-3"
-          :class="{ 'pt-3': mode !== 'phoneAddress', 'align-self-center': mode === 'phoneAddress' }">
-          <font-awesome-icon
-            class="logging-spinner text-info ml-3"
-            icon="circle-notch"
-            spin
-            v-if="isLogging || address.isBusy"
-          />
-          <div
-            :class="{ hidden: selectedResponse === 'START' || isLogging || address.isBusy }"
-            class="d-flex flex-column w-100">
-            <ActivityButton
-              class="selected-response fa-2x d-flex"
-              :class="{ faded: !isMySelectedResponse || isIncomingResponse }"
-              :value="selectedResponse"
-              :next="'START'"
-              :selected="true"
-              :actionButtonList="actionButtonList"
-              @button-click="confirmClearStatus">
-            </ActivityButton>
-          </div>
-        </div>
+        <Tags
+          :record="address"
+          :variant="$route.name === 'phone-list' ? 'info' : ''"
+          :class="{'pl-2': $route.name === 'phone-list'}"></Tags>
       </div>
-      <AddressTags
-        :address="address"
-        :mode="mode"
-        v-on="$listeners"
-        :class="{ 'pl-3': mode === 'phoneAddress'}">
-      </AddressTags>
+      <div
+        class="static-buttons col-3 ml-n1"
+        :class="{ 'align-self-center': $route.name === 'phone-list' }">
+        <font-awesome-icon
+          class="text-info text-left fa-2x"
+          icon="circle-notch"
+          spin
+          v-if="isLogging || address.isBusy"
+        />
+        <span
+          v-else
+          class="d-flex flex-column w-100">
+          <ActivityButton
+            v-if="!allowedToCall"
+            class="fa-2x ml-n3 selected-tag"
+            :value="notAllowedTag"
+            :selected="true"
+            :display-only="true"
+            :bg="$route.name === 'phone-list' ? 'light' : 'white'"
+            :actionButtonList="actionButtonList">
+          </ActivityButton>
+          <ActivityButton
+            v-else
+            class="selected-response fa-2x d-flex"
+            :class="{
+              faded: !isMySelectedResponse || isIncomingResponse,
+              hidden: selectedResponse === 'START' || address.isBusy,
+            }"
+            :value="selectedResponse"
+            :next="'START'"
+            :selected="true"
+            :actionButtonList="actionButtonList"
+            @button-click="confirmClearStatus">
+          </ActivityButton>
+        </span>
+      </div>
     </div>
     <font-awesome-layers v-show="!isTerritoryBusy" class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
@@ -75,10 +92,12 @@
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
+import intersection from 'lodash/intersection';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
-import AddressTags from './AddressTags';
+import Tags from './Tags';
 import { format as formatPhone } from '../utils/phone';
+import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
 
 export default {
   name: 'AddressCard',
@@ -86,7 +105,7 @@ export default {
   components: {
     AddressLinks,
     ActivityButton,
-    AddressTags,
+    Tags,
   },
   data() {
     return {
@@ -173,6 +192,7 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
       isTerritoryBusy: 'territory/isBusy',
+      isDesktop: 'auth/isDesktop',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
@@ -212,6 +232,15 @@ export default {
       const userId = get(this.user, 'id') || '';
       return publisherId.toString() === userId.toString();
     },
+    allowedToCall() {
+      const tags = this.address.notes ? this.address.notes.split(',') : [];
+      return intersection(NOT_ALLOWED, tags).length === 0;
+    },
+    notAllowedTag() {
+      const tags = this.address.notes ? this.address.notes.split(',') : [];
+      const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
+      return notAllowedTags[0];
+    },
   },
 
   watch: {
@@ -234,8 +263,11 @@ export default {
   height: 100%;
 }
 .address-card-container {
-  &.min-height {
+  &.min-height-phone-address {
     min-height: 91px;
+  }
+  &.min-height {
+    min-height: 150px;
   }
   .address-card {
     display: flex;
@@ -274,7 +306,6 @@ export default {
 .selected-response {
   width: 60px;
   height: 40px;
-  border-radius: 50%;
 }
 .selected-response.faded {
   opacity: 0.6;
@@ -286,7 +317,6 @@ export default {
 }
 .logging-spinner {
   font-size: 30px;
-  position: absolute;
 }
 
 @media print {

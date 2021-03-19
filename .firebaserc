@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "foreign-field"
+    "default": "foreign-field",
+    "staging": "foreign-field-staging",
+    "test": "foreign-field-test"
   }
 }

@@ -85,6 +85,23 @@ export const ACTION_BUTTON_LIST = [
   },
 ];
 
+export const LEFT_BUTTON_LIST = [
+  'do not call',
+  'invalid',
+  'confirmed',
+];
+
+export const RIGHT_BUTTON_LIST = [
+  'NA',
+  'CT',
+  'VM',
+];
+
+export const NOT_ALLOWED = [
+  'invalid',
+  'do not call',
+];
+
 export function validate(_phone, isNew) {
   const phone = clone(_phone);
 

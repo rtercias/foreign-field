@@ -17,7 +17,7 @@
     variant="link"
     v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction"
-    :class="{ [`bg-${get('color')}`]: !invert }">
+    :class="{ [`bg-${get('color')}`]: !invert, 'display-only': displayOnly }">
     <span class="w-100">
       <font-awesome-layers
         class="fa-layers text-white fa-2x w-100"
@@ -29,7 +29,7 @@
         </font-awesome-icon>
         <font-awesome-icon icon="slash" v-if="isSlashed"
           class="slash-shadow"
-          :class="{ [`text-${get('color')}`]: !invert }">
+          :class="{ [`text-${get('color')}`]: !invert, [`text-${bg}`]: bg }">
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
@@ -66,6 +66,7 @@ export default {
     'spin',
     'slashed',
     'disabled',
+    'bg',
   ],
   methods: {
     ...mapActions({
@@ -115,7 +116,17 @@ export default {
 .interaction {
   cursor: pointer;
   text-decoration: none;
-  border-radius: 0;
+
+  &.btn {
+    border-radius: 0;
+    &.display-only {
+      text-decoration: none;
+      cursor: default !important;
+    }
+    &:focus {
+      box-shadow: none;
+    }
+  }
 
   &.disabled {
     cursor: not-allowed;

@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
 firebase.config.js.unsecured
+/.firebase
+.travis.yml
 /dist
 
 # local env files

@@ -14,7 +14,11 @@
       v-for="(a, index) in filteredAddresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
       class="phone-address-card-container"
-      :class="{ 'border-success border-medium': a.id === foundId }"
+      :class="{
+        'border-success border-medium': a.id === foundId,
+        'border': $route.name === 'address-list',
+        'm-2': $route.name === 'address-list' && isDesktop,
+      }"
       :address="a"
       :territory="territory"
       :index="index"
@@ -166,12 +170,22 @@ li {
 .add-new {
   font-size: 24px;
 }
+
+.phone-address-card-container {
+  width: 100%;
+}
+
 @media (min-width: 769px) {
   .phone-address-card-container {
-    width: 49%;
+    width: 48%;
     flex: auto;
-    margin: 5px;
     border: 1px solid $secondary;
+  }
+}
+
+@media (min-width: 1400px) {
+  .phone-address-card-container {
+    width: 32%;
   }
 }
 

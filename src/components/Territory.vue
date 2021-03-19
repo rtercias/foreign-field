@@ -189,7 +189,12 @@ export default {
       if (this.viewMode === 'phone-list') {
         const addresses = get(this.territory, 'addresses', []).map(a => get(a, 'phones.length')) || [];
         if (addresses.length) {
-          return addresses.reduce((acc, current) => (acc || 0) + current);
+          const addressCount = addresses.length;
+          const phoneCount = addresses.reduce((acc, current) => (acc || 0) + current);
+          if (this.isDesktop) {
+            return `${addressCount} addresses, ${phoneCount} phones`;
+          }
+          return `${addressCount}, ${phoneCount}`;
         }
         return 0;
       }

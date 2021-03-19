@@ -58,6 +58,7 @@ export const congregation = {
       state.error = exception;
     },
     UPDATE_CONGREGATION(state, cong) {
+      cong.options = JSON.parse(get(cong, 'options', '{}'));
       state.congregation = cong;
     },
     UPDATE_CONGREGATION_FAIL(state, exception) {

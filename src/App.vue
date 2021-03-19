@@ -3,17 +3,17 @@
     <b-navbar
       v-if="isDesktop"
       class="align-items-start mb-n5"
-      :class="{ 'w-25': isDesktop }"
+      :class="{ 'w-20': isDesktop }"
       type="dark"
       variant="primary">
       <nav-menu />
     </b-navbar>
-    <div :class="{ 'w-75': isDesktop, 'mb-5': !isDesktop }">
+    <div :class="{ 'w-80': isDesktop, 'mb-5': !isDesktop }">
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view class="h-100" :key="key"></router-view>
     </div>
     <footer v-if="isDesktop || isPWA" class="app-footer w-100 d-flex justify-content-end">
-      <b-navbar :class="isDesktop ? 'w-75' : 'w-100'"
+      <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
         class="desktop-nav alert-secondary d-flex justify-content-end border-medium
           border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
         <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
