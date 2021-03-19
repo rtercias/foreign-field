@@ -38,7 +38,7 @@
         :disabled="disabled"
         @change="updateOption">
       </b-form-select>
-      <div v-else :style="indent" class="w-75" :class="{'border px-1': disabled }">
+      <div v-else :style="isDesktop ? indent : ''" class="w-75" :class="{'border px-1': disabled }">
         <span v-if="disabled">{{!node.value ? 'None' : node.value}}</span>
         <b-form-input v-else v-model="node.value" @change="updateOption"></b-form-input>
       </div >
@@ -46,6 +46,8 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'OptionTree',
   props: ['node', 'depth', 'disabled'],
@@ -63,6 +65,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      isDesktop: 'auth/isDesktop',
+    }),
     indent() {
       return { transform: `translate(${this.depth * 25}px)` };
     },
