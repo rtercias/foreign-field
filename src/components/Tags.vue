@@ -131,9 +131,10 @@ export default {
       }
     },
     async confirmRemoveTag(tag) {
+      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2}`;
       const response = await this.$bvModal.msgBoxConfirm(
         `Remove "${formatLanguage(tag.caption, this.language)}" tag?`, {
-          title: `${this.record.addr1} ${this.record.addr2}`,
+          title,
           centered: true,
         }
       );
