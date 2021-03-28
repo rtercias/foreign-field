@@ -14,8 +14,7 @@
       :to="`/territories/${territory && territory.id}/optimize`">
       Optimize
     </b-nav-item>
-    <b-nav-item
-      v-if="canLead">
+    <b-nav-item>
       <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">
         <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
         <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
@@ -72,7 +71,9 @@ export default {
   },
   methods: {
     ...mapActions({
+      checkinAll: 'territories/checkinAll',
       logout: 'auth/logout',
+      updateCongregation: 'congregation/updateCongregation',
     }),
     get,
     async toggleCampaignMode() {

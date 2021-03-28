@@ -107,10 +107,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      checkinAll: 'territories/checkinAll',
-      copyCheckouts: 'territories/copyCheckouts',
       back: 'auth/back',
-      updateCongregation: 'congregation/updateCongregation',
     }),
     get,
     goBack() {
