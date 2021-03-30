@@ -150,7 +150,7 @@ export const addresses = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: print(gql`mutation UpdateSort($addressIds: [Int]!, $userid: Int) { 
+          query: print(gql`mutation UpdateSort($addressIds: [Int]!, $userid: Int) {
             updateSort(addressIds: $addressIds, userid: $userid)
           }`),
           variables: {
@@ -213,7 +213,8 @@ export const addresses = {
           return;
         }
 
-        const search = response.data.data.addresses;
+        const { addresses: _addresses } = response.data.data;
+        const search = orderBy(_addresses, addr => addr.addr1);
         commit(ADDRESS_LOOKUP_SUCCESS, search);
       } catch (exception) {
         commit(ADDRESS_LOOKUP_FAIL, exception);
