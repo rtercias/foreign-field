@@ -182,6 +182,7 @@ import {
   PHONE_ADDRESS_LEFT_BUTTON_LIST,
   PHONE_ADDRESS_RIGHT_BUTTON_LIST,
   NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
+  ADDRESS_STATUS,
 } from '../store/modules/models/AddressModel';
 
 const NO_NUMBER = 'no number';
@@ -335,6 +336,9 @@ export default {
       if (this.search && this.search.length) {
         // same record is ok
         if (id && this.search.some(s => s.id === id)) return false;
+
+        // inactive parent address is ok
+        if (this.search.some(s => s.address.status !== ADDRESS_STATUS.Active)) return false;
 
         if (this.search.some(s => s.parent_id === this.address.id)) {
           this.$bvModal.msgBoxOk('This number already exists.', { title, centered: true });

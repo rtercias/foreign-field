@@ -138,8 +138,8 @@ export const phone = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddPhone($phone: PhoneInput!) { 
-              addPhone(phone: $phone) { 
+            query: print(gql`mutation AddPhone($phone: PhoneInput!) {
+              addPhone(phone: $phone) {
                 ...PhoneModel
               }
             }
@@ -184,8 +184,8 @@ export const phone = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation UpdatePhone($phone: PhoneInput!) { 
-              updatePhone(phone: $phone) { 
+            query: print(gql`mutation UpdatePhone($phone: PhoneInput!) {
+              updatePhone(phone: $phone) {
                 ...PhoneModel
               }
             }
@@ -221,7 +221,7 @@ export const phone = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddPhoneTag($phoneId: Int!, $userid: Int!, $tag: String!) { 
+            query: print(gql`mutation AddPhoneTag($phoneId: Int!, $userid: Int!, $tag: String!) {
               addPhoneTag(phoneId: $phoneId, userid: $userid, note: $tag)
             }`),
             variables: {
@@ -259,7 +259,7 @@ export const phone = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation RemoveTag($phoneId: Int!, $userid: Int!, $tag: String!) { 
+            query: print(gql`mutation RemoveTag($phoneId: Int!, $userid: Int!, $tag: String!) {
               removePhoneTag(phoneId: $phoneId, userid: $userid, note: $tag)
             }`),
             variables: {
@@ -318,6 +318,7 @@ export const phone = {
                   state_province
                   postal_code
                   territory_id
+                  status
                 }
               }
             }`),
