@@ -333,17 +333,15 @@ export default {
     async checkDuplicates(phone, id) {
       const title = this.formatPhone(phone);
       await this.phoneSearch({ congId: this.congId, searchTerm: phone });
-      if (this.search && this.search.length) {
+      const searchResults = this.search.filter(s => s.address.status === ADDRESS_STATUS.Active.value);
+      if (searchResults && searchResults.length) {
         // same record is ok
-        if (id && this.search.some(s => s.id === id)) return false;
+        if (id && searchResults.some(s => s.id === id)) return false;
 
-        // inactive parent address is ok
-        if (this.search.some(s => s.address.status !== ADDRESS_STATUS.Active)) return false;
-
-        if (this.search.some(s => s.parent_id === this.address.id)) {
+        if (searchResults.some(s => s.parent_id === this.address.id)) {
           this.$bvModal.msgBoxOk('This number already exists.', { title, centered: true });
         } else {
-          const terr = this.search[0].territory;
+          const terr = searchResults[0].territory;
           const h = this.$createElement;
           const message = h('p', {
             domProps: {
