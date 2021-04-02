@@ -290,10 +290,12 @@ export const addresses = {
         for (const log of logs) {
           log.changes = JSON.parse(log.changes);
           for (const key in log.changes) {
-            const newValue = log.changes[key].new || '';
-            const oldValue = log.changes[key].old || '';
-            if ((!newValue && oldValue.length === newValue.length) || updateFields.includes(key)) {
-              delete log.changes[key];
+            if (!log.changes.added && !log.changes.removed) {
+              const newValue = log.changes[key].new || '';
+              const oldValue = log.changes[key].old || '';
+              if ((!newValue && oldValue.length === newValue.length) || updateFields.includes(key)) {
+                delete log.changes[key];
+              }
             }
           }
         }

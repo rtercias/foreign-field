@@ -1,6 +1,8 @@
 <template>
   <div class="w-100 d-flex justify-content-between">
-    <div v-if="field === 'notes'">
+    <div v-if="field === 'added'"><span>added this entry</span></div>
+    <div v-else-if="field === 'removed'"><span>removed this entry</span></div>
+    <div v-else-if="field === 'notes'">
       <div v-if="!!newItems.length">
         <span>added</span>&nbsp;
         <b-badge v-for="(tag, index) in newItems" :key="index">{{tag}}</b-badge>&nbsp;
@@ -17,7 +19,7 @@
       <div v-if="!change.new">
         <span>removed</span>&nbsp;
         <span v-if="!!change.old"><b-badge>{{oldValue}}</b-badge></span>&nbsp;
-        <span>from {{field}}</span>&nbsp;
+        <span>from {{field}}</span>
       </div>
       <div v-else>
         <span>changed</span>&nbsp;
