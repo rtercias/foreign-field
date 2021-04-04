@@ -11,7 +11,7 @@
           <span class="terr-name">{{primaryDescription && terr.name}}</span>
         </b-link>
       </div>
-      <div class="check-in-out text-right" size="small" role="group">
+      <div class="check-in-out text-right d-flex flex-column justify-content-start" size="small" role="group">
         <b-btn
           class="font-weight-bold p-1 btn-sm"
           v-b-modal.checkoutModal
@@ -22,15 +22,6 @@
           <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
           Check Out
         </b-btn>
-        <!-- <b-btn
-          class="p-1 btn-sm mr-1"
-          v-if="canWrite && status === 'Checked Out'"
-          variant="link"
-          @click="reassign(terr)"
-          :disabled="saving">
-          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
-          Reassign
-        </b-btn> -->
         <b-btn
           class="font-weight-bold p-1 btn-sm"
           v-if="canWrite && status === 'Checked Out'"
@@ -39,6 +30,16 @@
           :disabled="saving">
           <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
           Check In
+        </b-btn>
+        <b-btn
+          class="mr-0 pr-0 pt-0"
+          v-b-modal.checkoutModal
+          v-if="canViewReports && status === 'Checked Out'"
+          variant="link"
+          @click="selectTerritory(terr)"
+          :disabled="saving">
+          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
+          Reassign
         </b-btn>
       </div>
     </div>
@@ -168,6 +169,7 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       canWrite: 'auth/canWrite',
+      canViewReports: 'auth/canViewReports',
       canManage: 'auth/canManage',
       territories: 'territories/territories',
     }),
