@@ -26,12 +26,13 @@ export const model = gql`fragment AddressModel on Address {
     id
     phone
     notes
-    sort 
+    sort
   }
 }`;
 
 export const ADDRESS_STATUS = {
   Active: { value: 'Active', text: 'Active' },
+  Inactive: { value: 'Inactive', text: 'Inactive' },
   NF: { value: 'NF', text: 'Does not speak #language#' },
   DNC: { value: 'DNC', text: 'Do not call' },
 };

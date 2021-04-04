@@ -29,6 +29,9 @@
             <b-badge v-if="isDNC(address)" variant="danger" class="text-lowercase">
               {{ADDRESS_STATUS.DNC.text}}
             </b-badge>
+            <b-badge v-if="isInactive(address)" variant="danger" class="text-lowercase">
+              {{formatLanguage(statusText(address.status), language)}}
+            </b-badge>
             <div v-else>({{get(address, 'territory.name')}})</div>
           </div>
         </b-list-group-item>
@@ -138,7 +141,8 @@ export default {
       return get(address, 'status') === ADDRESS_STATUS.DNC.value;
     },
     isInactive(address) {
-      return this.isUnassigned(address) || this.isNF(address) || this.isDNC(address);
+      return this.isUnassigned(address) || this.isNF(address) || this.isDNC(address)
+        || address.status === ADDRESS_STATUS.Inactive.value;
     },
     statusText(status) {
       return ADDRESS_STATUS[status].text;
