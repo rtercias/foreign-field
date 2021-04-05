@@ -203,7 +203,7 @@ export default {
       return get(this.$route, 'query.group') || this.territory.group_id;
     },
     typeOptions() {
-      if (!TEST_GROUPS.includes(this.model.group_id)) {
+      if (!TEST_GROUPS.includes(Number(this.model.group_id))) {
         return Types.filter(t => t.value !== 'Test');
       }
       return Types;
