@@ -4,13 +4,13 @@
     <div v-else>
       <div class="address-header justify-content-around align-items-center py-3">
         <div class="lead font-weight-bold w-100 pl-5">
-          <div>{{address.addr1}} {{address.addr2}}</div>
-          <div>{{address.city}} {{address.state_province}} {{address.postalCode}}</div>
+          <div>{{get(address, 'addr1')}} {{get(address, 'addr2')}}</div>
+          <div>{{get(address, 'city')}} {{get(address, 'state_province')}} {{get(address, 'postalCode')}}</div>
         </div>
         <div class="pr-4">
           <b-link
             v-if="canWrite"
-            :to="`/territories/${territoryId}/addresses/${address.id}/edit${queryParamOrigin}`">
+            :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/edit${queryParamOrigin}`">
             <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
           </b-link>
         </div>
@@ -38,12 +38,12 @@
           411.com
         </b-list-group-item>
         <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="dark"
-          :to="`/territories/${territoryId}/addresses/${address.id}/history`">
+          :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/history`">
           <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
           Activity History
         </b-list-group-item>
         <b-list-group-item v-if="canWrite" class="lead p-4 font-weight-bold w-auto" variant="danger"
-          :to="`/territories/${territoryId}/addresses/${address.id}/logs?fullscreen=true`">
+          :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/logs?fullscreen=true`">
           <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
           Address Change Log
         </b-list-group-item>
@@ -88,9 +88,9 @@ export default {
       canWrite: 'auth/canWrite',
     }),
     mapsUrl() {
-      const addr1 = this.address.addr1 || '';
-      const city = this.address.city || '';
-      const state = this.address.state_province || '';
+      const addr1 = get(this.address, 'addr1') || '';
+      const city = get(this.address, 'city') || '';
+      const state = get(this.address, 'state_province') || '';
       return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
     },
     lookup411() {
@@ -127,6 +127,7 @@ export default {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
     }),
+    get,
   },
 };
 </script>
