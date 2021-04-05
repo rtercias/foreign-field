@@ -4,26 +4,26 @@
     <header class="page-header sticky-top d-flex flex-column align-items-center py-3 px-2 border-bottom">
       <div class="d-flex w-100 justify-content-between">
         <div class="d-flex flex-column pl-0 pr-4" :class="{ 'col-4': !isDesktop }">
-          <groups-select :selected-id="selectedGroup" />
+          <groups-select :selected-id="selectedGroup" :save="true" />
           <b-button-group v-if="isDesktop" class="p-sm-0 d-block mt-2">
             <b-badge
               variant="primary"
               class="btn alert p-2 border-medium mb-0"
-              :class="{ 'border-primary': typeFilter === 'REGULAR' }"
+              :class="{ 'border-info': typeFilter === 'REGULAR' }"
               @click="() => setTypeFilter('REGULAR')">
               Regular ({{count('Regular')}})
             </b-badge>
             <b-badge
               variant="warning"
               class="btn alert p-2 border-medium mb-0"
-              :class="{ 'border-primary': typeFilter === 'SEARCH' }"
+              :class="{ 'border-info': typeFilter === 'SEARCH' }"
               @click="() => setTypeFilter('SEARCH')">
               Survey ({{count('SEARCH')}})
             </b-badge>
             <b-badge
               variant="success"
               class="btn alert p-2 border-medium mb-0"
-              :class="{ 'border-primary': typeFilter === 'BUSINESS' }"
+              :class="{ 'border-info': typeFilter === 'BUSINESS' }"
               @click="() => setTypeFilter('BUSINESS')">
               Business ({{count('Business')}})
             </b-badge>
@@ -159,6 +159,7 @@ import orderBy from 'lodash/orderBy';
 import toLower from 'lodash/toLower';
 
 const DEFAULT_FILTER = '';
+const DEFAULT_SORT = 'Description';
 
 export default {
   name: 'Territories',
@@ -202,7 +203,7 @@ export default {
         { value: 3, text: 'With Phones' },
         { value: 4, text: 'Without Phones' },
       ],
-      sortOption: 'Description',
+      sortOption: DEFAULT_SORT,
       sortOptions: [
         { value: 'Name', text: 'Name' },
         { value: 'Description', text: 'Description' },
@@ -225,6 +226,7 @@ export default {
       isDesktop: 'auth/isDesktop',
       canManage: 'auth/canManage',
       territoriesCancelTokens: 'territories/cancelTokens',
+      selectedSortAndFilters: 'territories/selectedSortAndFilters',
     }),
     searchedTerritories() {
       const { territories = [] } = this;
@@ -274,21 +276,28 @@ export default {
 
     async setAvailability(value) {
       this.availability = this.availability === value ? DEFAULT_FILTER : value;
-      sessionStorage.setItem('availability', this.availability);
+      this.setSortAndFilter({ availability: this.availability });
     },
 
     async setTypeFilter(value) {
       this.typeFilter = this.typeFilter === value ? '' : value;
+      this.setSortAndFilter({ type: this.typeFilter });
     },
 
     sort(value) {
       this.sortOption = value;
+      this.setSortAndFilter({ sort: this.sortOption });
     },
 
     async fetch() {
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
-      this.availability = sessionStorage.getItem('availability') || DEFAULT_FILTER;
-      this.sortOption = get(this.congregation, 'options.territories.defaultSort') || 'Description';
+      this.selectedGroup = this.selectedSortAndFilters.groupId || 0;
+      this.availability = this.selectedSortAndFilters.availability || DEFAULT_FILTER;
+      this.typeFilter = this.selectedSortAndFilters.type || '';
+      this.selectedCountFilter = this.selectedSortAndFilters.count || 0;
+      this.sortOption = this.selectedSortAndFilters.sort
+        || get(this.congregation, 'options.territories.defaultSort')
+        || DEFAULT_SORT;
       await this.fetchTerritories({
         congId,
         groupId: this.selectedGroup === 0 ? null : this.groupId,
@@ -337,6 +346,7 @@ export default {
       } else {
         this.selectedCountFilter = value;
       }
+      this.setSortAndFilter({ count: this.selectedCountFilter });
     },
 
     ...mapActions({
@@ -346,6 +356,8 @@ export default {
       getGroup: 'group/getGroup',
       getAddressCountByTerritories: 'territories/getAddressCountByTerritories',
       getPhoneCountByTerritories: 'territories/getPhoneCountByTerritories',
+      setSortAndFilter: 'territories/setSortAndFilter',
+      removeSortAndFilter: 'territories/removeSortAndFilter',
     }),
 
     applyCountFilter(territories) {
@@ -369,6 +381,7 @@ export default {
   async mounted() {
     const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
     this.selectedGroup = this.groupId;
+    this.setSortAndFilter({ groupId: this.groupId });
     await this.getGroup({ id: this.groupId });
     if (this.group.congregation_id !== congId) this.selectedGroup = 0;
     await this.fetch();

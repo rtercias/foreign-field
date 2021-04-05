@@ -26,6 +26,7 @@ const COPY_CHECKOUTS = 'COPY_CHECKOUTS';
 const SET_RECENTLY_SEEN_TERRITORIES = 'SET_RECENTLY_SEEN_TERRITORIES';
 const GET_ADDRESS_COUNT = 'GET_ADDRESS_COUNT';
 const GET_PHONE_COUNT = 'GET_PHONE_COUNT';
+const SET_SORT_FILTER = 'SET_SORT_FILTER';
 
 export const territories = {
   namespaced: true,
@@ -36,6 +37,7 @@ export const territories = {
     nearestTerritories: [],
     recentlySeenTerritories: [],
     cancelTokens: {},
+    selectedSortAndFilters: {},
   },
   getters: {
     territories: state => orderBy(state.territories, 'description', 'name'),
@@ -44,6 +46,7 @@ export const territories = {
     error: state => state.error,
     nearestTerritories: state => state.nearestTerritories,
     recentlySeenTerritories: state => state.recentlySeenTerritories,
+    selectedSortAndFilters: state => state.selectedSortAndFilters,
   },
   mutations: {
     FETCH_TERRITORIES(state, cancelToken) {
@@ -84,6 +87,9 @@ export const territories = {
         Vue.set(terr, 'phoneCount', get(count, 'phoneCount', 0));
       }
     },
+    SET_SORT_FILTER: (state, filter) => {
+      state.selectedSortAndFilters = { ...state.selectedSortAndFilters, ...filter };
+    },
   },
   actions: {
     async fetchTerritories({ commit }, params) {
@@ -104,8 +110,8 @@ export const territories = {
           },
           cancelToken,
           data: {
-            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int) { 
-              territories (congId: $congId, group_id: $groupId) { 
+            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int) {
+              territories (congId: $congId, group_id: $groupId) {
                 id
                 name
                 description
@@ -212,8 +218,8 @@ export const territories = {
           },
           cancelToken: axiosToken.token,
           data: {
-            query: print(gql`query NearestAddresses($congId: Int $coordinates: [Float] $radius: Int, $unit: String) { 
-              nearestAddresses (congId: $congId, coordinates: $coordinates, radius: $radius, unit: $unit) { 
+            query: print(gql`query NearestAddresses($congId: Int $coordinates: [Float] $radius: Int, $unit: String) {
+              nearestAddresses (congId: $congId, coordinates: $coordinates, radius: $radius, unit: $unit) {
                 territory_id
                 congregationId
                 latitude
@@ -253,7 +259,7 @@ export const territories = {
           method: 'post',
           cancelToken: axiosToken.token,
           data: {
-            query: print(gql`query Territory($terrId: Int) { 
+            query: print(gql`query Territory($terrId: Int) {
               territory (id: $terrId) {
                 id
                 lastActivity {
@@ -285,7 +291,7 @@ export const territories = {
           method: 'post',
           cancelToken: axiosToken.token,
           data: {
-            query: print(gql`query AddressCountByTerritories($congId: Int) { 
+            query: print(gql`query AddressCountByTerritories($congId: Int) {
               addressCountByTerritories (congId: $congId) {
                 id
                 addressCount
@@ -311,7 +317,7 @@ export const territories = {
           method: 'post',
           cancelToken: axiosToken.token,
           data: {
-            query: print(gql`query PhoneCountByTerritories($congId: Int) { 
+            query: print(gql`query PhoneCountByTerritories($congId: Int) {
               phoneCountByTerritories (congId: $congId) {
                 id
                 phoneCount
@@ -341,7 +347,7 @@ export const territories = {
               gql`
                 mutation CheckinAll(
                   $congId: Int! $username: String! $tz_offset: String! $timezone: String! $campaign: Boolean
-                ) { 
+                ) {
                   checkinAll (
                     congId: $congId, username: $username, tz_offset: $tz_offset, timezone: $timezone, campaign: $campaign
                   )
@@ -370,7 +376,7 @@ export const territories = {
           method: 'post',
           cancelToken: axiosToken.token,
           data: {
-            query: print(gql`mutation CopyCheckouts($congId: Int! $username: String! $campaign: Boolean) { 
+            query: print(gql`mutation CopyCheckouts($congId: Int! $username: String! $campaign: Boolean) {
               copyCheckouts (congId: $congId, username: $username, campaign: $campaign)
             }`),
             variables: {
@@ -432,6 +438,9 @@ export const territories = {
       const filtered = state.recentlySeenTerritories.filter(t => t.id !== id);
       localStorage.setItem('seenTerritories', JSON.stringify(filtered));
       commit(SET_RECENTLY_SEEN_TERRITORIES, filtered);
+    },
+    setSortAndFilter({ commit }, filter) {
+      commit(SET_SORT_FILTER, filter);
     },
   },
 };

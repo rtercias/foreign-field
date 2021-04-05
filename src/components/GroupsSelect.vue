@@ -7,7 +7,7 @@
       :key="group.id"
       :to="{ name: 'group', params: { groupId: group.id } }"
       class="mx-0 pl-2 w-100 d-block"
-      @click="selectGroup">
+      @change="selectGroup">
       <font-awesome-icon class="ml-n4" icon="check" v-if="group.id === selectedGroup.id" />
       {{group.code}}
       <span v-if="selectedId === 0">{{`(${terrCount(group.id)})`}}</span>
