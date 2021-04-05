@@ -1,5 +1,5 @@
 <template>
-  <b-modal id="checkoutModal" :title="`Territory Checkout ${territory.id}`" @shown="clearName" @ok="checkout">
+  <b-modal id="checkoutModal" :title="`Territory ${task}: ${territory.name}`" @shown="clearName" @ok="checkout">
     <b-alert class="text-left" show variant="danger" v-show="status === 'Recently Worked'">
       This was just done. Check out again?
     </b-alert>
@@ -61,6 +61,9 @@ export default {
     }),
     status() {
       return this.territory && this.territory.status ? this.territory.status.status : '';
+    },
+    task() {
+      return this.status === 'Checked Out' ? 'Re-assign' : 'Check Out';
     },
   },
 };
