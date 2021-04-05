@@ -32,7 +32,7 @@
             <b-badge v-if="isInactive(address)" variant="danger" class="text-lowercase">
               {{formatLanguage(statusText(address.status), language)}}
             </b-badge>
-            <div v-else>({{get(address, 'territory.name')}})</div>
+            <div v-else>{{get(address, 'territory.name')}}</div>
           </div>
         </b-list-group-item>
         <b-list-group-item v-for="phone in phones" :key="phone.id">
@@ -141,15 +141,17 @@ export default {
       return get(address, 'status') === ADDRESS_STATUS.DNC.value;
     },
     isInactive(address) {
-      return this.isUnassigned(address) || this.isNF(address) || this.isDNC(address)
-        || address.status === ADDRESS_STATUS.Inactive.value;
+      return get(address, 'status') === ADDRESS_STATUS.Inactive.value;
+    },
+    isDisabled(address) {
+      return this.isUnassigned(address) || this.isNF(address) || this.isDNC(address) || this.isInactive(address);
     },
     statusText(status) {
       return ADDRESS_STATUS[status].text;
     },
     link(address) {
       if (!address) return null;
-      if (this.isInactive(address)) {
+      if (this.isDisabled(address)) {
         return `/territories/${address.territory_id}/addresses/${address.id}/edit`;
       }
 
