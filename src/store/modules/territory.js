@@ -14,6 +14,7 @@ const SET_TERRITORY = 'SET_TERRITORY';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
+const RESET_TERRITORY_ACTIVITIES = 'RESET_TERRITORY_ACTIVITIES';
 const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
 const CANCEL_FETCH_LAST_ACTIVITY = 'CANCEL_FETCH_LAST_ACTIVITY';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
@@ -81,13 +82,12 @@ export const territory = {
   },
 
   mutations: {
-    CHANGE_STATUS(state, { status, publisher, checkoutId }) {
+    CHANGE_STATUS(state, args) {
       Vue.set(state.territory, 'status', {
-        // eslint-disable-next-line
-        checkout_id: checkoutId,
-        status,
+        checkout_id: args.checkout_id,
+        status: args.status,
         date: new Date().getTime(),
-        publisher,
+        publisher: args.publisher,
       });
     },
     SET_TERRITORY(state, { terr, getLastActivity }) {
@@ -115,6 +115,16 @@ export const territory = {
     },
     RESET_TERRITORY(state) {
       state.territory = {};
+    },
+    RESET_TERRITORY_ACTIVITIES(state) {
+      if (state.territory) {
+        for (const address of state.territory.addresses) {
+          address.lastActivity = null;
+          for (const phone of address.phones) {
+            phone.lastActivity = null;
+          }
+        }
+      }
     },
     FETCH_LAST_ACTIVITY(state, cancelToken) {
       state.cancelTokens = { ...state.cancelTokens, FETCH_LAST_ACTIVITY: cancelToken };
@@ -271,7 +281,7 @@ export const territory = {
 
         const checkoutId = get(response, 'data.data.checkinTerritory');
         commit(CHANGE_STATUS, {
-          checkoutId,
+          checkout_id: checkoutId,
           status: 'Recently Worked',
           publisher: args.publisher,
         });
@@ -284,6 +294,7 @@ export const territory = {
     async checkoutTerritory({ commit, dispatch }, args) {
       try {
         commit(CHECKING_OUT, true);
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -303,9 +314,17 @@ export const territory = {
         });
 
         const checkoutId = get(response, 'data.data.checkoutTerritory');
-        commit(CHANGE_STATUS, { checkoutId, status: 'Checked Out', publisher: args.publisher });
+        const status = {
+          checkout_id: checkoutId,
+          status: 'Checked Out',
+          publisher: args.publisher,
+          date: args.date,
+        };
+        commit(CHANGE_STATUS, status);
         await dispatch('auth/getUserTerritories', args.username, { root: true });
         commit(CHECKING_OUT, false);
+        dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
       } catch (e) {
         console.error('Unable to checkout territory', e);
       }
@@ -313,7 +332,9 @@ export const territory = {
 
     async reassignCheckout({ commit, dispatch }, args) {
       try {
+        if (!args.checkoutId) throw new Error('checkout id is required');
         commit(CHECKING_OUT, true);
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
         await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -332,11 +353,19 @@ export const territory = {
           },
         });
 
-        commit(CHANGE_STATUS, { checkoutId: args.checkoutId, status: 'Checked Out', publisher: args.publisher });
+        const status = {
+          checkout_id: args.checkoutId,
+          status: 'Checked Out',
+          publisher: args.publisher,
+          date: args.date,
+        };
+        commit(CHANGE_STATUS, status);
         if (args.publisher.username === args.username) {
           await dispatch('auth/getUserTerritories', args.username, { root: true });
         }
         commit(CHECKING_OUT, false);
+        dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
       } catch (e) {
         console.error('Unable to reassign territory checkout', e);
       }
@@ -497,7 +526,7 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async resetTerritoryActivities(vuex, { checkoutId, userid, tzOffset, timezone }) {
+    async resetTerritoryActivities({ commit }, { checkoutId, userid, tzOffset, timezone }) {
       try {
         await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -522,6 +551,7 @@ export const territory = {
             },
           },
         });
+        commit(RESET_TERRITORY_ACTIVITIES);
       } catch (e) {
         console.error('Unable to reset territory activities', e);
       }

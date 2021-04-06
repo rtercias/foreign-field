@@ -354,7 +354,6 @@ export default {
       getPhoneCountByTerritories: 'territories/getPhoneCountByTerritories',
       setSortAndFilter: 'territories/setSortAndFilter',
       removeSortAndFilter: 'territories/removeSortAndFilter',
-
     }),
 
     applyCountFilter(territories) {

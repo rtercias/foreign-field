@@ -51,6 +51,7 @@ export default {
         territoryId: this.territory.id,
         publisher: this.selectedPublisher,
         username: this.user.username,
+        date: Date.now(),
       });
 
       this.$router.push(`/territories/${this.territory.id}`);
@@ -59,11 +60,11 @@ export default {
     async reassign() {
       await this.reassignCheckout({
         checkoutId: this.territory.status.checkout_id,
+        territoryId: this.territory.id,
         publisher: this.selectedPublisher,
         username: this.user.username,
+        date: this.territory.status.date,
       });
-
-      this.$router.push(`/territories/${this.territory.id}`);
     },
 
     async checkoutOrReassign() {

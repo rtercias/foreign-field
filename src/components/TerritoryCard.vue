@@ -19,7 +19,7 @@
           v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
           @click="isReassign = false"
           :disabled="saving">
-          <font-awesome-icon v-if="isCheckingOutThisTerritory" icon="circle-notch" spin></font-awesome-icon>
+          <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
           Check Out
         </b-btn>
         <b-btn
@@ -38,7 +38,7 @@
           variant="link"
           @click="isReassign = true"
           :disabled="saving">
-          <font-awesome-icon v-if="isCheckingOutThisTerritory" icon="circle-notch" spin></font-awesome-icon>
+          <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
           Reassign
         </b-btn>
       </div>
