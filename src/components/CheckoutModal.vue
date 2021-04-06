@@ -1,5 +1,9 @@
 <template>
-  <b-modal id="checkoutModal" :title="`Territory ${task}: ${territory.name}`" @shown="clearName" @ok="checkout">
+  <b-modal
+    :id="`checkoutModal-${territory.id}`"
+    :title="`Territory ${task}: ${territory.name}`"
+    @shown="clearName"
+    @ok="checkoutOrReassign">
     <b-alert class="text-left" show variant="danger" v-show="status === 'Recently Worked'">
       This was just done. Check out again?
     </b-alert>
@@ -18,7 +22,7 @@ import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'CheckoutModal',
-  props: ['territory'],
+  props: ['territory', 'isReassign'],
   data() {
     return {
       selectedPublisher: { name: 'me' },
@@ -27,8 +31,8 @@ export default {
 
   methods: {
     ...mapActions({
-      fetchPublishers: 'publishers/fetchPublishers',
       checkoutTerritory: 'territory/checkoutTerritory',
+      reassignCheckout: 'territory/reassignCheckout',
     }),
 
     selectPublisher(publisher) {
@@ -50,6 +54,24 @@ export default {
       });
 
       this.$router.push(`/territories/${this.territory.id}`);
+    },
+
+    async reassign() {
+      await this.reassignCheckout({
+        checkoutId: this.territory.status.checkout_id,
+        publisher: this.selectedPublisher,
+        username: this.user.username,
+      });
+
+      this.$router.push(`/territories/${this.territory.id}`);
+    },
+
+    async checkoutOrReassign() {
+      if (this.isReassign) {
+        await this.reassign();
+      } else {
+        await this.checkout();
+      }
     },
   },
 
