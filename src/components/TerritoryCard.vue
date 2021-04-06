@@ -12,14 +12,14 @@
         </b-link>
       </div>
       <div class="check-in-out text-right d-flex flex-column justify-content-start" size="small" role="group">
-        <b-btn
+          <b-btn
           class="font-weight-bold p-1 btn-sm"
-          v-b-modal.checkoutModal
+          v-b-modal = "`checkoutModal-${this.terr.id}`"
           variant="primary"
           v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
-          @click="selectTerritory(terr)"
+          @click="isReassign = false"
           :disabled="saving">
-          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
+          <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
           Check Out
         </b-btn>
         <b-btn
@@ -33,12 +33,12 @@
         </b-btn>
         <b-btn
           class="mr-0 pr-0 pt-0"
-          v-b-modal.checkoutModal
+          v-b-modal = "`checkoutModal-${this.terr.id}`"
           v-if="canViewReports && status === 'Checked Out'"
           variant="link"
-          @click="selectTerritory(terr)"
+          @click="isReassign = true"
           :disabled="saving">
-          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
+          <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
           Reassign
         </b-btn>
       </div>
@@ -92,20 +92,34 @@
         </div>
       </div>
     </div>
+    <CheckoutModal :territory="terr" :is-reassign="isReassign"></CheckoutModal>
   </div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
+import CheckoutModal from './CheckoutModal.vue';
 import { displayName } from '../utils/publisher';
 
 export default {
   name: 'TerritoryCard',
-  props: ['terr', 'groupId', 'selectTerritory', 'fetch', 'typeFilters', 'showAddressCount', 'showPhoneCount'],
+  props: [
+    'terr',
+    'groupId',
+    'selectTerritory',
+    'fetch',
+    'typeFilters',
+    'showAddressCount',
+    'showPhoneCount',
+  ],
+  components: {
+    CheckoutModal,
+  },
   data() {
     return {
       saving: false,
+      isReassign: false,
     };
   },
   methods: {
@@ -121,6 +135,7 @@ export default {
       });
 
       if (response) {
+        this.saving = true;
         const publisher = territory.status && territory.status.publisher || {};
         const { user } = this.$store.state.auth;
         await this.checkinTerritory({
@@ -129,7 +144,6 @@ export default {
           username: user.username,
         });
 
-        this.saving = true;
         await this.resetTerritoryActivities({
           checkoutId: territory.status.checkout_id,
           userid: this.user.id,
@@ -172,6 +186,8 @@ export default {
       canViewReports: 'auth/canViewReports',
       canManage: 'auth/canManage',
       territories: 'territories/territories',
+      territory: 'territory/territory',
+      isCheckingOut: 'territory/isCheckingOut',
     }),
 
     isRecentlyWorked() {
@@ -208,6 +224,9 @@ export default {
     },
     tags() {
       return this.terr.tags ? this.terr.tags.split(',') : [];
+    },
+    isCheckingOutThisTerritory() {
+      return this.terr.id === this.territory.id && this.isCheckingOut;
     },
   },
 };
