@@ -132,12 +132,13 @@
           <TerritoryCard
             :terr="terr"
             :groupId="terr.group_id"
+            :selectTerritory="selectTerritory"
             :fetch="fetch"
-            :type-filters="typeFilters"
-            :isCheckingOut="isCheckingOut">
+            :type-filters="typeFilters">
           </TerritoryCard>
         </b-list-group-item>
       </b-list-group>
+      <CheckoutModal :territory="selectedTerritory"></CheckoutModal>
     </div>
     <span class="d-block p-3" v-if="!loading && filteredTerritories && filteredTerritories.length === 0">
       There are no {{availability}} territories
@@ -150,6 +151,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryCard from './TerritoryCard.vue';
+import CheckoutModal from './CheckoutModal.vue';
 import GroupsSelect from './GroupsSelect';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
@@ -164,6 +166,7 @@ export default {
   props: ['groupId'],
   components: {
     TerritoryCard,
+    CheckoutModal,
     Loading,
     SearchBar,
     GroupsSelect,
@@ -208,7 +211,6 @@ export default {
       loading: true,
       DEFAULT_FILTER,
       selectedCountFilter: 0,
-      isReassign: false,
     };
   },
 
@@ -225,7 +227,6 @@ export default {
       canManage: 'auth/canManage',
       territoriesCancelTokens: 'territories/cancelTokens',
       selectedSortAndFilters: 'territories/selectedSortAndFilters',
-      isCheckingOut: 'territory/isCheckingOut',
     }),
     searchedTerritories() {
       const { territories = [] } = this;
@@ -269,6 +270,10 @@ export default {
 
   methods: {
     get,
+    selectTerritory(territory) {
+      this.selectedTerritory = territory;
+    },
+
     async setAvailability(value) {
       this.availability = this.availability === value ? DEFAULT_FILTER : value;
       this.setSortAndFilter({ availability: this.availability });
@@ -286,7 +291,6 @@ export default {
 
     async fetch() {
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
-      await this.fetchPublishers(congId);
       this.selectedGroup = this.selectedSortAndFilters.groupId || 0;
       this.availability = this.selectedSortAndFilters.availability || DEFAULT_FILTER;
       this.typeFilter = this.selectedSortAndFilters.type || '';
@@ -381,6 +385,7 @@ export default {
     await this.getGroup({ id: this.groupId });
     if (this.group.congregation_id !== congId) this.selectedGroup = 0;
     await this.fetch();
+    await this.fetchPublishers(congId);
 
     if (this.$route.query.territory) {
       this.applyFilter(this.$route.query.territory);
