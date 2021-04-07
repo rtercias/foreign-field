@@ -14,6 +14,7 @@ const SET_TERRITORY = 'SET_TERRITORY';
 const GET_TERRITORY_FAIL = 'GET_TERRITORY_FAIL';
 const GET_TERRITORY_SUCCESS = 'GET_TERRITORY_SUCCESS';
 const RESET_TERRITORY = 'RESET_TERRITORY';
+const RESET_TERRITORY_ACTIVITIES = 'RESET_TERRITORY_ACTIVITIES';
 const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
 const CANCEL_FETCH_LAST_ACTIVITY = 'CANCEL_FETCH_LAST_ACTIVITY';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
@@ -36,6 +37,7 @@ const DELETE_PHONE = 'DELETE_PHONE';
 const UPDATE_ADDRESS_NOTES = 'UPDATE_ADDRESS_NOTES';
 const UPDATE_PHONE_NOTES = 'UPDATE_PHONE_NOTES';
 const UPDATE_STATUS = 'UPDATE_STATUS';
+const CHECKING_OUT = 'CHECKING_OUT';
 
 const initialState = {
   territory: {
@@ -44,6 +46,7 @@ const initialState = {
     addresses: [],
   },
   cancelTokens: {},
+  isCheckingOut: false,
 };
 
 export const territory = {
@@ -58,6 +61,7 @@ export const territory = {
     congId: state => state.territory.congregationid,
     isLoading: state => state.isLoading,
     isBusy: state => get(state.territory, 'addresses', []).some(a => a.isBusy),
+    isCheckingOut: state => state.isCheckingOut,
     isCheckedOut: state => state.territory && state.territory.status && state.territory.status.status === 'Checked Out',
     isOwnedByUser: (state, getters, rootState, rootGetters) => {
       const user = rootGetters['auth/user'];
@@ -78,13 +82,12 @@ export const territory = {
   },
 
   mutations: {
-    CHANGE_STATUS(state, { status, publisher, checkoutId }) {
+    CHANGE_STATUS(state, args) {
       Vue.set(state.territory, 'status', {
-        // eslint-disable-next-line
-        checkout_id: checkoutId,
-        status,
+        checkout_id: args.checkout_id,
+        status: args.status,
         date: new Date().getTime(),
-        publisher,
+        publisher: args.publisher,
       });
     },
     SET_TERRITORY(state, { terr, getLastActivity }) {
@@ -112,6 +115,16 @@ export const territory = {
     },
     RESET_TERRITORY(state) {
       state.territory = {};
+    },
+    RESET_TERRITORY_ACTIVITIES(state) {
+      if (state.territory) {
+        for (const address of state.territory.addresses) {
+          address.lastActivity = null;
+          for (const phone of address.phones) {
+            phone.lastActivity = null;
+          }
+        }
+      }
     },
     FETCH_LAST_ACTIVITY(state, cancelToken) {
       state.cancelTokens = { ...state.cancelTokens, FETCH_LAST_ACTIVITY: cancelToken };
@@ -241,6 +254,9 @@ export const territory = {
     UPDATE_STATUS(state, status) {
       if (state.territory) state.territory.status = status;
     },
+    CHECKING_OUT(state, value) {
+      state.isCheckingOut = value;
+    },
   },
 
   actions: {
@@ -252,7 +268,7 @@ export const territory = {
 
         const response = await axios({
           data: {
-            query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+            query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) {
               checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user)
             }`),
             variables: {
@@ -265,7 +281,7 @@ export const territory = {
 
         const checkoutId = get(response, 'data.data.checkinTerritory');
         commit(CHANGE_STATUS, {
-          checkoutId,
+          checkout_id: checkoutId,
           status: 'Recently Worked',
           publisher: args.publisher,
         });
@@ -277,6 +293,8 @@ export const territory = {
 
     async checkoutTerritory({ commit, dispatch }, args) {
       try {
+        commit(CHECKING_OUT, true);
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -284,7 +302,7 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) { 
+            query: print(gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) {
               checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user)
             }`),
             variables: {
@@ -296,10 +314,60 @@ export const territory = {
         });
 
         const checkoutId = get(response, 'data.data.checkoutTerritory');
-        commit(CHANGE_STATUS, { checkoutId, status: 'Checked Out', publisher: args.publisher });
+        const status = {
+          checkout_id: checkoutId,
+          status: 'Checked Out',
+          publisher: args.publisher,
+          date: args.date,
+        };
+        commit(CHANGE_STATUS, status);
         await dispatch('auth/getUserTerritories', args.username, { root: true });
+        commit(CHECKING_OUT, false);
+        dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
       } catch (e) {
         console.error('Unable to checkout territory', e);
+      }
+    },
+
+    async reassignCheckout({ commit, dispatch }, args) {
+      try {
+        if (!args.checkoutId) throw new Error('checkout id is required');
+        commit(CHECKING_OUT, true);
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
+        await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation ReassignCheckout($checkoutId: Int!, $pubId: Int!, $user: String!) {
+              reassignCheckout(checkoutId: $checkoutId, publisherId: $pubId, user: $user)
+            }`),
+            variables: {
+              checkoutId: args.checkoutId,
+              pubId: get(args, 'publisher.id'),
+              user: args.username,
+            },
+          },
+        });
+
+        const status = {
+          checkout_id: args.checkoutId,
+          status: 'Checked Out',
+          publisher: args.publisher,
+          date: args.date,
+        };
+        commit(CHANGE_STATUS, status);
+        if (args.publisher.username === args.username) {
+          await dispatch('auth/getUserTerritories', args.username, { root: true });
+        }
+        commit(CHECKING_OUT, false);
+        dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
+      } catch (e) {
+        console.error('Unable to reassign territory checkout', e);
       }
     },
 
@@ -325,7 +393,7 @@ export const territory = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Territory($terrId: Int) { 
+            query: print(gql`query Territory($terrId: Int) {
               territory (id: $terrId) {
                 id congregationid name description type city group_id
                 group {
@@ -408,8 +476,8 @@ export const territory = {
           },
           cancelToken,
           data: {
-            query: print(gql`query Territory($territoryId: Int $checkoutId: Int) { 
-              territory(id: $territoryId) { 
+            query: print(gql`query Territory($territoryId: Int $checkoutId: Int) {
+              territory(id: $territoryId) {
                 lastActivities(checkout_id: $checkoutId) {
                   ...ActivityModel
                 }
@@ -458,7 +526,7 @@ export const territory = {
       commit(RESET_TERRITORY);
     },
 
-    async resetTerritoryActivities(vuex, { checkoutId, userid, tzOffset, timezone }) {
+    async resetTerritoryActivities({ commit }, { checkoutId, userid, tzOffset, timezone }) {
       try {
         await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -472,7 +540,7 @@ export const territory = {
               $userid: Int!,
               $tzOffset: String,
               $timezone: String
-            ) { 
+            ) {
               resetTerritoryActivity(checkout_id: $checkoutId, userid: $userid, tz_offset: $tzOffset, timezone: $timezone)
             }`),
             variables: {
@@ -483,6 +551,7 @@ export const territory = {
             },
           },
         });
+        commit(RESET_TERRITORY_ACTIVITIES);
       } catch (e) {
         console.error('Unable to reset territory activities', e);
       }
@@ -514,8 +583,8 @@ export const territory = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Territory($terrId: Int) { 
-              territory(id: $terrId) { 
+            query: print(gql`query Territory($terrId: Int) {
+              territory(id: $terrId) {
                 ...TerritoryModel
               }
             },
@@ -557,8 +626,8 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddTerritory($territory: TerritoryInput!) { 
-              addTerritory(territory: $territory) { 
+            query: print(gql`mutation AddTerritory($territory: TerritoryInput!) {
+              addTerritory(territory: $territory) {
                 ...TerritoryModel
               }
             }
@@ -597,8 +666,8 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation UpdateTerritory($territory: TerritoryInput!) { 
-              updateTerritory(territory: $territory) { 
+            query: print(gql`mutation UpdateTerritory($territory: TerritoryInput!) {
+              updateTerritory(territory: $territory) {
                 ...TerritoryModel
               }
             }
@@ -636,7 +705,7 @@ export const territory = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation DeleteTerritory($id: Int!) { 
+            query: print(gql`mutation DeleteTerritory($id: Int!) {
               deleteTerritory(id: $id)
             }`),
             variables: {

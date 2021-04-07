@@ -27,6 +27,8 @@ const SET_RECENTLY_SEEN_TERRITORIES = 'SET_RECENTLY_SEEN_TERRITORIES';
 const GET_ADDRESS_COUNT = 'GET_ADDRESS_COUNT';
 const GET_PHONE_COUNT = 'GET_PHONE_COUNT';
 const SET_SORT_FILTER = 'SET_SORT_FILTER';
+const SET_IS_BUSY = 'SET_IS_BUSY';
+const SET_STATUS = 'SET_STATUS';
 
 export const territories = {
   namespaced: true,
@@ -76,19 +78,31 @@ export const territories = {
     COPY_CHECKOUTS: () => {},
     SET_RECENTLY_SEEN_TERRITORIES: (state, terrs) => state.recentlySeenTerritories = terrs,
     GET_ADDRESS_COUNT: (state, terrAddressCount) => {
-      for (const terr of state.territories) {
-        const count = terrAddressCount.find(t => t.id === terr.id);
-        Vue.set(terr, 'addressCount', get(count, 'addressCount', 0));
+      if (terrAddressCount) {
+        for (const terr of state.territories) {
+          const count = terrAddressCount.find(t => t.id === terr.id);
+          if (count) Vue.set(terr, 'addressCount', get(count, 'addressCount', 0));
+        }
       }
     },
     GET_PHONE_COUNT: (state, terrPhoneCount) => {
-      for (const terr of state.territories) {
-        const count = terrPhoneCount.find(t => t.id === terr.id);
-        Vue.set(terr, 'phoneCount', get(count, 'phoneCount', 0));
+      if (terrPhoneCount) {
+        for (const terr of state.territories) {
+          const count = terrPhoneCount.find(t => t.id === terr.id);
+          if (count) Vue.set(terr, 'phoneCount', get(count, 'phoneCount', 0));
+        }
       }
+    },
+    SET_IS_BUSY: (state, { id, value }) => {
+      const terr = state.territories.find(t => t.id === id);
+      if (terr) Vue.set(terr, 'isBusy', value);
     },
     SET_SORT_FILTER: (state, filter) => {
       state.selectedSortAndFilters = { ...state.selectedSortAndFilters, ...filter };
+    },
+    SET_STATUS: (state, { id, status }) => {
+      const terr = state.territories.find(t => t.id === id);
+      if (terr) Vue.set(terr, 'status', status);
     },
   },
   actions: {
@@ -441,6 +455,12 @@ export const territories = {
     },
     setSortAndFilter({ commit }, filter) {
       commit(SET_SORT_FILTER, filter);
+    },
+    setIsBusy({ commit }, { id, value }) {
+      commit(SET_IS_BUSY, { id, value });
+    },
+    setStatus({ commit }, { id, status }) {
+      commit(SET_STATUS, { id, status });
     },
   },
 };
