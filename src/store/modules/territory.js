@@ -148,6 +148,8 @@ export const territory = {
       for (const address of addresses) {
         const phone = address.phones && address.phones.find(p => p.id === phoneId);
         if (phone) {
+          // eslint-disable-next-line
+          console.log('will update this phone record', JSON.parse(JSON.stringify(phone)));
           Vue.set(phone, 'lastActivity', lastActivity);
           Vue.set(phone, 'isBusy', false);
         }

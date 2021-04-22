@@ -105,6 +105,9 @@ export default {
       }
     });
     channel.bind('add-log', (log) => {
+      // eslint-disable-next-line
+      console.log('incoming status log', JSON.parse(JSON.stringify(log)));
+
       if (log) {
         this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
         this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
