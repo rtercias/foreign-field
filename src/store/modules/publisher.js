@@ -46,7 +46,7 @@ export const publisher = {
   },
   actions: {
     async fetchPublisher({ commit }, { id, congId }) {
-      if (!id || !congId) {
+      if (!id) {
         return;
       }
 
@@ -57,13 +57,13 @@ export const publisher = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: print(gql`query Publisher($id: Int, $congId: Int) { 
-            publisher (publisherId: $id, congId: $congId) { 
-              id 
-              firstname 
-              lastname 
-              congregationid 
-              username 
+          query: print(gql`query Publisher($id: Int, $congId: Int) {
+            publisher (publisherId: $id, congId: $congId) {
+              id
+              firstname
+              lastname
+              congregationid
+              username
               status
               role
             }
@@ -101,8 +101,8 @@ export const publisher = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation addPublisher($publisher: PublisherInput!) { 
-              addPublisher(publisher: $publisher) { 
+            query: print(gql`mutation addPublisher($publisher: PublisherInput!) {
+              addPublisher(publisher: $publisher) {
                 ...PublisherModel
               }
             }
@@ -141,8 +141,8 @@ export const publisher = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation updatePublisher($publisher: PublisherInput!) { 
-              updatePublisher(publisher: $publisher) { 
+            query: print(gql`mutation updatePublisher($publisher: PublisherInput!) {
+              updatePublisher(publisher: $publisher) {
                 ...PublisherModel
               }
             }
@@ -180,7 +180,7 @@ export const publisher = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation DeletePublisher($id: Int!) { 
+            query: print(gql`mutation DeletePublisher($id: Int!) {
               deletePublisher(id: $id)
             }`),
             variables: {

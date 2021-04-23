@@ -101,8 +101,12 @@ export default {
         } else {
           this.$set(this.phoneRecord, 'isBusy', true);
           await this.getLastActivityPublisher();
-          publisherName = this.publisher.firstname && this.publisher.lastname
-            && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          if (this.publisher) {
+            publisherName = this.publisher.firstname && this.publisher.lastname
+              && `${this.publisher.firstname} ${this.publisher.lastname}`;
+          } else {
+            publisherName = `Unknown (ID: ${this.lastActivity.publisher_id})`;
+          }
           this.$set(this.phoneRecord, 'isBusy', false);
         }
         const message = h('p', {
@@ -134,8 +138,7 @@ export default {
     },
     async getLastActivityPublisher() {
       const id = Number.parseInt(this.lastActivity.publisher_id, 10);
-      const congId = Number.parseInt(this.user.congregation.id, 10);
-      await this.fetchPublisher({ id, congId });
+      await this.fetchPublisher({ id });
     },
     edit() {
       this.$set(this.phoneRecord, 'editMode', !this.phoneRecord.editMode);
@@ -205,8 +208,6 @@ export default {
   watch: {
     incomingResponse(log) {
       if (log && this.user && log.publisher_id !== this.user.id) {
-        this.$set(this.phoneRecord, 'selectedResponse', log.value);
-        this.$set(this.phoneRecord, 'selectedResponseTS', log.timestamp);
         this.isIncomingResponse = (get(log, 'publisher_id') || '').toString() !== (get(this.user, 'id') || '').toString();
       }
     },

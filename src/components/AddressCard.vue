@@ -179,8 +179,7 @@ export default {
 
     async getLastActivityPublisher() {
       const id = Number.parseInt(this.lastActivity.publisher_id, 10);
-      const congId = Number.parseInt(this.user.congregation.id, 10);
-      await this.fetchPublisher({ id, congId });
+      await this.fetchPublisher({ id });
     },
   },
   computed: {
@@ -246,9 +245,6 @@ export default {
   watch: {
     incomingResponse(log) {
       if (log) {
-        this.$set(this.address, 'selectedResponse', log.value);
-        this.$set(this.address, 'selectedResponseTS', log.timestamp);
-
         const publisherId = get(log, 'publisher_id') || '';
         const userId = get(this.user, 'id') || '';
         this.isIncomingResponse = publisherId.toString() !== userId.toString();
