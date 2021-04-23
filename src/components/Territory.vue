@@ -4,15 +4,12 @@
     <div v-else>
       <header class="page-header sticky-top w-100 pt-2 px-2 pb-0 bg-white border-bottom" :sticky="true">
         <div class="w-100">
-          <div class="w-100 d-flex justify-content-between pt-3">
-            <div class="text-left w-50">
-              <h4>
+          <div class="w-100">
+            <div class="d-flex justify-content-between">
+              <h4 class="text-truncate" :class="{ 'text-medium': !isDesktop && territory.description.length > 10 }">
                 {{territory.description}}
                 <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
               </h4>
-              <span class="small">{{filteredCount || displayCount}}</span>
-            </div>
-            <div class="text-right w-50">
               <h4>
                 <font-awesome-icon
                   class="text-primary d-xl-none"
@@ -21,6 +18,9 @@
                   @click="openSMSMobile()">
                 </font-awesome-icon> {{territoryName}}
               </h4>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="small">{{filteredCount || displayCount}}</span>
               <span class="small">{{currentPublisher}}</span>
             </div>
           </div>
@@ -357,6 +357,9 @@ li {
   text-overflow: ellipsis;
   display: inline-block;
   overflow: hidden;
+}
+.text-medium {
+  font-size: 1.2rem;
 }
 @media (min-width: 769px) {
   .columns {

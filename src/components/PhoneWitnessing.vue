@@ -8,7 +8,7 @@
       :model="keywordFilter"
       :results="filteredAddresses"
       :allow-exclude="true"
-      top="187px"
+      top="172px"
     />
     <PhoneAddressCard
       v-for="(a, index) in filteredAddresses" :key="a.id"
@@ -72,6 +72,7 @@ export default {
       user: 'auth/user',
       token: 'auth/token',
       canCheckout: 'auth/canCheckout',
+      isDesktop: 'auth/isDesktop',
       phone: 'phone/phone',
       territoryIsLoading: 'territory/isLoading',
       isTerritoryBusy: 'territory/isBusy',
