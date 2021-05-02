@@ -207,8 +207,11 @@ export default {
   },
   watch: {
     incomingResponse(log) {
-      if (log && this.user && log.publisher_id !== this.user.id) {
-        this.isIncomingResponse = (get(log, 'publisher_id') || '').toString() !== (get(this.user, 'id') || '').toString();
+      if (log) {
+        const publisherId = (get(log, 'publisher_id') || '').toString();
+        const userId = (get(this.user, 'id') || '').toString();
+        const samePhoneRecord = log.address_id === this.phoneRecord.id;
+        this.isIncomingResponse = samePhoneRecord && this.user && publisherId !== userId;
       }
     },
   },
