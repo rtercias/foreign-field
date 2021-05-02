@@ -210,8 +210,8 @@ export default {
       if (log) {
         const publisherId = (get(log, 'publisher_id') || '').toString();
         const userId = (get(this.user, 'id') || '').toString();
-        const samePhoneRecord = log.address_id === this.phoneRecord.id;
-        this.isIncomingResponse = samePhoneRecord && this.user && publisherId !== userId;
+        const isSamePhoneRecord = log.address_id === this.phoneRecord.id;
+        this.isIncomingResponse = isSamePhoneRecord && this.user && publisherId !== userId;
       }
     },
   },

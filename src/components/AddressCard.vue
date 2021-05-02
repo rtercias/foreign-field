@@ -247,7 +247,8 @@ export default {
       if (log) {
         const publisherId = get(log, 'publisher_id') || '';
         const userId = get(this.user, 'id') || '';
-        this.isIncomingResponse = publisherId.toString() !== userId.toString();
+        const isSameAddressRecord = log.address_id === this.address.id;
+        this.isIncomingResponse = isSameAddressRecord && publisherId.toString() !== userId.toString();
       }
     },
   },
