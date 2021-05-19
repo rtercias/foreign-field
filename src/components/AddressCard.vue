@@ -241,17 +241,6 @@ export default {
       return notAllowedTags[0];
     },
   },
-
-  watch: {
-    incomingResponse(log) {
-      if (log) {
-        const publisherId = get(log, 'publisher_id') || '';
-        const userId = get(this.user, 'id') || '';
-        const isSameAddressRecord = log.address_id === this.address.id;
-        this.isIncomingResponse = isSameAddressRecord && publisherId.toString() !== userId.toString();
-      }
-    },
-  },
 };
 </script>
 <style scoped lang="scss">

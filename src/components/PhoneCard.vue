@@ -205,16 +205,6 @@ export default {
       return notAllowedTags[0];
     },
   },
-  watch: {
-    incomingResponse(log) {
-      if (log) {
-        const publisherId = (get(log, 'publisher_id') || '').toString();
-        const userId = (get(this.user, 'id') || '').toString();
-        const isSamePhoneRecord = log.address_id === this.phoneRecord.id;
-        this.isIncomingResponse = isSamePhoneRecord && this.user && publisherId !== userId;
-      }
-    },
-  },
 };
 </script>
 <style scoped>
