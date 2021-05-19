@@ -19,7 +19,7 @@ export const reports = {
     },
   },
   actions: {
-    async fetchAssignmentRecords({ commit }, congId) {
+    async fetchAssignmentRecords({ commit }, { congId, campaignMode }) {
       if (!congId) {
         console.error('congId is required');
         return;
@@ -32,9 +32,10 @@ export const reports = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: print(gql`query AssignmentRecords($congId: Int) { 
-            getAssignmentRecords (congId: $congId) { 
+          query: print(gql`query AssignmentRecords($congId: Int $campaignMode: Boolean) {
+            getAssignmentRecords (congId: $congId campaignMode: $campaignMode) {
               territory_name
+              territory_description
               publisher_name
               out
               in
@@ -43,6 +44,7 @@ export const reports = {
           }`),
           variables: {
             congId,
+            campaignMode,
           },
         },
       });
