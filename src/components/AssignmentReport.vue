@@ -3,26 +3,13 @@
     <thead>
       <tr class="w-100 p-3">
         <td class="buttons w-100 d-flex justify-content-between align-items-center">
-          <b-dropdown class="sort-btn pr-2" variant="outline-dark">
-            <span slot="button-content">
-              <font-awesome-icon icon="sort-amount-down-alt" />
-              <span class="pl-1" v-if="isDesktop">{{sortOptions.find(o => o.value === sortField).text}}</span>
-            </span>
-            <b-dropdown-item
-              class="d-block"
-              v-for="option in sortOptions"
-              :key="option.value"
-              :class="{ 'ml-n1': sortField === option.value }"
-              @click="sortField = option.value">
-              <font-awesome-icon class="selected" icon="check" v-if="sortField === option.value" />
-              <span>{{option.text}}</span>
-            </b-dropdown-item>
-          </b-dropdown>
-          <b-check v-model="campaignMode" @change="fetch">
-            <span>Campaign Mode</span>
-          </b-check>
+          <b-form-radio-group v-model="campaignMode" class="text-left" :class="{ 'small': !isDesktop }">
+            <b-form-radio :value="true"><span>No Campaigns</span></b-form-radio>
+            <b-form-radio :value="undefined"><span>Include Campaigns</span></b-form-radio>
+            <b-form-radio :value="false"><span>Campaign Mode Only</span></b-form-radio>
+          </b-form-radio-group>
           <div>
-            <span v-if="isDesktop">Date Filter:</span>
+            <span v-if="isDesktop" class="pr-2">Date Filter:</span>
             <the-mask
               class="date-filter text-center"
               :mask="'##/##/####'"
@@ -31,6 +18,21 @@
               v-model="dateFilter">
             </the-mask>
           </div>
+          <b-dropdown class="sort-btn pr-2 py-1" right variant="outline-dark">
+            <span slot="button-content">
+              <font-awesome-icon icon="sort-amount-down-alt" />
+              <span class="pl-1" v-if="isDesktop">{{sortOptions.find(o => o.value === sortField).text}}</span>
+            </span>
+            <b-dropdown-item
+              class="d-block mr-0 pl-1"
+              v-for="option in sortOptions"
+              :key="option.value"
+              :class="{ 'ml-n2': sortField === option.value }"
+              @click="sortField = option.value">
+              <font-awesome-icon class="selected mr-1" icon="check" v-if="sortField === option.value" />
+              <span>{{option.text}}</span>
+            </b-dropdown-item>
+          </b-dropdown>
         </td>
       </tr>
       <tr><td>
@@ -86,7 +88,7 @@ export default {
   data() {
     return {
       sortOptions,
-      campaignMode: false,
+      campaignMode: true,
       sortField: 'territory_name',
       dateFilter: '',
     };
@@ -99,7 +101,8 @@ export default {
       fetchAssignmentRecords: 'reports/fetchAssignmentRecords',
     }),
     async fetch() {
-      await this.fetchAssignmentRecords({ congId: this.congregationId, campaignMode: this.campaignMode });
+      const campaignMode = this.campaignMode === 'undefined' ? undefined : this.campaignMode;
+      await this.fetchAssignmentRecords({ congId: this.congregationId, campaignMode });
     },
   },
   computed: {
@@ -121,6 +124,11 @@ export default {
     },
     reportDate() {
       return format(new Date(), 'MM/dd/yyyy p');
+    },
+  },
+  watch: {
+    async campaignMode() {
+      await this.fetch();
     },
   },
 };
