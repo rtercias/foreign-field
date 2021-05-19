@@ -432,18 +432,6 @@ export default {
       try {
         this.$set(entity, 'isBusy', true);
         await this.addLog({ entityId: entity.id, value });
-        const timestamp = Date.now();
-
-        this.$set(entity, 'selectedResponse', value);
-        this.$set(entity, 'selectedResponseTS', timestamp);
-        this.$set(entity, 'lastActivity', {
-          publisher_id: this.user.id,
-          address_id: entity.id,
-          timestamp,
-          value,
-        });
-
-        this.$set(this.territory, 'lastActivity', entity.lastActivity);
         this.$set(entity, 'isBusy', false);
         if (typeof close === 'function') close();
       } catch (e) {

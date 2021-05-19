@@ -76,12 +76,12 @@ export default {
   },
   methods: {
     ...mapActions({
-      setAddress: 'address/setAddress',
-      addTag: 'address/addTag',
-      removeTag: 'address/removeTag',
+      addAddressTag: 'address/addTag',
+      removeAddressTag: 'address/removeTag',
+      addPhoneTag: 'phone/addTag',
+      removePhoneTag: 'phone/removeTag',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
-      updateAddress: 'address/updateAddress',
       getTerritory: 'territory/getTerritory',
     }),
     formatLanguage,
@@ -91,21 +91,15 @@ export default {
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       let cancel;
 
-      this.setAddress(this.record);
-
       if (index !== -1 && tag.state) {
-        const confirm = await this.confirmRemoveTag(tag);
-        if (confirm) {
-          this.setAddress(this.record);
-          this.$set(this.selectedTags, index, tag.caption);
-          await this.removeTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
-        }
+        await this.removeTag(tag);
+        this.$set(this.selectedTags, index, tag.caption);
       } else if (startsWith(tag.caption, DNC_TAG)) {
         await this.doNotCall(tag);
       } else if (startsWith(tag.caption, NF_TAG)) {
         await this.notForeign(tag);
       } else {
-        await this.addAddressTag(tag);
+        await this.addTag(tag);
       }
 
       if (!cancel) {
@@ -124,13 +118,17 @@ export default {
         }
       });
     },
-    async addAddressTag(tag) {
+    async addTag(tag) {
       if (this.user && this.record && this.selectedTags) {
         this.$set(this.selectedTags, this.selectedTags.length, tag);
-        await this.addTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+        if (this.record.type === 'Phone') {
+          await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
+        } else {
+          await this.addAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+        }
       }
     },
-    async confirmRemoveTag(tag) {
+    async removeTag(tag) {
       const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2}`;
       const response = await this.$bvModal.msgBoxConfirm(
         `Remove "${formatLanguage(tag.caption, this.language)}" tag?`, {
@@ -139,7 +137,13 @@ export default {
         }
       );
 
-      return response;
+      if (response) {
+        if (this.record.type === 'Phone') {
+          await this.removePhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
+        } else {
+          await this.removeAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+        }
+      }
     },
     async doNotCall(tag) {
       const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
@@ -149,7 +153,6 @@ export default {
 
       if (response) {
         const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
-        this.setAddress(this.record);
         await this.markAsDoNotCall({ addressId: this.record.id, userid: this.user.id, tag: datestamped });
         await this.getTerritory({ id: this.record.territory_id });
       }
@@ -161,7 +164,6 @@ export default {
       });
 
       if (response) {
-        this.setAddress(this.record);
         await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
         await this.getTerritory({ id: this.record.territory_id });
       }
