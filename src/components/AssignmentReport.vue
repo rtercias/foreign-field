@@ -6,7 +6,7 @@
           <b-dropdown class="sort-btn pr-2" variant="outline-dark">
             <span slot="button-content">
               <font-awesome-icon icon="sort-amount-down-alt" />
-              <span class="pl-1">{{sortOptions.find(o => o.value === sortField).text}}</span>
+              <span class="pl-1" v-if="isDesktop">{{sortOptions.find(o => o.value === sortField).text}}</span>
             </span>
             <b-dropdown-item
               class="d-block"
@@ -22,7 +22,7 @@
             <span>Campaign Mode</span>
           </b-check>
           <div>
-            Date Filter:
+            <span v-if="isDesktop">Date Filter:</span>
             <the-mask
               class="date-filter text-center"
               :mask="'##/##/####'"
@@ -106,6 +106,7 @@ export default {
     ...mapGetters({
       assignmentRecords: 'reports/assignmentRecords',
       loading: 'auth/loading',
+      isDesktop: 'auth/isDesktop',
     }),
     filteredRecords() {
       const records = this.assignmentRecords || [];
