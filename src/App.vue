@@ -247,4 +247,9 @@ router-link {
     }
   }
 }
+@media print {
+  .navbar {
+    display: none;
+  }
+}
 </style>
