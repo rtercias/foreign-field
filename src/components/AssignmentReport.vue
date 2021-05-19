@@ -40,7 +40,9 @@
           <div class="flex justify-content-center">
             <div class="box-group">
               <div class="text-left font-weight-bold">Terr. No. {{ group[0].territory_name }}</div>
-              <div v-if="sortField!=='territory_name'" class="text-left small">{{ group[0].territory_description }}</div>
+              <div v-if="sortField!=='territory_name'" class="terr-desc text-left small text-truncate">
+                {{ group[0].territory_description }}
+              </div>
               <div class="" v-for="(record, recordIndex) in group" :key="recordIndex">
                 <div class="box box-main flex">
                   <div class="box box-1">{{ record.publisher_name }}</div>
@@ -170,6 +172,9 @@ export default {
   }
   .date-filter {
     width: 120px;
+  }
+  .terr-desc {
+    width: 195px;
   }
   @media print
   {
