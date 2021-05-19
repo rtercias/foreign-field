@@ -21,13 +21,16 @@
           <b-check v-model="campaignMode" @change="fetch">
             <span>Campaign Mode</span>
           </b-check>
-          <the-mask
-            class="date-filter text-center"
-            :mask="'##/##/####'"
-            :masked="true"
-            placeholder="mm/dd/yyyy"
-            v-model="dateFilter">
-          </the-mask>
+          <div>
+            Date Filter:
+            <the-mask
+              class="date-filter text-center"
+              :mask="'##/##/####'"
+              :masked="true"
+              placeholder="mm/dd/yyyy"
+              v-model="dateFilter">
+            </the-mask>
+          </div>
         </td>
       </tr>
       <tr><td>
