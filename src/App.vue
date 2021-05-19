@@ -249,7 +249,7 @@ router-link {
 }
 @media print {
   .navbar {
-    display: none;
+    display: none !important;
   }
 }
 </style>

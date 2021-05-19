@@ -2,7 +2,7 @@
   <table class="assignment-report">
     <thead>
       <tr class="w-100 p-3">
-        <td class="w-100 d-flex justify-content-between align-items-center">
+        <td class="buttons w-100 d-flex justify-content-between align-items-center">
           <b-dropdown class="sort-btn pr-2" variant="outline-dark">
             <span slot="button-content">
               <font-awesome-icon icon="sort-amount-down-alt" />
@@ -179,10 +179,10 @@ export default {
   @media print
   {
     .assignment-report {
-      margin: 0;
+      width: 125%;
     }
-    .sort-btn {
-      display: none;
+    .buttons {
+      display: none !important;
     }
   }
 </style>
