@@ -3,7 +3,7 @@
     <thead>
       <tr class="w-100 p-3">
         <td class="w-100 d-flex justify-content-between align-items-center">
-          <b-dropdown class="sort-btn pr-2" variant="secondary">
+          <b-dropdown class="sort-btn pr-2" variant="outline-dark">
             <span slot="button-content">
               <font-awesome-icon icon="sort-amount-down-alt" />
               <span class="pl-1">{{sortOptions.find(o => o.value === sortField).text}}</span>
