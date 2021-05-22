@@ -108,6 +108,7 @@ export default {
       if (log) {
         this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
         this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
+        this.setTerritoryLastActivity({ territoryId: log.territory_id, lastActivity: log });
       }
     });
     channel.bind('add-note', (args) => {
@@ -171,6 +172,7 @@ export default {
       deletePhone: 'territory/deletePhone',
       updateAddressNotes: 'territory/updateAddressNotes',
       updatePhoneNotes: 'territory/updatePhoneNotes',
+      setTerritoryLastActivity: 'territory/setTerritoryLastActivity',
       setAddressLastActivity: 'territory/setAddressLastActivity',
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       updateStatus: 'territory/updateStatus',

@@ -18,6 +18,7 @@ const RESET_TERRITORY_ACTIVITIES = 'RESET_TERRITORY_ACTIVITIES';
 const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
 const CANCEL_FETCH_LAST_ACTIVITY = 'CANCEL_FETCH_LAST_ACTIVITY';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
+const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
 const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
@@ -134,6 +135,12 @@ export const territory = {
     },
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
+    },
+    SET_TERRITORY_LAST_ACTIVITY(state, { territoryId, lastActivity }) {
+      if (state.territory.id === territoryId) {
+        Vue.set(state.territory, 'lastActivity', lastActivity);
+        Vue.set(state.territory, 'isBusy', false);
+      }
     },
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
       const addresses = get(state, 'territory.addresses') || [];
@@ -557,6 +564,10 @@ export const territory = {
       } catch (e) {
         console.error('Unable to reset territory activities', e);
       }
+    },
+
+    setTerritoryLastActivity({ commit }, { territoryId, lastActivity }) {
+      commit(SET_TERRITORY_LAST_ACTIVITY, { territoryId, lastActivity });
     },
 
     setAddressLastActivity({ commit }, { addressId, lastActivity }) {
