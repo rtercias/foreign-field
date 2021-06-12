@@ -204,6 +204,7 @@ export default {
       sortOptions: [
         { value: 'Name', text: 'Name' },
         { value: 'Description', text: 'Description' },
+        { value: 'Completed Date', text: 'Completed Date' },
       ],
       loading: true,
       DEFAULT_FILTER,
@@ -244,12 +245,23 @@ export default {
       if (this.availability === DEFAULT_FILTER) {
         let allTerrs = this.searchedTerritories;
         allTerrs = this.applyCountFilter(allTerrs);
+        if (this.sortOption === 'Completed Date') {
+          return orderBy(allTerrs,
+            [terr => get(terr, 'status.status') !== 'Available' && get(terr, 'status.date')],
+            ['desc']);
+        }
         return orderBy(allTerrs, toLower(this.sortOption));
       }
       let filtered = this.searchedTerritories && this.searchedTerritories.filter(
         t => get(t, 'status.status') === this.availability
       );
       filtered = this.applyCountFilter(filtered);
+      if (this.sortOption === 'Completed Date') {
+        return orderBy(filtered,
+          [terr => get(terr, 'status.status') !== 'Available' && get(terr, 'status.date')],
+          ['desc']);
+      }
+
       return orderBy(filtered, toLower(this.sortOption));
     },
     isCampaignMode() {
