@@ -38,7 +38,7 @@
         :disabled="disabled"
         @change="updateOption">
       </b-form-select>
-      <div v-else :style="isDesktop ? indent : ''" class="float-right w-50 text-right">
+      <div v-else :style="isDesktop ? indent : ''" class="float-right w-50 text-right" :class="{ 'mr-4': isDesktop }">
         <span v-if="disabled">{{!node.value ? '' : node.value}}</span>
         <b-form-input v-else v-model="node.value" @change="updateOption"></b-form-input>
       </div >
