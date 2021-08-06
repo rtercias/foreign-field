@@ -26,7 +26,7 @@
         />
       </div>
     </div>
-    <div v-else class="d-flex align-items-center">
+    <div v-else class="option-row">
       <span :style="indent" class="d-inline-block mr-2">{{node.label}}</span>
       <b-form-select
         v-if="node.options"
@@ -34,11 +34,11 @@
         :options="node.options"
         v-model="node.value"
         :style="indent"
-        class="w-50"
+        class="float-right py-0 w-50 mr-4"
         :disabled="disabled"
         @change="updateOption">
       </b-form-select>
-      <div v-else :style="isDesktop ? indent : ''" :class="{'border px-1': disabled }">
+      <div v-else :style="isDesktop ? indent : ''" class="float-right w-50 text-right mr-4">
         <span v-if="disabled">{{!node.value ? '' : node.value}}</span>
         <b-form-input v-else v-model="node.value" @change="updateOption"></b-form-input>
       </div >
@@ -77,5 +77,9 @@ export default {
 <style lang="scss" scoped>
   .option-tree {
     margin-bottom: 8px;
+
+    .option-row {
+      line-height: 38px;
+    }
   }
 </style>
