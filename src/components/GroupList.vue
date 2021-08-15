@@ -12,7 +12,7 @@
     <div>
       <b-list-group>
         <b-list-group-item v-for="group in groups" :key="group.id">
-          <div class="d-flex justify-content-between">
+          <div class="d-flex justify-content-between text-left">
             {{group.code}} - {{group.description}}
             <b-link v-if="canManage" :to="`/groups/${group.id}/edit`">
               <font-awesome-icon

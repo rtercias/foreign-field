@@ -1,7 +1,7 @@
 <template>
   <b-dropdown
     class="selected-group text-left h-100 p-sm-0 p-0 mb-0 w-100"
-    :text="`${isDesktop ? 'Group: ' : ''}${truncate(selectedGroup.code, { length: maxChars }) || ''}`">
+    :text="`${isDesktop ? 'Group: ' : ''}${truncate(displayName(selectedGroup), { length: maxChars }) || ''}`">
     <b-dropdown-item
       v-for="group in groupsList"
       :key="group.id"
@@ -9,7 +9,7 @@
       class="mx-0 pl-2 w-100 d-block"
       @click="selectGroup">
       <font-awesome-icon class="ml-n4" icon="check" v-if="group.id === selectedGroup.id" />
-      {{group.code}}
+      {{displayName(group)}}
       <span v-if="selectedId === 0">{{`(${terrCount(group.id)})`}}</span>
     </b-dropdown-item>
   </b-dropdown>
@@ -37,6 +37,9 @@ export default {
       }
       return terr.filter(t => t.group_id === groupId).length;
     },
+    displayName(group) {
+      return this.isDesktop ? group.description : group.code;
+    },
   },
   computed: {
     ...mapGetters({
@@ -46,7 +49,7 @@ export default {
       isDesktop: 'auth/isDesktop',
     }),
     groupsList() {
-      return [{ id: 0, code: 'ALL' }, ...this.groups];
+      return [{ id: 0, code: 'ALL', description: 'ALL' }, ...this.groups];
     },
     selectedGroup() {
       return this.groupsList.find(g => g.id === this.selectedId) || {};
