@@ -38,7 +38,7 @@ export default {
       return terr.filter(t => t.group_id === groupId).length;
     },
     displayName(group) {
-      return this.isDesktop ? group.description : group.code;
+      return this.isDesktop && group.id !== 0 ? `${group.code} - ${group.description}` : group.code;
     },
   },
   computed: {
@@ -50,7 +50,7 @@ export default {
       isDesktop: 'auth/isDesktop',
     }),
     groupsList() {
-      return [{ id: 0, code: 'ALL', description: 'ALL' }, ...this.groups];
+      return [{ id: 0, code: 'ALL' }, ...this.groups];
     },
     selectedGroup() {
       return this.groupsList.find(g => g.id === this.selectedId) || {};
