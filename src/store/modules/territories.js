@@ -17,6 +17,7 @@ export const TEST_TERRITORIES = [
 const FETCH_TERRITORIES = 'FETCH_TERRITORIES';
 const SET_TERRITORIES = 'SET_TERRITORIES';
 const RESET_TERRITORIES = 'RESET_TERRITORIES';
+const SET_ALL_TERRITORIES = 'SET_ALL_TERRITORIES';
 const SET_LOADING = 'SET_LOADING';
 const SET_ERROR = 'SET_ERROR';
 const SET_NEAREST_TERRITORIES = 'SET_NEAREST_TERRITORIES';
@@ -40,9 +41,11 @@ export const territories = {
     recentlySeenTerritories: [],
     cancelTokens: {},
     selectedSortAndFilters: {},
+    allTerritories: [],
   },
   getters: {
     territories: state => orderBy(state.territories, 'description', 'name'),
+    allTerritories: state => orderBy(state.allTerritories, 'description', 'name'),
     cancelTokens: state => state.cancelTokens,
     loading: state => state.loading,
     error: state => state.error,
@@ -56,6 +59,7 @@ export const territories = {
     },
     SET_TERRITORIES: (state, terrs) => state.territories = terrs,
     RESET_TERRITORIES: state => state.territories = [],
+    SET_ALL_TERRITORIES: (state, all) => state.allTerritories = all,
     SET_LOADING: (state, value) => state.loading = value,
     SET_ERROR: (state, value) => state.error = value,
     SET_NEAREST_TERRITORIES: (state, nearest) => {
@@ -157,6 +161,9 @@ export const territories = {
           const { territories: terrs } = response.data.data;
           const filtered = terrs.filter(t => t.type !== 'Test');
           commit(SET_TERRITORIES, TEST_GROUPS.includes(params.groupId) ? terrs : filtered);
+          if (!params.groupId) {
+            commit(SET_ALL_TERRITORIES, terrs);
+          }
           commit(SET_LOADING, false);
         }
       } catch (e) {
@@ -202,6 +209,7 @@ export const territories = {
 
         if (response && response.data && response.data.data) {
           commit(SET_TERRITORIES, response.data.data.territories);
+          commit(SET_ALL_TERRITORIES, response.data.data.territories);
           commit(SET_LOADING, false);
         }
       } catch (e) {
