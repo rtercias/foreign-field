@@ -151,8 +151,12 @@ export default {
     async refresh() {
       this.isLoading = true;
       if (this.mode === Modes.edit) {
-        await this.getCongregation({ id: this.congregationId });
-        this.model = this.congregation;
+        if (this.user.congregation.id === this.congregationId) {
+          await this.getCongregation({ id: this.congregationId });
+          this.model = this.congregation;
+        } else {
+          this.$router.push('/unauthorized');
+        }
       }
       this.isLoading = false;
     },
