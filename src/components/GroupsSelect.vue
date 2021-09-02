@@ -25,6 +25,7 @@ export default {
   methods: {
     ...mapActions({
       getGroup: 'group/getGroup',
+      fetchAllTerritories: 'territories/fetchAllTerritories',
     }),
     truncate,
     selectGroup(item) {
@@ -38,7 +39,8 @@ export default {
       return terr.filter(t => t.group_id === groupId).length;
     },
     displayName(group) {
-      return this.isDesktop && group.id !== 0 ? `${group.code} - ${group.description}` : group.code;
+      return this.isDesktop
+        && group.id !== 0 ? `${get(group, 'code', '')} - ${get(group, 'description', '')}` : group.code;
     },
   },
   computed: {
@@ -58,6 +60,14 @@ export default {
     maxChars() {
       return this.isDesktop ? 19 : 13;
     },
+  },
+  async mounted() {
+    if (!this.group) {
+      await this.getGroup({ id: this.selectedId });
+    }
+    if (!this.allTerritories.length) {
+      await this.fetchAllTerritories({ congId: this.group.congregation_id });
+    }
   },
 };
 </script>

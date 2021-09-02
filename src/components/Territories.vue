@@ -298,6 +298,7 @@ export default {
 
     async fetch() {
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
+      if (congId) await this.getGroups({ congId });
       if (this.group.congregation_id && this.user.congregation.id !== this.group.congregation_id) {
         this.$router.push('/unauthorized');
         return;
@@ -366,6 +367,7 @@ export default {
       fetchPublishers: 'publishers/fetchPublishers',
       fetchTerritories: 'territories/fetchTerritories',
       getGroup: 'group/getGroup',
+      getGroups: 'group/getGroups',
       getAddressCountByTerritories: 'territories/getAddressCountByTerritories',
       getPhoneCountByTerritories: 'territories/getPhoneCountByTerritories',
       setSortAndFilter: 'territories/setSortAndFilter',
