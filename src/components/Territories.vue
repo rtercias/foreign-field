@@ -298,6 +298,7 @@ export default {
 
     async fetch() {
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
+      if (congId) await this.getGroups({ congId });
       await this.fetchPublishers(congId);
       this.selectedGroup = this.selectedSortAndFilters.groupId || 0;
       this.availability = this.selectedSortAndFilters.availability || DEFAULT_FILTER;
@@ -362,6 +363,7 @@ export default {
       fetchPublishers: 'publishers/fetchPublishers',
       fetchTerritories: 'territories/fetchTerritories',
       getGroup: 'group/getGroup',
+      getGroups: 'group/getGroups',
       getAddressCountByTerritories: 'territories/getAddressCountByTerritories',
       getPhoneCountByTerritories: 'territories/getPhoneCountByTerritories',
       setSortAndFilter: 'territories/setSortAndFilter',

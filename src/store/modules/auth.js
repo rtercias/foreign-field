@@ -163,7 +163,7 @@ export const auth = {
             data: {
               query: print(gql`query Publisher($username: String) {
                 user (username: $username) {
-                  id 
+                  id
                   username
                   firstname
                   lastname
@@ -277,10 +277,6 @@ export const auth = {
         } else {
           console.error(err);
         }
-      }
-
-      if (state.congId) {
-        dispatch('group/getGroups', { congId: state.congId }, { root: true });
       }
     },
 
