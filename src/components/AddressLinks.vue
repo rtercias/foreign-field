@@ -86,6 +86,7 @@ export default {
       address: 'address/address',
       token: 'auth/token',
       canWrite: 'auth/canWrite',
+      user: 'auth/user',
     }),
     mapsUrl() {
       const addr1 = get(this.address, 'addr1') || '';
@@ -121,13 +122,21 @@ export default {
       const { origin = '' } = this.$route.query;
       return origin ? `?origin=${origin}` : '';
     },
-
   },
   methods: {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
     }),
     get,
+  },
+  watch: {
+    user() {
+      if (this.user && this.user.congregation.id !== this.address.congregationId) {
+        this.$router.push('/unauthorized');
+      } else {
+        this.isLoading = false;
+      }
+    }
   },
 };
 </script>

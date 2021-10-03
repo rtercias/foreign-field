@@ -101,6 +101,9 @@ export default {
       fetchAssignmentRecords: 'reports/fetchAssignmentRecords',
     }),
     async fetch() {
+      if (this.user && this.user.congregation.id !== this.congregationId) {
+        this.$router.push('/unauthorized');
+      }
       const campaignMode = this.campaignMode === 'undefined' ? undefined : this.campaignMode;
       await this.fetchAssignmentRecords({ congId: this.congregationId, campaignMode });
     },
@@ -110,6 +113,7 @@ export default {
       assignmentRecords: 'reports/assignmentRecords',
       loading: 'auth/loading',
       isDesktop: 'auth/isDesktop',
+      user: 'auth/user',
     }),
     filteredRecords() {
       const records = this.assignmentRecords || [];
@@ -129,6 +133,11 @@ export default {
   watch: {
     async campaignMode() {
       await this.fetch();
+    },
+    user() {
+      if (this.user && this.user.congregation.id !== this.congregationId) {
+        this.$router.push('/unauthorized');
+      }
     },
   },
 };
