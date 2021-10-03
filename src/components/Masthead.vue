@@ -159,7 +159,7 @@ export default {
       isDesktop: 'auth/isDesktop',
     }),
     showLeftNav() {
-      return this.$route.name !== 'home';
+      return this.$route.name !== 'home' && this.$route.name !== 'unauthorized';
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
