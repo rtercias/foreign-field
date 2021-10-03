@@ -70,8 +70,10 @@ export default {
     await this.getDnc({ id: this.congregationId });
   },
   watch: {
-    async congregation() {
-      await this.getDnc({ id: this.congregation.id });
+    user() {
+      if (this.user && this.user.congregation.id !== this.congregationId) {
+        this.$router.push('/unauthorized');
+      }
     },
   },
 };
