@@ -258,13 +258,9 @@ export default {
       );
       filtered = this.applyCountFilter(filtered);
       if (this.sortOption === 'Completed Date') {
-        const r = orderBy(filtered,
+        return orderBy(filtered,
           [terr => get(terr, 'status.date')],
           [this.sortDirection]);
-
-        // eslint-disable-next-line
-        console.log(this.sortDirection, r);
-        return r;
       }
 
       return orderBy(filtered, toLower(this.sortOption), this.sortDirection);
