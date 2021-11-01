@@ -206,6 +206,7 @@ export default {
         { value: 'Description', text: 'Description' },
         { value: 'Completed Date', text: 'Completed Date' },
       ],
+      sortDirection: 'asc',
       loading: true,
       DEFAULT_FILTER,
       selectedCountFilter: 0,
@@ -247,22 +248,26 @@ export default {
         allTerrs = this.applyCountFilter(allTerrs);
         if (this.sortOption === 'Completed Date') {
           return orderBy(allTerrs,
-            [terr => get(terr, 'status.status') !== 'Available' && get(terr, 'status.date')],
-            ['desc']);
+            [terr => get(terr, 'status.date')],
+            [this.sortDirection]);
         }
-        return orderBy(allTerrs, toLower(this.sortOption));
+        return orderBy(allTerrs, toLower(this.sortOption), this.sortDirection);
       }
       let filtered = this.searchedTerritories && this.searchedTerritories.filter(
         t => get(t, 'status.status') === this.availability
       );
       filtered = this.applyCountFilter(filtered);
       if (this.sortOption === 'Completed Date') {
-        return orderBy(filtered,
-          [terr => get(terr, 'status.status') !== 'Available' && get(terr, 'status.date')],
-          ['desc']);
+        const r = orderBy(filtered,
+          [terr => get(terr, 'status.date')],
+          [this.sortDirection]);
+
+        // eslint-disable-next-line
+        console.log(this.sortDirection, r);
+        return r;
       }
 
-      return orderBy(filtered, toLower(this.sortOption));
+      return orderBy(filtered, toLower(this.sortOption), this.sortDirection);
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
@@ -293,7 +298,8 @@ export default {
 
     sort(value) {
       this.sortOption = value;
-      this.setSortAndFilter({ sort: this.sortOption });
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      this.setSortAndFilter({ sort: this.sortOption, sortDirection: this.sortDirection });
     },
 
     async fetch() {
@@ -307,6 +313,7 @@ export default {
       this.sortOption = this.selectedSortAndFilters.sort
         || get(this.congregation, 'options.territories.defaultSort')
         || DEFAULT_SORT;
+      this.sortDirection = this.selectedSortAndFilters.sortDirection || 'asc';
       await this.fetchTerritories({
         congId,
         groupId: this.selectedGroup === 0 ? null : this.groupId,
