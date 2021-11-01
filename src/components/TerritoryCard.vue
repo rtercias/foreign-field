@@ -85,9 +85,6 @@
             <div v-if="terr.lastActivityLoading" class="font-weight-bold m-0 medium">
               <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
             </div>
-            <b-button v-else class="get-last-activity p-0" variant="link" @click="() => fetchLastWorked(terr.id)">
-              Get last activity
-            </b-button>
           </div>
         </div>
       </div>
@@ -193,10 +190,13 @@ export default {
     isRecentlyWorked() {
       return this.status === 'Recently Worked';
     },
+    isAvailable() {
+      return this.status === 'Available';
+    },
     assignedTo() {
       if (this.terr && this.terr.status && this.terr.status.publisher) {
-        const pre = this.isRecentlyWorked
-          ? `Completed by ${displayName(this.terr.status.publisher)}`
+        const pre = this.isRecentlyWorked || this.isAvailable
+          ? 'Last completed '
           : `Assigned to ${displayName(this.terr.status.publisher)}`;
         const timestamp = Number(this.terr.status.date);
         const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
