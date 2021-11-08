@@ -11,6 +11,8 @@ const UPDATE_CONGREGATION = 'UPDATE_CONGREGATION';
 const UPDATE_CONGREGATION_FAIL = 'UPDATE_CONGREGATION_FAIL';
 const GET_CONGREGATION_FAIL = 'GET_CONGREGATION_FAIL';
 const GET_CONGREGATION_SUCCESS = 'GET_CONGREGATION_SUCCESS';
+const GET_CONGREGATIONS_BY_CIRCUIT_SUCCESS = 'GET_CONGREGATIONS_BY_CIRCUIT_SUCCESS';
+const GET_CONGREGATIONS_BY_CIRCUIT_FAIL = 'GET_CONGREGATIONS_BY_CIRCUIT_FAIL';
 const RESET_ERROR = 'RESET_ERROR';
 
 const initialState = {
@@ -26,6 +28,7 @@ const initialState = {
     admin_email: '',
     options: {},
   },
+  congregationsByCircuit: [],
   error: null,
 };
 
@@ -38,6 +41,7 @@ export const congregation = {
   getters: {
     congregation: state => state.congregation,
     error: state => state.error,
+    congregationsByCircuit: state => state.congregationsByCircuit,
   },
 
   mutations: {
@@ -67,6 +71,13 @@ export const congregation = {
     RESET_ERROR(state) {
       state.error = null;
     },
+    GET_CONGREGATIONS_BY_CIRCUIT_SUCCESS(state, congs) {
+      state.congregationsByCircuit = congs;
+      state.error = null;
+    },
+    GET_CONGREGATIONS_BY_CIRCUIT_FAIL(state, exception) {
+      state.error = exception;
+    },
   },
 
   actions: {
@@ -94,7 +105,7 @@ export const congregation = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Congregation($congId: Int!) { 
+            query: print(gql`query Congregation($congId: Int!) {
               congregation (id: $congId) {
                 ...CongregationModel
                 groups {
@@ -125,6 +136,50 @@ export const congregation = {
       }
     },
 
+    async getCongregationsByCircuit({ commit, getters, rootGetters }, circuit) {
+      if (!circuit) {
+        commit(GET_CONGREGATIONS_BY_CIRCUIT_FAIL, 'circuit is required');
+        return;
+      }
+      const token = rootGetters['auth/token'];
+      if (!token) {
+        commit(GET_CONGREGATIONS_BY_CIRCUIT_FAIL, 'Token is missing');
+        return;
+      }
+
+      if (getters.error) {
+        commit(RESET_ERROR);
+      }
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Congregation($keyword: String!) {
+              congregations (keyword: $keyword) {
+                ...CongregationModel
+              }
+            },
+            ${model}`),
+            variables: {
+              keyword: circuit,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        const { congregations: congs } = get(response, 'data.data');
+        commit(GET_CONGREGATIONS_BY_CIRCUIT_SUCCESS, congs);
+      } catch (exception) {
+        commit(GET_CONGREGATIONS_BY_CIRCUIT_FAIL, exception);
+        console.error(GET_CONGREGATIONS_BY_CIRCUIT_FAIL, exception);
+      }
+    },
+
     async addCongregation({ commit, rootGetters }, _cong) {
       try {
         commit('auth/LOADING', true, { root: true });
@@ -147,8 +202,8 @@ export const congregation = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddCongregation($cong: CongregationInput!) { 
-              addCongregation(cong: $cong) { 
+            query: print(gql`mutation AddCongregation($cong: CongregationInput!) {
+              addCongregation(cong: $cong) {
                 ...CongregationModel
               }
             }
@@ -195,8 +250,8 @@ export const congregation = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation UpdateCongregation($cong: CongregationInput!) { 
-              updateCongregation(cong: $cong) { 
+            query: print(gql`mutation UpdateCongregation($cong: CongregationInput!) {
+              updateCongregation(cong: $cong) {
                 ...CongregationModel
               }
             }

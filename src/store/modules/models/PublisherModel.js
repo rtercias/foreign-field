@@ -38,5 +38,16 @@ export function validate(_publisher, isNew) {
   }
 
   publisher.status = publisher.status ? 'active' : 'disabled';
+
+  const ignoredProperties = [
+    'congregation',
+  ];
+
+  for (const ignored of ignoredProperties) {
+    if (ignored in publisher) {
+      delete publisher[ignored];
+    }
+  }
+
   return publisher;
 }
