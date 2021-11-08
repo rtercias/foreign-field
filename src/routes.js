@@ -20,6 +20,7 @@ import CongregationForm from './components/CongregationForm';
 import GroupForm from './components/GroupForm';
 import PublisherForm from './components/PublisherForm';
 import DNCReport from './components/DNCReport';
+import CongregationSwitch from './components/CongregationSwitch.vue';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome, meta: { label: 'Home' } },
@@ -310,6 +311,15 @@ const routes = [
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
       back: 'congregation-edit',
       label: 'Edit Publisher',
+    },
+  },
+  {
+    name: 'congregation-switch',
+    path: '/congregation-switch',
+    component: CongregationSwitch,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'CO'],
     },
   },
 ];
