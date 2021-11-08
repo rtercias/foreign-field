@@ -1,8 +1,8 @@
 <template>
   <div>
     <h5 class="mt-5">SWITCH CONGREGATION</h5>
-    <div class="row col-md-12 justify-content-around">
-      <div>
+    <div class="mx-5">
+      <div class="text-left">
         <h5 class="mt-5">1. Select a circuit</h5>
         <b-dropdown class="circuits">
           <span slot="button-content">{{selectedCircuit || 'no selection'}}</span>
@@ -14,7 +14,7 @@
           </b-dropdown-item>
         </b-dropdown>
       </div>
-      <div>
+      <div class="text-left">
         <h5 class="mt-5" :class="{ 'text-light': !selectedCircuit }">2. Select a congregation</h5>
         <b-dropdown class="congregations" :disabled="!selectedCircuit">
           <span slot="button-content">{{selectedCongregation || 'no selection'}}</span>
