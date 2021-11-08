@@ -8,6 +8,7 @@
       :to="{ name: 'congregation-edit', params: { congregationId: congregation.id } }">
       {{congregation.name}}
     </b-nav-item>
+    <b-nav-item v-if="canSwitchCong" :to="{ name: 'congregation-switch' }">Switch Cong</b-nav-item>
     <b-nav-item v-if="canWrite" :to="`/groups/${groupId}`">Territories</b-nav-item>
     <b-nav-item
       v-if="canWrite && matchingRouteNames.includes('territory')"
@@ -57,6 +58,7 @@ export default {
       name: 'auth/name',
       canWrite: 'auth/canWrite',
       canLead: 'auth/canLead',
+      canSwitchCong: 'auth/canSwitchCong',
       congregation: 'auth/congregation',
       territory: 'territory/territory',
     }),
