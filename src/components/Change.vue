@@ -5,12 +5,12 @@
     <div v-else-if="field === 'notes'">
       <div v-if="!!newItems.length">
         <span>added</span>&nbsp;
-        <b-badge v-for="(tag, index) in newItems" :key="index">{{tag}}</b-badge>&nbsp;
+        <b-badge v-for="(tag, index) in newItems" :key="index">{{formattedValue(tag)}}</b-badge>&nbsp;
         <span>tag</span>
       </div>
       <div v-if="!!oldItems.length">
         <span>removed</span>&nbsp;
-        <b-badge v-for="(tag, index) in oldItems" :key="index">{{tag}}</b-badge>&nbsp;
+        <b-badge v-for="(tag, index) in oldItems" :key="index">{{formattedValue(tag)}}</b-badge>&nbsp;
         <span>tag</span>
       </div>
     </div>
@@ -48,15 +48,13 @@ export default {
       congregation: 'congregation/congregation',
     }),
     oldValue() {
-      const val = formatLanguage(this.change.old, this.language);
-      return val === undefined || val === null ? 'nothing' : val;
+      return this.formattedValue(this.change.old);
     },
     newValue() {
-      const val = formatLanguage(this.change.new, this.language);
-      return val === undefined || val === null ? 'nothing' : val;
+      return this.formattedValue(this.change.new);
     },
     language() {
-      return (get(this.congregation, 'language') || 'Tagalog');
+      return get(this.congregation, 'language') || 'Tagalog';
     },
     newItems() {
       const newValues = get(this.change, 'new.length') ? this.change.new.split(',') : [];
@@ -73,6 +71,10 @@ export default {
     ...mapActions({
       updateAddress: 'address/updateAddress',
     }),
+    formattedValue(value) {
+      const val = formatLanguage(value, this.language);
+      return val === undefined || val === null ? 'nothing' : val;
+    },
   },
 };
 </script>
