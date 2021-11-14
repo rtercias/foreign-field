@@ -122,7 +122,7 @@ export const addresses = {
         }
 
         const base = `https://admin.foreignfield.com/api/addresses/getOptimizedRouteForTerritory?territoryId=${territoryId}`;
-        const proxy = 'https://cors-anywhere.herokuapp.com';
+        const proxy = 'https://lit-ravine-85687.herokuapp.com';
         const url = document.location.host.includes('localhost') ? `${proxy}/${base}` : base;
         const response = await axios.get(url);
         const { data } = response;
