@@ -16,7 +16,7 @@
         <div class="text-uppercase pt-4">Addresses</div>
         <b-list-group-item v-for="address in addresses" :key="address.id">
           <div class="text-left">
-            <b-link :to="link(address)" :disabled="!canWrite">
+            <b-link :to="link(address)">
               <div>{{address.addr1}} {{address.addr2}}</div>
               <div>{{address.city}}, {{address.state_province}} {{address.postal_code}}</div>
             </b-link>
@@ -37,7 +37,7 @@
         </b-list-group-item>
         <b-list-group-item v-for="phone in phones" :key="phone.id">
           <div class="text-left">
-            <b-link :to="link(phone.address)" :disabled="!canWrite">
+            <b-link :to="link(phone.address)">
               <div>{{get(phone, 'address.addr1')}} {{get(phone, 'address.addr2')}}</div>
               <div>
                 {{get(phone, 'address.city')}}, {{get(phone, 'address.state_province')}}
