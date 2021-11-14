@@ -21,7 +21,7 @@
           <b-form-group label="Description" class="mt-3" :disabled="readOnly">
             <b-form-input v-model="model.description" maxlength="255"></b-form-input>
           </b-form-group>
-          <b-form-group label="circuit" class="mt-3" :disabled="readOnly">
+          <b-form-group label="Circuit" class="mt-3" :disabled="readOnly">
             <b-form-input v-model="model.circuit" maxlength="45"></b-form-input>
           </b-form-group>
           <b-form-group label="Language" class="mt-3" :disabled="readOnly">
