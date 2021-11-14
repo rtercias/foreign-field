@@ -10,6 +10,7 @@ export const model = gql`fragment CongregationModel on Congregation {
   campaign
   admin_email
   options
+  circuit
 }`;
 
 export function validate(_cong, isNew) {
@@ -20,6 +21,9 @@ export function validate(_cong, isNew) {
   }
   if (!cong.name) {
     throw new InvalidCongregationError('Congregation name is required');
+  }
+  if (!cong.circuit) {
+    throw new InvalidCongregationError('Circuit is required');
   }
   if (!cong.language) {
     throw new InvalidCongregationError('Language is required');

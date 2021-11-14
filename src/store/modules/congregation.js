@@ -20,6 +20,7 @@ const initialState = {
     id: 0,
     name: '',
     description: '',
+    circuit: '',
     territories: [],
     publishers: [],
     groups: [],
