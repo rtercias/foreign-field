@@ -5,7 +5,7 @@
       <div class="address-header justify-content-around align-items-center py-3">
         <div class="lead font-weight-bold w-100 pl-5">
           <div>{{get(address, 'addr1')}} {{get(address, 'addr2')}}</div>
-          <div>{{get(address, 'city')}} {{get(address, 'state_province')}} {{get(address, 'postalCode')}}</div>
+          <div>{{get(address, 'city')}} {{get(address, 'state_province')}} {{get(address, 'postal_code')}}</div>
         </div>
         <div class="pr-4">
           <b-link
