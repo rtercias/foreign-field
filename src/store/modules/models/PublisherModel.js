@@ -41,6 +41,7 @@ export function validate(_publisher, isNew) {
 
   const ignoredProperties = [
     'congregation',
+    'territories',
   ];
 
   for (const ignored of ignoredProperties) {
