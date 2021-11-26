@@ -73,7 +73,7 @@
       <div v-if="!loading && canManage" class="panel text-left py-3 col-sm-12 col-md-5 border-info m-2">
         <ChangeLog :type="'addresses'" :fullscreen="false" />
       </div>
-      <div v-if="!loading && canWrite" class="panel text-left py-3 scol-sm-12 col-md-5 border-info m-2">
+      <div v-if="!loading && canViewReports" class="panel text-left py-3 scol-sm-12 col-md-5 border-info m-2">
         <Reports />
       </div>
     </b-row>
@@ -117,7 +117,7 @@ export default {
       isAuthenticated: 'auth/isAuthenticated',
       user: 'auth/user',
       loading: 'auth/loading',
-      canWrite: 'auth/canWrite',
+      canViewReports: 'auth/canViewReports',
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
       isPWA: 'auth/isPWA',
