@@ -24,7 +24,7 @@
     "firebase": "^7.14.4",
     "firebaseui": "^3.6.1",
     "graphql": "^15.2.0",
-    "graphql-tag": "^2.10.3",
+    "graphql-tag": "^2.12.6",
     "gsap": "^3.2.6",
     "leaflet": "^1.6.0",
     "leaflet.markercluster": "^1.5.3",
