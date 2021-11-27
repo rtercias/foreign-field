@@ -158,7 +158,6 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import startCase from 'lodash/startCase';
 import { TheMask } from 'vue-the-mask';
 import get from 'lodash/get';
 import addYears from 'date-fns/addYears';
@@ -328,10 +327,10 @@ export default {
       const fullAddress = `${addr1 || ''}+${addr2 || ''}+${city || ''}+${state || ''}+${zip || ''}`;
 
       await this.addressLookup(fullAddress);
-      this.model.addr1 = startCase(this.address.addr1);
-      this.model.city = startCase(this.address.city);
-      this.model.state_province = startCase(this.address.state_province);
-      this.model.postal_code = startCase(this.address.postal_code);
+      this.model.addr1 = this.address.addr1;
+      this.model.city = this.address.city;
+      this.model.state_province = this.address.state_province;
+      this.model.postal_code = this.address.postal_code;
       this.model.longitude = this.address.longitude;
       this.model.latitude = this.address.latitude;
     },
