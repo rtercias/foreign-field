@@ -311,7 +311,8 @@ export default {
           status: 'Active',
         };
       }
-      if (this.user && this.user.congregation.id !== this.address.congregationId) {
+      if (this.user && this.mode === Modes.edit
+        && this.user.congregation.id !== this.address.congregationId) {
         this.$router.push('/unauthorized');
       }
       this.isLoading = false;
