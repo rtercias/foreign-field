@@ -74,10 +74,6 @@ export default {
       await this.getGroup({ id: this.selectedId });
     }
     await this.getGroupsList();
-
-    if (!this.allTerritories.length) {
-      await this.fetchAllTerritories({ congId: this.group.congregation_id });
-    }
   },
   watch: {
     async user() {
