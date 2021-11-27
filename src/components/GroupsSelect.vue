@@ -25,6 +25,7 @@ export default {
   methods: {
     ...mapActions({
       getGroup: 'group/getGroup',
+      getGroups: 'group/getGroups',
       fetchAllTerritories: 'territories/fetchAllTerritories',
     }),
     truncate,
@@ -42,9 +43,16 @@ export default {
       return this.isDesktop
         && group.id !== 0 ? `${get(group, 'code', '')} - ${get(group, 'description', '')}` : group.code;
     },
+    async getGroupsList() {
+      if (!this.groups.length) {
+        const congId = get(this.user, 'congregation.id');
+        await this.getGroups({ congId });
+      }
+    },
   },
   computed: {
     ...mapGetters({
+      user: 'auth/user',
       groups: 'group/groups',
       group: 'group/group',
       territories: 'territories/territories',
@@ -65,9 +73,16 @@ export default {
     if (!this.group) {
       await this.getGroup({ id: this.selectedId });
     }
+    await this.getGroupsList();
+
     if (!this.allTerritories.length) {
       await this.fetchAllTerritories({ congId: this.group.congregation_id });
     }
+  },
+  watch: {
+    async user() {
+      await this.getGroupsList();
+    },
   },
 };
 </script>
