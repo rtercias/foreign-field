@@ -10,7 +10,7 @@
       @click="selectGroup">
       <font-awesome-icon class="ml-n4" icon="check" v-if="group.id === selectedGroup.id" />
       {{displayName(group)}}
-      <span>{{`(${terrCount(group.id)})`}}</span>
+      <span>{{`${terrCount(group.id)}`}}</span>
     </b-dropdown-item>
   </b-dropdown>
 </template>
@@ -35,9 +35,10 @@ export default {
     terrCount(groupId) {
       const terr = get(this, 'allTerritories');
       if (groupId === 0) {
-        return terr.length;
+        return terr.length ? `(${terr.length})` : '';
       }
-      return terr.filter(t => t.group_id === groupId).length;
+      const count = terr.filter(t => t.group_id === groupId).length;
+      return count ? `(${count})` : '';
     },
     displayName(group) {
       return this.isDesktop
