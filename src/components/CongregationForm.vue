@@ -220,6 +220,11 @@ export default {
   watch: {
     async user() {
       await this.refresh();
+      if (this.user && this.user.congregation.id !== this.congregationId) {
+        this.$router.push('/unauthorized');
+      } else {
+        this.isLoading = false;
+      }
     },
   },
 };

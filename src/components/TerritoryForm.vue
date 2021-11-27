@@ -218,6 +218,15 @@ export default {
       return true;
     },
   },
+  watch: {
+    user() {
+      if (this.user && this.user.congregation.id !== this.territory.congregationid) {
+        this.$router.push('/unauthorized');
+      } else {
+        this.isLoading = false;
+      }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
