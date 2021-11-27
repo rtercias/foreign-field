@@ -221,6 +221,9 @@ export default {
       } else {
         await this.getTerritory({ id: this.territoryId, getLastActivity: true });
       }
+      if (this.user.congregation.id !== this.territory.congregationid) {
+        this.$router.push('/unauthorized');
+      }
     },
 
     async checkIn() {

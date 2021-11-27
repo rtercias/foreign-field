@@ -311,6 +311,9 @@ export default {
           status: 'Active',
         };
       }
+      if (this.user && this.user.congregation.id !== this.address.congregationId) {
+        this.$router.push('/unauthorized');
+      }
       this.isLoading = false;
     },
     async geocodeAddress() {

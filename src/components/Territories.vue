@@ -301,6 +301,10 @@ export default {
     async fetch() {
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
       if (congId) await this.getGroups({ congId });
+      if (this.group.congregation_id && this.user.congregation.id !== this.group.congregation_id) {
+        this.$router.push('/unauthorized');
+        return;
+      }
       await this.fetchPublishers(congId);
       this.selectedGroup = this.selectedSortAndFilters.groupId || 0;
       this.availability = this.selectedSortAndFilters.availability || DEFAULT_FILTER;
