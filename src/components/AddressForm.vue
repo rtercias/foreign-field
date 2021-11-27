@@ -31,24 +31,55 @@
             </b-form-select>
           </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
-            <b-form-input v-model="model.addr1" :readonly="readOnly" @change="geocodeAddress" maxlength="50">
+            <b-form-input
+             v-model="model.addr1"
+             :class="{ 'alert-success font-weight-bold': isGeocoded('addr1') }"
+             :readonly="readOnly"
+             @change="geocodeAddress"
+             maxlength="50">
             </b-form-input>
           </b-form-group>
           <b-form-group label="Address 2" class="mt-3">
-            <b-form-input v-model="model.addr2" :readonly="readOnly" maxlength="50"></b-form-input>
+            <b-form-input
+             v-model="model.addr2"
+             :class="{ 'alert-success font-weight-bold': isGeocoded('addr2') }"
+             :readonly="readOnly"
+             maxlength="50">
+             </b-form-input>
           </b-form-group>
           <b-form-group label="City" class="mt-3">
-            <b-form-input v-model="model.city" :readonly="readOnly" @change="geocodeAddress" maxlength="50">
+            <b-form-input
+             v-model="model.city"
+             :class="{ 'alert-success font-weight-bold': isGeocoded('city') }"
+             :readonly="readOnly"
+             @change="geocodeAddress"
+             maxlength="50">
             </b-form-input>
           </b-form-group>
           <b-form-group label="State" class="mt-3">
-            <b-form-input v-model="model.state_province" :readonly="readOnly" @change="geocodeAddress" maxlength="50">
+            <b-form-input
+             v-model="model.state_province"
+             :class="{ 'alert-success font-weight-bold': isGeocoded('state_province') }"
+             :readonly="readOnly"
+             @change="geocodeAddress"
+             maxlength="50">
             </b-form-input>
           </b-form-group>
           <b-form-group label="Zip" class="mt-3">
-            <b-form-input v-model="model.postal_code" :readonly="readOnly" @change="geocodeAddress" maxlength="15">
+            <b-form-input
+             v-model="model.postal_code"
+             :class="{ 'alert-success font-weight-bold': isGeocoded('postal_code') }"
+             :readonly="readOnly"
+             @change="geocodeAddress"
+             maxlength="15">
             </b-form-input>
           </b-form-group>
+          <b-button variant="outline-warning" size="sm" @click="undoGeocode" v-if="isGeocoded()">
+            Don't fix my address
+          </b-button>
+          <b-button variant="success" size="sm" @click="geocodeAddress" v-else-if="!!enteredAddress">
+            Fix my address
+          </b-button>
         </div>
         <div v-if="canWrite" class="mt-5">
           <div class="text-left" v-if="showTerrHelp">
@@ -203,13 +234,14 @@ export default {
       error: '',
       useGeocodedAddress: true,
       saveGPSCoordinates: false,
-      geocodedAddress: {},
+      enteredAddress: undefined,
       showTerrHelp: true,
       showGeocodeHelp: false,
     };
   },
   async mounted() {
     await this.refresh();
+    this.enteredAddress = undefined;
   },
   methods: {
     ...mapActions({
@@ -257,6 +289,8 @@ export default {
             await this.markAsDoNotCall({ addressId: this.model.id, userid: this.user.id, tag: dncTag });
           }
         }
+
+        this.enteredAddress = undefined;
 
         if (this.canManage) {
           this.step = 4;
@@ -327,12 +361,20 @@ export default {
       const fullAddress = `${addr1 || ''}+${addr2 || ''}+${city || ''}+${state || ''}+${zip || ''}`;
 
       await this.addressLookup(fullAddress);
+      this.enteredAddress = { ...this.model };
       this.model.addr1 = this.address.addr1;
       this.model.city = this.address.city;
       this.model.state_province = this.address.state_province;
       this.model.postal_code = this.address.postal_code;
       this.model.longitude = this.address.longitude;
       this.model.latitude = this.address.latitude;
+    },
+
+    isGeocoded(field) {
+      if (!field) {
+        return this.enteredAddress && this.enteredAddress !== this.model;
+      }
+      return this.enteredAddress && this.enteredAddress[field] !== this.model[field];
     },
 
     async applyGeocode() {
@@ -345,6 +387,10 @@ export default {
 
       await this.geocodeAddress();
       this.step = 2;
+    },
+
+    undoGeocode() {
+      this.model = this.enteredAddress;
     },
 
     async goToSelectTerritory() {
