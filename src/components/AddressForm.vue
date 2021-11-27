@@ -324,7 +324,10 @@ export default {
 
     async refresh() {
       this.isLoading = true;
-      await this.fetchAllTerritories({ congId: this.congId });
+      if (!this.allTerritories.length) {
+        await this.fetchAllTerritories({ congId: this.congId });
+      }
+
       if (this.mode === Modes.edit) {
         await this.fetchAddress({ addressId: this.addressId, status: '*' });
         this.model = { ...this.address } || {};
@@ -333,7 +336,7 @@ export default {
         }
         delete this.model.activityLogs;
       } else {
-        if (this.user && this.territoryId) {
+        if (this.user && this.territoryId && this.territory.id !== this.territoryId) {
           await this.getTerritory({ id: this.territoryId });
         }
         await this.setAddress({});
@@ -450,7 +453,7 @@ export default {
       address: 'address/address',
       territory: 'territory/territory',
       maxSort: 'territory/maxSort',
-      territories: 'territories/territories',
+      allTerritories: 'territories/allTerritories',
       territoriesLoading: 'territories/loading',
       searchedAddresses: 'addresses/search',
     }),
@@ -484,7 +487,7 @@ export default {
     },
 
     territoryOptions() {
-      return this.territories.map(t => ({ value: t.id, text: `${t.description} (${t.name})` }));
+      return this.allTerritories.map(t => ({ value: t.id, text: `${t.description} (${t.name})` }));
     },
 
     selectedTerritory() {

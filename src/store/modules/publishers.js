@@ -32,13 +32,13 @@ export const publishers = {
           'Content-Type': 'application/json',
         },
         data: {
-          query: print(gql`query PublishersList($congId: Int) { 
-            publishers (congId: $congId) { 
-              id 
-              firstname 
-              lastname 
-              congregationid 
-              username 
+          query: print(gql`query PublishersList($congId: Int) {
+            publishers (congId: $congId) {
+              id
+              firstname
+              lastname
+              congregationid
+              username
               status
               role
             }
@@ -54,6 +54,9 @@ export const publishers = {
         pub.status = pub.status === 'active';
       }
       commit(SET_PUBLISHERS, pubs);
+    },
+    resetPublishers({ commit }) {
+      commit(SET_PUBLISHERS, []);
     },
   },
 };

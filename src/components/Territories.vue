@@ -219,6 +219,7 @@ export default {
       congId: 'auth/congId',
       congregation: 'congregation/congregation',
       user: 'auth/user',
+      publishers: 'publishers/publishers',
       token: 'auth/token',
       territories: 'territories/territories',
       groups: 'group/groups',
@@ -300,12 +301,15 @@ export default {
 
     async fetch() {
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
-      if (congId) await this.getGroups({ congId });
-      if (this.group.congregation_id && this.user.congregation.id !== this.group.congregation_id) {
+      if (congId && !this.groups.length) await this.getGroups({ congId });
+      if (get(this.group, 'congregation_id') && get(this.user, 'congregation.id') !== get(this.group, 'congregation_id')) {
         this.$router.push('/unauthorized');
         return;
       }
-      await this.fetchPublishers(congId);
+      if (!this.publishers.length) {
+        await this.fetchPublishers(congId);
+      }
+
       this.selectedGroup = this.selectedSortAndFilters.groupId || 0;
       this.availability = this.selectedSortAndFilters.availability || DEFAULT_FILTER;
       this.typeFilter = this.selectedSortAndFilters.type || '';
@@ -314,10 +318,14 @@ export default {
         || get(this.congregation, 'options.territories.defaultSort')
         || DEFAULT_SORT;
       this.sortDirection = this.selectedSortAndFilters.sortDirection || 'asc';
-      await this.fetchTerritories({
-        congId,
-        groupId: this.selectedGroup === 0 ? null : this.groupId,
-      });
+
+      if (!this.territories.length) {
+        await this.fetchTerritories({
+          congId,
+          groupId: this.selectedGroup === 0 ? null : this.groupId,
+        });
+      }
+
       this.getAddressCountByTerritories(congId);
       this.getPhoneCountByTerritories(congId);
       this.loading = false;
@@ -400,7 +408,7 @@ export default {
     this.selectedGroup = this.groupId;
     this.setSortAndFilter({ groupId: this.groupId });
     await this.getGroup({ id: this.groupId });
-    if (this.group.congregation_id !== congId) this.selectedGroup = 0;
+    if (get(this.group, 'congregation_id') !== congId) this.selectedGroup = 0;
     await this.fetch();
 
     if (this.$route.query.territory) {

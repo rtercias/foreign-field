@@ -103,6 +103,7 @@ export default {
       addTerritory: 'territory/addTerritory',
       updateTerritory: 'territory/updateTerritory',
       deleteTerritory: 'territory/deleteTerritory',
+      resetTerritories: 'territories/resetTerritories',
       getGroups: 'group/getGroups',
       back: 'auth/back',
     }),
@@ -121,6 +122,8 @@ export default {
           } else if (this.mode === Modes.edit) {
             await this.updateTerritory(this.model);
           }
+          this.resetTerritories();
+
           this.$bvToast.toast('Territory saved.', {
             title: get(this.territory, 'name'),
             solid: true,
@@ -152,6 +155,7 @@ export default {
         });
         if (confirm) {
           await this.deleteTerritory(this.territory.id);
+          this.resetTerritories();
           this.cancel();
         }
       } catch (err) {
@@ -162,7 +166,7 @@ export default {
 
     async refresh() {
       this.isLoading = true;
-      if (!this.groups) {
+      if (!this.groups.length) {
         await this.getGroups({ congId: this.congId });
       }
 

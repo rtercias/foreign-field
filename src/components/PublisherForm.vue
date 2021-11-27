@@ -79,6 +79,7 @@ export default {
       addPublisher: 'publisher/addPublisher',
       updatePublisher: 'publisher/updatePublisher',
       deletePublisher: 'publisher/deletePublisher',
+      resetPublishers: 'publishers/resetPublishers',
       back: 'auth/back',
     }),
     async submit() {
@@ -96,6 +97,7 @@ export default {
           } else if (this.mode === Modes.edit) {
             await this.updatePublisher(this.model);
           }
+          this.resetPublishers();
           this.$bvToast.toast('Publisher saved.', {
             title: this.displayName,
             solid: true,
@@ -126,6 +128,7 @@ export default {
       });
       if (confirm) {
         await this.deletePublisher(this.publisher.id);
+        this.resetPublishers();
         this.cancel();
       }
     },

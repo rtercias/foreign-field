@@ -68,6 +68,7 @@ export default {
       addGroup: 'group/addGroup',
       updateGroup: 'group/updateGroup',
       deleteGroup: 'group/deleteGroup',
+      resetGroups: 'group/resetGroups',
       fetchPublishers: 'publishers/fetchPublishers',
       back: 'auth/back',
     }),
@@ -86,6 +87,9 @@ export default {
           } else if (this.mode === Modes.edit) {
             await this.updateGroup(this.model);
           }
+
+          this.resetGroups();
+
           this.$bvToast.toast('Group saved.', {
             title: this.model.description,
             solid: true,
@@ -117,6 +121,7 @@ export default {
         });
         if (confirm) {
           await this.deleteGroup(this.model.id);
+          this.resetGroups();
           this.cancel();
         }
       } catch (err) {

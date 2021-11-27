@@ -43,7 +43,7 @@ export default {
     };
   },
   async mounted() {
-    if (this.congregationId) {
+    if (this.congregationId && !this.groups.length) {
       await this.getGroups({ congId: this.congregationId });
     }
   },

@@ -74,11 +74,15 @@ export default {
     if (!this.group) {
       await this.getGroup({ id: this.selectedId });
     }
-    await this.getGroupsList();
+    if (!this.groups.length) {
+      await this.getGroupsList();
+    }
   },
   watch: {
     async user() {
-      await this.getGroupsList();
+      if (!this.groups.length) {
+        await this.getGroupsList();
+      }
     },
   },
 };

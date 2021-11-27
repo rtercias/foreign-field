@@ -106,7 +106,7 @@ export const group = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Group($groupId: Int) { 
+            query: print(gql`query Group($groupId: Int) {
               group (id: $groupId) {
                 ...GroupModel
               }
@@ -146,7 +146,7 @@ export const group = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Groups($congId: Int) { 
+            query: print(gql`query Groups($congId: Int) {
               groups (congId: $congId) {
                 ...GroupModel
               }
@@ -164,6 +164,10 @@ export const group = {
         commit(GET_GROUPS_FAIL, exception);
         console.error(GET_GROUPS_FAIL, exception);
       }
+    },
+
+    resetGroups({ commit }) {
+      commit(GET_GROUPS_SUCCESS, []);
     },
 
     async addGroup({ commit, rootGetters }, _group) {
@@ -184,8 +188,8 @@ export const group = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddGroup($group: GroupInput!) { 
-              addGroup(group: $group) { 
+            query: print(gql`mutation AddGroup($group: GroupInput!) {
+              addGroup(group: $group) {
                 ...GroupModel
               }
             }
@@ -222,8 +226,8 @@ export const group = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation UpdateGroup($group: GroupInput!) { 
-              updateGroup(group: $group) { 
+            query: print(gql`mutation UpdateGroup($group: GroupInput!) {
+              updateGroup(group: $group) {
                 ...GroupModel
               }
             }
@@ -261,7 +265,7 @@ export const group = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation DeleteGroup($id: Int!) { 
+            query: print(gql`mutation DeleteGroup($id: Int!) {
               deleteGroup(id: $id)
             }`),
             variables: {
