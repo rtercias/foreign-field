@@ -50,6 +50,9 @@ export default {
       togglingCampaignMode: false,
     };
   },
+  async mounted() {
+    await this.getGroupsList();
+  },
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
@@ -61,6 +64,7 @@ export default {
       canSwitchCong: 'auth/canSwitchCong',
       congregation: 'auth/congregation',
       territory: 'territory/territory',
+      groups: 'group/groups',
     }),
     matchingRouteNames() {
       return this.$route.matched.map(r => r.name);
@@ -77,6 +81,7 @@ export default {
       checkinAll: 'territories/checkinAll',
       logout: 'auth/logout',
       updateCongregation: 'congregation/updateCongregation',
+      getGroups: 'group/getGroups',
     }),
     get,
     async toggleCampaignMode() {
@@ -179,6 +184,17 @@ export default {
     logoutUser() {
       this.logout();
       this.$router.push('/signout');
+    },
+    async getGroupsList() {
+      if (!this.groups.length) {
+        const congId = get(this.user, 'congregation.id');
+        await this.getGroups({ congId });
+      }
+    },
+  },
+  watch: {
+    async user() {
+      await this.getGroupsList();
     },
   },
 };
