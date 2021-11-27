@@ -10,7 +10,7 @@
     "deploy-staging": "npm run build && firebase deploy -P staging"
   },
   "dependencies": {
-    "@capacitor/cli": "^1.0.0-alpha.38",
+    "@capacitor/cli": "^3.3.2",
     "@capacitor/core": "^1.0.0-alpha.38",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
