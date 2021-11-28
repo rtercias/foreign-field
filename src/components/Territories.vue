@@ -222,6 +222,7 @@ export default {
       publishers: 'publishers/publishers',
       token: 'auth/token',
       territories: 'territories/territories',
+      allTerritories: 'territories/allTerritories',
       groups: 'group/groups',
       group: 'group/group',
       isDesktop: 'auth/isDesktop',
@@ -300,6 +301,7 @@ export default {
     },
 
     async fetch() {
+      this.loading = true;
       const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
       if (congId && !this.groups.length) await this.getGroups({ congId });
       if (get(this.group, 'congregation_id') && get(this.user, 'congregation.id') !== get(this.group, 'congregation_id')) {
@@ -310,7 +312,7 @@ export default {
         await this.fetchPublishers(congId);
       }
 
-      this.selectedGroup = this.selectedSortAndFilters.groupId || 0;
+      this.selectedGroup = this.groupId || 0;
       this.availability = this.selectedSortAndFilters.availability || DEFAULT_FILTER;
       this.typeFilter = this.selectedSortAndFilters.type || '';
       this.selectedCountFilter = this.selectedSortAndFilters.count || 0;
@@ -319,7 +321,8 @@ export default {
         || DEFAULT_SORT;
       this.sortDirection = this.selectedSortAndFilters.sortDirection || 'asc';
 
-      if (!this.territories.length) {
+      const doFetchTerritories = this.group.id !== this.selectedGroup || !this.territories.length;
+      if (doFetchTerritories) {
         await this.fetchTerritories({
           congId,
           groupId: this.selectedGroup === 0 ? null : this.groupId,
@@ -406,8 +409,6 @@ export default {
   async mounted() {
     const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
     this.selectedGroup = this.groupId;
-    this.setSortAndFilter({ groupId: this.groupId });
-    await this.getGroup({ id: this.groupId });
     if (get(this.group, 'congregation_id') !== congId) this.selectedGroup = 0;
     await this.fetch();
 

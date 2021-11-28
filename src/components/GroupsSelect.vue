@@ -6,8 +6,7 @@
       v-for="group in groupsList"
       :key="group.id"
       :to="{ name: 'group', params: { groupId: group.id } }"
-      class="mx-0 pl-2 w-100 d-block"
-      @click="selectGroup">
+      class="mx-0 pl-2 w-100 d-block">
       <font-awesome-icon class="ml-n4" icon="check" v-if="group.id === selectedGroup.id" />
       {{displayName(group)}}
       <span>{{`${terrCount(group.id)}`}}</span>
@@ -29,9 +28,6 @@ export default {
       fetchAllTerritories: 'territories/fetchAllTerritories',
     }),
     truncate,
-    selectGroup(item) {
-      this.getGroup({ id: item });
-    },
     terrCount(groupId) {
       const terr = get(this, 'allTerritories');
       if (groupId === 0) {
@@ -71,9 +67,8 @@ export default {
     },
   },
   async mounted() {
-    if (!this.group) {
-      await this.getGroup({ id: this.selectedId });
-    }
+    await this.getGroup({ id: this.selectedId });
+
     if (!this.groups.length) {
       await this.getGroupsList();
     }
