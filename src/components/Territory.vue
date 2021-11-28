@@ -120,12 +120,14 @@ export default {
   },
   computed: {
     ...mapGetters({
+      group: 'group/group',
       territory: 'territory/territory',
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canViewReports: 'auth/canViewReports',
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
+      canCheckout: 'auth/canCheckout',
       ownedBy: 'territory/isOwnedByUser',
       options: 'auth/options',
       token: 'auth/token',
@@ -211,6 +213,7 @@ export default {
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
       fetchLastActivities: 'territory/fetchLastActivities',
+      updateTerritory: 'territories/updateTerritory',
     }),
 
     async refresh() {
@@ -262,9 +265,10 @@ export default {
         territoryId: this.territoryId,
         publisher: get(this.territory, 'status.publisher') || {},
         username: this.user.username,
+        date: Date.now(),
       });
 
-      await this.resetTerritoryActivities({
+      this.resetTerritoryActivities({
         checkoutId: this.territory.status.checkout_id,
         userid: this.user.id,
         tzOffset: new Date().getTimezoneOffset().toString(),
@@ -274,7 +278,11 @@ export default {
       this.saveSeenTerritory(this.territory);
 
       this.isCheckingIn = false;
-      await this.$router.push({ name: 'home' });
+      if (this.canCheckout) {
+        this.$router.push({ name: 'group', params: { groupId: this.group.id } });
+      } else {
+        this.$router.push({ name: 'home' });
+      }
       this.checkInToast('success');
     },
 

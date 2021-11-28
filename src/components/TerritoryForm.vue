@@ -64,17 +64,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import values from 'lodash/values';
 import Loading from './Loading';
 import { InvalidTerritoryError } from '../store/exceptions/custom-errors';
 import { Modes } from '../utils/modes';
 import { TEST_GROUPS } from '../store/modules/models/GroupModel';
+import { TerritoryType } from '../store';
 
-const Types = [
-  { text: 'Regular', value: 'Regular' },
-  { text: 'Survey', value: 'SEARCH' },
-  { text: 'Business', value: 'BUSINESS' },
-  { text: 'Test', value: 'Test' },
-];
 const required = ['congregationid', 'group_id', 'name', 'description', 'type'];
 
 export default {
@@ -207,10 +203,11 @@ export default {
       return get(this.$route, 'query.group') || this.territory.group_id;
     },
     typeOptions() {
+      const types = values(TerritoryType);
       if (!TEST_GROUPS.includes(Number(this.model.group_id))) {
-        return Types.filter(t => t.value !== 'Test');
+        return types.filter(t => t.value !== 'Test');
       }
-      return Types;
+      return types;
     },
     groupOptions() {
       return this.groups.map(g => ({ text: g.code, value: g.id }));

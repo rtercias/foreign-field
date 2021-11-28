@@ -3,6 +3,7 @@ import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import groupBy from 'lodash/groupBy';
 import toArray from 'lodash/toArray';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -106,7 +107,7 @@ export const territories = {
     },
     SET_STATUS: (state, { id, status }) => {
       const terr = state.territories.find(t => t.id === id);
-      if (terr) Vue.set(terr, 'status', status);
+      if (terr) set(terr, 'status', status);
     },
   },
   actions: {

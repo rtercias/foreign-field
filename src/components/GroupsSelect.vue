@@ -43,7 +43,7 @@ export default {
     async getGroupsList() {
       if (!this.groups.length) {
         const congId = get(this.user, 'congregation.id');
-        await this.getGroups({ congId });
+        if (congId) await this.getGroups({ congId });
       }
     },
   },

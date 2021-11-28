@@ -14,7 +14,7 @@
       <div class="check-in-out text-right d-flex flex-column justify-content-start" size="small" role="group">
           <b-btn
           class="font-weight-bold p-1 btn-sm"
-          v-b-modal = "`checkoutModal-${this.terr.id}`"
+          v-b-modal = "`checkoutModal-${terr.id}`"
           variant="primary"
           v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
           @click="isReassign = false"
@@ -26,14 +26,14 @@
           class="font-weight-bold p-1 btn-sm"
           v-if="canWrite && status === 'Checked Out'"
           variant="warning"
-          @click="checkin(terr)"
+          @click="checkin"
           :disabled="saving">
           <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
           Check In
         </b-btn>
         <b-btn
           class="mr-0 pr-0 pt-0"
-          v-b-modal = "`checkoutModal-${this.terr.id}`"
+          v-b-modal = "`checkoutModal-${terr.id}`"
           v-if="canViewReports && status === 'Checked Out'"
           variant="link"
           @click="isReassign = true"
@@ -79,14 +79,6 @@
           </b-badge>
           <b-badge class="mr-1" v-for="(tag, index) in tags" :key="index">{{tag}}</b-badge>
         </div>
-        <div>
-          <div class="last-worked" v-if="terr.lastActivity">Last worked: {{lastWorked}}</div>
-          <div v-else class="loading">
-            <div v-if="terr.lastActivityLoading" class="font-weight-bold m-0 medium">
-              <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
     <CheckoutModal :territory="terr" :is-reassign="isReassign"></CheckoutModal>
@@ -124,29 +116,34 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       fetchLastActivity: 'territories/fetchLastActivity',
+      updateTerritory: 'territories/updateTerritory',
+      setTerritory: 'territory/setTerritory',
     }),
-    async checkin(territory) {
+    async checkin() {
       const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
-        title: `${territory.name}`,
+        title: `${this.terr.name}`,
         centered: true,
       });
 
       if (response) {
         this.saving = true;
-        const publisher = territory.status && territory.status.publisher || {};
+        const publisher = this.terr.status && this.terr.status.publisher || {};
         const { user } = this.$store.state.auth;
         await this.checkinTerritory({
-          territoryId: territory.id,
+          checkout_id: get(this.terr, 'status.checkout_id'),
+          territoryId: this.terr.id,
           publisher: publisher || {},
           username: user.username,
+          date: Date.now(),
         });
 
-        await this.resetTerritoryActivities({
-          checkoutId: territory.status.checkout_id,
+        this.resetTerritoryActivities({
+          checkoutId: this.terr.status.checkout_id,
           userid: this.user.id,
           tzOffset: new Date().getTimezoneOffset().toString(),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         });
+
         this.saving = false;
 
         await this.fetch();
@@ -224,9 +221,6 @@ export default {
     },
     tags() {
       return this.terr.tags ? this.terr.tags.split(',') : [];
-    },
-    isCheckingOutThisTerritory() {
-      return this.terr.id === this.territory.id && this.isCheckingOut;
     },
   },
 };

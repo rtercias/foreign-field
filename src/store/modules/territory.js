@@ -5,6 +5,7 @@ import { print } from 'graphql/language/printer';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import { model, validate } from './models/TerritoryModel';
 import { model as activityModel } from './models/ActivityModel';
 import { AddressStatus, AddressType } from '..';
@@ -84,7 +85,7 @@ export const territory = {
 
   mutations: {
     CHANGE_STATUS(state, args) {
-      Vue.set(state.territory, 'status', {
+      set(state.territory, 'status', {
         checkout_id: args.checkout_id,
         status: args.status,
         date: new Date().getTime(),
@@ -289,12 +290,15 @@ export const territory = {
         });
 
         const checkoutId = get(response, 'data.data.checkinTerritory');
-        commit(CHANGE_STATUS, {
+        const status = {
           checkout_id: checkoutId,
           status: 'Recently Worked',
           publisher: args.publisher,
-        });
-        await dispatch('auth/getUserTerritories', args.username, { root: true });
+          date: args.date,
+        };
+        commit(CHANGE_STATUS, status);
+        dispatch('auth/getUserTerritories', args.username, { root: true });
+        dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
       } catch (e) {
         console.error('Unable to check in territory', e);
       }
@@ -330,7 +334,7 @@ export const territory = {
           date: args.date,
         };
         commit(CHANGE_STATUS, status);
-        await dispatch('auth/getUserTerritories', args.username, { root: true });
+        dispatch('auth/getUserTerritories', args.username, { root: true });
         commit(CHECKING_OUT, false);
         dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
         dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });

@@ -70,7 +70,8 @@ export const auth = {
     leftNavRouteParams: (state, getters, rootState, rootGetters) => ({
       congregationId: get(rootGetters['congregation/congregation'], 'id')
         || get(rootGetters['auth/user'], 'congregation.id'),
-      groupId: get(rootGetters['group/group'], 'id') || 0,
+      groupId: get(rootGetters['group/group'], 'id')
+        || get(rootGetters['territory/territory'], 'group_id'),
       territoryId: get(rootGetters['territory/territory'], 'id')
         || get(rootGetters['address/address'], 'territory_id'),
       addressId: get(rootGetters['address/address'], 'id'),
