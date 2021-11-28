@@ -232,17 +232,16 @@ export default {
       isCheckingOut: 'territory/isCheckingOut',
     }),
     searchedTerritories() {
-      const { territories = [] } = this;
       if (this.keywordFilter) {
-        return territories.filter(t => this.excludeKeyword !== this.compareToKeyword(
+        return this.territories.filter(t => this.excludeKeyword !== this.compareToKeyword(
           this.keywordFilter,
           [t.name, t.description, t.tags, t.id],
         ));
       }
       if (this.typeFilter) {
-        return territories.filter(t => this.compareToKeyword(this.typeFilter, [t.type]));
+        return this.territories.filter(t => this.compareToKeyword(this.typeFilter, [t.type]));
       }
-      return territories;
+      return this.territories;
     },
     filteredTerritories() {
       if (this.availability === DEFAULT_FILTER) {
@@ -302,7 +301,7 @@ export default {
 
     async fetch() {
       this.loading = true;
-      const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
+      const congId = this.congId || get(this.congregation, 'id') || (this.user && this.user.congId);
       if (congId && !this.groups.length) await this.getGroups({ congId });
       if (get(this.group, 'congregation_id') && get(this.user, 'congregation.id') !== get(this.group, 'congregation_id')) {
         this.$router.push('/unauthorized');

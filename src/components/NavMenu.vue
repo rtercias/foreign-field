@@ -71,7 +71,7 @@ export default {
       return this.$route.matched.map(r => r.name);
     },
     groupId() {
-      return get(this.group, 'id') || get(this.groups, '[0].id') || 0;
+      return get(this.group, 'id') || get(this.territory, 'group_id') || get(this.groups, '[0].id') || 0;
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
@@ -188,8 +188,8 @@ export default {
     },
     async getGroupsList() {
       if (!this.groups.length) {
-        const congId = get(this.user, 'congregation.id');
-        await this.getGroups({ congId });
+        const congId = get(this.user, 'congregation.id') || get(this.congregation, 'id');
+        if (congId) await this.getGroups({ congId });
       }
     },
   },

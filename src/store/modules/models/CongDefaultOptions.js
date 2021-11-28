@@ -16,6 +16,12 @@ export const CongDefault = {
           { value: 'phone-list', text: 'Phone List' },
         ],
       },
+      redirectAfterCheckout: {
+        options: [
+          { value: true, text: 'Yes' },
+          { value: false, text: 'No' },
+        ],
+      },
     },
     address: {
       customTags: '',

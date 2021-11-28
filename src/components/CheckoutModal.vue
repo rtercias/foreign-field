@@ -9,16 +9,20 @@
     </b-alert>
     <label class="pr-2">To:</label>
     <b-dropdown class="publishers-list" right variant="outline-primary">
-        <span slot="button-content">{{selectedPublisher.name || 'Select Publisher'}}</span>
-        <b-dropdown-item v-for="pub in publishers" v-bind:key="pub.id" @click="selectPublisher(pub)">
-          {{pub.lastname}}, {{pub.firstname}}
-        </b-dropdown-item>
-      </b-dropdown>
+      <span slot="button-content">{{selectedPublisher.name || 'Select Publisher'}}</span>
+      <b-dropdown-item v-for="pub in publishers" v-bind:key="pub.id" @click="selectPublisher(pub)">
+        {{pub.lastname}}, {{pub.firstname}}
+      </b-dropdown-item>
+    </b-dropdown>
+    <b-checkbox class="pt-4 text-right" v-model="goToTerritory" @change="remember">
+      Go to territory after checkout
+    </b-checkbox>
   </b-modal>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import get from 'lodash/get';
 
 export default {
   name: 'CheckoutModal',
@@ -26,13 +30,25 @@ export default {
   data() {
     return {
       selectedPublisher: { name: 'me' },
+      goToTerritory: true,
     };
+  },
+
+  updated() {
+    const redirect = sessionStorage.getItem('goToTerritory');
+    if (redirect === 'true' || redirect === 'false') {
+      this.goToTerritory = redirect === 'true';
+    } else {
+      this.goToTerritory = get(this.congregation, 'options.territory.redirectAfterCheckout');
+    }
   },
 
   methods: {
     ...mapActions({
       checkoutTerritory: 'territory/checkoutTerritory',
       reassignCheckout: 'territory/reassignCheckout',
+      updateTerritory: 'territories/updateTerritory',
+      setTerritory: 'territory/setTerritory',
     }),
 
     selectPublisher(publisher) {
@@ -54,7 +70,9 @@ export default {
         date: Date.now(),
       });
 
-      this.$router.push(`/territories/${this.territory.id}`);
+      if (this.goToTerritory) {
+        this.$router.push(`/territories/${this.territory.id}`);
+      }
     },
 
     async reassign() {
@@ -74,11 +92,16 @@ export default {
         await this.checkout();
       }
     },
+
+    remember(val) {
+      sessionStorage.setItem('goToTerritory', val);
+    },
   },
 
   computed: {
     ...mapGetters({
       congId: 'auth/congId',
+      congregation: 'congregation/congregation',
       user: 'auth/user',
       publishers: 'publishers/publishers',
     }),
