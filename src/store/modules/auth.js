@@ -19,6 +19,7 @@ const UPDATE_TOKEN = 'UPDATE_TOKEN';
 const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
 const WINDOW_RESIZE = 'WINDOW_RESIZE';
 const COLLAPSE_NAV = 'COLLAPSE_NAV';
+const SET_SCROLL_Y_POSITION = 'SET_SCROLL_Y_POSITION';
 
 function initialState() {
   return {
@@ -36,6 +37,7 @@ function initialState() {
     options: null,
     myTerritoriesLoading: false,
     userTerritories: [],
+    scrollYPosition: { home: 0 },
   };
 }
 
@@ -79,6 +81,7 @@ export const auth = {
       publisherId: get(rootGetters['publisher/publisher'], 'id'),
       checkoutId: get(rootGetters['territory/territory'], 'status.checkout_id'),
     }),
+    scrollYPosition: state => state.scrollYPosition,
   },
 
   mutations: {
@@ -135,6 +138,9 @@ export const auth = {
     },
     WINDOW_RESIZE(state) {
       state.isSwitchedToDesktop = window.matchMedia('(min-width: 801px)').matches;
+    },
+    SET_SCROLL_Y_POSITION(state, scroll) {
+      state.scrollYPosition[scroll.route] = scroll.yPos;
     },
   },
 
@@ -348,6 +354,10 @@ export const auth = {
 
     collapseNav({ commit }) {
       commit(COLLAPSE_NAV);
+    },
+
+    setScrollYPosition({ commit }, yPos) {
+      commit(SET_SCROLL_Y_POSITION, yPos);
     },
   },
 };

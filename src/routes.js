@@ -21,6 +21,7 @@ import GroupForm from './components/GroupForm';
 import PublisherForm from './components/PublisherForm';
 import DNCReport from './components/DNCReport';
 import CongregationSwitch from './components/CongregationSwitch.vue';
+import { store } from './store';
 
 const routes = [
   { name: 'home', path: '/', component: Welcome, meta: { label: 'Home' } },
@@ -343,6 +344,7 @@ function convertIdsToNumber(to) {
 
 router.beforeEach((to, from, next) => {
   try {
+    store.dispatch('auth/setScrollYPosition', { route: from.path, yPos: window.scrollY }, { root: true });
     convertIdsToNumber(to);
     // const CANCELLABLE_ROUTES = ['phone-list', 'address-list'];
     // // eslint-disable-next-line

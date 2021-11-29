@@ -169,6 +169,15 @@ const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
 
 export const channel = pusher.subscribe('foreign-field');
 
+const mountedMixin = {
+  mounted() {
+    const scroll = store.getters['auth/scrollYPosition'];
+    window.scrollTo(0, scroll[router.currentRoute.path] || 0);
+  },
+};
+
+Vue.mixin(mountedMixin);
+
 function init() {
   new Vue({
     render: h => h(App),
