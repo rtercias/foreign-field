@@ -52,6 +52,8 @@ export default {
   },
   props: ['territory', 'id', 'disabled'],
   async mounted() {
+    this.keywordFilter = this.savedFilter.keyword;
+    this.exclude = this.savedFilter.exclude;
     if (this.$route.query.addressId) {
       this.foundId = Number.parseInt(this.$route.query.addressId, 10);
       this.scrollToView();
@@ -77,6 +79,7 @@ export default {
       territoryIsLoading: 'territory/isLoading',
       isTerritoryBusy: 'territory/isBusy',
       territoryCancelTokens: 'territory/cancelTokens',
+      savedFilter: 'territory/filter',
     }),
     lastActivity() {
       return this.territory.lastActivity;
@@ -105,6 +108,7 @@ export default {
       resetNHRecords: 'territory/resetNHRecords',
       fetchPhone: 'address/fetchAddress',
       cancelFetchLastActivity: 'territory/cancelFetchLastActivity',
+      setFilter: 'territory/setFilter',
     }),
 
     search(_keyword) {
@@ -129,6 +133,7 @@ export default {
     filter(_keyword, exclude) {
       this.keywordFilter = _keyword;
       this.exclude = exclude;
+      this.setFilter({ keyword: _keyword, exclude });
       this.$emit('update-count', this.filteredAddresses.length);
     },
 

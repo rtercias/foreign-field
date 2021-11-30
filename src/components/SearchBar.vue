@@ -11,44 +11,44 @@
       <div
         class="buttons"
         :class="{
-        'align-items-center d-flex justify-content-between mx-2': showFilter,
+        'align-items-center d-flex justify-content-between mx-0': showFilter,
         'position-absolute mr-1 mt-1 d-inline': !showFilter,
       }">
-        <i title="Filter">
-          <font-awesome-icon
-            v-if="showFilter && !model"
-            :disabled="!keywordFilter"
-            class="text-primary mr-3"
-            :class="{ 'text-light no-pointer': !keywordFilter }"
-            icon="filter"
-            @click="filter" />
-        </i>
-        <i title="Clear">
-          <font-awesome-icon
-            v-if="showFilter && !!model"
-            class="text-danger mr-3"
-            :class="{ 'text-light no-pointer': !keywordFilter }"
-            icon="times"
-            @click="clear" />
-        </i>
-        <i title="Exclude">
-          <font-awesome-icon
-            v-if="allowExclude"
-            :disabled="!keywordFilter"
-            class="text-primary"
-            :class="{ 'text-light no-pointer': !keywordFilter, 'mr-3': showSearch }"
-            :icon="!exclude ? 'not-equal' : 'equals'"
-            @click="exclude = !exclude" />
-      </i>
-      <i title="Search">
-        <font-awesome-icon
+        <b-button
+          title="Filter"
+          v-if="showFilter && !model"
+          :disabled="!keywordFilter"
+          class="btn-sm bg-transparent border-0"
+          :class="{ 'text-light no-pointer': !keywordFilter }"
+          @click="filter">
+          <font-awesome-icon class="text-primary" icon="filter" />
+        </b-button>
+        <b-button
+          title="Clear"
+          v-if="showFilter && !!model"
+          class="btn-sm bg-transparent border-0"
+          :class="{ 'text-light no-pointer': !keywordFilter }"
+          @click="clear">
+          <font-awesome-icon class="text-danger" icon="times" />
+        </b-button>
+        <b-button
+          title="Exclude"
+          v-if="allowExclude"
+          :disabled="!keywordFilter"
+          class="btn-sm bg-transparent border-0"
+          :class="{ 'text-light no-pointer': !keywordFilter, 'mr-0': showSearch }"
+          @click="exclude = !exclude">
+          <font-awesome-icon class="text-primary" :icon="!exclude ? 'not-equal' : 'equals'" />
+        </b-button>
+        <b-button
+          title="Search"
           v-if="showSearch"
           :disabled="!keywordFilter"
-          class="text-primary"
+          class="btn-sm bg-transparent border-0"
           :class="{ 'text-light no-pointer': !keywordFilter }"
-          icon="search"
-          @click="search" />
-      </i>
+          @click="search">
+          <font-awesome-icon class="text-primary" icon="search" />
+        </b-button>
       </div>
     </div>
     <!-- <div class="d-flex justify-content-end">

@@ -40,6 +40,7 @@ const UPDATE_ADDRESS_NOTES = 'UPDATE_ADDRESS_NOTES';
 const UPDATE_PHONE_NOTES = 'UPDATE_PHONE_NOTES';
 const UPDATE_STATUS = 'UPDATE_STATUS';
 const CHECKING_OUT = 'CHECKING_OUT';
+const SET_FILTER = 'SET_FILTER';
 
 const initialState = {
   territory: {
@@ -49,6 +50,10 @@ const initialState = {
   },
   cancelTokens: {},
   isCheckingOut: false,
+  filter: {
+    keyword: '',
+    exclude: false,
+  },
 };
 
 export const territory = {
@@ -81,6 +86,7 @@ export const territory = {
     },
     address: state => id => state.territory.addresses.find(a => a.id === id),
     error: state => state.error,
+    filter: state => state.filter,
   },
 
   mutations: {
@@ -266,6 +272,9 @@ export const territory = {
     },
     CHECKING_OUT(state, value) {
       state.isCheckingOut = value;
+    },
+    SET_FILTER(state, value) {
+      state.filter = value;
     },
   },
 
@@ -771,6 +780,9 @@ export const territory = {
     updateStatus({ commit }, status) {
       const result = status.status === 'Checked Out' ? status : null;
       commit(UPDATE_STATUS, result);
+    },
+    setFilter({ commit }, filter) {
+      commit(SET_FILTER, filter);
     },
   },
 };
