@@ -63,15 +63,24 @@ export default {
     },
 
     async checkout() {
-      await this.checkoutTerritory({
-        territoryId: this.territory.id,
-        publisher: this.selectedPublisher,
-        username: this.user.username,
-        date: Date.now(),
-      });
+      try {
+        await this.checkoutTerritory({
+          territoryId: this.territory.id,
+          publisher: this.selectedPublisher,
+          username: this.user.username,
+          date: Date.now(),
+        });
 
-      if (this.goToTerritory) {
-        this.$router.push(`/territories/${this.territory.id}`);
+        if (this.goToTerritory) {
+          this.$router.push(`/territories/${this.territory.id}`);
+        }
+      } catch (e) {
+        await this.$bvModal.msgBoxOk(this.checkoutError, {
+          title: 'Unable to checkout',
+          centered: true,
+          okTitle: 'Refresh',
+        });
+        this.$router.go();
       }
     },
 
@@ -104,6 +113,7 @@ export default {
       congregation: 'congregation/congregation',
       user: 'auth/user',
       publishers: 'publishers/publishers',
+      checkoutError: 'territory/error',
     }),
     status() {
       return this.territory && this.territory.status ? this.territory.status.status : '';

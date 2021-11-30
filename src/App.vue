@@ -135,6 +135,48 @@ export default {
         this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
       }
     });
+    channel.bind('checkout-territory', (args) => {
+      if (args) {
+        const { checkoutId, territoryId, publisher } = args;
+        this.setTerritoryStatus({
+          id: territoryId,
+          status: {
+            status: 'Checked Out',
+            checkout_id: checkoutId,
+            date: new Date().getTime(),
+            publisher,
+          },
+        });
+      }
+    });
+    channel.bind('checkin-territory', (args) => {
+      if (args) {
+        const { checkoutId, territoryId, publisher } = args;
+        this.setTerritoryStatus({
+          id: territoryId,
+          status: {
+            status: 'Recently Worked',
+            checkout_id: checkoutId,
+            date: new Date().getTime(),
+            publisher,
+          },
+        });
+      }
+    });
+    channel.bind('reassign-territory', (args) => {
+      if (args) {
+        const { checkoutId, territoryId, publisher } = args;
+        this.setTerritoryStatus({
+          id: territoryId,
+          status: {
+            status: 'Checked Out',
+            checkout_id: checkoutId,
+            date: new Date().getTime(),
+            publisher,
+          },
+        });
+      }
+    });
   },
   computed: {
     ...mapGetters({
@@ -177,6 +219,7 @@ export default {
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       updateStatus: 'territory/updateStatus',
       collapseNav: 'auth/collapseNav',
+      setTerritoryStatus: 'territories/setStatus',
     }),
     async refresh() {
       if (this.user) await this.authorize(get(this.user, 'username'));

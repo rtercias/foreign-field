@@ -260,8 +260,10 @@ export default {
 
     async checkInAndReset() {
       this.isCheckingIn = true;
+      const checkoutId = get(this.territory, 'status.checkout_id');
+
       await this.checkinTerritory({
-        checkout_id: get(this.territory, 'status.checkout_id'),
+        checkout_id: checkoutId,
         territoryId: this.territoryId,
         publisher: get(this.territory, 'status.publisher') || {},
         username: this.user.username,
@@ -269,7 +271,7 @@ export default {
       });
 
       this.resetTerritoryActivities({
-        checkoutId: this.territory.status.checkout_id,
+        checkoutId,
         userid: this.user.id,
         tzOffset: new Date().getTimezoneOffset().toString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,

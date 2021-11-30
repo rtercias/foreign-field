@@ -129,8 +129,9 @@ export default {
         this.saving = true;
         const publisher = this.terr.status && this.terr.status.publisher || {};
         const { user } = this.$store.state.auth;
+        const checkoutId = get(this.terr, 'status.checkout_id');
         await this.checkinTerritory({
-          checkout_id: get(this.terr, 'status.checkout_id'),
+          checkout_id: checkoutId,
           territoryId: this.terr.id,
           publisher: publisher || {},
           username: user.username,
@@ -138,7 +139,7 @@ export default {
         });
 
         this.resetTerritoryActivities({
-          checkoutId: this.terr.status.checkout_id,
+          checkoutId,
           userid: this.user.id,
           tzOffset: new Date().getTimezoneOffset().toString(),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,

@@ -40,6 +40,7 @@ const UPDATE_ADDRESS_NOTES = 'UPDATE_ADDRESS_NOTES';
 const UPDATE_PHONE_NOTES = 'UPDATE_PHONE_NOTES';
 const UPDATE_STATUS = 'UPDATE_STATUS';
 const CHECKING_OUT = 'CHECKING_OUT';
+const CHECKOUT_FAIL = 'CHECKOUT_FAIL';
 const SET_FILTER = 'SET_FILTER';
 
 const initialState = {
@@ -54,6 +55,7 @@ const initialState = {
     keyword: '',
     exclude: false,
   },
+  error: '',
 };
 
 export const territory = {
@@ -273,6 +275,9 @@ export const territory = {
     CHECKING_OUT(state, value) {
       state.isCheckingOut = value;
     },
+    CHECKOUT_FAIL(state, error) {
+      state.error = error;
+    },
     SET_FILTER(state, value) {
       state.filter = value;
     },
@@ -314,42 +319,45 @@ export const territory = {
     },
 
     async checkoutTerritory({ commit, dispatch }, args) {
-      try {
-        commit(CHECKING_OUT, true);
-        dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
+      commit(CHECKING_OUT, true);
+      dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) {
+            checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user)
+          }`),
+          variables: {
+            terrId: args.territoryId,
+            pubId: get(args, 'publisher.id'),
+            user: args.username,
           },
-          data: {
-            query: print(gql`mutation CheckoutTerritory($terrId: Int!, $pubId: Int!, $user: String) {
-              checkoutTerritory(territoryId: $terrId, publisherId: $pubId, user: $user)
-            }`),
-            variables: {
-              terrId: args.territoryId,
-              pubId: get(args, 'publisher.id'),
-              user: args.username,
-            },
-          },
-        });
+        },
+      });
 
-        const checkoutId = get(response, 'data.data.checkoutTerritory');
-        const status = {
-          checkout_id: checkoutId,
-          status: 'Checked Out',
-          publisher: args.publisher,
-          date: args.date,
-        };
-        commit(CHANGE_STATUS, status);
-        dispatch('auth/getUserTerritories', args.username, { root: true });
+      const checkoutId = get(response, 'data.data.checkoutTerritory');
+      if (!checkoutId) {
+        const error = get(response, 'data.errors[0].message');
+        commit(CHECKOUT_FAIL, error);
         commit(CHECKING_OUT, false);
-        dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
-        dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
-      } catch (e) {
-        console.error('Unable to checkout territory', e);
+        throw error;
       }
+
+      const status = {
+        checkout_id: checkoutId,
+        status: 'Checked Out',
+        publisher: args.publisher,
+        date: args.date,
+      };
+      commit(CHANGE_STATUS, status);
+      dispatch('auth/getUserTerritories', args.username, { root: true });
+      commit(CHECKING_OUT, false);
+      dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
+      dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
     },
 
     async reassignCheckout({ commit, dispatch }, args) {
