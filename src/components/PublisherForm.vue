@@ -25,7 +25,8 @@
         </b-form-checkbox>
       </b-form-group>
       <b-form-group label="Role" class="mt-3">
-        <b-form-select :options="roleOptions" v-model="model.role" :disabled="self"></b-form-select>
+        <b-form-input v-if="self" v-model="model.role" :disabled="self"></b-form-input>
+        <b-form-select v-else :options="roleOptions" v-model="model.role"></b-form-select>
       </b-form-group>
       <hr />
       <div class="buttons justify-content-between">
