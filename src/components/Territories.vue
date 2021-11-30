@@ -319,6 +319,7 @@ export default {
         || get(this.congregation, 'options.territories.defaultSort')
         || DEFAULT_SORT;
       this.sortDirection = this.selectedSortAndFilters.sortDirection || 'asc';
+      this.keywordFilter = this.selectedSortAndFilters.keyword || '';
 
       const doFetchTerritories = this.group.id !== this.selectedGroup || !this.territories.length;
       if (doFetchTerritories) {
@@ -336,6 +337,7 @@ export default {
     applyFilter(value, exclude) {
       this.keywordFilter = value;
       this.excludeKeyword = exclude;
+      this.setSortAndFilter({ keyword: this.keywordFilter });
     },
 
     compareToKeyword(filter, values) {
