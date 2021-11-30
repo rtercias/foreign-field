@@ -52,6 +52,7 @@ export default {
   },
   props: ['territory', 'id', 'disabled'],
   async mounted() {
+    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     this.keywordFilter = this.savedFilter.keyword;
     this.exclude = this.savedFilter.exclude;
     if (this.$route.query.addressId) {
@@ -59,6 +60,7 @@ export default {
       this.scrollToView();
     }
   },
+
   data() {
     return {
       reset: false,
@@ -80,6 +82,7 @@ export default {
       isTerritoryBusy: 'territory/isBusy',
       territoryCancelTokens: 'territory/cancelTokens',
       savedFilter: 'territory/filter',
+      scrollYPosition: 'auth/scrollYPosition',
     }),
     lastActivity() {
       return this.territory.lastActivity;

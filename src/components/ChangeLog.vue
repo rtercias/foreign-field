@@ -123,6 +123,7 @@ export default {
   },
   async mounted() {
     this.loading = true;
+    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     this.refresh();
   },
   methods: {
@@ -194,6 +195,7 @@ export default {
       canManage: 'auth/canManage',
       isDesktop: 'auth/isDesktop',
       addressesCancelTokens: 'addresses/cancelTokens',
+      scrollYPosition: 'auth/scrollYPosition',
     }),
     title1() {
       const record = this.logs && this.logs.length && this.logs[0].address;

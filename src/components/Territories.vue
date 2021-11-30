@@ -230,6 +230,7 @@ export default {
       territoriesCancelTokens: 'territories/cancelTokens',
       selectedSortAndFilters: 'territories/selectedSortAndFilters',
       isCheckingOut: 'territory/isCheckingOut',
+      scrollYPosition: 'auth/scrollYPosition',
     }),
     searchedTerritories() {
       if (this.keywordFilter) {
@@ -408,6 +409,7 @@ export default {
   },
 
   async mounted() {
+    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
     this.selectedGroup = this.groupId;
     if (get(this.group, 'congregation_id') !== congId) this.selectedGroup = 0;
