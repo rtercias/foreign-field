@@ -26,7 +26,7 @@
       <b-toaster name="campaign-help"></b-toaster>
     </b-nav-item>
     <b-nav-item-dropdown v-if="isAuthenticated" right>
-      <span slot="text">{{user.firstname}}</span>
+      <span slot="text">{{user && user.firstname || name}}</span>
       <b-dropdown-item
         class="m-0 w-100"
         :to="{
@@ -155,7 +155,7 @@ export default {
       });
 
       this.togglingCampaignMode = false;
-      this.$router.go();
+      // this.$router.go();
     },
     toggleCampaignHelp() {
       this.$bvToast.hide('campaign-help');

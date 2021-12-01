@@ -8,6 +8,7 @@ import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
 import { IncompleteRegistrationError, UnauthorizedUserError } from '../exceptions/custom-errors';
+import { model as congregationModel } from './models/CongregationModel';
 
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
@@ -176,16 +177,11 @@ export const auth = {
                   role
                   status
                   congregation {
-                    id
-                    name
-                    description
-                    language
-                    admin_email
-                    campaign
-                    options
+                    ...CongregationModel
                   }
                 }
-              }`),
+              },
+              ${congregationModel}`),
               variables: {
                 username,
               },
