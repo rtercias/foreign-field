@@ -88,7 +88,7 @@ export default {
   data() {
     return {
       sortOptions,
-      campaignMode: true,
+      campaignMode: 'undefined',
       sortField: 'territory_name',
       dateFilter: '',
     };
