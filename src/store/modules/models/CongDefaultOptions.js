@@ -7,7 +7,7 @@ export const CongDefault = {
           'Name',
         ],
       },
-      daysAsRecent: 30,
+      cycle: 30,
     },
     territory: {
       defaultView: {
