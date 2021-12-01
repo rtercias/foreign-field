@@ -155,7 +155,7 @@ export default {
       });
 
       this.togglingCampaignMode = false;
-      // this.$router.go();
+      this.$router.go();
     },
     toggleCampaignHelp() {
       this.$bvToast.hide('campaign-help');

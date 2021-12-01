@@ -31,9 +31,8 @@
             <b-form-input v-model="model.admin_email" maxlength="255"></b-form-input>
           </b-form-group>
           <b-form-group class="mt-3" :disabled="readOnly">
-            <b-form-checkbox :checked="model.campaign" v-model="model.campaign">
-              Campaign Mode
-            </b-form-checkbox>
+            <label>Campaign Mode:</label>
+            <span class="ml-2">{{model.campaign ? 'Yes' : 'No'}}</span>
           </b-form-group>
           <hr />
           <span class="d-block pb-2">Options</span>
@@ -220,7 +219,7 @@ export default {
   watch: {
     async user() {
       await this.refresh();
-      if (this.user && this.user.congregation.id !== this.congregationId) {
+      if (this.mode === Modes.edit && this.user && this.user.congregation.id !== this.congregationId) {
         this.$router.push('/unauthorized');
       } else {
         this.isLoading = false;

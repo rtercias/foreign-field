@@ -51,6 +51,11 @@ export default {
       isLoading: false,
     };
   },
+  mounted() {
+    if (this.isAdmin) {
+      this.circuits.push(...['Test']);
+    }
+  },
   methods: {
     ...mapActions({
       updatePublisher: 'publisher/updatePublisher',
@@ -82,7 +87,15 @@ export default {
       user: 'auth/user',
       congregationsByCircuit: 'congregation/congregationsByCircuit',
       congregation: 'auth/congregation',
+      isAdmin: 'auth/isAdmin',
     }),
+  },
+  watch: {
+    user() {
+      if (this.isAdmin) {
+        this.circuits.push(...['Test']);
+      }
+    },
   },
 };
 </script>
