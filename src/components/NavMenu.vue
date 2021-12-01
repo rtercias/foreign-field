@@ -26,7 +26,7 @@
       <b-toaster name="campaign-help"></b-toaster>
     </b-nav-item>
     <b-nav-item-dropdown v-if="isAuthenticated" right>
-      <span slot="text">{{name}}</span>
+      <span slot="text">{{user.firstname}}</span>
       <b-dropdown-item
         class="m-0 w-100"
         :to="{
@@ -71,7 +71,8 @@ export default {
       return this.$route.matched.map(r => r.name);
     },
     groupId() {
-      return get(this.group, 'id') || get(this.territory, 'group_id') || get(this.groups, '[0].id') || 0;
+      const { id = 0, code } = this.group;
+      return code === 'ALL' ? 0 : id || get(this.territory, 'group_id') || get(this.groups, '[0].id');
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;

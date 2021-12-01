@@ -409,11 +409,11 @@ export default {
   },
 
   async mounted() {
-    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     const congId = get(this.congregation, 'id') || (this.user && this.user.congId);
     this.selectedGroup = this.groupId;
     if (get(this.group, 'congregation_id') !== congId) this.selectedGroup = 0;
     await this.fetch();
+    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
 
     if (this.$route.query.territory) {
       this.applyFilter(this.$route.query.territory);

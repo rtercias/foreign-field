@@ -123,8 +123,8 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     this.refresh();
+    window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
   },
   methods: {
     ...mapActions({

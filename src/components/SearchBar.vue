@@ -7,7 +7,7 @@
       'd-flex justify-content-between': showFilter,
       'position-relative': !showFilter,
       }">
-      <b-form-input class="d-inline" v-model="keywordFilter" :placeholder="searchText" @keydown="keydown" />
+      <b-form-input class="d-inline pr-5" v-model="keywordFilter" :placeholder="searchText" @keydown="keydown" />
       <div
         class="buttons"
         :class="{
