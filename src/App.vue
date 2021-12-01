@@ -2,7 +2,7 @@
   <div id="app" class="d-flex min-vh-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
     <b-navbar
       v-if="isDesktop"
-      class="align-items-start mb-n5"
+      class="align-items-start nav-footer-margin"
       :class="{ 'w-20': isDesktop }"
       type="dark"
       variant="primary">
@@ -281,6 +281,9 @@ router-link {
     min-height: $header-height;
     padding-top: 14px;
     border-bottom: solid 6px;
+  }
+  .nav-footer-margin {
+    margin-bottom: -58px;
   }
   .app-breadcrumb {
     font-size: 20px;

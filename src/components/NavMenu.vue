@@ -1,6 +1,6 @@
 <template>
   <b-navbar-nav
-    class="pt-3 flex-column large-font-menu font-weight-bold"
+    class="pt-3 flex-column large-font-menu font-weight-bold sticky-top"
     :class="{ 'text-left': isDesktop }">
     <b-nav-item to="/">Home</b-nav-item>
     <b-nav-item
