@@ -126,8 +126,8 @@
           data-toggle="collapse"
           class="territory-card col-md-6 col-lg-3 px-4"
           :class="{
-            'list-group-item-success': isCampaignMode && get(terr, 'status.status') === 'Recently Worked',
-            'list-group-item-warning': isCampaignMode && get(terr, 'status.status') === 'Checked Out'
+            'list-group-item-success': get(terr, 'status.status') === 'Recently Worked',
+            'list-group-item-warning': get(terr, 'status.status') === 'Checked Out'
           }">
           <TerritoryCard
             :terr="terr"
