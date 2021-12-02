@@ -31,7 +31,7 @@
       <hr />
       <div class="buttons justify-content-between">
         <b-button type="button" variant="light" @click="cancel">Cancel</b-button>
-        <b-button type="button" v-if="mode===modes.edit && !self" variant="danger" @click="remove">
+        <b-button type="button" v-if="mode===modes.edit && isAdmin" variant="danger" @click="remove">
           Delete
         </b-button>
         <b-button

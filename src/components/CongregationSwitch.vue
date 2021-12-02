@@ -53,7 +53,7 @@ export default {
   },
   mounted() {
     if (this.isAdmin) {
-      this.circuits.push(...['Test']);
+      this.circuits.push(...['Test', 'Unassigned']);
     }
   },
   methods: {
