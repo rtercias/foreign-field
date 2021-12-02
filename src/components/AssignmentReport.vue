@@ -5,8 +5,8 @@
         <td class="buttons w-100 d-flex justify-content-between align-items-center">
           <b-form-radio-group v-model="campaignMode" class="text-left" :class="{ 'small': !isDesktop }">
             <b-form-radio :value="false"><span>No Campaigns</span></b-form-radio>
-            <b-form-radio :value="undefined"><span>Include Campaigns</span></b-form-radio>
-            <b-form-radio :value="true"><span>Campaign Mode Only</span></b-form-radio>
+            <b-form-radio :value="undefined"><span>Include Campaigns*</span></b-form-radio>
+            <b-form-radio :value="true"><span>Campaign Mode Only*</span></b-form-radio>
           </b-form-radio-group>
           <div>
             <span v-if="isDesktop" class="pr-2">Date Filter:</span>
@@ -50,7 +50,7 @@
               </div>
               <div class="" v-for="(record, recordIndex) in group" :key="recordIndex">
                 <div class="box box-main flex">
-                  <div class="box box-1">{{ record.publisher_name }}</div>
+                  <div class="box box-1">{{ record.publisher_name }}<span v-if="record.campaign">*</span></div>
                   <div class="row-2">
                     <div class="box box-2">{{ record.out }}</div>
                     <div class="box box-3">{{ record.in }}</div>

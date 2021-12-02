@@ -40,6 +40,7 @@ export const reports = {
               out
               in
               timestamp
+              campaign
             }
           }`),
           variables: {
