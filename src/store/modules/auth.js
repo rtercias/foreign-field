@@ -231,13 +231,6 @@ export const auth = {
                   status
                   date
                 }
-                lastActivity {
-                  id
-                  address_id
-                  checkout_id
-                  value
-                  timestamp
-                }
               }
             }
           }`),
