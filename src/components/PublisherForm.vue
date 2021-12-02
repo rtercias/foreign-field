@@ -11,7 +11,7 @@
     <Loading v-if="isLoading"></Loading>
     <b-form v-else class="form px-4 pb-4 text-left" @submit.prevent="submit">
       <b-form-group label="User Name" class="mt-3">
-        <b-form-input v-model="model.username" :disabled="self" maxlength="50"></b-form-input>
+        <b-form-input v-model="model.username" maxlength="50"></b-form-input>
       </b-form-group>
       <b-form-group label="First Name" class="mt-3">
         <b-form-input v-model="model.firstname" maxlength="50"></b-form-input>
