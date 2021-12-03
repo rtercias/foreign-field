@@ -52,9 +52,7 @@ export default {
     };
   },
   mounted() {
-    if (this.isAdmin) {
-      this.circuits.push(...['Test', 'Unassigned']);
-    }
+    this.populateCircuits();
   },
   methods: {
     ...mapActions({
@@ -62,6 +60,11 @@ export default {
       getCongregationsByCircuit: 'congregation/getCongregationsByCircuit',
     }),
     get,
+    populateCircuits() {
+      if (this.isAdmin) {
+        this.circuits.push(...['Test', 'Unassigned']);
+      }
+    },
     async selectCircuit(circuit) {
       this.selectedCircuit = circuit;
       await this.getCongregationsByCircuit(circuit);
@@ -92,9 +95,7 @@ export default {
   },
   watch: {
     user() {
-      if (this.isAdmin) {
-        this.circuits.push(...['Test']);
-      }
+      this.populateCircuits();
     },
   },
 };
