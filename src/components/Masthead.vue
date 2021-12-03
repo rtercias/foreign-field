@@ -32,7 +32,7 @@
           'w-75': !isSearchHidden && !isDesktop,
           }">
           <search-bar
-            v-if="(!isSearchHidden || isDesktop) && isAuthorized"
+            v-if="(!isSearchHidden || isDesktop) && isAuthorized && !isForcedOut"
             class="search-bar w-100"
             :search-text="'Search address, phone or territory'"
             @on-click="search"
@@ -150,6 +150,7 @@ export default {
   computed: {
     ...mapGetters({
       isAuthorized: 'auth/isAuthorized',
+      isForcedOut: 'auth/isForcedOut',
       user: 'auth/user',
       canWrite: 'auth/canWrite',
       congId: 'auth/congId',
