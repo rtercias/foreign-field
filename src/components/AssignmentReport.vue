@@ -3,7 +3,7 @@
     <thead>
       <tr class="w-100 p-3">
         <td class="buttons w-100 d-flex justify-content-between align-items-center">
-          <b-form-radio-group v-model="campaignMode" class="text-left" :class="{ 'small': !isDesktop }">
+          <b-form-radio-group v-model="campaignMode" class="text-left" :class="{ 'small': !isDesktop }" @change="fetch">
             <b-form-radio :value="false"><span>No Campaigns</span></b-form-radio>
             <b-form-radio :value="undefined"><span>Include Campaigns*</span></b-form-radio>
             <b-form-radio :value="true"><span>Campaign Mode Only*</span></b-form-radio>
@@ -100,11 +100,11 @@ export default {
     ...mapActions({
       fetchAssignmentRecords: 'reports/fetchAssignmentRecords',
     }),
-    async fetch() {
+    async fetch(value) {
       if (this.user && this.user.congregation.id !== this.congregationId) {
         this.$router.push('/unauthorized');
       }
-      const campaignMode = this.campaignMode === 'undefined' ? undefined : this.campaignMode;
+      const campaignMode = value;
       await this.fetchAssignmentRecords({ congId: this.congregationId, campaignMode });
     },
   },
@@ -131,9 +131,6 @@ export default {
     },
   },
   watch: {
-    async campaignMode() {
-      await this.fetch();
-    },
     user() {
       if (this.user && this.user.congregation.id !== this.congregationId) {
         this.$router.push('/unauthorized');
