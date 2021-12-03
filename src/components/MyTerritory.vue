@@ -9,9 +9,9 @@
     <div v-if="territory.lastVisited" class="small">
       {{formattedLastVisited}}
     </div>
-    <!--<div class="small font-weight-normal" v-if="territory.status">
+    <div class="small font-weight-normal" v-if="territory.status">
       Last activity: {{this.lastTimestamp}}
-    </div>-->
+    </div>
   </div>
 </template>
 <script>
@@ -43,7 +43,7 @@ export default {
       if (this.lastActivity) {
         const timestamp = Number(this.lastActivity.timestamp);
         if (!Number.isNaN(timestamp)) {
-          return format(new Date(timestamp), 'E M/d p');
+          return formatDistance(new Date(timestamp), new Date(), { addSuffix: true });
         }
       }
       return null;
