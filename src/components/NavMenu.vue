@@ -4,19 +4,19 @@
     :class="{ 'text-left': isDesktop }">
     <b-nav-item to="/">Home</b-nav-item>
     <b-nav-item
-      v-if="canWrite"
+      v-if="canWrite && !isForcedOut"
       :to="{ name: 'congregation-edit', params: { congregationId: congregation.id } }">
       {{congregation.name}}
     </b-nav-item>
-    <b-nav-item v-if="canSwitchCong" :to="{ name: 'congregation-switch' }">Switch Cong</b-nav-item>
-    <b-nav-item v-if="canWrite" :to="`/groups/${groupId}`">Territories</b-nav-item>
+    <b-nav-item v-if="canSwitchCong && !isForcedOut" :to="{ name: 'congregation-switch' }">Switch Cong</b-nav-item>
+    <b-nav-item v-if="canWrite && !isForcedOut" :to="`/groups/${groupId}`">Territories</b-nav-item>
     <b-nav-item
       v-if="canWrite && matchingRouteNames.includes('territory')"
       :to="`/territories/${territory && territory.id}/optimize`">
       Optimize
     </b-nav-item>
     <b-nav-item
-      v-if="canLead">
+      v-if="canLead && !isForcedOut">
       <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">
         <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
         <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
@@ -29,6 +29,7 @@
       <span slot="text">{{user && user.firstname || name}}</span>
       <b-dropdown-item
         class="m-0 w-100"
+        v-if="!isForcedOut"
         :to="{
           name: 'publisher-edit',
           params: { publisherId: get(user, 'id', 0) },
@@ -57,6 +58,7 @@ export default {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
       isDesktop: 'auth/isDesktop',
+      isForcedOut: 'auth/isForcedOut',
       user: 'auth/user',
       name: 'auth/name',
       canWrite: 'auth/canWrite',

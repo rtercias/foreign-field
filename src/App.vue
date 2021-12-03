@@ -33,6 +33,7 @@ import Masthead from './components/Masthead';
 import NavMenu from './components/NavMenu';
 import { AddressStatus } from './store';
 import { unmask } from './utils/phone';
+import { UnauthorizedUserError } from './store/exceptions/custom-errors';
 
 export default {
   name: 'app',
@@ -220,9 +221,18 @@ export default {
       updateStatus: 'territory/updateStatus',
       collapseNav: 'auth/collapseNav',
       setTerritoryStatus: 'territories/setStatus',
+      forceout: 'auth/forceout',
     }),
     async refresh() {
-      if (this.user) await this.authorize(get(this.user, 'username'));
+      if (this.user) {
+        await this.authorize(get(this.user, 'username'));
+        const isUserDisabled = this.user.status === 'disabled';
+        if (isUserDisabled) {
+          this.forceout();
+          this.$router.push({ name: 'unauthorized' });
+          throw new UnauthorizedUserError('Unauthorized');
+        }
+      }
     },
     urlCopied() {
       this.$bvToast.toast(`Copied link: ${document.location.href}`, {
@@ -251,6 +261,9 @@ export default {
           this.$router.replace({ name: 'error' });
         }
       }
+    },
+    async user() {
+      await this.refresh();
     },
   },
 };
