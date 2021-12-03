@@ -10,7 +10,7 @@
     <label class="pr-2">To:</label>
     <b-dropdown class="publishers-list" right variant="outline-primary">
       <span slot="button-content">{{selectedPublisher.name || 'Select Publisher'}}</span>
-      <b-dropdown-item v-for="pub in publishers" v-bind:key="pub.id" @click="selectPublisher(pub)">
+      <b-dropdown-item v-for="pub in activePublishers" v-bind:key="pub.id" @click="selectPublisher(pub)">
         {{pub.lastname}}, {{pub.firstname}}
       </b-dropdown-item>
     </b-dropdown>
@@ -120,6 +120,9 @@ export default {
     },
     task() {
       return this.status === 'Checked Out' ? 'Re-assign' : 'Check Out';
+    },
+    activePublishers() {
+      return this.publishers.filter(p => !!p.status);
     },
   },
 };
