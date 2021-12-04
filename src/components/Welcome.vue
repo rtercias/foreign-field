@@ -34,6 +34,9 @@
         </span>
         <span v-else-if="!(territories && territories.length)" class="text-center small">
           I have no territories checked out.
+          <b-button class="p-0 pl-1" variant="link">
+            <font-awesome-icon icon="redo-alt" class="text-info fa-sm" @click="refreshTerritories" />
+          </b-button>
         </span>
         <div v-else class="text-left w-100">
           <div class="d-flex justify-content-between align-items-center pb-1">
@@ -49,7 +52,7 @@
           </b-list-group>
         </div>
       </div>
-      <div v-if="!loading" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
+      <div v-if="!loading && !isBasicAccessOnly" class="panel col-sm-12 col-md-5 text-left py-3 border-info m-2">
         <span v-if="!recentlySeenWithoutCheckout.length" class="text-center small">
           I have not visited any territories lately.
         </span>
@@ -119,6 +122,7 @@ export default {
       loading: 'auth/loading',
       canViewReports: 'auth/canViewReports',
       canManage: 'auth/canManage',
+      isBasicAccessOnly: 'auth/isBasicAccessOnly',
       isDesktop: 'auth/isDesktop',
       isPWA: 'auth/isPWA',
       myTerritoriesLoading: 'auth/myTerritoriesLoading',

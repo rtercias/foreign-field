@@ -64,6 +64,7 @@ export const auth = {
       || get(state.user, 'role') === 'Admin',
     canLead: state => get(state.user, 'role') === 'SO',
     canSwitchCong: state => state.user && ['Admin', 'CO'].includes(state.user.role),
+    isBasicAccessOnly: state => state.user && state.user.role === 'PUB',
     token: state => state.token,
     isDesktop: state => state.isSwitchedToDesktop || window.matchMedia('(min-width: 801px)').matches,
     isPWA: () => window.matchMedia('(display-mode: standalone)').matches,
