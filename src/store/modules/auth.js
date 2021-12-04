@@ -227,10 +227,6 @@ export const auth = {
                 description
                 group_id
                 type
-                status {
-                  status
-                  date
-                }
                 lastActivity {
                   id
                   address_id
