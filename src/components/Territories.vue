@@ -158,7 +158,6 @@ import toLower from 'lodash/toLower';
 
 const DEFAULT_FILTER = '';
 const DEFAULT_SORT = 'Description';
-const PAGE_LIMIT = 10;
 
 export default {
   name: 'Territories',
@@ -329,24 +328,15 @@ export default {
           groupId: this.selectedGroup === 0 ? null : this.groupId,
         });
 
-        const terrCount = this.territories.length;
-        for (let i = 0; i < terrCount; i += PAGE_LIMIT) {
-          this.fetchStatusesWithOffset(congId, i);
-        }
+        this.fetchStatuses({
+          congId,
+          groupId: this.selectedGroup === 0 ? null : this.groupId,
+        });
       }
 
       this.getAddressCountByTerritories(congId);
       this.getPhoneCountByTerritories(congId);
       this.loading = false;
-    },
-
-    async fetchStatusesWithOffset(congId, offset) {
-      await this.fetchStatuses({
-        congId,
-        groupId: this.selectedGroup === 0 ? null : this.groupId,
-        limit: PAGE_LIMIT,
-        offset,
-      });
     },
 
     applyFilter(value, exclude) {
