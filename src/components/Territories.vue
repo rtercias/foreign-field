@@ -158,6 +158,7 @@ import toLower from 'lodash/toLower';
 
 const DEFAULT_FILTER = '';
 const DEFAULT_SORT = 'Description';
+const PAGE_LIMIT = 10;
 
 export default {
   name: 'Territories',
@@ -222,7 +223,6 @@ export default {
       publishers: 'publishers/publishers',
       token: 'auth/token',
       territories: 'territories/territories',
-      allTerritories: 'territories/allTerritories',
       groups: 'group/groups',
       group: 'group/group',
       isDesktop: 'auth/isDesktop',
@@ -328,11 +328,25 @@ export default {
           congId,
           groupId: this.selectedGroup === 0 ? null : this.groupId,
         });
+
+        const terrCount = this.territories.length;
+        for (let i = 0; i < terrCount; i += PAGE_LIMIT) {
+          this.fetchStatusesWithOffset(congId, i);
+        }
       }
 
       this.getAddressCountByTerritories(congId);
       this.getPhoneCountByTerritories(congId);
       this.loading = false;
+    },
+
+    async fetchStatusesWithOffset(congId, offset) {
+      await this.fetchStatuses({
+        congId,
+        groupId: this.selectedGroup === 0 ? null : this.groupId,
+        limit: PAGE_LIMIT,
+        offset,
+      });
     },
 
     applyFilter(value, exclude) {
@@ -382,6 +396,7 @@ export default {
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
       fetchTerritories: 'territories/fetchTerritories',
+      fetchStatuses: 'territories/fetchStatuses',
       getGroup: 'group/getGroup',
       getGroups: 'group/getGroups',
       getAddressCountByTerritories: 'territories/getAddressCountByTerritories',
