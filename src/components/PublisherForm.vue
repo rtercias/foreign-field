@@ -85,7 +85,9 @@ export default {
     }),
     async submit() {
       try {
-        const message = 'Are you sure you want to save your changes?';
+        const message = this.mode === Modes.add
+          ? 'Add new publisher?'
+          : 'Are you sure you want to save your changes?';
         const confirm = await this.$bvModal.msgBoxConfirm(message, {
           title: this.displayName,
           centered: true,
@@ -111,6 +113,8 @@ export default {
         } else {
           console.error(err.message);
         }
+        this.isSaving = false;
+        return;
       }
       this.isSaving = false;
       this.cancel();

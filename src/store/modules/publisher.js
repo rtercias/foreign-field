@@ -3,6 +3,7 @@ import gql from 'graphql-tag';
 import get from 'lodash/get';
 import { print } from 'graphql/language/printer';
 import { model, validate } from './models/PublisherModel';
+import { InvalidPublisherError } from '../exceptions/custom-errors';
 
 const SET_PUBLISHER = 'SET_PUBLISHER';
 const ADD_PUBLISHER = 'ADD_PUBLISHER';
@@ -82,43 +83,49 @@ export const publisher = {
       commit(SET_PUBLISHER, pub);
     },
     async addPublisher({ commit, rootGetters }, _publisher) {
-      try {
-        commit('auth/LOADING', true, { root: true });
+      commit('auth/LOADING', true, { root: true });
 
-        const user = rootGetters['auth/user'];
-        const pub = validate(_publisher);
+      const user = rootGetters['auth/user'];
+      const pub = validate(_publisher);
 
-        if (!user) {
-          throw new Error('No authorized user');
-        }
-
-        pub.create_user = user.id;
-
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
-            query: print(gql`mutation addPublisher($publisher: PublisherInput!) {
-              addPublisher(publisher: $publisher) {
-                ...PublisherModel
-              }
-            }
-            ${model}`),
-            variables: {
-              publisher: pub,
-            },
-          },
-        });
-
-        const { addPublisher } = get(response, 'data.data');
-        commit(ADD_PUBLISHER, addPublisher);
-        commit('auth/LOADING', false, { root: true });
-      } catch (error) {
-        commit(ADD_PUBLISHER_FAIL, error);
+      if (!user) {
+        throw new Error('No authorized user');
       }
+
+      pub.create_user = user.id;
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`mutation addPublisher($publisher: PublisherInput!) {
+            addPublisher(publisher: $publisher) {
+              ...PublisherModel
+            }
+          }
+          ${model}`),
+          variables: {
+            publisher: pub,
+          },
+        },
+      });
+
+      const { data, errors } = get(response, 'data');
+      const { addPublisher } = data;
+      if (!addPublisher) {
+        const { message } = errors[0];
+        commit(ADD_PUBLISHER_FAIL, message);
+        commit('auth/LOADING', false, { root: true });
+        if (message.includes('ER_DUP_ENTRY')) {
+          throw new InvalidPublisherError(`Duplicate entry found for ${pub.username}`);
+        }
+        throw new InvalidPublisherError('Unexpected error. ADD_PUBLISHER_FAIL');
+      }
+      commit(ADD_PUBLISHER, addPublisher);
+      commit('auth/LOADING', false, { root: true });
     },
 
     async updatePublisher({ commit, rootGetters }, _publisher) {
