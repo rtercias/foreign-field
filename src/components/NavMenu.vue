@@ -74,7 +74,7 @@ export default {
     },
     groupId() {
       const { id = 0, code } = this.group;
-      return code === 'ALL' ? 0 : id || get(this.territory, 'group_id') || 0;
+      return code === 'ALL' ? 0 : id || get(this.territory, 'group_id') || get(this.groups, '[0].id');
     },
     isCampaignMode() {
       return get(this.user, 'congregation.campaign') || false;
