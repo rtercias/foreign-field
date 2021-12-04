@@ -57,7 +57,7 @@ export default {
       isDesktop: 'auth/isDesktop',
     }),
     groupsList() {
-      return [{ id: 0, code: 'ALL' }, ...this.groups];
+      return [...this.groups, { id: 0, code: 'ALL' }];
     },
     selectedGroup() {
       return this.groupsList.find(g => g.id === this.selectedId) || {};
