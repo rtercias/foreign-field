@@ -21,6 +21,7 @@ const USER_TERRITORIES_ADDED = 'USER_TERRITORIES_ADDED';
 const WINDOW_RESIZE = 'WINDOW_RESIZE';
 const COLLAPSE_NAV = 'COLLAPSE_NAV';
 const SET_SCROLL_Y_POSITION = 'SET_SCROLL_Y_POSITION';
+const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
 
 function initialState() {
   return {
@@ -143,6 +144,13 @@ export const auth = {
     SET_SCROLL_Y_POSITION(state, scroll) {
       state.scrollYPosition[scroll.route] = scroll.yPos;
     },
+    SET_TERRITORY_LAST_ACTIVITY: (state, { id, lastActivity }) => {
+      const territories = get(state, 'user.territories') || [];
+      const territory = territories.find(t => t.id === id);
+      if (territory) {
+        Vue.set(territory, 'lastActivity', lastActivity);
+      }
+    },
   },
 
   actions: {
@@ -228,13 +236,6 @@ export const auth = {
                 description
                 group_id
                 type
-                lastActivity {
-                  id
-                  address_id
-                  checkout_id
-                  value
-                  timestamp
-                }
               }
             }
           }`),
@@ -247,6 +248,37 @@ export const auth = {
       const { territories } = (response && response.data && response.data.data.user) || {};
       commit(USER_TERRITORIES_ADDED, territories);
       commit(USER_TERRITORIES_LOADING, false);
+    },
+
+    async getTerritoryLastActivity({ commit }, id) {
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Territory($terrId: Int) {
+              territory (id: $terrId) {
+                id
+                lastActivity {
+                  id
+                  address_id
+                  checkout_id
+                  value
+                  timestamp
+                }
+              }
+            }`),
+            variables: {
+              terrId: id,
+            },
+          },
+        });
+
+        const { territory } = response.data.data;
+        commit(SET_TERRITORY_LAST_ACTIVITY, territory);
+      } catch (exception) {
+        console.error('Unable to get last activity', exception);
+      }
     },
 
     forceout({ commit }) {
