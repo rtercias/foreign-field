@@ -12,11 +12,12 @@
         </b-link>
       </div>
       <div class="check-in-out text-right d-flex flex-column justify-content-start" size="small" role="group">
-          <b-btn
+        <font-awesome-icon icon="circle-notch" spin v-if="loadingStatuses" class="text-black-50" />
+        <b-btn
           class="font-weight-bold p-1 btn-sm"
           v-b-modal = "`checkoutModal-${terr.id}`"
           variant="primary"
-          v-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
+          v-else-if="canWrite && (status === 'Available' || status === 'Recently Worked')"
           @click="isReassign = false"
           :disabled="saving">
           <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
@@ -24,7 +25,7 @@
         </b-btn>
         <b-btn
           class="font-weight-bold p-1 btn-sm"
-          v-if="canWrite && status === 'Checked Out'"
+          v-else-if="canWrite && status === 'Checked Out'"
           variant="warning"
           @click="checkin"
           :disabled="saving">
@@ -34,7 +35,7 @@
         <b-btn
           class="mr-0 pr-0 pt-0"
           v-b-modal = "`checkoutModal-${terr.id}`"
-          v-if="canViewReports && status === 'Checked Out'"
+          v-else-if="canViewReports && status === 'Checked Out'"
           variant="link"
           @click="isReassign = true"
           :disabled="saving">
@@ -183,6 +184,7 @@ export default {
       territories: 'territories/territories',
       territory: 'territory/territory',
       isCheckingOut: 'territory/isCheckingOut',
+      loadingStatuses: 'territories/loadingStatuses',
     }),
 
     isRecentlyWorked() {

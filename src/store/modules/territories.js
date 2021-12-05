@@ -3,7 +3,6 @@ import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import groupBy from 'lodash/groupBy';
 import toArray from 'lodash/toArray';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -20,6 +19,7 @@ const SET_TERRITORIES = 'SET_TERRITORIES';
 const RESET_TERRITORIES = 'RESET_TERRITORIES';
 const SET_ALL_TERRITORIES = 'SET_ALL_TERRITORIES';
 const SET_LOADING = 'SET_LOADING';
+const SET_LOADING_STATUSES = 'SET_LOADING_STATUSES';
 const SET_ERROR = 'SET_ERROR';
 const SET_NEAREST_TERRITORIES = 'SET_NEAREST_TERRITORIES';
 const SET_LAST_ACTIVITY = 'SET_LAST_ACTIVITY';
@@ -30,6 +30,7 @@ const GET_ADDRESS_COUNT = 'GET_ADDRESS_COUNT';
 const GET_PHONE_COUNT = 'GET_PHONE_COUNT';
 const SET_SORT_FILTER = 'SET_SORT_FILTER';
 const SET_IS_BUSY = 'SET_IS_BUSY';
+const FETCH_STATUSES = 'FETCH_STATUSES';
 const SET_STATUS = 'SET_STATUS';
 
 export const territories = {
@@ -37,6 +38,7 @@ export const territories = {
   state: {
     territories: [],
     loading: false,
+    loadingStatuses: false,
     error: '',
     nearestTerritories: [],
     recentlySeenTerritories: [],
@@ -53,15 +55,22 @@ export const territories = {
     nearestTerritories: state => state.nearestTerritories,
     recentlySeenTerritories: state => state.recentlySeenTerritories,
     selectedSortAndFilters: state => state.selectedSortAndFilters,
+    loadingStatuses: state => state.loadingStatuses,
   },
   mutations: {
     FETCH_TERRITORIES(state, cancelToken) {
       state.cancelTokens = { ...state.cancelTokens, FETCH_TERRITORIES: cancelToken };
     },
+    FETCH_STATUSES(state, cancelToken) {
+      state.cancelTokens = { ...state.cancelTokens, FETCH_STATUSES: cancelToken };
+    },
     SET_TERRITORIES: (state, terrs) => state.territories = terrs,
     RESET_TERRITORIES: state => state.territories = [],
     SET_ALL_TERRITORIES: (state, all) => state.allTerritories = all,
     SET_LOADING: (state, value) => state.loading = value,
+    SET_LOADING_STATUSES: (state, value) => {
+      Vue.set(state, 'loadingStatuses', value);
+    },
     SET_ERROR: (state, value) => state.error = value,
     SET_NEAREST_TERRITORIES: (state, nearest) => {
       const nearestTerritories = groupBy(nearest, 'territory_id');
@@ -107,7 +116,7 @@ export const territories = {
     },
     SET_STATUS: (state, { id, status }) => {
       const terr = state.territories.find(t => t.id === id);
-      if (terr) set(terr, 'status', status);
+      if (terr) Vue.set(terr, 'status', status);
     },
   },
   actions: {
@@ -138,17 +147,6 @@ export const territories = {
                 congregationid
                 tags
                 group_id
-                status {
-                  checkout_id
-                  status
-                  date
-                  publisher {
-                    id
-                    username
-                    firstname
-                    lastname
-                  }
-                }
               }
             }`),
             variables: {
@@ -169,6 +167,61 @@ export const territories = {
         }
       } catch (e) {
         commit(SET_LOADING, false);
+        commit(SET_ERROR, e);
+      }
+    },
+
+    async fetchStatuses({ commit }, params) {
+      if (!params || !params.congId) {
+        return;
+      }
+
+      const { congId, groupId, limit, offset } = params;
+      const tokenSource = axios.CancelToken.source();
+      const cancelToken = tokenSource.token;
+      commit(FETCH_STATUSES, tokenSource);
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cancelToken,
+          data: {
+            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int $limit: Int $offset: Int) {
+              territories (congId: $congId, group_id: $groupId, limit: $limit, offset: $offset) {
+                id
+                status {
+                  checkout_id
+                  status
+                  date
+                  publisher {
+                    id
+                    username
+                    firstname
+                    lastname
+                  }
+                }
+              }
+            }`),
+            variables: {
+              congId,
+              groupId,
+              limit,
+              offset,
+            },
+          },
+        });
+
+        if (response && response.data && response.data.data) {
+          const { territories: terrs } = response.data.data;
+          for (const terr of terrs) {
+            commit(SET_STATUS, terr);
+          }
+          commit(SET_LOADING_STATUSES, false);
+        }
+      } catch (e) {
         commit(SET_ERROR, e);
       }
     },
@@ -470,6 +523,9 @@ export const territories = {
     },
     setStatus({ commit }, { id, status }) {
       commit(SET_STATUS, { id, status });
+    },
+    setLoadingStatuses({ commit }, value) {
+      commit(SET_LOADING_STATUSES, value);
     },
   },
 };

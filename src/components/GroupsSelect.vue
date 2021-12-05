@@ -57,7 +57,11 @@ export default {
       isDesktop: 'auth/isDesktop',
     }),
     groupsList() {
-      return [...this.groups, { id: 0, code: 'ALL' }];
+      if (!this.groups) {
+        return [{ id: 0, code: 'ALL' }];
+      }
+
+      return [{ id: 0, code: 'ALL' }, ...this.groups];
     },
     selectedGroup() {
       return this.groupsList.find(g => g.id === this.selectedId) || {};
@@ -75,7 +79,7 @@ export default {
   },
   watch: {
     async user() {
-      if (!this.groups.length) {
+      if (this.groups && !this.groups.length) {
         await this.getGroupsList();
       }
     },

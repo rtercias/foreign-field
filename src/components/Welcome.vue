@@ -146,6 +146,7 @@ export default {
   methods: {
     ...mapActions({
       getUserTerritories: 'auth/getUserTerritories',
+      getTerritoryLastActivity: 'auth/getTerritoryLastActivity',
       setSeenTerritories: 'territories/setSeenTerritories',
       removeSeenTerritory: 'territories/removeSeenTerritory',
     }),
@@ -166,6 +167,9 @@ export default {
         if (this.user) {
           if (this.user.username && this.doUpdateTerritories) {
             await this.getUserTerritories(this.user.username);
+            for (const territory of this.userTerritories) {
+              this.getTerritoryLastActivity(territory.id);
+            }
           }
         }
         this.forceUpdate = false;

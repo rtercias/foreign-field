@@ -58,7 +58,9 @@
                 v-bind:key="avail.value"
                 @click="() => setAvailability(avail.value)">
                 <font-awesome-icon class="selected" icon="check" v-if="availability === avail.value" />
-                {{`${availabilityText(avail.value)} (${count(avail.value)})`}}
+                {{availabilityText(avail.value)}}
+                <font-awesome-icon icon="circle-notch" spin v-if="loadingStatuses" class="text-black-50" />
+                <span v-else>({{count(avail.value)}})</span>
               </b-dropdown-item>
               <b-dropdown-divider class="w-100 pr-4"></b-dropdown-divider>
               <b-dropdown-item
@@ -103,7 +105,9 @@
                 [`alert-${avail.variant}`]: avail.variant,
               }"
               @click="() => setAvailability(avail.value)">
-              {{availabilityText(avail.value)}} ({{count(avail.value)}})
+              {{availabilityText(avail.value)}}
+              <font-awesome-icon icon="circle-notch" spin v-if="loadingStatuses" />
+              <span v-else>({{count(avail.value)}})</span>
             </b-badge>
           </b-button-group>
         </div>
@@ -222,7 +226,6 @@ export default {
       publishers: 'publishers/publishers',
       token: 'auth/token',
       territories: 'territories/territories',
-      allTerritories: 'territories/allTerritories',
       groups: 'group/groups',
       group: 'group/group',
       isDesktop: 'auth/isDesktop',
@@ -231,6 +234,7 @@ export default {
       selectedSortAndFilters: 'territories/selectedSortAndFilters',
       isCheckingOut: 'territory/isCheckingOut',
       scrollYPosition: 'auth/scrollYPosition',
+      loadingStatuses: 'territories/loadingStatuses',
     }),
     searchedTerritories() {
       if (this.keywordFilter) {
@@ -328,6 +332,12 @@ export default {
           congId,
           groupId: this.selectedGroup === 0 ? null : this.groupId,
         });
+
+        this.setLoadingStatuses(true);
+        this.fetchStatuses({
+          congId,
+          groupId: this.selectedGroup === 0 ? null : this.groupId,
+        });
       }
 
       this.getAddressCountByTerritories(congId);
@@ -382,12 +392,14 @@ export default {
       resetTerritories: 'territories/resetTerritories',
       fetchPublishers: 'publishers/fetchPublishers',
       fetchTerritories: 'territories/fetchTerritories',
+      fetchStatuses: 'territories/fetchStatuses',
       getGroup: 'group/getGroup',
       getGroups: 'group/getGroups',
       getAddressCountByTerritories: 'territories/getAddressCountByTerritories',
       getPhoneCountByTerritories: 'territories/getPhoneCountByTerritories',
       setSortAndFilter: 'territories/setSortAndFilter',
       removeSortAndFilter: 'territories/removeSortAndFilter',
+      setLoadingStatuses: 'territories/setLoadingStatuses',
     }),
 
     applyCountFilter(territories) {
