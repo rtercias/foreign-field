@@ -19,6 +19,7 @@ const SET_TERRITORIES = 'SET_TERRITORIES';
 const RESET_TERRITORIES = 'RESET_TERRITORIES';
 const SET_ALL_TERRITORIES = 'SET_ALL_TERRITORIES';
 const SET_LOADING = 'SET_LOADING';
+const SET_LOADING_STATUSES = 'SET_LOADING_STATUSES';
 const SET_ERROR = 'SET_ERROR';
 const SET_NEAREST_TERRITORIES = 'SET_NEAREST_TERRITORIES';
 const SET_LAST_ACTIVITY = 'SET_LAST_ACTIVITY';
@@ -37,6 +38,7 @@ export const territories = {
   state: {
     territories: [],
     loading: false,
+    loadingStatuses: false,
     error: '',
     nearestTerritories: [],
     recentlySeenTerritories: [],
@@ -53,6 +55,7 @@ export const territories = {
     nearestTerritories: state => state.nearestTerritories,
     recentlySeenTerritories: state => state.recentlySeenTerritories,
     selectedSortAndFilters: state => state.selectedSortAndFilters,
+    loadingStatuses: state => state.loadingStatuses,
   },
   mutations: {
     FETCH_TERRITORIES(state, cancelToken) {
@@ -65,6 +68,9 @@ export const territories = {
     RESET_TERRITORIES: state => state.territories = [],
     SET_ALL_TERRITORIES: (state, all) => state.allTerritories = all,
     SET_LOADING: (state, value) => state.loading = value,
+    SET_LOADING_STATUSES: (state, value) => {
+      Vue.set(state, 'loadingStatuses', value);
+    },
     SET_ERROR: (state, value) => state.error = value,
     SET_NEAREST_TERRITORIES: (state, nearest) => {
       const nearestTerritories = groupBy(nearest, 'territory_id');
@@ -213,6 +219,7 @@ export const territories = {
           for (const terr of terrs) {
             commit(SET_STATUS, terr);
           }
+          commit(SET_LOADING_STATUSES, false);
         }
       } catch (e) {
         commit(SET_ERROR, e);
@@ -516,6 +523,9 @@ export const territories = {
     },
     setStatus({ commit }, { id, status }) {
       commit(SET_STATUS, { id, status });
+    },
+    setLoadingStatuses({ commit }, value) {
+      commit(SET_LOADING_STATUSES, value);
     },
   },
 };
