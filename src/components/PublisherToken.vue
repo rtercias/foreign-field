@@ -3,7 +3,7 @@
     <div v-if="publisherToken">
       <h4>Help {{publisherName || username}} log in to Foreign Field</h4>
       <div class="mt-5 mb-2">
-        <div>Enter {{publisher.firstname}}'s phone number and send them a login link:</div>
+        <div>Enter their phone number and send them a login link:</div>
         <the-mask
           class="w-auto mr-3"
           type="tel"
