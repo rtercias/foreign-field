@@ -302,10 +302,10 @@ export const auth = {
         await dispatch('authenticate', user);
         if (user.emailVerified && user.email) {
           await dispatch('authorize', user.email);
+        } else if (user.phoneNumber) {
+          await dispatch('authorize', user.phoneNumber);
         } else if (user.uid) {
           await dispatch('authorize', user.uid);
-        } else {
-          await dispatch('authorize', user.phoneNumber);
         }
 
         if (!state.user) {
