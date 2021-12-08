@@ -17,10 +17,11 @@
           *SMS Account is currently limited to verified phone numbers during trial period
         </div>
       </div>
-      <b-button @click="sendLink">
-          <font-awesome-icon class="text-primary d-xl-none" icon="sms" size="sm" />
-          Send Link
-        </b-button>
+      <b-button @click="sendLink" v-if="!isSMSSent">
+        <font-awesome-icon class="text-primary d-xl-none" icon="sms" size="sm" />
+        Send Link
+      </b-button>
+      <div v-else>SMS Sent!</div>
       <div class="mt-5 mb-2">
         Or copy the link below and send it to them some other way.
         <div class="font-weight-bold font-italic text-break">{{shortLink}}</div>
@@ -48,6 +49,7 @@ export default {
     return {
       isCopied: false,
       phoneNumber: '2037880993',
+      isSMSSent: false,
     };
   },
   async mounted() {
@@ -94,6 +96,7 @@ export default {
     },
     async sendLink() {
       await this.sendSMS({ text: this.shortLink, number: `+1${this.phoneNumber}` });
+      this.isSMSSent = true;
     },
   },
 };
