@@ -84,6 +84,7 @@ import {
   faNotEqual,
   faEquals,
   faLink,
+  faCopy,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 import VueClipboard from 'vue-clipboard2';
@@ -143,6 +144,7 @@ library.add(
   faNotEqual,
   faEquals,
   faLink,
+  faCopy,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

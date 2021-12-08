@@ -24,6 +24,7 @@ const SET_SCROLL_Y_POSITION = 'SET_SCROLL_Y_POSITION';
 const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
 const GENERATE_PUBLISHER_TOKEN = 'GENERATE_PUBLISHER_TOKEN';
 const GENERATE_SHORT_LINK = 'GENERATE_SHORT_LINK';
+const SMS_SENT = 'SMS_SENT';
 
 function initialState() {
   return {
@@ -163,6 +164,7 @@ export const auth = {
     GENERATE_SHORT_LINK(state, shortLink) {
       Vue.set(state, 'shortLink', shortLink);
     },
+    SMS_SENT() {},
   },
 
   actions: {
@@ -444,6 +446,31 @@ export const auth = {
 
       const { shortLink } = get(response, 'data');
       commit(GENERATE_SHORT_LINK, shortLink);
+    },
+
+    async sendSMS({ commit }, { text, number }) {
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        data: {
+          query: print(gql`mutation SendSMS($text: String! $number: String!) {
+            sendSMS(text: $text, number: $number)
+          }`),
+          variables: {
+            text,
+            number,
+          },
+        },
+      });
+
+      const { data, errors } = get(response, 'data');
+      const { sendSMS } = data;
+      if (sendSMS === 'queued') {
+        commit(SMS_SENT);
+      } else {
+        const { message } = errors[0];
+        throw new Error('Unable to send SMS', message);
+      }
     },
   },
 };

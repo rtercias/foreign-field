@@ -1,15 +1,32 @@
 <template>
   <div class="p-5 text-left">
     <div v-if="publisherToken">
-      <h4 class="mb-3">Help {{publisherName || username}} log in to Foreign Field</h4>
-      <div class="mb-3 font-weight-bold font-italic text-break">Login Link: {{shortLink}}</div>
-      <b-button v-if="isDesktop" variant="light" @click="copyLink">
+      <h4>Help {{publisherName || username}} log in to Foreign Field</h4>
+      <div class="mt-5 mb-2">
+        <div>Enter {{publisher.firstname}}'s phone number and send them a login link:</div>
+        <the-mask
+          class="w-auto mr-3"
+          type="tel"
+          :mask="'###-###-####'"
+          :masked="false"
+          placeholder="###-###-####"
+          disabled
+          v-model="phoneNumber">
+        </the-mask>
+        <b-badge variant="warning">*SMS Account is currently limited to verified phone numbers during trial period</b-badge>
+      </div>
+      <b-button @click="sendLink">
+          <font-awesome-icon class="text-primary d-xl-none" icon="sms" size="sm" />
+          Send Link
+        </b-button>
+      <div class="mt-5 mb-2">
+        Or copy the link below and send it to them some other way.
+        <div class="font-weight-bold font-italic text-break">{{shortLink}}</div>
+      </div>
+      <b-button variant="light" @click="copyLink">
+        <font-awesome-icon class="text-primary d-xl-none mr-1" icon="copy" size="sm" />
         <span v-if="isCopied">Copied!</span>
         <span v-else>Copy Link</span>
-      </b-button>
-      <b-button v-else @click="sendLink">
-        <font-awesome-icon class="text-primary d-xl-none" icon="sms" size="sm" />
-        Send Login Link via SMS
       </b-button>
     </div>
     <div v-else>Token not available.</div>
@@ -17,13 +34,18 @@
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { TheMask } from 'vue-the-mask';
 import { displayName } from '../utils/publisher';
 
 export default {
   name: 'PublisherToken',
+  components: {
+    TheMask,
+  },
   data() {
     return {
       isCopied: false,
+      phoneNumber: '2037880993',
     };
   },
   async mounted() {
@@ -53,6 +75,7 @@ export default {
       generatePublisherToken: 'auth/generatePublisherToken',
       generateShortLink: 'auth/generateShortLink',
       fetchPublisherByUsername: 'publisher/fetchPublisherByUsername',
+      sendSMS: 'auth/sendSMS',
     }),
     async generateTokenAndLink() {
       await this.fetchPublisherByUsername(this.username);
@@ -67,9 +90,8 @@ export default {
         console.error(error);
       }
     },
-    sendLink() {
-      window.open(`sms:&body=${this.shortLink}`, '_self');
-      return false;
+    async sendLink() {
+      await this.sendSMS({ text: this.shortLink, number: `+1${this.phoneNumber}` });
     },
   },
 };
