@@ -13,7 +13,9 @@
           disabled
           v-model="phoneNumber">
         </the-mask>
-        <b-badge variant="warning">*SMS Account is currently limited to verified phone numbers during trial period</b-badge>
+        <div class="bg-warning small text-break p-2 my-2 rounded">
+          *SMS Account is currently limited to verified phone numbers during trial period
+        </div>
       </div>
       <b-button @click="sendLink">
           <font-awesome-icon class="text-primary d-xl-none" icon="sms" size="sm" />
