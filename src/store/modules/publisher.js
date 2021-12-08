@@ -82,6 +82,41 @@ export const publisher = {
       }
       commit(SET_PUBLISHER, pub);
     },
+    async fetchPublisherByUsername({ commit }, username) {
+      if (!username) {
+        return;
+      }
+
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: {
+          query: print(gql`query User($username: String) {
+            user (username: $username) {
+              id
+              firstname
+              lastname
+              congregationid
+              username
+              status
+              role
+            }
+          }`),
+          variables: {
+            username,
+          },
+        },
+      });
+
+      const { user } = get(response, 'data.data');
+      if (user) {
+        user.status = user.status === 'active';
+      }
+      commit(SET_PUBLISHER, user);
+    },
     async addPublisher({ commit, rootGetters }, _publisher) {
       commit('auth/LOADING', true, { root: true });
 

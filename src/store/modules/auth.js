@@ -22,6 +22,8 @@ const WINDOW_RESIZE = 'WINDOW_RESIZE';
 const COLLAPSE_NAV = 'COLLAPSE_NAV';
 const SET_SCROLL_Y_POSITION = 'SET_SCROLL_Y_POSITION';
 const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
+const GENERATE_PUBLISHER_TOKEN = 'GENERATE_PUBLISHER_TOKEN';
+const GENERATE_SHORT_LINK = 'GENERATE_SHORT_LINK';
 
 function initialState() {
   return {
@@ -40,6 +42,8 @@ function initialState() {
     myTerritoriesLoading: false,
     userTerritories: [],
     scrollYPosition: { home: 0 },
+    publisherToken: '',
+    shortLink: '',
   };
 }
 
@@ -84,6 +88,8 @@ export const auth = {
       checkoutId: get(rootGetters['territory/territory'], 'status.checkout_id'),
     }),
     scrollYPosition: state => state.scrollYPosition,
+    publisherToken: state => state.publisherToken,
+    shortLink: state => state.shortLink,
   },
 
   mutations: {
@@ -144,12 +150,18 @@ export const auth = {
     SET_SCROLL_Y_POSITION(state, scroll) {
       state.scrollYPosition[scroll.route] = scroll.yPos;
     },
-    SET_TERRITORY_LAST_ACTIVITY: (state, { id, lastActivity }) => {
+    SET_TERRITORY_LAST_ACTIVITY(state, { id, lastActivity }) {
       const territories = get(state, 'user.territories') || [];
       const territory = territories.find(t => t.id === id);
       if (territory) {
         Vue.set(territory, 'lastActivity', lastActivity);
       }
+    },
+    GENERATE_PUBLISHER_TOKEN(state, token) {
+      state.publisherToken = token;
+    },
+    GENERATE_SHORT_LINK(state, shortLink) {
+      Vue.set(state, 'shortLink', shortLink);
     },
   },
 
@@ -288,8 +300,10 @@ export const auth = {
     async login({ dispatch, state }, user) {
       try {
         await dispatch('authenticate', user);
-        if (user.emailVerified && !!user.email) {
+        if (user.emailVerified && user.email) {
           await dispatch('authorize', user.email);
+        } else if (user.uid) {
+          await dispatch('authorize', user.uid);
         } else {
           await dispatch('authorize', user.phoneNumber);
         }
@@ -316,40 +330,52 @@ export const auth = {
       axios.defaults.headers.common.Authorization = `Bearer ${tempToken}`;
       commit(UPDATE_TOKEN, tempToken);
 
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         firebase.initializeApp(config);
-        firebase.auth().onAuthStateChanged(async (user) => {
-          if (user) {
-            user.token = await user.getIdToken();
-            if (!user.token) {
-              reject();
-              throw new Error('Unable to retrieve token from Firebase');
-            }
 
-            commit(UPDATE_TOKEN, user.token);
+        const authCallback = async (user) => {
+          commit(UPDATE_TOKEN, user.token);
+          sessionStorage.setItem('firebaseui::token', user.token);
+
+          axios.interceptors.request.use(async (cfg) => {
+            const token = await user.getIdToken();
             sessionStorage.setItem('firebaseui::token', user.token);
+            cfg.headers.Authorization = `Bearer ${token}`;
+            commit(UPDATE_TOKEN, token);
+            return cfg;
+          });
 
-            axios.interceptors.request.use(async (cfg) => {
-              const token = await user.getIdToken();
-              sessionStorage.setItem('firebaseui::token', user.token);
-              cfg.headers.Authorization = `Bearer ${token}`;
-              commit(UPDATE_TOKEN, token);
-              return cfg;
-            });
+          await dispatch('login', user);
+        };
 
-            await dispatch('login', user);
-          } else {
-            if (state.isForcedOut) {
-              router.replace({ name: 'signout', params: { unauthorized: true } });
-            }
-
-            const loc = window.location;
-            if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
-              router.replace({ name: 'auth', query: { redirect: loc.pathname } });
-            }
-          }
+        const params = new URLSearchParams(window.location.search);
+        const tokenParam = params.get('token');
+        if (tokenParam) {
+          const { user } = await firebase.auth().signInWithCustomToken(tokenParam);
+          await authCallback(user);
           resolve();
-        });
+        } else {
+          firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+              user.token = await user.getIdToken();
+              if (!user.token) {
+                reject();
+                throw new Error('Unable to retrieve token from Firebase');
+              }
+              await authCallback(user);
+            } else {
+              if (state.isForcedOut) {
+                router.replace({ name: 'signout', params: { unauthorized: true } });
+              }
+
+              const loc = window.location;
+              if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
+                router.replace({ name: 'auth', query: { redirect: loc.pathname } });
+              }
+            }
+            resolve();
+          });
+        }
       });
     },
 
@@ -382,6 +408,42 @@ export const auth = {
 
     setScrollYPosition({ commit }, yPos) {
       commit(SET_SCROLL_Y_POSITION, yPos);
+    },
+
+    async generatePublisherToken({ commit }, username) {
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        data: {
+          query: print(gql`query Token($username: String) {
+            token(username:$username)
+          }`),
+          variables: {
+            username,
+          },
+        },
+      });
+
+      const { token } = (response && response.data && response.data.data) || {};
+      commit(GENERATE_PUBLISHER_TOKEN, token);
+    },
+
+    async generateShortLink({ commit }, link) {
+      const instance = axios.create();
+      delete instance.defaults.headers.common.Authorization;
+      const response = await instance({
+        url: `https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=${process.env.VUE_APP_WEB_API_KEY}`,
+        method: 'post',
+        data: {
+          dynamicLinkInfo: {
+            domainUriPrefix: process.env.VUE_APP_DYNAMIC_LINK_DOMAIN,
+            link,
+          },
+        },
+      });
+
+      const { shortLink } = get(response, 'data');
+      commit(GENERATE_SHORT_LINK, shortLink);
     },
   },
 };
