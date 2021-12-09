@@ -18,12 +18,8 @@
         :mask="'###-###-####'"
         :masked="false"
         placeholder="###-###-####"
-        disabled
         v-model="phoneNumber">
       </the-mask>
-      <div class="bg-warning small text-break p-2 my-2 rounded">
-        *SMS Account is currently limited to verified phone numbers during trial period
-      </div>
     </div>
     <b-button @click="sendLink" v-if="!isSMSSent" variant="primary" :disabled="isEmpty(publisher)">
       <font-awesome-icon class="d-xl-none" icon="sms" size="sm" />
@@ -55,7 +51,7 @@ export default {
   data() {
     return {
       isCopied: false,
-      phoneNumber: '2037880993',
+      phoneNumber: '',
       isSMSSent: false,
       publisher: {},
     };
