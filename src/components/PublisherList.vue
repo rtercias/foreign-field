@@ -30,7 +30,7 @@
         <template #cell(name)="data">
           <span class="name">{{ data.value }}</span>
           <b-badge
-            v-if="data.item.role === 'PUB'"
+            v-if="['PUB', 'RP'].includes(data.item.role)"
             class="ml-2 btn"
             variant="warning"
             :to="{ name: 'publisher-token',
