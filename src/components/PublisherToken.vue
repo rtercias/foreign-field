@@ -25,7 +25,7 @@
         *SMS Account is currently limited to verified phone numbers during trial period
       </div>
     </div>
-    <b-button @click="sendLink" v-if="!isSMSSent" variant="primary">
+    <b-button @click="sendLink" v-if="!isSMSSent" variant="primary" :disabled="isEmpty(publisher)">
       <font-awesome-icon class="d-xl-none" icon="sms" size="sm" />
       Send Link
     </b-button>
@@ -34,7 +34,7 @@
       Or copy the link below and send it to them some other way.
       <div class="font-weight-bold font-italic text-break">{{shortLink}}</div>
     </div>
-    <b-button variant="outline-primary" @click="copyLink">
+    <b-button variant="outline-primary" @click="copyLink" :disabled="isEmpty(publisher)">
       <font-awesome-icon class="text-primary d-xl-none mr-1" icon="copy" size="sm" />
       <span v-if="isCopied">Copied!</span>
       <span v-else>Copy Link</span>
@@ -45,6 +45,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import { TheMask } from 'vue-the-mask';
 import { displayName } from '../utils/publisher';
+import isEmpty from 'lodash/isEmpty';
 
 export default {
   name: 'PublisherToken',
@@ -95,6 +96,7 @@ export default {
       fetchPublishers: 'publishers/fetchPublishers',
     }),
     displayName,
+    isEmpty,
     async selectPublisher(pub) {
       if (typeof pub === 'string') {
         this.publisher = this.publishers.find(p => p.username === pub);
@@ -116,8 +118,10 @@ export default {
       }
     },
     async sendLink() {
-      await this.sendSMS({ text: this.shortLink, number: `+1${this.phoneNumber}` });
-      this.isSMSSent = true;
+      if (this.publisher) {
+        await this.sendSMS({ text: this.shortLink, number: `+1${this.phoneNumber}` });
+        this.isSMSSent = true;
+      }
     },
     async fetch() {
       const { username } = this.$route.query;
