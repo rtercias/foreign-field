@@ -36,6 +36,9 @@
         }">
         Profile
       </b-dropdown-item>
+      <b-dropdown-item class="m-0 w-100" v-if="canWrite && !isForcedOut" :to="`/publishers/token`">
+        Login Helper
+      </b-dropdown-item>
       <b-dropdown-item class="m-0 w-100" @click="logoutUser">Logout</b-dropdown-item>
     </b-nav-item-dropdown>
   </b-navbar-nav>

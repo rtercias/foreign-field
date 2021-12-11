@@ -29,6 +29,16 @@
         :current-page="currentPage">
         <template #cell(name)="data">
           <span class="name">{{ data.value }}</span>
+          <b-badge
+            v-if="['PUB', 'RP'].includes(data.item.role)"
+            class="ml-2 btn"
+            variant="warning"
+            :to="{ name: 'publisher-token',
+              query: { username: data.item.username },
+            }"
+          >
+            get token
+          </b-badge>
         </template>
         <template #cell(id)="data">
           <b-link v-if="canManage" :to="`/publishers/${data.item.edit}/edit`">
@@ -104,7 +114,7 @@ export default {
       return publishers;
     },
     displayedPublishers() {
-      return this.publishers.map(p => ({ name: displayName(p), edit: p.id }));
+      return this.publishers.map(p => ({ name: displayName(p), edit: p.id, ...p }));
     },
   },
   methods: {
