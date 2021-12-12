@@ -8,6 +8,12 @@ export const CongDefault = {
           'Completed Date',
         ],
       },
+      defaultSortDirection: {
+        options: [
+          { value: 'asc', text: 'Ascending' },
+          { value: 'desc', text: 'Descending' },
+        ],
+      },
       cycle: 30,
     },
     territory: {

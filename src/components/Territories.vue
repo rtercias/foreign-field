@@ -76,7 +76,8 @@
               text-right d-md-block d-sm-flex justify-content-between">
               <b-dropdown class="sort-btn pr-2" right variant="secondary">
                 <span slot="button-content">
-                  <font-awesome-icon icon="sort-amount-down-alt" />
+                  <font-awesome-icon v-if="sortDirection === 'asc'" icon="sort-amount-up-alt" />
+                  <font-awesome-icon v-else icon="sort-amount-down-alt" />
                   <span v-if="isDesktop" class="pl-1">{{sortOption}}</span>
                 </span>
                 <b-dropdown-item
@@ -323,7 +324,9 @@ export default {
       this.sortOption = this.selectedSortAndFilters.sort
         || get(this.congregation, 'options.territories.defaultSort')
         || DEFAULT_SORT;
-      this.sortDirection = this.selectedSortAndFilters.sortDirection || 'asc';
+      this.sortDirection = this.selectedSortAndFilters.sortDirection
+        || get(this.congregation, 'options.territories.defaultSortDirection')
+        || 'asc';
       this.keywordFilter = this.selectedSortAndFilters.keyword || '';
 
       const doFetchTerritories = this.group.id !== this.selectedGroup || !this.territories.length;
