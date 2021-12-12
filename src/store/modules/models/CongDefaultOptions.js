@@ -5,6 +5,7 @@ export const CongDefault = {
         options: [
           'Description',
           'Name',
+          'Completed Date',
         ],
       },
       cycle: 30,
