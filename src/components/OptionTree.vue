@@ -26,7 +26,7 @@
         />
       </div>
     </div>
-    <div v-else class="option-row">
+    <div v-else class="option-row d-flex justify-content-between">
       <span :style="indent" class="d-inline-block mr-2">{{node.label}}</span>
       <b-form-select
         v-if="node.options"
@@ -34,7 +34,7 @@
         :options="node.options"
         v-model="node.value"
         :style="indent"
-        class="float-right py-0 w-50 mr-4"
+        class="py-0 w-50 mr-4"
         :disabled="disabled"
         @change="updateOption">
       </b-form-select>
