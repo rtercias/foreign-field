@@ -321,7 +321,7 @@ const routes = [
     component: PublisherToken,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP-E'],
+      permissions: () => store.getters['auth/canHelpLogin'],
       label: 'Generate Token',
     },
   },

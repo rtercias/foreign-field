@@ -30,14 +30,14 @@
         <template #cell(name)="data">
           <span class="name">{{ data.value }}</span>
           <b-badge
-            v-if="['PUB', 'RP'].includes(data.item.role)"
+            v-if="canHelpLogin && ['PUB', 'RP'].includes(data.item.role)"
             class="ml-2 btn"
             variant="warning"
             :to="{ name: 'publisher-token',
               query: { username: data.item.username },
             }"
           >
-            get token
+            help
           </b-badge>
         </template>
         <template #cell(id)="data">
@@ -95,6 +95,7 @@ export default {
     ...mapGetters({
       pubs: 'publishers/publishers',
       canManage: 'auth/canManage',
+      canHelpLogin: 'auth/canHelpLogin',
       user: 'auth/user',
     }),
     publishers() {

@@ -70,6 +70,10 @@ export const auth = {
       || get(state.user, 'role') === 'Admin',
     canLead: state => get(state.user, 'role') === 'SO',
     canSwitchCong: state => state.user && ['Admin', 'CO'].includes(state.user.role),
+    canHelpLogin: (state) => {
+      const { loginHelperAccess } = get(state, 'congregation.options.publishers') || '';
+      return state.user && ['Admin', 'SO', 'TS', 'GO', loginHelperAccess].includes(state.user.role);
+    },
     isBasicAccessOnly: state => state.user && state.user.role === 'PUB',
     token: state => state.token,
     isDesktop: state => state.isSwitchedToDesktop || window.matchMedia('(min-width: 801px)').matches,
@@ -174,66 +178,66 @@ export const auth = {
     },
 
     async logout({ commit }) {
-      return new Promise((resolve) => {
-        firebase.auth().signOut();
-        commit(RESET);
-        resolve();
-      });
+      firebase.auth().signOut();
+      sessionStorage.removeItem('firebaseui::token');
+      commit(RESET);
     },
 
-    async authorize({ commit, dispatch, getters }, username) {
-      try {
-        if (getters.isAuthorized) return true;
+    async authorize({ commit, dispatch }, username) {
+      commit(LOADING, true);
+      const response = await axios({
+        url: process.env.VUE_APP_ROOT_API,
+        method: 'post',
+        data: {
+          query: print(gql`query Publisher($username: String) {
+            user (username: $username) {
+              id
+              username
+              firstname
+              lastname
+              role
+              status
+              congregation {
+                ...CongregationModel
+              }
+            }
+          },
+          ${congregationModel}`),
+          variables: {
+            username,
+          },
+        },
+      });
 
-        commit(LOADING, true);
-        return new Promise(async (resolve, reject) => {
-          const response = await axios({
-            url: process.env.VUE_APP_ROOT_API,
-            method: 'post',
-            data: {
-              query: print(gql`query Publisher($username: String) {
-                user (username: $username) {
-                  id
-                  username
-                  firstname
-                  lastname
-                  role
-                  status
-                  congregation {
-                    ...CongregationModel
-                  }
-                }
-              },
-              ${congregationModel}`),
-              variables: {
-                username,
-              },
-            },
-          });
-
-          if (!response || !response.data || !response.data.data || !response.data.data.user) {
-            reject(new IncompleteRegistrationError('Unauthorized'));
-          }
-
-          const { user } = (response && response.data && response.data.data) || {};
-          const options = JSON.parse(get(user, 'congregation.options', '{}'));
-          const congregation = user && { ...user.congregation, options };
-          const userRoles = get(user, 'role', '').split(',');
-          const { permissions = [] } = router.currentRoute.meta;
-          const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
-          if (user && hasPermission) {
-            commit(AUTHORIZE, { ...user, congregation });
-            dispatch('congregation/setCongregation', congregation, { root: true });
-            resolve();
-          } else {
-            reject(new UnauthorizedUserError('Unauthorized'));
-          }
-
-          commit(LOADING, false);
-        });
-      } catch (e) {
-        throw e;
+      if (!response || !response.data || !response.data.data || !response.data.data.user) {
+        throw new IncompleteRegistrationError('Unauthorized');
       }
+
+      const { user } = (response && response.data && response.data.data) || {};
+      if (user.status === 'disabled') {
+        throw new UnauthorizedUserError('Unauthorized');
+      }
+
+      const options = JSON.parse(get(user, 'congregation.options', '{}'));
+      const congregation = user && { ...user.congregation, options };
+      const userRoles = get(user, 'role', '').split(',');
+      const { permissions } = router.currentRoute.meta;
+
+      let hasPermission = true;
+      if (typeof permissions === 'function') {
+        hasPermission = permissions();
+      } else if (Array.isArray(permissions)) {
+        hasPermission = intersection(permissions, userRoles).length > 0;
+      }
+
+      if (user && hasPermission) {
+        commit(AUTHORIZE, { ...user, congregation });
+        dispatch('congregation/setCongregation', congregation, { root: true });
+      } else {
+        throw new UnauthorizedUserError('Unauthorized');
+      }
+
+      commit(LOADING, false);
     },
 
     async getUserTerritories({ commit }, username) {
@@ -332,53 +336,48 @@ export const auth = {
       axios.defaults.headers.common.Authorization = `Bearer ${tempToken}`;
       commit(UPDATE_TOKEN, tempToken);
 
-      return new Promise(async (resolve, reject) => {
-        firebase.initializeApp(config);
+      firebase.initializeApp(config);
 
-        const authCallback = async (user) => {
-          commit(UPDATE_TOKEN, user.token);
+      const authCallback = async (user) => {
+        commit(UPDATE_TOKEN, user.token);
+        sessionStorage.setItem('firebaseui::token', user.token);
+
+        axios.interceptors.request.use(async (cfg) => {
+          const token = await user.getIdToken();
           sessionStorage.setItem('firebaseui::token', user.token);
+          cfg.headers.Authorization = `Bearer ${token}`;
+          commit(UPDATE_TOKEN, token);
+          return cfg;
+        });
 
-          axios.interceptors.request.use(async (cfg) => {
-            const token = await user.getIdToken();
-            sessionStorage.setItem('firebaseui::token', user.token);
-            cfg.headers.Authorization = `Bearer ${token}`;
-            commit(UPDATE_TOKEN, token);
-            return cfg;
-          });
+        await dispatch('login', user);
+      };
 
-          await dispatch('login', user);
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        const tokenParam = params.get('token');
-        if (tokenParam) {
-          const { user } = await firebase.auth().signInWithCustomToken(tokenParam);
-          await authCallback(user);
-          resolve();
-        } else {
-          firebase.auth().onAuthStateChanged(async (user) => {
-            if (user) {
-              user.token = await user.getIdToken();
-              if (!user.token) {
-                reject();
-                throw new Error('Unable to retrieve token from Firebase');
-              }
-              await authCallback(user);
-            } else {
-              if (state.isForcedOut) {
-                router.replace({ name: 'signout', params: { unauthorized: true } });
-              }
-
-              const loc = window.location;
-              if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
-                router.replace({ name: 'auth', query: { redirect: loc.pathname } });
-              }
+      const params = new URLSearchParams(window.location.search);
+      const tokenParam = params.get('token');
+      if (tokenParam) {
+        const { user } = await firebase.auth().signInWithCustomToken(tokenParam);
+        await authCallback(user);
+      } else {
+        firebase.auth().onAuthStateChanged(async (user) => {
+          if (user) {
+            user.token = await user.getIdToken();
+            if (!user.token) {
+              throw new Error('Unable to retrieve token from Firebase');
             }
-            resolve();
-          });
-        }
-      });
+            await authCallback(user);
+          } else {
+            if (state.isForcedOut) {
+              router.replace({ name: 'signout', params: { unauthorized: true } });
+            }
+
+            const loc = window.location;
+            if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
+              router.replace({ name: 'auth', query: { redirect: loc.pathname } });
+            }
+          }
+        });
+      }
     },
 
     back({ getters, state }, params) {

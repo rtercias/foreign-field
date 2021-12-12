@@ -221,16 +221,13 @@ export default {
       updateStatus: 'territory/updateStatus',
       collapseNav: 'auth/collapseNav',
       setTerritoryStatus: 'territories/setStatus',
-      forceout: 'auth/forceout',
+      logout: 'auth/logout',
     }),
     async refresh() {
       if (this.user) {
         await this.authorize(get(this.user, 'username'));
-        const isUserDisabled = this.user.status === 'disabled';
-        if (isUserDisabled) {
-          this.forceout();
-          this.$router.push({ name: 'unauthorized' });
-          throw new UnauthorizedUserError('Unauthorized');
+        if (this.user.status === 'disabled') {
+          this.logoutUser();
         }
       }
     },
@@ -248,6 +245,11 @@ export default {
     resetHideMenu() {
       this.hideMenu = false;
     },
+    logoutUser() {
+      this.logout();
+      this.$router.push({ name: 'unauthorized' });
+      throw new UnauthorizedUserError('Unauthorized');
+    },
   },
   watch: {
     async $route() {
@@ -261,9 +263,6 @@ export default {
           this.$router.replace({ name: 'error' });
         }
       }
-    },
-    async user() {
-      await this.refresh();
     },
   },
 };
