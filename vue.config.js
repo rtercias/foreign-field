@@ -3,6 +3,8 @@ const path = require('path');
 
 module.exports = {
   devServer: {
+    host: 'localhost',
+    port: 8080,
     overlay: {
       warnings: true,
       errors: true,
