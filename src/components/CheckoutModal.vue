@@ -47,8 +47,6 @@ export default {
     ...mapActions({
       checkoutTerritory: 'territory/checkoutTerritory',
       reassignCheckout: 'territory/reassignCheckout',
-      updateTerritory: 'territories/updateTerritory',
-      setTerritory: 'territory/setTerritory',
     }),
 
     selectPublisher(publisher) {

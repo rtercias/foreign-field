@@ -318,7 +318,7 @@ export const territory = {
       }
     },
 
-    async checkoutTerritory({ commit, dispatch }, args) {
+    async checkoutTerritory({ commit, getters, dispatch }, args) {
       commit(CHECKING_OUT, true);
       dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
       const response = await axios({
@@ -353,14 +353,20 @@ export const territory = {
         publisher: args.publisher,
         date: args.date,
       };
-      commit(CHANGE_STATUS, status);
-      dispatch('auth/getUserTerritories', args.username, { root: true });
+
+      if (getters.territory.id === args.territoryId) {
+        commit(CHANGE_STATUS, status);
+      }
+      if (args.publisher.username === args.username) {
+        dispatch('auth/getUserTerritories', args.username, { root: true });
+      }
+
       commit(CHECKING_OUT, false);
       dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
       dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
     },
 
-    async reassignCheckout({ commit, dispatch }, args) {
+    async reassignCheckout({ commit, getters, dispatch }, args) {
       try {
         if (!args.checkoutId) throw new Error('checkout id is required');
         commit(CHECKING_OUT, true);
@@ -389,10 +395,14 @@ export const territory = {
           publisher: args.publisher,
           date: args.date,
         };
-        commit(CHANGE_STATUS, status);
+
+        if (getters.territory.id === args.territoryId) {
+          commit(CHANGE_STATUS, status);
+        }
         if (args.publisher.username === args.username) {
           await dispatch('auth/getUserTerritories', args.username, { root: true });
         }
+
         commit(CHECKING_OUT, false);
         dispatch('territories/setStatus', { id: args.territoryId, status }, { root: true });
         dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });

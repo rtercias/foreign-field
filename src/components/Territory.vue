@@ -213,7 +213,7 @@ export default {
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
       fetchLastActivities: 'territory/fetchLastActivities',
-      updateTerritory: 'territories/updateTerritory',
+      setTerritory: 'territories/setTerritory',
     }),
 
     async refresh() {
@@ -224,7 +224,7 @@ export default {
       } else {
         await this.getTerritory({ id: this.territoryId, getLastActivity: true });
       }
-      if (this.user.congregation.id !== this.territory.congregationid) {
+      if (get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
         this.$router.push('/unauthorized');
       }
     },
