@@ -257,6 +257,7 @@ export default {
         this.hideMenu = true;
         await this.refresh();
       } catch (e) {
+        console.error(e);
         if (String(e).includes('Unauthorized')) {
           this.$router.replace({ name: 'unauthorized' });
         } else {
