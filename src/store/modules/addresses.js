@@ -124,7 +124,8 @@ export const addresses = {
         /* eslint-disable max-len */
         const base = `https://foreignfieldadmin.azurewebsites.net/api/addresses/getOptimizedRouteForTerritory?territoryId=${territoryId}`;
         const proxy = 'https://cors-anywhere.herokuapp.com';
-        const url = document.location.host.includes('localhost') ? `${proxy}/${base}` : base;
+        const url = document.location.host.includes('localhost')
+          || document.location.host.includes('staging') ? `${proxy}/${base}` : base;
         const response = await axios.get(url);
         const { data } = response;
         commit(OPTIMIZE_SUCCESS, data.map(d => ({
