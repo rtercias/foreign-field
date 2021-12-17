@@ -4,7 +4,7 @@ export const CongDefault = {
       loginHelperAccess: {
         options: [
           { value: null, text: 'Servants and elders only' },
-          { value: 'RP-E', text: 'Regular Pioneers (Enhanced)' },
+          { value: 'RP-E', text: 'Include Assistants (RP-E)' },
         ],
       },
     },
