@@ -73,6 +73,7 @@ import groupBy from 'lodash/groupBy';
 import orderBy from 'lodash/orderBy';
 import format from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
+import isEqual from 'date-fns/isEqual';
 
 const sortOptions = [
   { value: 'territory_name', text: 'Name' },
@@ -118,7 +119,8 @@ export default {
     filteredRecords() {
       const records = this.assignmentRecords || [];
       if (!this.dateFilter) return records;
-      return records.filter(r => isAfter(new Date(r.out), new Date(this.dateFilter)));
+      return records.filter(r => isEqual(new Date(r.out), new Date(this.dateFilter))
+        || isAfter(new Date(r.out), new Date(this.dateFilter)));
     },
     groupedRecords() {
       return groupBy(
