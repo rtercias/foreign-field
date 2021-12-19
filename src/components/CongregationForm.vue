@@ -220,7 +220,7 @@ export default {
     async user() {
       await this.refresh();
       if (this.mode === Modes.edit && this.user && this.user.congregation.id !== this.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       } else {
         this.isLoading = false;
       }

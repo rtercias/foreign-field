@@ -224,8 +224,11 @@ export default {
       } else {
         await this.getTerritory({ id: this.territoryId, getLastActivity: true });
       }
-      if (this.user.congregation.id !== this.territory.congregationid) {
-        this.$router.push('/unauthorized');
+
+      const userCong = get(this.user, 'congregation.id');
+      const territoryCong = get(this.territory, 'congregationid');
+      if (userCong && territoryCong && userCong !== territoryCong) {
+        this.$router.replace('/unauthorized');
       }
     },
 

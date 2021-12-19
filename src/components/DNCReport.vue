@@ -72,7 +72,7 @@ export default {
   watch: {
     user() {
       if (this.user && this.user.congregation.id !== this.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
     },
   },

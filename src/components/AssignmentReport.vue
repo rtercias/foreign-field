@@ -103,7 +103,7 @@ export default {
     }),
     async fetch(value) {
       if (this.user && this.user.congregation.id !== this.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
       const campaignMode = value;
       await this.fetchAssignmentRecords({ congId: this.congregationId, campaignMode });
@@ -135,7 +135,7 @@ export default {
   watch: {
     user() {
       if (this.user && this.user.congregation.id !== this.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
     },
   },

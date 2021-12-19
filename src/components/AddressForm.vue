@@ -349,7 +349,7 @@ export default {
       }
       if (this.user && this.mode === Modes.edit
         && this.user.congregation.id !== this.address.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
       this.isLoading = false;
     },
@@ -509,7 +509,7 @@ export default {
         && this.congId !== this.territory.congregationid;
 
       if (unauthAddressCongId || unauthTerritoryCongId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
     },
     congId() {
