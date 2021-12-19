@@ -43,7 +43,7 @@ export const AddressStatus = {
 
 export const TerritoryType = {
   Regular: { text: 'Regular', value: 'Regular' },
-  Survey: { text: 'Survey', value: 'SEARCH' },
+  SEARCH: { text: 'Survey', value: 'SEARCH' },
   Business: { text: 'Business', value: 'BUSINESS' },
   Test: { text: 'Test', value: 'Test' },
 };

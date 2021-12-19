@@ -20,7 +20,10 @@
               </h4>
             </div>
             <div class="d-flex justify-content-between">
-              <span class="small">{{filteredCount || displayCount}}</span>
+              <div>
+                <span class="small">{{filteredCount || displayCount}}</span>
+                <b-badge variant="warning" class="ml-2">{{displayType}}</b-badge>
+              </div>
               <span class="small">{{currentPublisher}}</span>
             </div>
           </div>
@@ -76,7 +79,7 @@ import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
-import { store, defaultOptions } from '../store';
+import { store, defaultOptions, TerritoryType } from '../store';
 import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 
@@ -204,6 +207,9 @@ export default {
     },
     displayCount() {
       return `Count: ${this.count}`;
+    },
+    displayType() {
+      return this.territory.type === 'Active' ? '' : get(TerritoryType[this.territory.type], 'text');
     },
   },
   methods: {
