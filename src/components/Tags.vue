@@ -182,7 +182,7 @@ export default {
     },
     highlight(tag) {
       const tagsToHighlight = ['no number', 'do not mail', 'do not call', 'invalid'];
-      return tagsToHighlight.includes(tag);
+      return tagsToHighlight.includes(tag) || tag.includes('not') || tag.includes('no');
     },
     hide(tag) {
       const hidden = ['invalid #', 'confirmed phone'];
