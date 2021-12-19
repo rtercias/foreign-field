@@ -431,7 +431,7 @@ export default {
 
       try {
         this.$set(entity, 'isBusy', true);
-        await this.addLog({ entityId: entity.id, value });
+        await this.addLog({ entityId: entity.id, value, checkoutId: get(this.territory, 'status.checkout_id') });
         this.$set(entity, 'isBusy', false);
         if (typeof close === 'function') close();
       } catch (e) {
@@ -505,7 +505,11 @@ export default {
       if (this.address.lastActivity.value === 'LW') {
         await this.removeLog({ id: this.address.lastActivity.id, entityId: this.address.id });
       } else {
-        await this.addLog({ entityId: this.address.id, value: LETTER_WRITING });
+        await this.addLog({
+          entityId: this.address.id,
+          value: LETTER_WRITING,
+          checkoutId: get(this.territory, 'status.checkout_id'),
+        });
       }
     },
     lookupFastPeopleSearch() {

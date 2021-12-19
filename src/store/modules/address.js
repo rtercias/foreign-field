@@ -9,7 +9,6 @@ import { model as activityModel, createActivityLog } from './models/ActivityMode
 const FETCH_ADDRESS = 'FETCH_ADDRESS';
 const SET_ADDRESS = 'SET_ADDRESS';
 const ADD_LOG = 'ADD_LOG';
-const UPDATE_LOG = 'UPDATE_LOG';
 const REMOVE_LOG = 'REMOVE_LOG';
 const ADD_ADDRESS = 'ADD_ADDRESS';
 const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
@@ -76,14 +75,6 @@ export const address = {
         }
       }
     },
-    UPDATE_LOG(state, log) {
-      if (state.address.id === log.address_id) {
-        const index = state.address.activityLogs.findIndex(a => a.id === log.id);
-        if (index !== -1) {
-          state.address.activityLogs.splice(index, 1, log);
-        }
-      }
-    },
     REMOVE_LOG(state, { id, addressId }) {
       if (state.address.id === addressId) {
         const index = state.address.activityLogs.findIndex(a => a.id === id);
@@ -141,8 +132,8 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`query Address($addressId: Int $checkoutId: Int $status: String) { 
-              address(id: $addressId, status: $status) { 
+            query: print(gql`query Address($addressId: Int $checkoutId: Int $status: String) {
+              address(id: $addressId, status: $status) {
                 ...AddressModel
                 activityLogs(checkout_id: $checkoutId) {
                   ...ActivityModel
@@ -191,8 +182,8 @@ export const address = {
           },
           cancelToken,
           data: {
-            query: print(gql`query Address($addressId: Int $checkoutId: Int) { 
-              address(id: $addressId) { 
+            query: print(gql`query Address($addressId: Int $checkoutId: Int) {
+              address(id: $addressId) {
                 lastActivity(checkout_id: $checkoutId) {
                   ...ActivityModel
                 }
@@ -218,9 +209,8 @@ export const address = {
       }
     },
 
-    async addLog({ commit, getters, rootGetters }, { entityId, value }) {
+    async addLog({ commit, rootGetters }, { entityId, value, checkoutId }) {
       try {
-        const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
 
@@ -233,7 +223,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddLog($activityLog: ActivityLogInput!) { 
+            query: print(gql`mutation AddLog($activityLog: ActivityLogInput!) {
               addLog(activityLog: $activityLog) {
                 ...ActivityModel
               }
@@ -261,41 +251,6 @@ export const address = {
       }
     },
 
-    async updateLog({ commit, getters, rootGetters }, { id, entityId, value }) {
-      try {
-        const checkoutId = getters.checkoutInfo && getters.checkoutInfo.checkout_id;
-        const user = rootGetters['auth/user'];
-        const activityLog = createActivityLog(id, entityId, value, checkoutId, user);
-
-        commit('auth/LOADING', true, { root: true });
-
-        await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          data: {
-            query: print(gql`mutation UpdateLog($activityLog: ActivityLogInput!) { 
-              updateLog(activityLog: $activityLog) {
-                id checkout_id address_id value tz_offset timestamp
-                timezone publisher_id notes
-              }
-            }`),
-            variables: {
-              activityLog,
-            },
-          },
-        });
-
-        commit(UPDATE_LOG, activityLog);
-      } catch (e) {
-        commit(LOG_FAIL, e);
-      }
-
-      commit('auth/LOADING', false, { root: true });
-    },
-
     async removeLog({ commit }, { id, entityId }) {
       try {
         commit('auth/LOADING', true, { root: true });
@@ -307,7 +262,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation RemoveLog($id: Int!) { 
+            query: print(gql`mutation RemoveLog($id: Int!) {
               removeLog(id: $id)
             }`),
             variables: {
@@ -338,8 +293,8 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation CreateAddress($address: AddressInput!) { 
-              addAddress(address: $address) { 
+            query: print(gql`mutation CreateAddress($address: AddressInput!) {
+              addAddress(address: $address) {
                 ...AddressModel
               }
             }
@@ -386,8 +341,8 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation UpdateAddress($address: AddressInput!) { 
-              updateAddress(address: $address) { 
+            query: print(gql`mutation UpdateAddress($address: AddressInput!) {
+              updateAddress(address: $address) {
                 ...AddressModel
               }
             }
@@ -433,7 +388,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation DeleteAddress($id: Int!) { 
+            query: print(gql`mutation DeleteAddress($id: Int!) {
               deleteAddress(id: $id)
             }`),
             variables: {
@@ -468,7 +423,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
+            query: print(gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) {
               changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
             }`),
             variables: {
@@ -507,7 +462,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) { 
+            query: print(gql`mutation ChangeStatus($addressId: Int!, $status: String!, $userid: Int!, $tag: String) {
               changeAddressStatus(addressId: $addressId, status: $status, userid: $userid, note: $tag)
             }`),
             variables: {
@@ -546,7 +501,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation AddTag($addressId: Int!, $userid: Int!, $tag: String!) { 
+            query: print(gql`mutation AddTag($addressId: Int!, $userid: Int!, $tag: String!) {
               addNote(addressId: $addressId, userid: $userid, note: $tag)
             }`),
             variables: {
@@ -585,7 +540,7 @@ export const address = {
             'Content-Type': 'application/json',
           },
           data: {
-            query: print(gql`mutation RemoveTag($addressId: Int!, $userid: Int!, $tag: String!) { 
+            query: print(gql`mutation RemoveTag($addressId: Int!, $userid: Int!, $tag: String!) {
               removeNote(addressId: $addressId, userid: $userid, note: $tag)
             }`),
             variables: {
