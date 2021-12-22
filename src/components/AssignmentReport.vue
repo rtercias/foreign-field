@@ -1,13 +1,44 @@
 <template>
   <table class="assignment-report">
     <thead>
-      <tr class="w-100 p-3">
+      <tr class="w-100 p-3 pb-5">
         <td class="buttons w-100 d-flex justify-content-between align-items-center">
-          <b-form-radio-group v-model="campaignMode" class="text-left" :class="{ 'small': !isDesktop }" @change="fetch">
-            <b-form-radio :value="false"><span>No Campaigns</span></b-form-radio>
-            <b-form-radio :value="undefined"><span>Include Campaigns*</span></b-form-radio>
-            <b-form-radio :value="true"><span>Campaign Mode Only*</span></b-form-radio>
-          </b-form-radio-group>
+          <b-dropdown class="campaign-filter pr-2 py-1" left variant="outline-dark">
+            <span slot="button-content">
+              <font-awesome-icon icon="bolt" />
+              <span class="pl-2" v-if="isDesktop">{{get(campaignMode, 'text')}}</span>
+            </span>
+            <b-dropdown-item
+              class="d-block mr-0 pl-1"
+              v-for="option in campaignOptions"
+              :key="get(option, 'value')"
+              :class="{ 'ml-n2': get(campaignMode, 'value') === get(option, 'value') }"
+              @click="() => fetch({ campaignMode: option })">
+              <font-awesome-icon
+                class="selected mr-1"
+                icon="check"
+                v-if="get(campaignMode, 'value') === get(option, 'value')" />
+              <span>{{get(option, 'text')}}</span>
+            </b-dropdown-item>
+          </b-dropdown>
+          <b-dropdown class="survey-filter pr-2 py-1" left variant="outline-dark">
+            <span slot="button-content">
+              <font-awesome-icon icon="binoculars" />
+              <span class="pl-2" v-if="isDesktop">{{get(surveyMode, 'text')}}</span>
+            </span>
+            <b-dropdown-item
+              class="d-block mr-0 pl-1"
+              v-for="option in surveyOptions"
+              :key="get(option, 'value')"
+              :class="{ 'ml-n2': get(surveyMode, 'value') === get(option, 'value') }"
+              @click="() => fetch({ surveyMode: option })">
+              <font-awesome-icon
+                class="selected mr-1"
+                icon="check"
+                v-if="get(surveyMode, 'value') === get(option, 'value')" />
+              <span>{{get(option, 'text')}}</span>
+            </b-dropdown-item>
+          </b-dropdown>
           <div>
             <span v-if="isDesktop" class="pr-2">Date Filter:</span>
             <the-mask
@@ -21,7 +52,7 @@
           <b-dropdown class="sort-btn pr-2 py-1" right variant="outline-dark">
             <span slot="button-content">
               <font-awesome-icon icon="sort-amount-down-alt" />
-              <span class="pl-1" v-if="isDesktop">{{sortOptions.find(o => o.value === sortField).text}}</span>
+              <span class="pl-2" v-if="isDesktop">{{sortOptions.find(o => o.value === sortField).text}}</span>
             </span>
             <b-dropdown-item
               class="d-block mr-0 pl-1"
@@ -38,6 +69,7 @@
       <tr><td>
         <h3 class="font-weight-bold mt-0">Territory Assignment Record (S-13)</h3>
       </td></tr>
+      <tr v-if="campaignMode !== false" class="d-flex justify-content-end mr-5"><td>*Campaign Mode</td></tr>
     </thead>
     <tbody>
       <tr v-for="(group, groupIndex) in groupedRecords" :key="groupIndex">
@@ -71,12 +103,25 @@ import { mapGetters, mapActions } from 'vuex';
 import { TheMask } from 'vue-the-mask';
 import groupBy from 'lodash/groupBy';
 import orderBy from 'lodash/orderBy';
+import get from 'lodash/get';
 import format from 'date-fns/format';
 import isAfter from 'date-fns/isAfter';
 
 const sortOptions = [
   { value: 'territory_name', text: 'Name' },
   { value: 'territory_description, territory_name', text: 'Description' },
+];
+
+const campaignOptions = [
+  { value: undefined, text: 'Include Campaigns' },
+  { value: false, text: 'Exclude Campaigns' },
+  { value: true, text: 'Campaigns Only' },
+];
+
+const surveyOptions = [
+  { value: undefined, text: 'Include Surveys' },
+  { value: false, text: 'Exclude Surveys' },
+  { value: true, text: 'Surveys Only' },
 ];
 
 export default {
@@ -88,8 +133,11 @@ export default {
   data() {
     return {
       sortOptions,
-      campaignMode: 'undefined',
+      campaignOptions,
+      surveyOptions,
+      campaignMode: campaignOptions[0],
       sortField: 'territory_name',
+      surveyMode: surveyOptions[0],
       dateFilter: '',
     };
   },
@@ -100,12 +148,20 @@ export default {
     ...mapActions({
       fetchAssignmentRecords: 'reports/fetchAssignmentRecords',
     }),
-    async fetch(value) {
+    get,
+    async fetch(params) {
       if (this.user && this.user.congregation.id !== this.congregationId) {
         this.$router.push('/unauthorized');
       }
-      const campaignMode = value;
-      await this.fetchAssignmentRecords({ congId: this.congregationId, campaignMode });
+      const campaignMode = get(params, 'campaignMode') || this.campaignMode;
+      const surveyMode = get(params, 'surveyMode') || this.surveyMode;
+      this.campaignMode = campaignMode;
+      this.surveyMode = surveyMode;
+      await this.fetchAssignmentRecords({
+        congId: this.congregationId,
+        campaignMode: campaignMode.value,
+        surveyMode: surveyMode.value,
+      });
     },
   },
   computed: {

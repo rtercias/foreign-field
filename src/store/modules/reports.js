@@ -19,7 +19,7 @@ export const reports = {
     },
   },
   actions: {
-    async fetchAssignmentRecords({ commit }, { congId, campaignMode }) {
+    async fetchAssignmentRecords({ commit }, { congId, campaignMode, surveyMode }) {
       if (!congId) {
         console.error('congId is required');
         return;
@@ -36,6 +36,7 @@ export const reports = {
             getAssignmentRecords (congId: $congId campaignMode: $campaignMode) {
               territory_name
               territory_description
+              type
               publisher_name
               out
               in
@@ -51,7 +52,12 @@ export const reports = {
       });
 
       if (response && response.data && response.data.data) {
-        const records = response.data.data.getAssignmentRecords || [];
+        let records = response.data.data.getAssignmentRecords || [];
+        if (surveyMode === true) {
+          records = records.filter(r => r.type === 'SEARCH');
+        } else if (surveyMode === false) {
+          records = records.filter(r => r.type !== 'SEARCH');
+        }
         commit(SET_ASSIGNMENT_RECORDS, records);
       }
     },
