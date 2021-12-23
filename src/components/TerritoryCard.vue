@@ -23,25 +23,27 @@
           <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
           Check Out
         </b-btn>
-        <b-btn
-          class="font-weight-bold p-1 btn-sm"
-          v-else-if="canWrite && status === 'Checked Out'"
-          variant="warning"
-          @click="checkin"
-          :disabled="saving">
-          <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
-          Check In
-        </b-btn>
-        <b-btn
-          class="mr-0 pr-0 pt-0"
-          v-b-modal = "`checkoutModal-${terr.id}`"
-          v-else-if="canViewReports && status === 'Checked Out'"
-          variant="link"
-          @click="isReassign = true"
-          :disabled="saving">
-          <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
-          Reassign
-        </b-btn>
+        <div v-else-if="status === 'Checked Out'" class="d-flex flex-column">
+          <b-btn
+            class="font-weight-bold p-1 btn-sm"
+            v-if="canWrite"
+            variant="warning"
+            @click="checkin"
+            :disabled="saving">
+            <font-awesome-icon v-if="saving" icon="circle-notch" spin></font-awesome-icon>
+            Check In
+          </b-btn>
+          <b-btn
+            class="mr-0 pr-0 pb-0 pt-2"
+            v-b-modal = "`checkoutModal-${terr.id}`"
+            v-if="canViewReports"
+            variant="link"
+            @click="isReassign = true"
+            :disabled="saving">
+            <font-awesome-icon v-if="terr.isBusy" icon="circle-notch" spin></font-awesome-icon>
+            Reassign
+          </b-btn>
+        </div>
       </div>
     </div>
     <div class="row">
