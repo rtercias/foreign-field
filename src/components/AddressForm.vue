@@ -247,6 +247,7 @@ export default {
     ...mapActions({
       addAddress: 'address/addAddress',
       updateAddress: 'address/updateAddress',
+      deleteAddressFromTerritory: 'territory/deleteAddress',
       deleteAddress: 'address/deleteAddress',
       fetchAddress: 'address/fetchAddress',
       addressLookup: 'address/addressLookup',
@@ -273,7 +274,6 @@ export default {
         if (this.mode === Modes.add) {
           this.isSaving = true;
           await this.addAddress(this.model);
-          await this.getTerritory({ id: this.model.territory_id });
         } else if (this.mode === Modes.edit) {
           if (this.model.status !== ADDRESS_STATUS.Active.value) {
             const statusTag = ADDRESS_STATUS[this.model.status].value;
@@ -281,6 +281,10 @@ export default {
           }
 
           await this.updateAddress(this.model);
+
+          if (this.model.territory_id !== this.territory.id) {
+            this.deleteAddressFromTerritory(this.model);
+          }
 
           if (this.model.status === ADDRESS_STATUS.NF.value) {
             await this.markAsNotForeign({ addressId: this.model.id, userid: this.user.id, tag: NF_TAG });
@@ -337,7 +341,7 @@ export default {
         delete this.model.activityLogs;
       } else {
         if (this.user && this.territoryId && this.territory.id !== this.territoryId) {
-          await this.getTerritory({ id: this.territoryId });
+          this.getTerritory({ id: this.territoryId, getLastActivity: true });
         }
         await this.setAddress({});
         this.model = {
@@ -406,9 +410,8 @@ export default {
       }
     },
 
-    async updateTerritory(territoryId) {
+    updateTerritory(territoryId) {
       this.$set(this.model, 'territory_id', territoryId);
-      await this.getTerritory({ id: territoryId });
     },
 
     done() {

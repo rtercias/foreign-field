@@ -126,9 +126,14 @@ export default {
 };
 </script>
 
-<style>
-  .publishers-list .dropdown-menu {
-    height: 31rem;
-    overflow-y: auto;
+<style lang="scss">
+  .publishers-list {
+    .dropdown-menu {
+      height: 31rem;
+      overflow-y: auto;
+    }
+    li {
+      display: block;
+    }
   }
 </style>
