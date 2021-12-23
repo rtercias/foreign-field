@@ -7,13 +7,14 @@ import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
-import { IncompleteRegistrationError, UnauthorizedUserError } from '../exceptions/custom-errors';
+import { IncompleteRegistrationError, UnauthorizedUserError, DisabledUserError } from '../exceptions/custom-errors';
 import { model as congregationModel } from './models/CongregationModel';
 
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
 const VERIFYING = 'VERIFYING';
+const ERROR_MESSAGE = 'ERROR_MESSAGE';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
@@ -33,6 +34,7 @@ function initialState() {
     isPending: false,
     isForcedOut: false,
     isVerifying: false,
+    errorMessage: '',
     isSwitchedToDesktop: false,
     name: '',
     email: '',
@@ -62,6 +64,7 @@ export const auth = {
     isAuthorized: state => !!state.user,
     isForcedOut: state => state.isForcedOut,
     isVerifying: state => state.isVerifying,
+    errorMessage: state => state.errorMessage,
     user: state => state.user,
     congId: state => state.congId,
     congregation: state => state.congregation,
@@ -142,6 +145,10 @@ export const auth = {
       }
     },
 
+    ERROR_MESSAGE(state, message) {
+      state.errorMessage = message;
+    },
+
     RESET(state) {
       const s = initialState();
       Object.keys(s).forEach((key) => {
@@ -192,9 +199,10 @@ export const auth = {
       commit(AUTHENTICATE_SUCCESS, { name: displayName, photoUrl, token, email, emailVerified });
     },
 
-    async logout({ commit }) {
+    logout({ commit }) {
       firebase.auth().signOut();
       sessionStorage.removeItem('firebaseui::token');
+      sessionStorage.removeItem('firebaseui::pendingRedirect');
       commit(RESET);
     },
 
@@ -204,46 +212,57 @@ export const auth = {
       dispatch('login', authenticatedUser);
     },
 
-    async authorize({ commit, dispatch }, username) {
+    async authorize({ commit, getters, dispatch }, username) {
       commit(LOADING, true);
-      const response = await axios({
-        url: process.env.VUE_APP_ROOT_API,
-        method: 'post',
-        data: {
-          query: print(gql`query Publisher($username: String) {
-            user (username: $username) {
-              id
-              username
-              firstname
-              lastname
-              role
-              status
-              congregation {
-                ...CongregationModel
+      if (!getters.isAuthorized) {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Publisher($username: String) {
+              user (username: $username) {
+                id
+                username
+                firstname
+                lastname
+                role
+                status
+                congregation {
+                  ...CongregationModel
+                }
               }
-            }
+            },
+            ${congregationModel}`),
+            variables: {
+              username,
+            },
           },
-          ${congregationModel}`),
-          variables: {
-            username,
-          },
-        },
-      });
+        });
 
-      if (!response || !response.data || !response.data.data || !response.data.data.user) {
-        throw new IncompleteRegistrationError('Unauthorized');
+        if (!response || !response.data || !response.data.data || !response.data.data.user) {
+          throw new IncompleteRegistrationError(
+            'Account not found. Ask your administrator to create a publisher account for you.'
+          );
+        }
+
+        const { user } = (response && response.data && response.data.data) || {};
+        if (user.status === 'disabled') {
+          throw new DisabledUserError('Your account is disabled.');
+        }
+
+        const options = JSON.parse(get(user, 'congregation.options', '{}'));
+        const congregation = user && { ...user.congregation, options };
+
+        if (user) {
+          commit(AUTHORIZE, { ...user, congregation });
+          dispatch('congregation/setCongregation', congregation, { root: true });
+        } else {
+          throw new UnauthorizedUserError('Unauthorized');
+        }
       }
 
-      const { user } = (response && response.data && response.data.data) || {};
-      if (user.status === 'disabled') {
-        throw new UnauthorizedUserError('Unauthorized');
-      }
-
-      const options = JSON.parse(get(user, 'congregation.options', '{}'));
-      const congregation = user && { ...user.congregation, options };
-      const userRoles = get(user, 'role', '').split(',');
+      const userRoles = get(getters.user, 'role', '').split(',');
       const { permissions } = router.currentRoute.meta;
-
       let hasPermission = true;
       if (typeof permissions === 'function') {
         hasPermission = permissions();
@@ -251,10 +270,7 @@ export const auth = {
         hasPermission = intersection(permissions, userRoles).length > 0;
       }
 
-      if (user && hasPermission) {
-        commit(AUTHORIZE, { ...user, congregation });
-        dispatch('congregation/setCongregation', congregation, { root: true });
-      } else {
+      if (!hasPermission) {
         throw new UnauthorizedUserError('Unauthorized');
       }
 
@@ -320,11 +336,14 @@ export const auth = {
       }
     },
 
-    forceout({ commit }) {
+    forceout({ commit }, errorMessage) {
       commit(FORCEOUT);
+      if (errorMessage) {
+        commit(ERROR_MESSAGE, errorMessage);
+      }
     },
 
-    async login({ dispatch, state }, user) {
+    async login({ dispatch }, user) {
       if (!user) return;
 
       try {
@@ -336,16 +355,10 @@ export const auth = {
         } else if (user.uid) {
           await dispatch('authorize', user.uid);
         }
-
-        if (!state.user) {
-          // unauthorized
-          await dispatch('logout');
-          dispatch('forceout');
-        }
       } catch (err) {
-        if (err instanceof IncompleteRegistrationError) {
-          await dispatch('logout');
-          dispatch('forceout');
+        if (err instanceof IncompleteRegistrationError || err instanceof DisabledUserError) {
+          dispatch('logout');
+          dispatch('forceout', err.message);
         } else if (err instanceof UnauthorizedUserError) {
           router.replace({ name: 'unauthorized' });
         } else {

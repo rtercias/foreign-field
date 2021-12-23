@@ -25,7 +25,7 @@
       <font-awesome-icon class="ml-1 text-info" icon="info-circle" @click="toggleCampaignHelp" />
       <b-toaster name="campaign-help"></b-toaster>
     </b-nav-item>
-    <b-nav-item-dropdown v-if="isAuthenticated" right>
+    <b-nav-item-dropdown v-if="isAuthenticated">
       <span slot="text">{{user && user.firstname || name}}</span>
       <b-dropdown-item
         class="m-0 w-100"

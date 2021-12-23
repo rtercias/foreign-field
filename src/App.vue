@@ -225,9 +225,14 @@ export default {
     }),
     async refresh() {
       if (this.user) {
-        await this.authorize(get(this.user, 'username'));
-        if (this.user.status === 'disabled') {
-          this.logoutUser();
+        try {
+          await this.authorize(get(this.user, 'username'));
+        } catch (err) {
+          if (err instanceof UnauthorizedUserError) {
+            this.$router.replace({ name: 'unauthorized' });
+          } else {
+            console.error(err);
+          }
         }
       }
     },
