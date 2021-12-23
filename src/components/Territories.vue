@@ -310,7 +310,7 @@ export default {
       const congId = this.congId || get(this.congregation, 'id') || (this.user && this.user.congId);
       if (congId && !this.groups.length) await this.getGroups({ congId });
       if (get(this.group, 'congregation_id') && get(this.user, 'congregation.id') !== get(this.group, 'congregation_id')) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
         return;
       }
       if (!this.publishers.length) {

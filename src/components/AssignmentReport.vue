@@ -152,7 +152,7 @@ export default {
     get,
     async fetch(params) {
       if (this.user && this.user.congregation.id !== this.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
       const campaignMode = get(params, 'campaignMode') || this.campaignMode;
       const surveyMode = get(params, 'surveyMode') || this.surveyMode;
@@ -191,7 +191,7 @@ export default {
   watch: {
     user() {
       if (this.user && this.user.congregation.id !== this.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
     },
   },
