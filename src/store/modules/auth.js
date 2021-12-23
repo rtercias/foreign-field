@@ -13,6 +13,7 @@ import { model as congregationModel } from './models/CongregationModel';
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
+const VERIFYING = 'VERIFYING';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
@@ -31,8 +32,10 @@ function initialState() {
     isAuthenticated: false,
     isPending: false,
     isForcedOut: false,
+    isVerifying: false,
     isSwitchedToDesktop: false,
     name: '',
+    email: '',
     user: undefined,
     photoUrl: '',
     congId: 0,
@@ -55,8 +58,10 @@ export const auth = {
     isAuthenticated: state => state.isAuthenticated,
     isPending: state => state.isPending,
     name: state => state.name,
+    email: state => state.email,
     isAuthorized: state => !!state.user,
     isForcedOut: state => state.isForcedOut,
+    isVerifying: state => state.isVerifying,
     user: state => state.user,
     congId: state => state.congId,
     congregation: state => state.congregation,
@@ -106,9 +111,13 @@ export const auth = {
     AUTHENTICATE_SUCCESS(state, authenticatedUser) {
       state.isAuthenticated = true;
       state.isForcedOut = false;
-      state.name = authenticatedUser.name;
-      state.photoUrl = authenticatedUser.photoUrl;
-      state.token = authenticatedUser.token;
+      if (authenticatedUser) {
+        state.name = authenticatedUser.name;
+        state.photoUrl = authenticatedUser.photoUrl;
+        state.token = authenticatedUser.token;
+        state.email = authenticatedUser.email;
+        state.isVerifying = !authenticatedUser.emailVerified;
+      }
     },
 
     AUTHORIZE(state, user) {
@@ -124,6 +133,13 @@ export const auth = {
 
     FORCEOUT(state) {
       state.isForcedOut = true;
+    },
+
+    VERIFYING(state, user) {
+      if (user) {
+        state.isVerifying = !user.emailVerified;
+        state.email = user.email;
+      }
     },
 
     RESET(state) {
@@ -172,15 +188,20 @@ export const auth = {
   },
 
   actions: {
-    async authenticate({ commit }, params) {
-      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl, token: params.token });
-      return params;
+    async authenticate({ commit }, { displayName, photoUrl, token, email, emailVerified } = {}) {
+      commit(AUTHENTICATE_SUCCESS, { name: displayName, photoUrl, token, email, emailVerified });
     },
 
     async logout({ commit }) {
       firebase.auth().signOut();
       sessionStorage.removeItem('firebaseui::token');
       commit(RESET);
+    },
+
+    async verify({ commit, dispatch }, user) {
+      commit(VERIFYING, user);
+      const authenticatedUser = await user.sendEmailVerification({ url: document.location.href });
+      dispatch('login', authenticatedUser);
     },
 
     async authorize({ commit, dispatch }, username) {
@@ -304,6 +325,8 @@ export const auth = {
     },
 
     async login({ dispatch, state }, user) {
+      if (!user) return;
+
       try {
         await dispatch('authenticate', user);
         if (user.emailVerified && user.email) {
@@ -342,6 +365,10 @@ export const auth = {
         commit(UPDATE_TOKEN, user.token);
         sessionStorage.setItem('firebaseui::token', user.token);
 
+        if (user && user.email && !user.emailVerified) {
+          return;
+        }
+
         axios.interceptors.request.use(async (cfg) => {
           const token = await user.getIdToken();
           sessionStorage.setItem('firebaseui::token', user.token);
@@ -375,6 +402,11 @@ export const auth = {
             if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
               router.replace({ name: 'auth', query: { redirect: loc.pathname } });
             }
+          }
+        });
+        firebase.auth().onIdTokenChanged((user) => {
+          if (user && user.email && user.emailVerified) {
+            dispatch('login', user);
           }
         });
       }

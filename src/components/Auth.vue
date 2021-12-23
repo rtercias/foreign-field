@@ -1,18 +1,34 @@
 <template lang="html">
-  <div :class="{ visible: !isAuthenticated, hidden: isAuthenticated }" id="firebaseui-auth-container" class="p-5"></div>
+  <div>
+    <div v-if="isVerifying" class="px-5 pt-4">
+      <div>A sign-in email with additional instructions was sent to {{email}}. Check your email to complete sign-in.</div>
+      <b-button @click="reload">Reload</b-button>
+    </div>
+    <div v-show="!isVerifying && !isAuthenticated" id="firebaseui-auth-container" class="p-5"></div>
+  </div>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import firebaseui from 'firebaseui';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'auth',
   computed: {
     ...mapGetters({
       isAuthenticated: 'auth/isAuthenticated',
+      isVerifying: 'auth/isVerifying',
+      email: 'auth/email',
     }),
+  },
+  methods: {
+    ...mapActions({
+      verify: 'auth/verify',
+    }),
+    reload() {
+      this.$router.go();
+    },
   },
   mounted() {
     const uiConfig = {
@@ -22,7 +38,11 @@ export default {
         firebase.auth.PhoneAuthProvider.PROVIDER_ID,
       ],
       callbacks: {
-        signInSuccessWithAuthResult: () => {
+        signInSuccessWithAuthResult: ({ user }) => {
+          if (user.email && !user.emailVerified) {
+            this.verify(user);
+          }
+
           const redirectUrl = this.$router.currentRoute.query.redirect;
           this.$router.push(redirectUrl || '/welcome');
           // Do not automatically redirect.
