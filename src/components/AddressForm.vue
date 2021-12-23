@@ -256,6 +256,7 @@ export default {
       addressSearch: 'addresses/addressSearch',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
+      back: 'auth/back',
     }),
     async submitAddress() {
       try {
@@ -295,7 +296,7 @@ export default {
         if (this.canManage) {
           this.step = 4;
         } else {
-          this.$router.push(this.returnRoute);
+          this.back({ vm: this });
         }
       } catch (err) {
         if (err instanceof InvalidAddressError) {
@@ -412,7 +413,7 @@ export default {
     },
 
     done() {
-      this.$router.go(-1);
+      this.back({ vm: this });
     },
 
     async remove() {
@@ -457,16 +458,6 @@ export default {
       territoriesLoading: 'territories/loading',
       searchedAddresses: 'addresses/search',
     }),
-
-    returnRoute() {
-      const { origin = '' } = this.$route.query;
-      const queryParam = origin ? `?origin=${origin}` : '';
-      const addMode = this.mode === Modes.add
-        ? `/territories/${this.territoryId}`
-        : `/territories/${this.territoryId}/addresses/${this.addressId}/detail${queryParam}`;
-      if (this.$route.name === 'address-new') return '/';
-      return addMode;
-    },
 
     isFormComplete() {
       const isActive = get(this.model, 'status') === ADDRESS_STATUS.Active.value;

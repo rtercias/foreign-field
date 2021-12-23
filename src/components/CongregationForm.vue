@@ -109,7 +109,6 @@ export default {
       getCongregation: 'congregation/getCongregation',
       addCongregation: 'congregation/addCongregation',
       updateCongregation: 'congregation/updateCongregation',
-      back: 'auth/back',
     }),
     edit() {
       this.readOnly = false;

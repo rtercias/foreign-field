@@ -48,8 +48,8 @@
           Address Change Log
         </b-list-group-item>
         <b-list-group-item
-          class="lead p-4 font-weight-bold w-100"
-          :to="`/territories/${territoryId}/${$route.query.origin || ''}`"
+          class="cancel lead p-4 font-weight-bold w-100"
+          @click="goBack"
           variant="light">
           Cancel
         </b-list-group-item>
@@ -127,8 +127,12 @@ export default {
   methods: {
     ...mapActions({
       fetchAddress: 'address/fetchAddress',
+      back: 'auth/back',
     }),
     get,
+    goBack() {
+      this.back({ vm: this });
+    },
   },
   watch: {
     user() {
@@ -145,5 +149,8 @@ export default {
 <style>
   .address-header {
     display: flex;
+  }
+  .cancel {
+    cursor: pointer;
   }
 </style>

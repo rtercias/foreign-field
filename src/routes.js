@@ -186,6 +186,8 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
       label: 'Change Log',
+      preserveQueryString: true,
+      back: 'home',
     },
   },
   {
@@ -240,6 +242,7 @@ const routes = [
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
       label: 'Add Address',
+      preserveQueryString: true,
     },
   },
   {

@@ -382,19 +382,33 @@ export const auth = {
     },
 
     back({ getters, state }, params) {
-      const { vm, route } = params;
+      const { vm } = params;
+      let { route } = params;
       if (route) {
         vm.$router.push(route);
         return;
       }
-      const back = get(Vue.$route, 'query.back') || get(vm.$route, 'meta.back');
+      route = route || vm.$route || Vue.$route;
+
+      let origin = get(route, 'query.origin');
+      if (origin === get(route, 'name')) {
+        origin = '';
+      }
+      const back = get(route, 'query.back') || get(route, 'meta.back');
       const userRoles = get(state.user, 'role', '').split(',');
-      const resolvedTo = vm.$router.resolve({ name: back });
+      const resolvedTo = vm.$router.resolve({ name: origin || back });
+      const preserveQueryString = get(resolvedTo, 'route.meta.preserveQueryString');
       const permissions = get(resolvedTo, 'route.meta.permissions') || [];
       const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
 
-      if (back && hasPermission) {
-        vm.$router.push({ name: back, params: getters.leftNavRouteParams });
+      let query = '';
+      if (preserveQueryString) {
+        const queryString = new URLSearchParams(document.location.search);
+        query = Object.fromEntries(queryString);
+      }
+
+      if ((origin || back) && hasPermission) {
+        vm.$router.push({ name: origin || back, params: getters.leftNavRouteParams, query });
       } else {
         vm.$router.back();
       }

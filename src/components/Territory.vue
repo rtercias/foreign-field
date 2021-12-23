@@ -69,7 +69,11 @@
           </div>
         </div>
       </header>
-      <router-view :disabled="!isCheckedOut" :territory="territory" @update-count="updateCount"></router-view>
+      <router-view
+        :disabled="!isCheckedOut"
+        :territory="territory"
+        :options="{ showSortOrder: true, editable: true }"
+        @update-count="updateCount"/>
     </div>
   </div>
 </template>
@@ -77,7 +81,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
-import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
 import { store, defaultOptions, TerritoryType } from '../store';
 import { displayName, displayShortName } from '../utils/publisher';
@@ -86,7 +89,6 @@ import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 export default {
   name: 'Territory',
   components: {
-    TerritoryMap,
     Loading,
   },
   props: ['territoryId'],
