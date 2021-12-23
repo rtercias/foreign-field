@@ -52,7 +52,6 @@ export default {
       user: 'auth/user',
       groups: 'group/groups',
       group: 'group/group',
-      territories: 'territories/territories',
       allTerritories: 'territories/allTerritories',
       isDesktop: 'auth/isDesktop',
     }),

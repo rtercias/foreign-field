@@ -312,7 +312,7 @@ export const address = {
 
         const { addAddress } = get(response, 'data.data');
         commit(ADD_ADDRESS, addAddress);
-        dispatch('territory/addAddress', addr, { root: true });
+        dispatch('territory/addAddress', addAddress, { root: true });
       } catch (e) {
         commit(ADD_ADDRESS_FAIL, e);
         console.error(ADD_ADDRESS_FAIL, e);

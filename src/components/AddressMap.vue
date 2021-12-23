@@ -147,10 +147,10 @@ export default {
 
 <style>
   .step-2 .address-map {
-    height: calc(100vh - 220px);
+    height: calc(100vh - 355px);
   }
   .step-3 .address-map {
-    height: calc(100vh - 255px);
+    height: calc(100vh - 369px);
   }
   .map {
     width: 100%;
