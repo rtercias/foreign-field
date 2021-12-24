@@ -16,7 +16,6 @@
       <v-marker-cluster
         class="marker-cluster"
         ref="markerCluster"
-        v-if="step===3"
         :options="{
           maxClusterRadius: 4000,
           zoomToBoundsOnClick: false,
@@ -76,11 +75,11 @@ export default {
   },
   async mounted() {
     this.center = this.getLatLng();
+
     if (this.step === 3) {
       await this.$emit('get-nearest-territories');
-      const clusters = this.$refs.markerCluster || [];
 
-      for (const cluster of clusters) {
+      for (const cluster of this.$refs.markerCluster) {
         const vm = this;
         cluster.mapObject.on('clustermouseover', (c) => {
           c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
