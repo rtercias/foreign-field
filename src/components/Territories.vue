@@ -160,6 +160,7 @@ import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 import orderBy from 'lodash/orderBy';
 import toLower from 'lodash/toLower';
+import { displayName } from '../utils/publisher';
 
 const DEFAULT_FILTER = '';
 const DEFAULT_SORT = 'Description';
@@ -246,8 +247,7 @@ export default {
             t.description,
             t.tags,
             t.id,
-            get(t.status, 'publisher.firstname'),
-            get(t.status, 'publisher.lastname'),
+            displayName(get(t.status, 'publisher')),
           ],
         ));
       }
