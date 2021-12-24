@@ -115,7 +115,7 @@
       </div>
       <SearchBar
         class="w-100 pt-3"
-        :search-text="'Filter by territory name, description, id, or tag'"
+        :search-text="'Filter by territory name, description, id, tag, or publisher name'"
         :results="filteredTerritories"
         allow-exclude="true"
         :model="keywordFilter"
@@ -241,7 +241,14 @@ export default {
       if (this.keywordFilter) {
         return this.territories.filter(t => this.excludeKeyword !== this.compareToKeyword(
           this.keywordFilter,
-          [t.name, t.description, t.tags, t.id],
+          [
+            t.name,
+            t.description,
+            t.tags,
+            t.id,
+            get(t.status, 'publisher.firstname'),
+            get(t.status, 'publisher.lastname'),
+          ],
         ));
       }
       if (this.typeFilter) {
