@@ -150,21 +150,10 @@
             <div>
               Selected Territory:
               <b-form-select
-                class="w-50"
+                class="w-25"
                 v-model="model.territory_id"
                 :options="territoryOptions" required>
               </b-form-select>
-            </div>
-            <div class="text-right">
-              Radius:
-              <the-mask
-                class="w-25 form-control d-inline"
-                :mask="'##'"
-                :masked="true"
-                placeholder="3"
-                v-model="radius"
-                @change.native="getNearest"
-              />
             </div>
           </div>
         </div>
@@ -173,8 +162,7 @@
           :zoom="14"
           :step="step"
           :key="step"
-          @territory-selected="updateTerritory"
-          @get-nearest-territories="getNearest">
+          @territory-selected="updateTerritory">
         </AddressMap>
       </div>
       <div v-else-if="step === 4" class="step-4 pb-5">
@@ -233,8 +221,6 @@ import { Modes as _Modes } from '../utils/modes';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
 import { formatLanguage, NF_TAG, DNC_TAG } from '../utils/tags';
 
-const DEFAULT_RADIUS = 3;
-
 const Modes = {
   ..._Modes,
   phoneAdd: 'phone-add',
@@ -272,7 +258,6 @@ export default {
       enteredAddress: undefined,
       showTerrHelp: true,
       showGeocodeHelp: false,
-      radius: DEFAULT_RADIUS,
     };
   },
   async mounted() {
@@ -293,7 +278,6 @@ export default {
       addressSearch: 'addresses/addressSearch',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
-      getNearestTerritories: 'territories/getNearestTerritories',
     }),
     async submitAddress() {
       try {
@@ -482,15 +466,6 @@ export default {
       const notes = get(this.model, 'notes') || '';
       const tags = notes.split(',') || [];
       return tags.filter(t => t.includes(status)).join(',');
-    },
-
-    async getNearest() {
-      await this.getNearestTerritories({
-        congId: this.congId,
-        coordinates: [this.model.latitude, this.model.longitude],
-        radius: Number(this.radius),
-        unit: 'mi',
-      });
     },
   },
   computed: {

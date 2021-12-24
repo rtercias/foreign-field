@@ -6,6 +6,7 @@
       :zoom="zoom"
       :center="center"
       :draggable="true"
+      @update:bounds="getNearest"
       :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
@@ -75,30 +76,7 @@ export default {
   },
   async mounted() {
     this.center = this.getLatLng();
-
-    if (this.step === 3) {
-      await this.$emit('get-nearest-territories');
-
-      for (const cluster of this.$refs.markerCluster) {
-        const vm = this;
-        cluster.mapObject.on('clustermouseover', (c) => {
-          c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
-        });
-
-        cluster.mapObject.on('clusterclick', (c) => {
-          const selected = c.originalEvent.target.closest('.leaflet-marker-pane')
-            .getElementsByClassName('selected') || [];
-
-          for (const el of selected) {
-            el.classList.remove('selected');
-          }
-
-          c.originalEvent.target.closest('.leaflet-interactive').classList.add('selected');
-          c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
-          vm.$emit('territory-selected', cluster.$attrs.id);
-        });
-      }
-    }
+    await this.getNearest();
   },
   computed: {
     ...mapGetters({
@@ -119,6 +97,7 @@ export default {
   methods: {
     ...mapActions({
       addAddress: 'address/addAddress',
+      getNearestTerritories: 'territories/getNearestTerritories',
     }),
     getLatLng() {
       if (this.address.latitude && this.address.longitude) {
@@ -137,6 +116,36 @@ export default {
       const mapBoundNorthEast = this.$refs.addressMap.mapObject.getBounds().getNorthEast();
       const mapDistance = mapBoundNorthEast.distanceTo(this.$refs.addressMap.mapObject.getCenter());
       return Math.ceil(mapDistance / 1000 / 1.6);
+    },
+    async getNearest() {
+      if (this.step === 3) {
+        await this.getNearestTerritories({
+          congId: this.congId,
+          coordinates: [this.address.latitude, this.address.longitude],
+          radius: this.getRadius(),
+          unit: 'mi',
+        });
+
+        for (const cluster of this.$refs.markerCluster) {
+          const vm = this;
+          cluster.mapObject.on('clustermouseover', (c) => {
+            c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
+          });
+
+          cluster.mapObject.on('clusterclick', (c) => {
+            const selected = c.originalEvent.target.closest('.leaflet-marker-pane')
+              .getElementsByClassName('selected') || [];
+
+            for (const el of selected) {
+              el.classList.remove('selected');
+            }
+
+            c.originalEvent.target.closest('.leaflet-interactive').classList.add('selected');
+            c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
+            vm.$emit('territory-selected', cluster.$attrs.id);
+          });
+        }
+      }
     },
   },
   watch: {
