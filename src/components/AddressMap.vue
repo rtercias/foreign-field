@@ -16,7 +16,7 @@
       <v-marker-cluster
         class="marker-cluster"
         ref="markerCluster"
-        v-show="step===3"
+        v-if="step===3"
         :options="{
           maxClusterRadius: 4000,
           zoomToBoundsOnClick: false,
@@ -77,20 +77,24 @@ export default {
   async mounted() {
     this.center = this.getLatLng();
     if (this.step === 3) {
-      await this.getNearestTerritories({
-        congId: this.congId,
-        coordinates: [this.address.latitude, this.address.longitude],
-        radius: 3,
-        unit: 'mi',
-      });
+      await this.$emit('get-nearest-territories');
+      const clusters = this.$refs.markerCluster || [];
 
-      for (const cluster of this.$refs.markerCluster) {
+      for (const cluster of clusters) {
         const vm = this;
         cluster.mapObject.on('clustermouseover', (c) => {
           c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
         });
 
         cluster.mapObject.on('clusterclick', (c) => {
+          const selected = c.originalEvent.target.closest('.leaflet-marker-pane')
+            .getElementsByClassName('selected') || [];
+
+          for (const el of selected) {
+            el.classList.remove('selected');
+          }
+
+          c.originalEvent.target.closest('.leaflet-interactive').classList.add('selected');
           c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
           vm.$emit('territory-selected', cluster.$attrs.id);
         });
@@ -116,7 +120,6 @@ export default {
   methods: {
     ...mapActions({
       addAddress: 'address/addAddress',
-      getNearestTerritories: 'territories/getNearestTerritories',
     }),
     getLatLng() {
       if (this.address.latitude && this.address.longitude) {
@@ -145,12 +148,14 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+  @import "../assets/foreign-field-theme.scss";
+
   .step-2 .address-map {
     height: calc(100vh - 355px);
   }
   .step-3 .address-map {
-    height: calc(100vh - 369px);
+    height: calc(100vh - 385px);
   }
   .map {
     width: 100%;
@@ -159,14 +164,17 @@ export default {
     width: 80px !important;
     height: 80px !important;
     border-radius: 50% !important;
-  }
-  .marker-cluster div {
-    width: 70px !important;
-    height: 70px !important;
-    border-radius: 50% !important;
-  }
-  .marker-cluster span {
-    line-height: 70px !important;
-    font-size: 20px;
+    &.selected {
+      background-color: $primary;
+    }
+    div {
+      width: 70px !important;
+      height: 70px !important;
+      border-radius: 50% !important;
+    }
+    span {
+      line-height: 70px !important;
+      font-size: 20px;
+    }
   }
 </style>

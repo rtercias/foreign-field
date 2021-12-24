@@ -63,7 +63,7 @@ export default {
       }
     });
     channel.bind('update-address', (address) => {
-      if (address && this.territory.id === address.territory_id) {
+      if (address) {
         if (address.status !== AddressStatus.Active) {
           this.deleteAddress(address);
         } else {

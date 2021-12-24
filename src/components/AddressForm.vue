@@ -130,19 +130,52 @@
           First, let's check the address location. Drag and drop the marker to make adjustments.
           Click on <b>Select Territory</b> when finished.
         </p>
-        <AddressMap :address="model" :zoom="17" :step="step" :key="step" @updated="updateCoordinates" />
+        <AddressMap
+          :address="model"
+          :zoom="17"
+          :step="step"
+          :key="step"
+          @updated="updateCoordinates"
+        />
       </div>
       <div v-else-if="step === 3" class="step-3">
         <div v-if="territoriesLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
           Loading territories... <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
         </div>
-        <p v-else>
-          Now, select the territory for this address by clicking on one of the circle territory markers.
-          <b-form-select v-model="model.territory_id"
-            :options="territoryOptions" required>
-          </b-form-select>
-        </p>
-        <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
+        <div v-else class="mb-3">
+          <p class="mb-3">
+            Now, select the territory for this address by clicking on one of the circle territory markers.
+          </p>
+          <div class="d-flex justify-content-between">
+            <div>
+              Selected Territory:
+              <b-form-select
+                class="w-50"
+                v-model="model.territory_id"
+                :options="territoryOptions" required>
+              </b-form-select>
+            </div>
+            <div class="text-right">
+              Radius:
+              <the-mask
+                class="w-25 form-control d-inline"
+                :mask="'##'"
+                :masked="true"
+                placeholder="3"
+                v-model="radius"
+                @change.native="getNearest"
+              />
+            </div>
+          </div>
+        </div>
+        <AddressMap
+          :address="model"
+          :zoom="14"
+          :step="step"
+          :key="step"
+          @territory-selected="updateTerritory"
+          @get-nearest-territories="getNearest">
+        </AddressMap>
       </div>
       <div v-else-if="step === 4" class="step-4 pb-5">
         <div v-if="mode === 'add'">
@@ -200,6 +233,8 @@ import { Modes as _Modes } from '../utils/modes';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
 import { formatLanguage, NF_TAG, DNC_TAG } from '../utils/tags';
 
+const DEFAULT_RADIUS = 3;
+
 const Modes = {
   ..._Modes,
   phoneAdd: 'phone-add',
@@ -237,6 +272,7 @@ export default {
       enteredAddress: undefined,
       showTerrHelp: true,
       showGeocodeHelp: false,
+      radius: DEFAULT_RADIUS,
     };
   },
   async mounted() {
@@ -257,6 +293,7 @@ export default {
       addressSearch: 'addresses/addressSearch',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
+      getNearestTerritories: 'territories/getNearestTerritories',
     }),
     async submitAddress() {
       try {
@@ -394,6 +431,7 @@ export default {
 
       await this.geocodeAddress();
       this.step = 2;
+      window.scrollTo(0, 0);
     },
 
     undoGeocode() {
@@ -402,6 +440,7 @@ export default {
 
     async goToSelectTerritory() {
       this.step = 3;
+      window.scrollTo(0, 0);
     },
 
     prev() {
@@ -443,6 +482,15 @@ export default {
       const notes = get(this.model, 'notes') || '';
       const tags = notes.split(',') || [];
       return tags.filter(t => t.includes(status)).join(',');
+    },
+
+    async getNearest() {
+      await this.getNearestTerritories({
+        congId: this.congId,
+        coordinates: [this.model.latitude, this.model.longitude],
+        radius: Number(this.radius),
+        unit: 'mi',
+      });
     },
   },
   computed: {
