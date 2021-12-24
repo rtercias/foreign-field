@@ -150,7 +150,6 @@
             <div>
               Selected Territory:
               <b-form-select
-                class="w-25"
                 v-model="model.territory_id"
                 :options="territoryOptions" required>
               </b-form-select>
