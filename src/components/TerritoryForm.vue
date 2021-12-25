@@ -108,7 +108,7 @@ export default {
       try {
         const message = 'Are you sure you want to save your changes?';
         const confirm = await this.$bvModal.msgBoxConfirm(message, {
-          title: get(this.territory, 'name'),
+          title: get(this.model, 'name'),
           centered: true,
         });
         if (confirm) {
@@ -218,11 +218,14 @@ export default {
       }
       return true;
     },
+    congregationIdStatus() {
+      return get(this.user, 'congregation.id') && get(this.territory, 'congregationid');
+    },
   },
   watch: {
-    user() {
-      if (this.user && this.user.congregation.id !== this.territory.congregationid) {
-        this.$router.push('/unauthorized');
+    congregationIdStatus(isLoaded) {
+      if (isLoaded && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
+        this.$router.replace('/unauthorized');
       } else {
         this.isLoading = false;
       }

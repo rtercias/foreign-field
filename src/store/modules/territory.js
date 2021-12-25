@@ -228,11 +228,8 @@ export const territory = {
     DELETE_ADDRESS(state, address) {
       address.id = address.id || address.addressId;
       if (state.territory && state.territory.addresses) {
-        const origAddress = state.territory.addresses.find(a => a.id === address.id);
-        if (origAddress && address.status !== AddressStatus.Active) {
-          const index = state.territory.addresses.findIndex(a => a.id === address.id);
-          state.territory.addresses.splice(index, 1);
-        }
+        const index = state.territory.addresses.findIndex(a => a.id === address.id);
+        state.territory.addresses.splice(index, 1);
       }
     },
     UPDATE_PHONE(state, phone) {

@@ -7,12 +7,14 @@ import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
-import { IncompleteRegistrationError, UnauthorizedUserError } from '../exceptions/custom-errors';
+import { IncompleteRegistrationError, UnauthorizedUserError, DisabledUserError } from '../exceptions/custom-errors';
 import { model as congregationModel } from './models/CongregationModel';
 
 const AUTHENTICATE_SUCCESS = 'AUTHENTICATE_SUCCESS';
 const AUTHORIZE = 'AUTHORIZE';
 const FORCEOUT = 'FORCEOUT';
+const VERIFYING = 'VERIFYING';
+const ERROR_MESSAGE = 'ERROR_MESSAGE';
 const RESET = 'RESET';
 const LOADING = 'LOADING';
 const USER_TERRITORIES_LOADING = 'USER_TERRITORIES_LOADING';
@@ -31,8 +33,11 @@ function initialState() {
     isAuthenticated: false,
     isPending: false,
     isForcedOut: false,
+    isVerifying: false,
+    errorMessage: '',
     isSwitchedToDesktop: false,
     name: '',
+    email: '',
     user: undefined,
     photoUrl: '',
     congId: 0,
@@ -55,8 +60,11 @@ export const auth = {
     isAuthenticated: state => state.isAuthenticated,
     isPending: state => state.isPending,
     name: state => state.name,
+    email: state => state.email,
     isAuthorized: state => !!state.user,
     isForcedOut: state => state.isForcedOut,
+    isVerifying: state => state.isVerifying,
+    errorMessage: state => state.errorMessage,
     user: state => state.user,
     congId: state => state.congId,
     congregation: state => state.congregation,
@@ -70,6 +78,10 @@ export const auth = {
       || get(state.user, 'role') === 'Admin',
     canLead: state => get(state.user, 'role') === 'SO',
     canSwitchCong: state => state.user && ['Admin', 'CO'].includes(state.user.role),
+    canHelpLogin: (state) => {
+      const { loginHelperAccess } = get(state, 'congregation.options.publishers') || '';
+      return state.user && ['Admin', 'SO', 'TS', 'GO', loginHelperAccess].includes(state.user.role);
+    },
     isBasicAccessOnly: state => state.user && state.user.role === 'PUB',
     token: state => state.token,
     isDesktop: state => state.isSwitchedToDesktop || window.matchMedia('(min-width: 801px)').matches,
@@ -102,9 +114,13 @@ export const auth = {
     AUTHENTICATE_SUCCESS(state, authenticatedUser) {
       state.isAuthenticated = true;
       state.isForcedOut = false;
-      state.name = authenticatedUser.name;
-      state.photoUrl = authenticatedUser.photoUrl;
-      state.token = authenticatedUser.token;
+      if (authenticatedUser) {
+        state.name = authenticatedUser.name;
+        state.photoUrl = authenticatedUser.photoUrl;
+        state.token = authenticatedUser.token;
+        state.email = authenticatedUser.email;
+        state.isVerifying = !authenticatedUser.emailVerified;
+      }
     },
 
     AUTHORIZE(state, user) {
@@ -120,6 +136,17 @@ export const auth = {
 
     FORCEOUT(state) {
       state.isForcedOut = true;
+    },
+
+    VERIFYING(state, user) {
+      if (user) {
+        state.isVerifying = !user.emailVerified;
+        state.email = user.email;
+      }
+    },
+
+    ERROR_MESSAGE(state, message) {
+      state.errorMessage = message;
     },
 
     RESET(state) {
@@ -168,72 +195,86 @@ export const auth = {
   },
 
   actions: {
-    async authenticate({ commit }, params) {
-      commit(AUTHENTICATE_SUCCESS, { name: params.displayName, photoUrl: params.photoUrl, token: params.token });
-      return params;
+    async authenticate({ commit }, { displayName, photoUrl, token, email, emailVerified } = {}) {
+      commit(AUTHENTICATE_SUCCESS, { name: displayName, photoUrl, token, email, emailVerified });
     },
 
-    async logout({ commit }) {
-      return new Promise((resolve) => {
-        firebase.auth().signOut();
-        commit(RESET);
-        resolve();
-      });
+    logout({ commit }) {
+      firebase.auth().signOut();
+      sessionStorage.removeItem('firebaseui::token');
+      sessionStorage.removeItem('firebaseui::pendingRedirect');
+      commit(RESET);
     },
 
-    async authorize({ commit, dispatch, getters }, username) {
-      try {
-        if (getters.isAuthorized) return true;
+    async verify({ commit, dispatch }, user) {
+      commit(VERIFYING, user);
+      const authenticatedUser = await user.sendEmailVerification({ url: document.location.href });
+      dispatch('login', authenticatedUser);
+    },
 
-        commit(LOADING, true);
-        return new Promise(async (resolve, reject) => {
-          const response = await axios({
-            url: process.env.VUE_APP_ROOT_API,
-            method: 'post',
-            data: {
-              query: print(gql`query Publisher($username: String) {
-                user (username: $username) {
-                  id
-                  username
-                  firstname
-                  lastname
-                  role
-                  status
-                  congregation {
-                    ...CongregationModel
-                  }
+    async authorize({ commit, getters, dispatch }, username) {
+      commit(LOADING, true);
+      if (!getters.isAuthorized) {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          data: {
+            query: print(gql`query Publisher($username: String) {
+              user (username: $username) {
+                id
+                username
+                firstname
+                lastname
+                role
+                status
+                congregation {
+                  ...CongregationModel
                 }
-              },
-              ${congregationModel}`),
-              variables: {
-                username,
-              },
+              }
             },
-          });
-
-          if (!response || !response.data || !response.data.data || !response.data.data.user) {
-            reject(new IncompleteRegistrationError('Unauthorized'));
-          }
-
-          const { user } = (response && response.data && response.data.data) || {};
-          const options = JSON.parse(get(user, 'congregation.options', '{}'));
-          const congregation = user && { ...user.congregation, options };
-          const userRoles = get(user, 'role', '').split(',');
-          const { permissions = [] } = router.currentRoute.meta;
-          const hasPermission = permissions.length ? intersection(permissions, userRoles).length > 0 : true;
-          if (user && hasPermission) {
-            commit(AUTHORIZE, { ...user, congregation });
-            dispatch('congregation/setCongregation', congregation, { root: true });
-            resolve();
-          } else {
-            reject(new UnauthorizedUserError('Unauthorized'));
-          }
-
-          commit(LOADING, false);
+            ${congregationModel}`),
+            variables: {
+              username,
+            },
+          },
         });
-      } catch (e) {
-        throw e;
+
+        if (!response || !response.data || !response.data.data || !response.data.data.user) {
+          throw new IncompleteRegistrationError(
+            'Account not found. Ask your administrator to create a publisher account for you.'
+          );
+        }
+
+        const { user } = (response && response.data && response.data.data) || {};
+        if (user.status === 'disabled') {
+          throw new DisabledUserError('Your account is disabled.');
+        }
+
+        const options = JSON.parse(get(user, 'congregation.options', '{}'));
+        const congregation = user && { ...user.congregation, options };
+
+        if (user) {
+          commit(AUTHORIZE, { ...user, congregation });
+          dispatch('congregation/setCongregation', congregation, { root: true });
+        } else {
+          throw new UnauthorizedUserError('Unauthorized');
+        }
       }
+
+      const userRoles = get(getters.user, 'role', '').split(',');
+      const { permissions } = router.currentRoute.meta;
+      let hasPermission = true;
+      if (typeof permissions === 'function') {
+        hasPermission = permissions();
+      } else if (Array.isArray(permissions)) {
+        hasPermission = intersection(permissions, userRoles).length > 0;
+      }
+
+      if (!hasPermission) {
+        throw new UnauthorizedUserError('Unauthorized');
+      }
+
+      commit(LOADING, false);
     },
 
     async getUserTerritories({ commit }, username) {
@@ -295,11 +336,16 @@ export const auth = {
       }
     },
 
-    forceout({ commit }) {
+    forceout({ commit }, errorMessage) {
       commit(FORCEOUT);
+      if (errorMessage) {
+        commit(ERROR_MESSAGE, errorMessage);
+      }
     },
 
-    async login({ dispatch, state }, user) {
+    async login({ dispatch }, user) {
+      if (!user) return;
+
       try {
         await dispatch('authenticate', user);
         if (user.emailVerified && user.email) {
@@ -309,16 +355,10 @@ export const auth = {
         } else if (user.uid) {
           await dispatch('authorize', user.uid);
         }
-
-        if (!state.user) {
-          // unauthorized
-          await dispatch('logout');
-          dispatch('forceout');
-        }
       } catch (err) {
-        if (err instanceof IncompleteRegistrationError) {
-          await dispatch('logout');
-          dispatch('forceout');
+        if (err instanceof IncompleteRegistrationError || err instanceof DisabledUserError) {
+          dispatch('logout');
+          dispatch('forceout', err.message);
         } else if (err instanceof UnauthorizedUserError) {
           router.replace({ name: 'unauthorized' });
         } else {
@@ -332,53 +372,57 @@ export const auth = {
       axios.defaults.headers.common.Authorization = `Bearer ${tempToken}`;
       commit(UPDATE_TOKEN, tempToken);
 
-      return new Promise(async (resolve, reject) => {
-        firebase.initializeApp(config);
+      firebase.initializeApp(config);
 
-        const authCallback = async (user) => {
-          commit(UPDATE_TOKEN, user.token);
-          sessionStorage.setItem('firebaseui::token', user.token);
+      const authCallback = async (user) => {
+        commit(UPDATE_TOKEN, user.token);
+        sessionStorage.setItem('firebaseui::token', user.token);
 
-          axios.interceptors.request.use(async (cfg) => {
-            const token = await user.getIdToken();
-            sessionStorage.setItem('firebaseui::token', user.token);
-            cfg.headers.Authorization = `Bearer ${token}`;
-            commit(UPDATE_TOKEN, token);
-            return cfg;
-          });
-
-          await dispatch('login', user);
-        };
-
-        const params = new URLSearchParams(window.location.search);
-        const tokenParam = params.get('token');
-        if (tokenParam) {
-          const { user } = await firebase.auth().signInWithCustomToken(tokenParam);
-          await authCallback(user);
-          resolve();
-        } else {
-          firebase.auth().onAuthStateChanged(async (user) => {
-            if (user) {
-              user.token = await user.getIdToken();
-              if (!user.token) {
-                reject();
-                throw new Error('Unable to retrieve token from Firebase');
-              }
-              await authCallback(user);
-            } else {
-              if (state.isForcedOut) {
-                router.replace({ name: 'signout', params: { unauthorized: true } });
-              }
-
-              const loc = window.location;
-              if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
-                router.replace({ name: 'auth', query: { redirect: loc.pathname } });
-              }
-            }
-            resolve();
-          });
+        if (user && user.email && !user.emailVerified) {
+          return;
         }
-      });
+
+        axios.interceptors.request.use(async (cfg) => {
+          const token = await user.getIdToken();
+          sessionStorage.setItem('firebaseui::token', user.token);
+          cfg.headers.Authorization = `Bearer ${token}`;
+          commit(UPDATE_TOKEN, token);
+          return cfg;
+        });
+
+        await dispatch('login', user);
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const tokenParam = params.get('token');
+      if (tokenParam) {
+        const { user } = await firebase.auth().signInWithCustomToken(tokenParam);
+        await authCallback(user);
+      } else {
+        firebase.auth().onAuthStateChanged(async (user) => {
+          if (user) {
+            user.token = await user.getIdToken();
+            if (!user.token) {
+              throw new Error('Unable to retrieve token from Firebase');
+            }
+            await authCallback(user);
+          } else {
+            if (state.isForcedOut) {
+              router.replace({ name: 'signout', params: { unauthorized: true } });
+            }
+
+            const loc = window.location;
+            if (loc.pathname !== '/' && loc.pathname !== '/auth' && loc.pathname !== '/signout') {
+              router.replace({ name: 'auth', query: { redirect: loc.pathname } });
+            }
+          }
+        });
+        firebase.auth().onIdTokenChanged((user) => {
+          if (user && user.email && user.emailVerified) {
+            dispatch('login', user);
+          }
+        });
+      }
     },
 
     back({ getters, state }, params) {

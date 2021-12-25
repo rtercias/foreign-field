@@ -59,3 +59,6 @@ html, body { height: 100% }
 .w-80 {
   width: 80% !important;
 }
+.mdl-dialog.firebaseui-dialog.firebaseui-id-dialog {
+  height: fit-content;
+}

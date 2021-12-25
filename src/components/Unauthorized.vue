@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="lead p-2 pt-5">You are not authorized to view this page</div>
-    <div v-if="$route.query.expired">Your session token may have expired.</div>
+  <div class="mt-5">
+    Sorry, you don't have access to this page.
+    <div v-if="$route.query.expired">Your session has expired.</div>
   </div>
 </template>

@@ -122,7 +122,9 @@ export default {
       const { origin = '' } = this.$route.query;
       return origin ? `?origin=${origin}` : '';
     },
-
+    congregationIdStatus() {
+      return get(this.user, 'congregation.id') && get(this.address, 'congregationId');
+    },
   },
   methods: {
     ...mapActions({
@@ -135,9 +137,9 @@ export default {
     },
   },
   watch: {
-    user() {
-      if (this.user && this.user.congregation.id !== this.address.congregationId) {
-        this.$router.push('/unauthorized');
+    congregationIdStatus(isLoaded) {
+      if (isLoaded && get(this.user, 'congregation.id') !== get(this.address, 'congregationId')) {
+        this.$router.replace('/unauthorized');
       } else {
         this.isLoading = false;
       }

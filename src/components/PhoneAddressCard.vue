@@ -106,6 +106,7 @@
             <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
             <b-button
               variant="link"
+              v-if="canWrite"
               v-show="!item.isBusy"
               class="interaction bg-danger"
               :class="{ 'mb-2': isDesktop && mode === 'phone-list' }">
@@ -212,6 +213,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      canWrite: 'auth/canWrite',
       phoneButtonList: 'phone/actionButtonList',
       addressButtonList: 'address/actionButtonList',
       user: 'auth/user',

@@ -63,7 +63,7 @@ export default {
       }
     });
     channel.bind('update-address', (address) => {
-      if (address && this.territory.id === address.territory_id) {
+      if (address) {
         if (address.status !== AddressStatus.Active) {
           this.deleteAddress(address);
         } else {
@@ -221,16 +221,18 @@ export default {
       updateStatus: 'territory/updateStatus',
       collapseNav: 'auth/collapseNav',
       setTerritoryStatus: 'territories/setStatus',
-      forceout: 'auth/forceout',
+      logout: 'auth/logout',
     }),
     async refresh() {
       if (this.user) {
-        await this.authorize(get(this.user, 'username'));
-        const isUserDisabled = this.user.status === 'disabled';
-        if (isUserDisabled) {
-          this.forceout();
-          this.$router.push({ name: 'unauthorized' });
-          throw new UnauthorizedUserError('Unauthorized');
+        try {
+          await this.authorize(get(this.user, 'username'));
+        } catch (err) {
+          if (err instanceof UnauthorizedUserError) {
+            this.$router.replace({ name: 'unauthorized' });
+          } else {
+            console.error(err);
+          }
         }
       }
     },
@@ -248,6 +250,11 @@ export default {
     resetHideMenu() {
       this.hideMenu = false;
     },
+    logoutUser() {
+      this.logout();
+      this.$router.push({ name: 'unauthorized' });
+      throw new UnauthorizedUserError('Unauthorized');
+    },
   },
   watch: {
     async $route() {
@@ -255,15 +262,13 @@ export default {
         this.hideMenu = true;
         await this.refresh();
       } catch (e) {
+        console.error(e);
         if (String(e).includes('Unauthorized')) {
           this.$router.replace({ name: 'unauthorized' });
         } else {
           this.$router.replace({ name: 'error' });
         }
       }
-    },
-    async user() {
-      await this.refresh();
     },
   },
 };

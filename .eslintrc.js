@@ -1,5 +1,5 @@
-
-{
+console.log('env', process.env.NODE_ENV);
+module.exports = {
   "root": true,
   "extends": [
     "plugin:vue/base",
@@ -8,12 +8,12 @@
   "env": {
     "node": true
   },
-  "parserOptions": {	
-    "parser": "babel-eslint",	
-    "sourceType": "module",	
-    "allowImportExportEverywhere": false,	
-    "codeFrame": false,	
-    "ecmaVersion": 2017	
+  "parserOptions": {
+    "parser": "babel-eslint",
+    "sourceType": "module",
+    "allowImportExportEverywhere": false,
+    "codeFrame": false,
+    "ecmaVersion": 2017
   },
   "rules": {
     "max-len": [2, { "code": 125 }],
@@ -28,15 +28,8 @@
       "LabeledStatement",
       "WithStatement"
     ],
-    "no-console": [
-      "error",
-      {
-        "allow": [
-          "error",
-          "warn"
-        ]
-      }
-    ],
+    "no-console": process.env.NODE_ENV === 'production' ? 2 : 0,
+    "no-debugger": process.env.NODE_ENV === 'production' ? 2 : 0,
     "no-param-reassign": [
       "error",
       {

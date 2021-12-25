@@ -1,5 +1,13 @@
 export const CongDefault = {
   options: {
+    publishers: {
+      loginHelperAccess: {
+        options: [
+          { value: null, text: 'Servants and elders only' },
+          { value: 'RP-E', text: 'Include Assistants (RP-E)' },
+        ],
+      },
+    },
     territories: {
       defaultSort: {
         options: [
