@@ -247,7 +247,7 @@ export default {
             t.description,
             t.tags,
             t.id,
-            displayName(get(t.status, 'publisher')),
+            get(t.status, 'status') === 'Checked Out' && displayName(get(t.status, 'publisher')),
           ],
         ));
       }
