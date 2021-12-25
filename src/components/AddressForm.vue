@@ -176,7 +176,7 @@
           <span v-if="mode === 'add'">the addition of this new address.</span>
           <span v-if="mode === 'edit'">this address update.</span>
         </p>
-        <b-button v-if="canManage" variant="info" :to="`/territories/${territoryId}/optimize`">
+        <b-button v-if="canManage" variant="info" :to="`/territories/${model.territory_id}/optimize`">
           Optimize
         </b-button>
       </div>
@@ -373,7 +373,7 @@ export default {
       }
       if (this.user && this.mode === Modes.edit
         && this.user.congregation.id !== this.address.congregationId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
       this.isLoading = false;
     },
@@ -534,7 +534,7 @@ export default {
         && this.congId !== this.territory.congregationid;
 
       if (unauthAddressCongId || unauthTerritoryCongId) {
-        this.$router.push('/unauthorized');
+        this.$router.replace('/unauthorized');
       }
     },
     congId() {

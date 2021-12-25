@@ -39,7 +39,7 @@ const routes = [
     component: CongregationForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO'],
       back: 'home',
       label: 'Congregation Profile',
     },
@@ -82,7 +82,7 @@ const routes = [
     component: Territories,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E'],
+      permissions: ['Admin', 'TS', 'GO', 'SO', 'RP-E', 'CO'],
       back: 'home',
       label: 'Territories',
     },
@@ -92,7 +92,7 @@ const routes = [
     component: Territory,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
       back: 'group',
     },
     children: [{
@@ -101,7 +101,7 @@ const routes = [
       component: PhoneWitnessing,
       props: true,
       meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
         back: 'group',
         label: 'Territory',
       },
@@ -111,7 +111,7 @@ const routes = [
       component: TerritoryMap,
       props: true,
       meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
         back: 'group',
         label: 'Territory Map',
       },
@@ -121,7 +121,7 @@ const routes = [
       component: PhoneWitnessing,
       props: true,
       meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+        permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
         back: 'group',
         label: 'Territory',
       },
@@ -154,7 +154,7 @@ const routes = [
     component: SearchResults,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
       label: 'Global Search',
     },
   },
@@ -164,7 +164,7 @@ const routes = [
     component: AssignmentReport,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO'],
       label: 'S-13 Assignment Report',
     },
   },
@@ -174,7 +174,7 @@ const routes = [
     component: DNCReport,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO'],
       label: 'Do Not Call Report',
     },
   },
@@ -205,7 +205,7 @@ const routes = [
     component: AddressLinks,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
       back: 'address-list',
       label: 'Address Info',
     },
@@ -216,7 +216,7 @@ const routes = [
     component: ActivityHistory,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
       back: 'address-links',
       label: 'Address Activity History',
     },
@@ -227,7 +227,7 @@ const routes = [
     component: ActivityHistory,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
       back: 'address-list',
       label: 'Current Checkout Activity History',
     },
@@ -238,7 +238,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E'],
       label: 'Add Address',
     },
   },
@@ -248,7 +248,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP-E'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP-E'],
       back: 'address-list',
       label: 'Add Address',
     },
@@ -259,7 +259,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E'],
       back: 'address-links',
       label: 'Edit Address',
     },
@@ -270,7 +270,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E'],
     },
   },
   {
@@ -279,7 +279,7 @@ const routes = [
     component: AddressForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
     },
   },
   {
@@ -310,7 +310,7 @@ const routes = [
     component: PublisherForm,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP', 'RP-E', 'PUB'],
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
       back: 'congregation-edit',
       label: 'Edit Publisher',
     },
@@ -321,7 +321,7 @@ const routes = [
     component: PublisherToken,
     props: true,
     meta: {
-      permissions: ['Admin', 'TS', 'SO', 'GO', 'RP-E'],
+      permissions: () => store.getters['auth/canHelpLogin'],
       label: 'Generate Token',
     },
   },

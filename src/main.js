@@ -185,7 +185,7 @@ function init() {
         await this.$store.dispatch('auth/firebaseInit');
       } catch (e) {
         console.error(e);
-        Vue.$router.push({ name: 'unauthorized' });
+        Vue.$router.replace({ name: 'unauthorized' });
       }
     },
   }).$mount('#app');

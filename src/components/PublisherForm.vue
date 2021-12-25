@@ -95,7 +95,7 @@ export default {
         if (confirm) {
           this.isSaving = true;
           if (this.mode === Modes.add) {
-            this.model.congregationid = this.congregation.id;
+            this.model.congregationid = get(this.congregation, 'id');
             await this.addPublisher(this.model);
           } else if (this.mode === Modes.edit) {
             await this.updatePublisher(this.model);
@@ -139,12 +139,14 @@ export default {
     },
 
     async refresh() {
-      if (!this.isLoading && !this.self && !this.canWrite) {
+      if (!this.canManage && get(this.user, 'id') !== this.publisherId) {
+        this.$router.replace({ name: 'unauthorized' });
+      } else if (!this.isLoading && !this.self && !this.canWrite) {
         this.$router.replace({ name: 'unauthorized' });
       } else {
         this.isLoading = true;
         if (this.mode === Modes.edit) {
-          await this.fetchPublisher({ id: this.publisherId, congId: this.congregation.id });
+          await this.fetchPublisher({ id: this.publisherId, congId: get(this.congregation, 'id') });
           this.model = this.publisher;
         }
         this.isLoading = false;
@@ -159,6 +161,7 @@ export default {
       publisher: 'publisher/publisher',
       congregation: 'congregation/congregation',
       canWrite: 'auth/canWrite',
+      canManage: 'auth/canManage',
     }),
     mode() {
       return this.publisherId ? Modes.edit : Modes.add;

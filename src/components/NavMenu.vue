@@ -25,7 +25,7 @@
       <font-awesome-icon class="ml-1 text-info" icon="info-circle" @click="toggleCampaignHelp" />
       <b-toaster name="campaign-help"></b-toaster>
     </b-nav-item>
-    <b-nav-item-dropdown v-if="isAuthenticated" right>
+    <b-nav-item-dropdown v-if="isAuthenticated">
       <span slot="text">{{user && user.firstname || name}}</span>
       <b-dropdown-item
         class="m-0 w-100"
@@ -36,7 +36,7 @@
         }">
         Profile
       </b-dropdown-item>
-      <b-dropdown-item class="m-0 w-100" v-if="canWrite && !isForcedOut" :to="`/publishers/token`">
+      <b-dropdown-item class="m-0 w-100" v-if="canHelpLogin && !isForcedOut" :to="`/publishers/token`">
         Login Helper
       </b-dropdown-item>
       <b-dropdown-item class="m-0 w-100" @click="logoutUser">Logout</b-dropdown-item>
@@ -67,6 +67,7 @@ export default {
       canWrite: 'auth/canWrite',
       canLead: 'auth/canLead',
       canSwitchCong: 'auth/canSwitchCong',
+      canHelpLogin: 'auth/canHelpLogin',
       congregation: 'auth/congregation',
       territory: 'territory/territory',
       group: 'group/group',

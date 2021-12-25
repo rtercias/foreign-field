@@ -218,11 +218,14 @@ export default {
       }
       return true;
     },
+    congregationIdStatus() {
+      return get(this.user, 'congregation.id') && get(this.territory, 'congregationid');
+    },
   },
   watch: {
-    user() {
-      if (this.user && this.user.congregation.id !== this.territory.congregationid) {
-        this.$router.push('/unauthorized');
+    congregationIdStatus(isLoaded) {
+      if (isLoaded && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
+        this.$router.replace('/unauthorized');
       } else {
         this.isLoading = false;
       }
