@@ -49,13 +49,13 @@
     <div class="row">
       <div class="w-100 d-flex justify-content-between align-items-end">
         <div class="territory-details">
-          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
+          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo('phoneAddress')">
             ID: {{terr.id}}
           </b-badge>
-          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
+          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo('phoneAddress')">
             Addresses: {{terr.addressCount}}
           </b-badge>
-          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo">
+          <b-badge variant="link" class="btn-link mr-1 text-black-50" @click="showTerrInfo('phoneAddress')">
             Phones: {{terr.phoneCount}}
           </b-badge>
         </div>
@@ -70,7 +70,9 @@
         </b-link>
       </div>
       <hr class="my-2 w-100" />
-      <div class="assigned-to-info w-100 text-right">{{assignedTo}}</div>
+      <div class="assigned-to-info w-100 text-right" @click="showTerrInfo('assignedTo')">
+        {{assignedTo()}}
+      </div>
       <div class="d-flex justify-content-between w-100">
         <div>
           <b-badge
@@ -122,6 +124,7 @@ export default {
       updateTerritory: 'territories/updateTerritory',
       setTerritory: 'territory/setTerritory',
     }),
+    displayName,
     async checkin() {
       const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
         title: `${this.terr.name}`,
@@ -163,18 +166,40 @@ export default {
     typeFilter(type) {
       return this.typeFilters.find(t => t.value === type) || {};
     },
-    showTerrInfo() {
+    showTerrInfo(type) {
       const h = this.$createElement;
-      const message = h('p', {
-        domProps: {
-          innerHTML: `
-            <div>ID: ${this.terr.id}</div>
-            <div>Address Count: ${get(this.terr, 'addressCount', 0)}</div>
-            <div>Phone Count: ${get(this.terr, 'phoneCount', 0)}</div>
-          `,
-        },
-      });
-      this.$bvModal.msgBoxOk(message, { title: 'Territory Details', centered: true });
+      const messages = {
+        phoneAddress: h('p', {
+          domProps: {
+            innerHTML: `
+              <div>ID: ${this.terr.id}</div>
+              <div>Address Count: ${get(this.terr, 'addressCount', 0)}</div>
+              <div>Phone Count: ${get(this.terr, 'phoneCount', 0)}</div>
+            `,
+          },
+        }),
+        assignedTo: h('p', {
+          domProps: {
+            innerHTML: `
+              ${this.assignedTo(true)}
+            `,
+          },
+        }),
+      };
+
+      this.$bvModal.msgBoxOk(messages[type], { title: 'Territory Details', centered: true });
+    },
+    assignedTo(showFull) {
+      if (this.terr && this.terr.status && this.terr.status.publisher) {
+        const isFree = this.isRecentlyWorked || this.isAvailable;
+        const name = showFull ? `${isFree ? 'by ' : ''}${displayName(this.terr.status.publisher)}` : '';
+        const pre = isFree ? `Last completed ${name}` : `Assigned to ${displayName(this.terr.status.publisher)}`;
+        const timestamp = Number(this.terr.status.date);
+        const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
+        return `${pre}${(showFull || isFree) ? formattedDate : ''}`;
+      }
+
+      return '';
     },
   },
   computed: {
@@ -194,18 +219,6 @@ export default {
     },
     isAvailable() {
       return this.status === 'Available';
-    },
-    assignedTo() {
-      if (this.terr && this.terr.status && this.terr.status.publisher) {
-        const pre = this.isRecentlyWorked || this.isAvailable
-          ? 'Last completed '
-          : `Assigned to ${displayName(this.terr.status.publisher)}`;
-        const timestamp = Number(this.terr.status.date);
-        const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
-        return `${pre}${formattedDate}`;
-      }
-
-      return '';
     },
     status() {
       return this.terr && this.terr.status && this.terr.status.status || 'Available';
@@ -244,5 +257,9 @@ export default {
   }
   .assigned-to-info, .last-worked, .loading, .get-last-activity, .show-checkout-details {
     font-size: 12px;
+  }
+  .assigned-to-info:hover {
+    text-decoration: underline;
+    cursor: pointer;
   }
 </style>

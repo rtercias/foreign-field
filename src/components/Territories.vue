@@ -115,7 +115,7 @@
       </div>
       <SearchBar
         class="w-100 pt-3"
-        :search-text="'Filter by territory name, description, id, or tag'"
+        :search-text="'Filter by territory name, description, id, tag, or publisher name'"
         :results="filteredTerritories"
         allow-exclude="true"
         :model="keywordFilter"
@@ -160,6 +160,7 @@ import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 import orderBy from 'lodash/orderBy';
 import toLower from 'lodash/toLower';
+import { displayName } from '../utils/publisher';
 
 const DEFAULT_FILTER = '';
 const DEFAULT_SORT = 'Description';
@@ -241,7 +242,13 @@ export default {
       if (this.keywordFilter) {
         return this.territories.filter(t => this.excludeKeyword !== this.compareToKeyword(
           this.keywordFilter,
-          [t.name, t.description, t.tags, t.id],
+          [
+            t.name,
+            t.description,
+            t.tags,
+            t.id,
+            displayName(get(t.status, 'publisher')),
+          ],
         ));
       }
       if (this.typeFilter) {

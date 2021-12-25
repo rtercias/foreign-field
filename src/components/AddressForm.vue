@@ -130,19 +130,39 @@
           First, let's check the address location. Drag and drop the marker to make adjustments.
           Click on <b>Select Territory</b> when finished.
         </p>
-        <AddressMap :address="model" :zoom="17" :step="step" :key="step" @updated="updateCoordinates" />
+        <AddressMap
+          :address="model"
+          :zoom="17"
+          :step="step"
+          :key="step"
+          @updated="updateCoordinates"
+        />
       </div>
       <div v-else-if="step === 3" class="step-3">
         <div v-if="territoriesLoading" class="font-weight-bold m-0 mt-2 mr-2 ml-2 medium">
           Loading territories... <font-awesome-icon icon="circle-notch" spin></font-awesome-icon>
         </div>
-        <p v-else>
-          Now, select the territory for this address by clicking on one of the circle territory markers.
-          <b-form-select v-model="model.territory_id"
-            :options="territoryOptions" required>
-          </b-form-select>
-        </p>
-        <AddressMap :address="model" :zoom="14" :step="step" :key="step" @territory-selected="updateTerritory"></AddressMap>
+        <div v-else class="mb-3">
+          <p class="mb-3">
+            Now, select the territory for this address by clicking on one of the circle territory markers.
+          </p>
+          <div class="d-flex justify-content-between">
+            <div>
+              Selected Territory:
+              <b-form-select
+                v-model="model.territory_id"
+                :options="territoryOptions" required>
+              </b-form-select>
+            </div>
+          </div>
+        </div>
+        <AddressMap
+          :address="model"
+          :zoom="14"
+          :step="step"
+          :key="step"
+          @territory-selected="updateTerritory">
+        </AddressMap>
       </div>
       <div v-else-if="step === 4" class="step-4 pb-5">
         <div v-if="mode === 'add'">
@@ -247,6 +267,7 @@ export default {
     ...mapActions({
       addAddress: 'address/addAddress',
       updateAddress: 'address/updateAddress',
+      deleteAddressFromTerritory: 'territory/deleteAddress',
       deleteAddress: 'address/deleteAddress',
       fetchAddress: 'address/fetchAddress',
       addressLookup: 'address/addressLookup',
@@ -273,7 +294,6 @@ export default {
         if (this.mode === Modes.add) {
           this.isSaving = true;
           await this.addAddress(this.model);
-          await this.getTerritory({ id: this.model.territory_id });
         } else if (this.mode === Modes.edit) {
           if (this.model.status !== ADDRESS_STATUS.Active.value) {
             const statusTag = ADDRESS_STATUS[this.model.status].value;
@@ -281,6 +301,10 @@ export default {
           }
 
           await this.updateAddress(this.model);
+
+          if (this.model.territory_id !== this.territory.id) {
+            this.deleteAddressFromTerritory(this.model);
+          }
 
           if (this.model.status === ADDRESS_STATUS.NF.value) {
             await this.markAsNotForeign({ addressId: this.model.id, userid: this.user.id, tag: NF_TAG });
@@ -337,7 +361,7 @@ export default {
         delete this.model.activityLogs;
       } else {
         if (this.user && this.territoryId && this.territory.id !== this.territoryId) {
-          await this.getTerritory({ id: this.territoryId });
+          this.getTerritory({ id: this.territoryId, getLastActivity: true });
         }
         await this.setAddress({});
         this.model = {
@@ -390,6 +414,7 @@ export default {
 
       await this.geocodeAddress();
       this.step = 2;
+      window.scrollTo(0, 0);
     },
 
     undoGeocode() {
@@ -398,6 +423,7 @@ export default {
 
     async goToSelectTerritory() {
       this.step = 3;
+      window.scrollTo(0, 0);
     },
 
     prev() {
@@ -406,9 +432,8 @@ export default {
       }
     },
 
-    async updateTerritory(territoryId) {
+    updateTerritory(territoryId) {
       this.$set(this.model, 'territory_id', territoryId);
-      await this.getTerritory({ id: territoryId });
     },
 
     done() {

@@ -51,7 +51,7 @@
       </b-list-group>
       <b-list-group class="col-sm-12 col-md-6 px-0">
         <div class="text-uppercase pt-4">Territories</div>
-        <b-list-group-item v-for="terr in territories" :key="terr.id">
+        <b-list-group-item v-for="terr in allTerritories" :key="terr.id">
           <div class="text-left">
             <b-link :to="`/territories/${terr.id}`">
               {{terr.name}} {{terr.description}}
@@ -91,7 +91,7 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       addresses: 'addresses/search',
-      territories: 'territories/territories',
+      allTerritories: 'territories/allTerritories',
       phones: 'phone/search',
       canWrite: 'auth/canWrite',
       congregation: 'congregation/congregation',

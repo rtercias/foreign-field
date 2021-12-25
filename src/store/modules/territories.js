@@ -262,7 +262,6 @@ export const territories = {
         });
 
         if (response && response.data && response.data.data) {
-          commit(SET_TERRITORIES, response.data.data.territories);
           commit(SET_ALL_TERRITORIES, response.data.data.territories);
           commit(SET_LOADING, false);
         }
