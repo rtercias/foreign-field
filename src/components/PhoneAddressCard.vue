@@ -519,6 +519,7 @@ export default {
       const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
       const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
       window.open(`https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`, '_blank');
+      this.$refs.list.closeActions();
     },
 
     selectedNotAllowed(item) {
