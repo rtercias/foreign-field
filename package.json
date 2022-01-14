@@ -52,7 +52,7 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.3",
-    "node-forge": "^0.10.0",
+    "node-forge": "^1.0.0",
     "sass": "^1.26.10",
     "sass-loader": "^9.0.3",
     "vue-cli-plugin-pwa": "^1.0.0-alpha.1",
