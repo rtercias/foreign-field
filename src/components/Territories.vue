@@ -113,8 +113,11 @@
           </b-button-group>
         </div>
       </div>
+      <div class="d-flex align-self-start mt-2 small">
+        Address Count (current view): {{addressCount}}
+      </div>
       <SearchBar
-        class="w-100 pt-3"
+        class="w-100 pt-1"
         :search-text="'Filter by territory name, description, id, tag, or publisher name'"
         :results="filteredTerritories"
         allow-exclude="true"
@@ -284,6 +287,11 @@ export default {
     },
     typeText() {
       return (this.typeFilters.find(t => t.value === this.typeFilter) || { text: '' }).text;
+    },
+    addressCount() {
+      const reducer = (sum, count) => sum + (count || 0);
+      const initialValue = 0;
+      return this.filteredTerritories.map(t => t.addressCount).reduce(reducer, initialValue).toLocaleString();
     },
   },
 
