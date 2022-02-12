@@ -79,9 +79,12 @@ import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import TerritoryMap from './TerritoryMap.vue';
 import Loading from './Loading';
-import { store, defaultOptions, TerritoryType } from '../store';
+import { store, defaultOptions, TerritoryType, AddressStatus } from '../store';
 import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
+import { subscription } from '../main';
+import { unmask } from '../utils/phone';
+
 
 export default {
   name: 'Territory',
@@ -119,6 +122,7 @@ export default {
     };
   },
   async mounted() {
+    this.subscribe();
     await this.refresh();
   },
   computed: {
@@ -309,6 +313,87 @@ export default {
 
     updateCount(count) {
       this.filteredCount = `Count: ${count}`;
+    },
+    subscribe() {
+      subscription.bind('add-address', (address) => {
+        if (address && this.territory.id === address.territory_id) {
+          this.addAddress(address);
+        }
+      });
+      subscription.bind('update-address', (address) => {
+        if (address) {
+          if (address.status !== AddressStatus.Active) {
+            this.deleteAddress(address);
+          } else {
+            this.updateAddress(address);
+          }
+        }
+      });
+      subscription.bind('change-address-status', (address) => {
+        if (address && this.territory.id === address.territory_id) {
+          if (address.status !== AddressStatus.Active) {
+            this.deleteAddress(address);
+          } else {
+            this.updateAddress(address);
+          }
+        }
+      });
+      subscription.bind('add-phone', (phone) => {
+        if (phone && this.territory.id === phone.territory_id) {
+          phone.phone = unmask(phone.phone);
+          this.addPhone(phone);
+        }
+      });
+      subscription.bind('update-phone', (phone) => {
+        if (phone && this.territory.id === phone.territory_id) {
+          if (phone.status !== AddressStatus.Active) {
+            this.deletePhone(phone);
+          } else {
+            phone.phone = unmask(phone.phone);
+            this.updatePhone(phone);
+          }
+        }
+      });
+      subscription.bind('change-phone-status', (phone) => {
+        if (phone && this.territory.id === phone.territory_id) {
+          if (phone.status !== AddressStatus.Active) {
+            this.deletePhone(phone);
+          } else {
+            this.updatePhone(phone);
+          }
+        }
+      });
+      subscription.bind('add-log', (log) => {
+        if (log) {
+          this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
+          this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
+          this.setTerritoryLastActivity({ territoryId: log.territory_id, lastActivity: log });
+        }
+      });
+      subscription.bind('add-note', (args) => {
+        if (args && this.territory) {
+          const { addressId, notes } = args;
+          this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
+        }
+      });
+      subscription.bind('remove-note', (args) => {
+        if (args && this.territory) {
+          const { addressId, notes } = args;
+          this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
+        }
+      });
+      subscription.bind('add-phone-tag', (args) => {
+        if (args && this.territory) {
+          const { phoneId, notes } = args;
+          this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
+        }
+      });
+      subscription.bind('remove-phone-tag', (args) => {
+        if (args && this.territory) {
+          const { phoneId, notes } = args;
+          this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
+        }
+      });
     },
   },
   watch: {
