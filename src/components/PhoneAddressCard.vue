@@ -516,9 +516,10 @@ export default {
     },
     lookupFastPeopleSearch() {
       const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const addr2 = `${(get(this.address, 'addr2') || '').trim().replace(/\s+/g, '-')}`;
       const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
       const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
-      window.open(`https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`, '_blank');
+      window.open(`https://www.fastpeoplesearch.com/address/${addr1}-${addr2}_${city}-${state}`, '_blank');
       this.$refs.list.closeActions();
     },
 
