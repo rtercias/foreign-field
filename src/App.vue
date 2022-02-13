@@ -12,7 +12,7 @@
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view class="h-100" :key="key"></router-view>
     </div>
-    <footer v-if="isDesktop || isPWA" class="app-footer w-100 d-flex justify-content-end">
+    <footer class="app-footer w-100 d-flex justify-content-end">
       <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
         class="desktop-nav alert-secondary d-flex justify-content-between border-medium
           border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
@@ -141,17 +141,6 @@ export default {
       back: 'auth/back',
       authorize: 'auth/authorize',
       changeWindowSize: 'auth/changeWindowSize',
-      addAddress: 'territory/addAddress',
-      addPhone: 'territory/addPhone',
-      updateAddress: 'territory/updateAddress',
-      updatePhone: 'territory/updatePhone',
-      deleteAddress: 'territory/deleteAddress',
-      deletePhone: 'territory/deletePhone',
-      updateAddressNotes: 'territory/updateAddressNotes',
-      updatePhoneNotes: 'territory/updatePhoneNotes',
-      setTerritoryLastActivity: 'territory/setTerritoryLastActivity',
-      setAddressLastActivity: 'territory/setAddressLastActivity',
-      setPhoneLastActivity: 'territory/setPhoneLastActivity',
       updateStatus: 'territory/updateStatus',
       collapseNav: 'auth/collapseNav',
       setTerritoryStatus: 'territories/setStatus',

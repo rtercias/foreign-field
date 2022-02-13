@@ -1,9 +1,10 @@
 import Pusher from 'pusher-js';
+import { store } from '../store';
+import { mutationMapper } from './mutationMapper';
 
 export class Subscription {
   constructor() {
     this.init();
-    this.subscriptions = [];
 
     const isCollaborate = sessionStorage.getItem('collaborate') === 'true';
     if (isCollaborate) {
@@ -31,8 +32,12 @@ export class Subscription {
   bind(eventName, callback) {
     if (this.channel) {
       this.channel.bind(eventName, callback);
+    } else {
+      store.subscribe((mutation) => {
+        if (mutation.type === mutationMapper(eventName)) {
+          callback(mutation.payload);
+        }
+      });
     }
-    this.subscriptions.push({ eventName, callback });
-    console.log('subscriptions', this.subscriptions);
   }
 }

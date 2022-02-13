@@ -226,6 +226,18 @@ export default {
       saveSeenTerritory: 'territories/saveSeenTerritory',
       fetchLastActivities: 'territory/fetchLastActivities',
       setTerritory: 'territories/setTerritory',
+      addAddress: 'territory/addAddress',
+      addPhone: 'territory/addPhone',
+      updateAddress: 'territory/updateAddress',
+      updatePhone: 'territory/updatePhone',
+      deleteAddress: 'territory/deleteAddress',
+      deletePhone: 'territory/deletePhone',
+      updateAddressNotes: 'territory/updateAddressNotes',
+      updatePhoneNotes: 'territory/updatePhoneNotes',
+      setTerritoryLastActivity: 'territory/setTerritoryLastActivity',
+      setAddressLastActivity: 'territory/setAddressLastActivity',
+      setPhoneLastActivity: 'territory/setPhoneLastActivity',
+
     }),
 
     async refresh() {
@@ -332,7 +344,11 @@ export default {
         }
       });
       subscription.bind('change-address-status', (address) => {
-        if (address && this.territory.id === address.territory_id) {
+        if (!address) return;
+        address.id = address.id || address.addressId;
+        address.territory_id = address.territory_id || this.territory.id;
+        const addresses = this.territory.addresses || [];
+        if (addresses.some(a => a.id === address.id)) {
           if (address.status !== AddressStatus.Active) {
             this.deleteAddress(address);
           } else {
@@ -369,7 +385,7 @@ export default {
         if (log) {
           this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
           this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
-          this.setTerritoryLastActivity({ territoryId: log.territory_id, lastActivity: log });
+          this.setTerritoryLastActivity({ territoryId: log.territory_id || this.territory.id, lastActivity: log });
         }
       });
       subscription.bind('add-note', (args) => {
