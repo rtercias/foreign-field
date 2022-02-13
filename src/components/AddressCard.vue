@@ -18,7 +18,7 @@
         <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
           <b-link
             class="w-100"
-            :to="`/territories/${territory.id}/addresses/${address.id}/detail?origin=phone`">
+            :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
             <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
               {{address.addr1}} {{address.addr2}}
             </div>

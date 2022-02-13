@@ -5,12 +5,16 @@
         <div v-if="!isSingleRecord">
           <b-link
             v-if="log.address.type === 'Phone'"
-            :to="`/territories/${territoryId}/addresses/${log.address.parent_id}/detail?origin=${$route.name}`">
+            :to="`/territories/${territoryId}/phone?
+              origin=${$route.name}&addressId=${log.address.parent_id}${isFullScreen ? '&fullscreen=true' : ''}`"
+          >
             <div>{{formatPhone(log.address.phone)}}</div>
           </b-link>
           <b-link
             v-else
-            :to="`/territories/${territoryId}/addresses/${log.address.id}/detail?origin=${$route.name}`">
+            :to="`/territories/${territoryId}/addresses/${log.address.id}/edit?
+              origin=${$route.name}${isFullScreen ? '&fullscreen=true' : ''}`"
+          >
             <div>{{log.address.addr1}} {{log.address.addr2}}</div>
             <div>{{log.address.city}} {{log.address.state_province}} {{log.address.postal_code}}</div>
           </b-link>
@@ -82,6 +86,9 @@ export default {
     }),
     territoryId() {
       return get(this.log, 'address.territory.id');
+    },
+    isFullScreen() {
+      return this.$route.query.fullscreen;
     },
   },
 };

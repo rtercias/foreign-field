@@ -70,6 +70,9 @@ export default {
     SearchBar,
   },
   props: ['hideMenu'],
+  beforeRouteEnter(to, from, next) {
+    next(vm => vm.prevRoute = from);
+  },
   data() {
     return {
       permissions: {
@@ -84,6 +87,7 @@ export default {
       isSearchHidden: true,
       backLabel: '',
       showMenu: false,
+      prevRoute: undefined,
     };
   },
   async mounted() {
@@ -123,9 +127,13 @@ export default {
       });
     },
     async refresh() {
+      let origin = get(this.$route, 'query.origin');
+      if (origin === get(this.$route, 'name')) {
+        origin = '';
+      }
       const back = get(this.$route, 'meta.back');
-      const backRoute = this.$router.resolve({ name: back });
-      this.backLabel = back ? get(backRoute, 'route.meta.label') : '';
+      const backRoute = this.$router.resolve({ name: origin || back || !this.prevRoute || 'home' });
+      this.backLabel = this.$route.name === 'home' ? '' : get(backRoute, 'route.meta.label') || 'Home';
     },
     search(keyword) {
       this.showMenu = false;
@@ -167,6 +175,9 @@ export default {
     },
     routeLabel() {
       return get(this.$route, 'meta.label');
+    },
+    isHome() {
+      return this.$route.name === 'home';
     },
   },
   watch: {

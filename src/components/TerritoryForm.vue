@@ -139,7 +139,7 @@ export default {
 
     cancel() {
       this.model = {};
-      this.$router.go(-1);
+      this.back({ vm: this });
     },
 
     async remove() {
