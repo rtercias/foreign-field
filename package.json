@@ -22,7 +22,7 @@
     "core-js": "^2.6.11",
     "date-fns": "^2.26.0",
     "firebase": "^7.14.4",
-    "firebaseui": "^3.6.1",
+    "firebaseui": "^4.7.1",
     "graphql": "^15.2.0",
     "graphql-tag": "^2.12.6",
     "gsap": "^3.2.6",
