@@ -5,6 +5,7 @@ import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
 import { model as addressModel, validate, isCity, ACTION_BUTTON_LIST, ADDRESS_STATUS } from './models/AddressModel';
 import { model as activityModel, createActivityLog } from './models/ActivityModel';
+import { addTag } from '../../utils/tags';
 
 const FETCH_ADDRESS = 'FETCH_ADDRESS';
 const SET_ADDRESS = 'SET_ADDRESS';
@@ -64,7 +65,12 @@ export const address = {
     DELETE_ADDRESS_FAIL(state, exception) {
       state.error = exception;
     },
-    CHANGE_STATUS(state, status) { state.address.status = status; },
+    CHANGE_STATUS(state, addr) {
+      if (state.address.id === addr.id) {
+        state.address.status = addr.status;
+        state.address.notes = addTag(state.address.notes, addr.note);
+      }
+    },
     ADD_LOG(state, log) {
       if (state.address.id === log.address_id) {
         if (state.address.activityLogs && state.address.activityLogs.length) {
@@ -360,7 +366,7 @@ export const address = {
         }
         const { updateAddress } = get(response, 'data.data');
         commit(UPDATE_ADDRESS, updateAddress);
-        dispatch('territory/updateAddress', addr, { root: true });
+        dispatch('territory/updateAddress', _address, { root: true });
       } catch (e) {
         commit(UPDATE_ADDRESS_FAIL, e);
         console.error(UPDATE_ADDRESS_FAIL, e);
@@ -441,7 +447,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.NF.value);
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.NF.value, userid, note: tag });
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -480,7 +486,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.DNC.value);
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid, note: tag });
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
