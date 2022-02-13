@@ -25,7 +25,7 @@
             {{ collaborate ? 'Disable collaborate mode' : 'Enable collaborate mode' }}
           </b-link>
           <font-awesome-icon
-            class="text-primary d-xl-none ml-2"
+            class="text-primary ml-2"
             icon="info-circle"
             size="sm"
             @click="showCollaborateHelp">
