@@ -16,14 +16,15 @@
       <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
         class="desktop-nav alert-secondary d-flex justify-content-between border-medium
           border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
-        <div>
-          <b-link
-            class="font-weight-bold"
-            @click="toggleCollaborate"
-            :class="{ 'text-success': !collaborate, 'text-danger': collaborate }"
-          >
-            {{ collaborate ? 'Disable collaborate mode' : 'Enable collaborate mode' }}
-          </b-link>
+        <div class="d-flex">
+          <toggle-button
+            class="mr-2"
+            :value="collaborate"
+            @change="toggleCollaborate"
+            :sync="true"
+            :labels="{ checked: 'On', unchecked: 'Off' }"
+          />
+          Collaborate Mode
           <font-awesome-icon
             class="text-primary ml-2"
             icon="info-circle"
@@ -41,6 +42,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { ToggleButton } from 'vue-js-toggle-button';
 import get from 'lodash/get';
 import throttle from 'lodash/throttle';
 import { subscription } from './main';
@@ -53,6 +55,7 @@ export default {
   components: {
     Masthead,
     NavMenu,
+    ToggleButton,
   },
   data() {
     return {
