@@ -186,7 +186,6 @@ import {
   ADDRESS_STATUS,
 } from '../store/modules/models/AddressModel';
 
-const NO_NUMBER = 'no number';
 const DO_NOT_MAIL = 'do not mail';
 const LETTER_WRITING = 'mail sent';
 
@@ -325,7 +324,6 @@ export default {
 
       await this.addPhone(phone);
       this.newPhone = '';
-      this.toggleNoNumberTag({ forceRemove: true });
       this.isAdding = false;
     },
     cancel(phone) {
@@ -491,17 +489,6 @@ export default {
       }
 
       return newArray;
-    },
-    async toggleNoNumberTag({ forceRemove = false }) {
-      let notesArray = this.address.notes ? this.address.notes.split(',') : [];
-      if (forceRemove || notesArray.includes(NO_NUMBER)) {
-        notesArray = notesArray.filter(n => n !== NO_NUMBER);
-      } else {
-        notesArray.push(NO_NUMBER);
-      }
-
-      this.$set(this.address, 'notes', notesArray.join(','));
-      await this.updateAddress(this.address);
     },
     async toggleLetterWriting() {
       if (this.address.lastActivity.value === 'LW') {

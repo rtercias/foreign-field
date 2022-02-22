@@ -215,7 +215,7 @@ export const address = {
       }
     },
 
-    async addLog({ commit, rootGetters }, { entityId, value, checkoutId }) {
+    async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId }) {
       try {
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
@@ -248,6 +248,11 @@ export const address = {
 
         const { addLog } = get(response, 'data.data') || {};
         commit(ADD_LOG, addLog);
+
+        // TODO: separate the calls by creating "addLog" function specifically for phones
+        dispatch('territory/setAddressLastActivity', { addressId: entityId, lastActivity: addLog }, { root: true });
+        dispatch('territory/setPhoneLastActivity', { phoneId: entityId, lastActivity: addLog }, { root: true });
+
         commit(FETCH_LAST_ACTIVITY_SUCCESS, addLog);
       } catch (e) {
         commit(LOG_FAIL, e);
