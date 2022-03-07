@@ -390,10 +390,10 @@ export default {
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
-      if (typeof close === 'function') close();
       this.$set(phone, 'isBusy', false);
+      if (typeof close === 'function') close();
     },
-    async removeAddress(address, close) {
+    async removeAddress(address) {
       this.$set(address, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
         'Remove address from the list?', {
@@ -407,8 +407,10 @@ export default {
         await this.updateAddress({ ...address, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
-      if (typeof close === 'function') close();
-      this.$set(address, 'isBusy', false);
+
+      // remove address from list if it's no longer active
+      const index = this.territory.addresses.findIndex(a => a.id === address.id);
+      if (index >= 0) this.territory.addresses.splice(index, 1);
     },
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');

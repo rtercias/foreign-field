@@ -236,7 +236,10 @@ export const territory = {
       if (state.territory && state.territory.addresses && state.territory.id === address.territory_id) {
         address.id = address.id || address.addressId;
         const index = state.territory.addresses.findIndex(a => a.id === address.id);
-        state.territory.addresses.splice(index, 1);
+        if (index >= 0) {
+          Vue.set(state.territory.addresses[index], 'isBusy', false);
+          state.territory.addresses.splice(index, 1);
+        }
       }
     },
     UPDATE_PHONE(state, phone) {
@@ -263,14 +266,14 @@ export const territory = {
     UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes }) {
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.id === addressId);
-        if (address) address.notes = notes;
+        if (address) Vue.set(address, 'notes', notes);
       }
     },
     UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes }) {
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.phones.some(p => p.id === phoneId));
         const phone = address && address.phones.find(p => p.id === phoneId);
-        if (phone) phone.notes = notes;
+        if (phone) Vue.set(phone, 'notes', notes);
       }
     },
     UPDATE_STATUS(state, status) {
