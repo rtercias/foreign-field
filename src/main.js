@@ -19,7 +19,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import BootstrapVue from 'bootstrap-vue';
 import App from './App.vue';
-import Pusher from 'pusher-js';
+import { Subscription } from './utils/subscription';
 import { router } from './routes';
 import { store } from './store';
 import '../node_modules/firebaseui/dist/firebaseui.css';
@@ -168,12 +168,8 @@ Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
-/* eslint-enable */
-const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, {
-  cluster: 'us2',
-});
 
-export const channel = pusher.subscribe('foreign-field');
+export const subscription = new Subscription();
 
 function init() {
   new Vue({

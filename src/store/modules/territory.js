@@ -7,6 +7,8 @@ import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import { model, validate } from './models/TerritoryModel';
+import { model as addressModel } from './models/AddressModel';
+import { model as phoneModel } from './models/PhoneModel';
 import { model as activityModel } from './models/ActivityModel';
 import { AddressStatus, AddressType } from '..';
 
@@ -45,6 +47,7 @@ const SET_FILTER = 'SET_FILTER';
 
 const initialState = {
   territory: {
+    id: null,
     name: '',
     description: '',
     addresses: [],
@@ -106,7 +109,7 @@ export const territory = {
         for (const address of addresses) {
           if (getLastActivity) address.isBusy = true;
 
-          const phones = terr.phones.filter(p => p.parent_id === address.id);
+          const phones = get(terr, 'phones', []).filter(p => p.parent_id === address.id);
           address.phones = phones;
 
           for (const phone of address.phones) {
@@ -198,7 +201,7 @@ export const territory = {
       console.error(DELETE_TERRITORY_FAIL, exception);
     },
     ADD_ADDRESS(state, newAddress) {
-      if (state.territory && state.territory.addresses) {
+      if (state.territory && state.territory.addresses && state.territory.id === newAddress.territory_id) {
         const exists = state.territory.addresses.some(a => a.id === newAddress.id);
         if (!exists) {
           newAddress.phones = [];
@@ -215,21 +218,28 @@ export const territory = {
       }
     },
     UPDATE_ADDRESS(state, address) {
-      if (state.territory && state.territory.addresses) {
+      if (state.territory && state.territory.addresses && state.territory.id === address.territory_id) {
         address.id = address.id || address.addressId;
         const origAddress = state.territory.addresses.find(a => a.id === address.id);
         if (origAddress && address) {
           for (const property in address) {
             origAddress[property] = address[property];
           }
+        } else if (!origAddress) {
+          // this is necessary for re-activating non-active addresses
+          const sort = address.sort < 0 ? 0 : address.sort;
+          state.territory.addresses.splice(sort, 0, address);
         }
       }
     },
     DELETE_ADDRESS(state, address) {
-      address.id = address.id || address.addressId;
-      if (state.territory && state.territory.addresses) {
+      if (state.territory && state.territory.addresses && state.territory.id === address.territory_id) {
+        address.id = address.id || address.addressId;
         const index = state.territory.addresses.findIndex(a => a.id === address.id);
-        state.territory.addresses.splice(index, 1);
+        if (index >= 0) {
+          Vue.set(state.territory.addresses[index], 'isBusy', false);
+          state.territory.addresses.splice(index, 1);
+        }
       }
     },
     UPDATE_PHONE(state, phone) {
@@ -256,14 +266,14 @@ export const territory = {
     UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes }) {
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.id === addressId);
-        if (address) address.notes = notes;
+        if (address) Vue.set(address, 'notes', notes);
       }
     },
     UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes }) {
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.phones.some(p => p.id === phoneId));
         const phone = address && address.phones.find(p => p.id === phoneId);
-        if (phone) phone.notes = notes;
+        if (phone) Vue.set(phone, 'notes', notes);
       }
     },
     UPDATE_STATUS(state, status) {
@@ -437,21 +447,10 @@ export const territory = {
                   code
                 }
                 addresses {
-                  id addr1 addr2 city state_province postal_code
-                  phone longitude latitude notes sort
-                  territory_id congregationId status type
+                  ...AddressModel
                 }
                 phones {
-                  id
-                  congregationId
-                  territory_id
-                  parent_id
-                  type
-                  status
-                  phone
-                  notes
-                  sort
-                  create_user
+                  ...PhoneModel
                 }
                 status {
                   checkout_id
@@ -462,15 +461,13 @@ export const territory = {
                   }
                 }
                 lastActivity {
-                  id
-                  address_id
-                  checkout_id
-                  value
-                  timestamp
-                  publisher_id
+                  ...ActivityModel
                 }
               }
-            }`),
+            }
+            ${addressModel}
+            ${phoneModel}
+            ${activityModel}`),
             variables: {
               terrId: id,
             },
@@ -501,7 +498,7 @@ export const territory = {
       const cancelToken = tokenSource.token;
       commit(FETCH_LAST_ACTIVITY, tokenSource);
 
-      const addresses = terr.addresses || [];
+      const addresses = get(terr, 'addresses') || [];
       const checkoutId = get(terr, 'status.checkout_id');
 
       try {
