@@ -11,6 +11,7 @@ import { model as addressModel } from './models/AddressModel';
 import { model as phoneModel } from './models/PhoneModel';
 import { model as activityModel } from './models/ActivityModel';
 import { AddressStatus, AddressType } from '..';
+import { addTag, removeTag } from '../../utils/tags';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
@@ -263,17 +264,23 @@ export const territory = {
         }
       }
     },
-    UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes }) {
+    UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes, addedTag, removedTag }) {
+      let updatedNotes = notes;
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.id === addressId);
-        if (address) Vue.set(address, 'notes', notes);
+        if (addedTag) updatedNotes = addTag(address.notes, addedTag);
+        if (removedTag) updatedNotes = removeTag(address.notes, removedTag);
+        if (address) Vue.set(address, 'notes', updatedNotes);
       }
     },
-    UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes }) {
+    UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes, addedTag, removedTag }) {
+      let updatedNotes = notes;
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.phones.some(p => p.id === phoneId));
         const phone = address && address.phones.find(p => p.id === phoneId);
-        if (phone) Vue.set(phone, 'notes', notes);
+        if (addedTag) updatedNotes = addTag(phone.notes, addedTag);
+        if (removedTag) updatedNotes = removeTag(phone.notes, removedTag);
+        if (phone) Vue.set(phone, 'notes', updatedNotes);
       }
     },
     UPDATE_STATUS(state, status) {
@@ -783,11 +790,11 @@ export const territory = {
     deletePhone({ commit }, phone) {
       commit(DELETE_PHONE, phone);
     },
-    updateAddressNotes({ commit }, { territoryId, addressId, notes }) {
-      commit(UPDATE_ADDRESS_NOTES, { territoryId, addressId, notes });
+    updateAddressNotes({ commit }, { territoryId, addressId, notes, addedTag, removedTag }) {
+      commit(UPDATE_ADDRESS_NOTES, { territoryId, addressId, notes, addedTag, removedTag });
     },
-    updatePhoneNotes({ commit }, { territoryId, phoneId, notes }) {
-      commit(UPDATE_PHONE_NOTES, { territoryId, phoneId, notes });
+    updatePhoneNotes({ commit }, { territoryId, phoneId, notes, addedTag, removedTag }) {
+      commit(UPDATE_PHONE_NOTES, { territoryId, phoneId, notes, addedTag, removedTag });
     },
     updateStatus({ commit }, status) {
       const result = status.status === 'Checked Out' ? status : null;
