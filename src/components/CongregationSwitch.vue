@@ -45,7 +45,7 @@ export default {
   },
   data() {
     return {
-      circuits: ['NJ-16'],
+      circuits: ['NJ-16', 'CA-85'],
       selectedCircuit: '',
       selectedCongregation: '',
       isLoading: false,
