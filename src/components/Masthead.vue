@@ -58,7 +58,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import VuePullRefresh from 'vue-pull-refresh';
 import get from 'lodash/get';
-import { subscription } from '../main';
+import { channel } from '../main';
 import NavMenu from './NavMenu';
 import SearchBar from './SearchBar';
 
@@ -91,7 +91,7 @@ export default {
     };
   },
   async mounted() {
-    subscription.bind('check-in-all', async (congId) => {
+    channel.bind('check-in-all', async (congId) => {
       if (this.congId === congId) {
         this.$bvToast.toast('All territories have been checked in.', {
           variant: 'success',
@@ -99,7 +99,7 @@ export default {
         });
       }
     });
-    subscription.bind('copy-checkouts', async (congId) => {
+    channel.bind('copy-checkouts', async (congId) => {
       if (this.congId === congId) {
         this.$bvToast.toast('Territory checkouts have been preserved.', {
           variant: 'success',

@@ -186,6 +186,7 @@ import {
   ADDRESS_STATUS,
 } from '../store/modules/models/AddressModel';
 
+const NO_NUMBER = 'no number';
 const DO_NOT_MAIL = 'do not mail';
 const LETTER_WRITING = 'mail sent';
 
@@ -324,6 +325,7 @@ export default {
 
       await this.addPhone(phone);
       this.newPhone = '';
+      this.toggleNoNumberTag({ forceRemove: true });
       this.isAdding = false;
     },
     cancel(phone) {
@@ -390,10 +392,10 @@ export default {
         await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
-      this.$set(phone, 'isBusy', false);
       if (typeof close === 'function') close();
+      this.$set(phone, 'isBusy', false);
     },
-    async removeAddress(address) {
+    async removeAddress(address, close) {
       this.$set(address, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
         'Remove address from the list?', {
@@ -407,10 +409,8 @@ export default {
         await this.updateAddress({ ...address, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
       }
-
-      // remove address from list if it's no longer active
-      const index = this.territory.addresses.findIndex(a => a.id === address.id);
-      if (index >= 0) this.territory.addresses.splice(index, 1);
+      if (typeof close === 'function') close();
+      this.$set(address, 'isBusy', false);
     },
     formatPhone(phone) {
       return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
@@ -491,6 +491,17 @@ export default {
       }
 
       return newArray;
+    },
+    async toggleNoNumberTag({ forceRemove = false }) {
+      let notesArray = this.address.notes ? this.address.notes.split(',') : [];
+      if (forceRemove || notesArray.includes(NO_NUMBER)) {
+        notesArray = notesArray.filter(n => n !== NO_NUMBER);
+      } else {
+        notesArray.push(NO_NUMBER);
+      }
+
+      this.$set(this.address, 'notes', notesArray.join(','));
+      await this.updateAddress(this.address);
     },
     async toggleLetterWriting() {
       if (this.address.lastActivity.value === 'LW') {

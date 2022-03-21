@@ -26,11 +26,8 @@
             <b-badge variant="danger" v-if="model.status !== 'Active'">{{statusText(address.status)}}</b-badge>
           </b-form-group>
           <b-form-group label="Status" class="mt-3" v-if="canManage">
-            <b-form-select
-              v-model="model.status"
-              :options="statusOptions"
-              @change="onStatusChanged"
-              required>
+            <b-form-select v-model="model.status"
+              :options="statusOptions" required>
             </b-form-select>
           </b-form-group>
           <b-form-group label="Address 1" class="mt-3">
@@ -214,7 +211,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import { TheMask } from 'vue-the-mask';
 import get from 'lodash/get';
-import toLower from 'lodash/toLower';
 import addYears from 'date-fns/addYears';
 import format from 'date-fns/format';
 import AddressMap from './AddressMap';
@@ -222,7 +218,7 @@ import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 import { Modes as _Modes } from '../utils/modes';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
-import { formatLanguage, NF_TAG, DNC_TAG, removeTag } from '../utils/tags';
+import { formatLanguage, NF_TAG, DNC_TAG } from '../utils/tags';
 
 const Modes = {
   ..._Modes,
@@ -301,8 +297,8 @@ export default {
           await this.addAddress(this.model);
         } else if (this.mode === Modes.edit) {
           if (this.model.status !== ADDRESS_STATUS.Active.value) {
-            const statusTag = ADDRESS_STATUS[this.model.status].text;
-            this.model.notes = removeTag(this.model.notes, statusTag);
+            const statusTag = ADDRESS_STATUS[this.model.status].value;
+            this.model.notes = this.removeStatusTag(statusTag);
           }
 
           await this.updateAddress(this.model);
@@ -357,10 +353,6 @@ export default {
         await this.fetchAllTerritories({ congId: this.congId });
       }
 
-      if (this.user && this.territoryId && this.territory.id !== this.territoryId) {
-        this.getTerritory({ id: this.territoryId, getLastActivity: true });
-      }
-
       if (this.mode === Modes.edit) {
         await this.fetchAddress({ addressId: this.addressId, status: '*' });
         this.model = { ...this.address } || {};
@@ -369,6 +361,9 @@ export default {
         }
         delete this.model.activityLogs;
       } else {
+        if (this.user && this.territoryId && this.territory.id !== this.territoryId) {
+          this.getTerritory({ id: this.territoryId, getLastActivity: true });
+        }
         await this.setAddress({});
         this.model = {
           congregationId: this.congId,
@@ -467,11 +462,10 @@ export default {
     statusText(status) {
       return formatLanguage(ADDRESS_STATUS[status].text, this.language);
     },
-    onStatusChanged(value) {
-      const dnc = toLower(ADDRESS_STATUS.DNC.text);
-      if (value === ADDRESS_STATUS.Active.value && toLower(this.model.notes).includes(dnc)) {
-        this.model.notes = removeTag(this.model.notes, dnc);
-      }
+    removeStatusTag(status) {
+      const notes = get(this.model, 'notes') || '';
+      const tags = notes.split(',') || [];
+      return tags.filter(t => t.includes(status)).join(',');
     },
   },
   computed: {

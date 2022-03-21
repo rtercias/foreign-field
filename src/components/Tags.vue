@@ -82,6 +82,7 @@ export default {
       removePhoneTag: 'phone/removeTag',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
+      getTerritory: 'territory/getTerritory',
     }),
     formatLanguage,
     async updateTag(tag) {
@@ -155,6 +156,7 @@ export default {
       if (response) {
         const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
         await this.markAsDoNotCall({ addressId: this.record.id, userid: this.user.id, tag: datestamped });
+        await this.getTerritory({ id: this.record.territory_id });
       }
     },
     async notForeign(tag) {
@@ -165,6 +167,7 @@ export default {
 
       if (response) {
         await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+        await this.getTerritory({ id: this.record.territory_id });
       }
     },
     hasPhone() {
