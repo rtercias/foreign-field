@@ -390,26 +390,26 @@ export default {
       });
       subscription.bind('add-note', (args) => {
         if (args && this.territory) {
-          const { addressId, notes, tag: addedTag } = args;
-          this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes, addedTag });
+          const { addressId, notes } = args;
+          this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
         }
       });
       subscription.bind('remove-note', (args) => {
         if (args && this.territory) {
-          const { addressId, notes, tag: removedTag } = args;
-          this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes, removedTag });
+          const { addressId, notes } = args;
+          this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
         }
       });
       subscription.bind('add-phone-tag', (args) => {
         if (args && this.territory) {
-          const { phoneId, notes, tag: addedTag } = args;
-          this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes, addedTag });
+          const { phoneId, notes } = args;
+          this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
         }
       });
       subscription.bind('remove-phone-tag', (args) => {
         if (args && this.territory) {
-          const { phoneId, notes, tag: removedTag } = args;
-          this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes, removedTag });
+          const { phoneId, notes } = args;
+          this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
         }
       });
     },
