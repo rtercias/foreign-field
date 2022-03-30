@@ -46,9 +46,9 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
-              <b-button variant="primary" :to="`/territories/${territoryId}/optimize`">
+              <!-- <b-button variant="primary" :to="`/territories/${territoryId}/optimize`">
                 Optimize
-              </b-button>
+              </b-button> -->
             </b-button-group>
             <b-button-group v-else-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
               <b-button v-if="canManage" variant="danger" @click="reset">
