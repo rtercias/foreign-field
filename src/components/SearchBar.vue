@@ -1,6 +1,6 @@
 <template>
   <div
-    class="sticky-top bg-white"
+    class="search-bar sticky-top bg-white"
     :style="{ top: top }"
     :class="{ 'p-0': noPadding, 'p-2 border-bottom': !noPadding }">
     <div :class="{
@@ -120,6 +120,12 @@ export default {
     }
     .no-pointer {
       cursor: default;
+    }
+  }
+
+  @media print {
+    .search-bar {
+      display: none !important;
     }
   }
 </style>

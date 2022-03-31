@@ -251,5 +251,11 @@ export default {
   .address a {
     text-decoration: none;
   }
+  .ellipsis-v-static {
+    display: none;
+  }
+  .edit-phone {
+    display: none;
+  }
 }
 </style>

@@ -70,10 +70,11 @@
         </div>
       </header>
       <router-view
+        class="router-view"
         :disabled="!isCheckedOut"
         :territory="territory"
         :options="{ showSortOrder: true, editable: true }"
-        @update-count="updateCount"/>
+        @update-count="updateCount" />
     </div>
   </div>
 </template>
@@ -232,8 +233,9 @@ export default {
       } else {
         await this.getTerritory({ id: this.territoryId, getLastActivity: true });
       }
-      if (get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
-        this.$router.push('/unauthorized');
+
+      if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
+        this.$router.replace('/unauthorized');
       }
     },
 
@@ -382,14 +384,16 @@ li {
 .text-medium {
   font-size: 1.2rem;
 }
-@media (min-width: 769px) {
-  .columns {
-    columns: 2;
-  }
-}
+
 @media print {
-  .columns {
-    columns: 2;
+  .territory {
+    width: 100% !important;
+  }
+  .header-buttons {
+    display: none !important;
+  }
+  .router-view {
+    padding-top: 40px !important;
   }
 }
 </style>

@@ -138,7 +138,7 @@ export default {
   },
   watch: {
     congregationIdStatus(isLoaded) {
-      if (isLoaded && get(this.user, 'congregation.id') !== get(this.address, 'congregationId')) {
+      if (isLoaded && this.user && get(this.user, 'congregation.id') !== get(this.address, 'congregationId')) {
         this.$router.replace('/unauthorized');
       } else {
         this.isLoading = false;

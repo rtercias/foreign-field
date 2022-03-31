@@ -313,5 +313,8 @@ export default {
   .address a {
     text-decoration: none;
   }
+  .ellipsis-v-static {
+    display: none;
+  }
 }
 </style>

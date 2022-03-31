@@ -132,7 +132,7 @@
         </swipe-list>
         <b-list-group-item
           v-if="mode === 'phone-list'"
-          class="d-flex p-0 pb-2 border-0"
+          class="new-phone d-flex p-0 pb-2 border-0"
           :class="{ 'pt-0': isDesktop, 'mt-2 mx-2': !isDesktop }">
           <b-input-group size="lg">
             <b-input-group-prepend>
@@ -631,6 +631,12 @@ export default {
   }
   .address a {
     text-decoration: none;
+  }
+  .new-phone {
+    display: none !important;
+  }
+  .border-warning {
+    border: initial !important;
   }
 }
 

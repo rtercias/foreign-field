@@ -28,7 +28,7 @@
             v-if="availableTags.length && !allTagsSelected"
             v-on:click="collapsed = !collapsed"
             pill
-            class="tag-button border-info d-flex mr-1 mb-1"
+            class="tag-button add-tag border-info d-flex mr-1 mb-1"
             :class="`border-${variant}`"
             :variant="variant"
             size='sm'>
@@ -297,5 +297,14 @@ export default {
   }
   .tag-button-preview {
     cursor: pointer;
+  }
+
+  @media print {
+    .tag-text {
+      font-size: 24px !important;
+    }
+    .badge.add-tag {
+      display: none !important;
+    }
   }
 </style>

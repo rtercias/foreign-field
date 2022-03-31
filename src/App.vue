@@ -314,6 +314,13 @@ router-link {
   }
 }
 @media print {
+  body {
+    margin: 25mm 25mm 25mm 25mm;
+
+    * {
+      font-size: 24px;
+    }
+  }
   .navbar {
     display: none !important;
   }
