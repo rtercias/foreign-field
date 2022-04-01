@@ -359,8 +359,10 @@ export default {
         });
       }
 
-      this.getAddressCountByTerritories(congId);
-      this.getPhoneCountByTerritories(congId);
+      if (congId) {
+        this.getAddressCountByTerritories(congId);
+        this.getPhoneCountByTerritories(congId);
+      }
       this.loading = false;
     },
 
