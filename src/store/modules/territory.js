@@ -289,13 +289,14 @@ export const territory = {
 
         const response = await axios({
           data: {
-            query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String) {
-              checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user)
+            query: print(gql`mutation CheckinTerritory($terrId: Int!, $pubId: Int!, $user: String, $checkoutId: Int!) {
+              checkinTerritory(territoryId: $terrId, publisherId: $pubId, user: $user, checkoutId: $checkoutId)
             }`),
             variables: {
               terrId: args.territoryId,
               pubId: get(args, 'publisher.id'),
               user: args.username,
+              checkoutId: args.checkoutId,
             },
           },
         });

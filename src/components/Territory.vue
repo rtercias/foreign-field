@@ -273,7 +273,7 @@ export default {
       const checkoutId = get(this.territory, 'status.checkout_id');
 
       await this.checkinTerritory({
-        checkout_id: checkoutId,
+        checkoutId,
         territoryId: this.territoryId,
         publisher: get(this.territory, 'status.publisher') || {},
         username: this.user.username,
