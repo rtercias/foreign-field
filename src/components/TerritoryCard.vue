@@ -137,7 +137,7 @@ export default {
         const { user } = this.$store.state.auth;
         const checkoutId = get(this.terr, 'status.checkout_id');
         await this.checkinTerritory({
-          checkout_id: checkoutId,
+          checkoutId,
           territoryId: this.terr.id,
           publisher: publisher || {},
           username: user.username,
