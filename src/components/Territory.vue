@@ -386,6 +386,13 @@ li {
 }
 
 @media print {
+  body {
+    margin: 25mm 25mm 25mm 25mm;
+
+    * {
+      font-size: 24px;
+    }
+  }
   .territory {
     width: 100% !important;
   }
