@@ -5,7 +5,8 @@
   "scripts": {
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "start": "vue-cli-service serve --open --https",
+    "start": "vue-cli-service serve --open",
+    "start-secure": "vue-cli-service serve --open --https --host 0.0.0.0",
     "deploy": "npm run build && firebase deploy -P default",
     "deploy-staging": "npm run build && firebase deploy -P staging"
   },
