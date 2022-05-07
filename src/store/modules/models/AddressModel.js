@@ -24,9 +24,15 @@ export const model = gql`fragment AddressModel on Address {
   parent_id
   phones {
     id
+    congregationId
+    territory_id
+    parent_id
+    type
+    status
     phone
     notes
     sort
+    create_user
   }
 }`;
 
