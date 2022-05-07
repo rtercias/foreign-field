@@ -30,7 +30,7 @@ export function formatLanguage(tag = '', value) {
 
 export function addTag(notes = '', tag) {
   const tags = notes.split(',') || [];
-  tags.push(tag);
+  if (!tags.includes(tag)) tags.push(tag);
   return tags.join(',');
 }
 

@@ -82,6 +82,8 @@ export default {
       removePhoneTag: 'phone/removeTag',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
+      setPhone: 'phone/setPhone',
+      setAddress: 'address/setAddress',
     }),
     formatLanguage,
     async updateTag(tag) {
@@ -121,8 +123,10 @@ export default {
       if (this.user && this.record && this.selectedTags) {
         this.$set(this.selectedTags, this.selectedTags.length, tag);
         if (this.record.type === 'Phone') {
+          await this.setPhone(this.record);
           await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
         } else {
+          await this.setAddress(this.record);
           await this.addAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
         }
       }
@@ -140,8 +144,10 @@ export default {
 
       if (response) {
         if (this.record.type === 'Phone') {
+          await this.setPhone(this.record);
           await this.removePhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
         } else {
+          await this.setAddress(this.record);
           await this.removeAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
         }
       }

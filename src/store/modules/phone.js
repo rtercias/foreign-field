@@ -4,6 +4,7 @@ import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
 import { model as phoneModel, validate, ACTION_BUTTON_LIST } from './models/PhoneModel';
 import { model as activityModel } from './models/ActivityModel';
+import * as tagUtils from '../../utils/tags';
 
 
 export const REJECT_TAGS = ['invalid', 'do not call'];
@@ -56,19 +57,15 @@ export const phone = {
     UPDATE_PHONE_FAIL(state, error) { state.error = error; },
     PHONE_LOOKUP_SUCCESS(state, search) { state.search = search; },
     PHONE_LOOKUP_FAIL(state, exception) { console.error(PHONE_LOOKUP_FAIL, exception); },
-    ADD_TAG(state, { phoneId, tag }) {
+    ADD_TAG(state, { phoneId, tag, notes }) {
       if (state.phone.id === phoneId) {
-        const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
-        arrTags.push(tag);
-        state.phone.notes = arrTags.join(',');
+        state.phone.notes = tagUtils.addTag(notes, tag);
       }
     },
     ADD_TAG_FAIL(state, error) { state.error = error; },
-    REMOVE_TAG(state, { phoneId, tag }) {
+    REMOVE_TAG(state, { phoneId, tag, notes }) {
       if (state.phone.id === phoneId) {
-        const arrTags = (state.phone.notes && state.phone.notes.split(',')) || [];
-        const newTags = arrTags.filter(t => t !== tag);
-        state.phone.notes = newTags.join(',');
+        state.phone.notes = tagUtils.removeTag(notes, tag);
       }
     },
     REMOVE_TAG_FAIL(state, error) { state.error = error; },
@@ -210,7 +207,7 @@ export const phone = {
       }
     },
 
-    async addTag({ commit }, { phoneId, userid, tag }) {
+    async addTag({ commit, state }, { phoneId, userid, tag }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -237,8 +234,8 @@ export const phone = {
           throw new Error(errors[0].message);
         }
         const { addPhoneTag } = get(response, 'data.data');
-        if (addPhoneTag) {
-          commit(ADD_TAG, { phoneId, tag });
+        if (addPhoneTag && get(state, 'phone.id') === phoneId) {
+          commit(ADD_TAG, { phoneId, tag, notes: tagUtils.addTag(get(state, 'phone.notes'), tag) });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);
@@ -248,7 +245,7 @@ export const phone = {
       }
     },
 
-    async removeTag({ commit }, { phoneId, userid, tag }) {
+    async removeTag({ commit, state }, { phoneId, userid, tag }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -275,8 +272,8 @@ export const phone = {
           throw new Error(errors[0].message);
         }
         const { removePhoneTag } = get(response, 'data.data');
-        if (removePhoneTag) {
-          commit(REMOVE_TAG, { phoneId, tag });
+        if (removePhoneTag && get(state, 'phone.id') === phoneId) {
+          commit(REMOVE_TAG, { phoneId, tag, notes: tagUtils.removeTag(get(state, 'phone.notes'), tag) });
         }
       } catch (e) {
         commit(REMOVE_TAG_FAIL, e);
