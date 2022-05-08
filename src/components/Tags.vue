@@ -21,7 +21,7 @@
               : `outline-${color(tag.caption)}`">
             <span class="tag-text d-flex align-items-center small font-weight-bold">
               <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
-              {{ formatLanguage(tag.caption.toLowerCase(), language) }}
+              {{ formatLanguage(toLower(tag.caption), language) }}
             </span>
           </b-badge>
           <b-badge
@@ -50,6 +50,7 @@ import { mapActions, mapGetters } from 'vuex';
 import union from 'lodash/union';
 import map from 'lodash/map';
 import get from 'lodash/get';
+import toLower from 'lodash/toLower';
 import difference from 'lodash/difference';
 import startsWith from 'lodash/startsWith';
 import addYears from 'date-fns/addYears';
@@ -85,6 +86,7 @@ export default {
       setPhone: 'phone/setPhone',
       setAddress: 'address/setAddress',
     }),
+    toLower,
     formatLanguage,
     async updateTag(tag) {
       if (this.disabled) return;
@@ -209,7 +211,7 @@ export default {
       congregation: 'congregation/congregation',
     }),
     language() {
-      return (get(this.congregation, 'language') || 'Tagalog').toLowerCase();
+      return toLower(get(this.congregation, 'language') || 'Tagalog');
     },
     availableTags() {
       const tags = this.record.type === 'Phone' ? PHONE_TAGS : ADDRESS_TAGS;
@@ -223,7 +225,7 @@ export default {
     },
     combinedTags() {
       const newArr = union(this.selectedTags, this.availableTags)
-        .map(t => t.toLowerCase())
+        .map(t => toLower(t))
         .filter(t => t && !this.hide(t))
         .sort();
 
@@ -232,7 +234,7 @@ export default {
     },
     selectedTags() {
       const notes = get(this.record, 'notes') || '';
-      return (notes.toLowerCase().split(',').filter(n => n.length)) || [];
+      return (toLower(notes).split(',').filter(n => n.length)) || [];
     },
     allTagsSelected() {
       return difference(this.availableTags, this.selectedTags).length === 0;
