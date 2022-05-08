@@ -200,7 +200,7 @@ export default {
     title1() {
       const record = this.logs && this.logs.length && this.logs[0].address;
       const address = record.type === 'Phone' ? this.address : record;
-      return this.isSingleRecord && address ? `${address.addr1} ${address.addr2}` : '';
+      return this.isSingleRecord && address ? `${address.addr1} ${address.addr2 || ''}` : '';
     },
     title2() {
       const record = this.logs && this.logs.length && this.logs[0].address;
