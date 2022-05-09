@@ -96,7 +96,6 @@ export default {
 
       if (index !== -1 && tag.state) {
         await this.removeTag(tag);
-        this.$set(this.selectedTags, index, tag.caption);
       } else if (startsWith(tag.caption, DNC_TAG)) {
         await this.doNotCall(tag);
       } else if (startsWith(tag.caption, NF_TAG)) {
@@ -123,7 +122,6 @@ export default {
     },
     async addTag(tag) {
       if (this.user && this.record && this.selectedTags) {
-        this.$set(this.selectedTags, this.selectedTags.length, tag);
         if (this.record.type === 'Phone') {
           await this.setPhone(this.record);
           await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
@@ -134,7 +132,7 @@ export default {
       }
     },
     async removeTag(tag) {
-      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2}`;
+      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2 || ''}`;
       const response = await this.$bvModal.msgBoxConfirm(
         formatLanguage(tag.caption, this.language), {
           title,
@@ -187,7 +185,8 @@ export default {
 
       return true;
     },
-    highlight(tag) {
+    highlight(tag = '') {
+      if (!tag) return false;
       const tagsToHighlight = ['no number', 'do not mail', 'do not call', 'invalid'];
       return tagsToHighlight.includes(tag)
         || tag.includes('not ')
@@ -241,11 +240,18 @@ export default {
     },
     preview() {
       const all = this.selectedTags.sort();
+      const result = [];
       if (this.mode === 'phoneAddress') {
-        return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
+        result.push(...all.filter(t => PHONE_ADDRESS_TAGS.includes(t)));
+      } else {
+        result.push(...all.filter(t => !this.hide(t)));
       }
 
-      return all.filter(t => !this.hide(t)).map(t => ({ caption: t, state: true }));
+      if (result.length && typeof result[0] === 'string') {
+        return result.map(t => ({ caption: t, state: true }));
+      }
+
+      return result;
     },
     displayedTags() {
       return this.collapsed ? this.preview : this.combinedTags;

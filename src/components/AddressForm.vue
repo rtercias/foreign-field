@@ -298,6 +298,7 @@ export default {
 
         if (this.mode === Modes.add) {
           this.isSaving = true;
+          this.model.notes = '';
           await this.addAddress(this.model);
         } else if (this.mode === Modes.edit) {
           if (this.model.status !== ADDRESS_STATUS.Active.value) {

@@ -125,8 +125,8 @@ export default {
     };
   },
   async mounted() {
-    this.subscribe();
     await this.refresh();
+    this.subscribe();
   },
   computed: {
     ...mapGetters({
