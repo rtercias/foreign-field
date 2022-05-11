@@ -21,7 +21,7 @@
               : `outline-${color(tag.caption)}`">
             <span class="tag-text d-flex align-items-center small font-weight-bold">
               <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
-              {{ formatLanguage(tag.caption.toLowerCase(), language) }}
+              {{ formatLanguage(toLower(tag.caption), language) }}
             </span>
           </b-badge>
           <b-badge
@@ -50,6 +50,7 @@ import { mapActions, mapGetters } from 'vuex';
 import union from 'lodash/union';
 import map from 'lodash/map';
 import get from 'lodash/get';
+import toLower from 'lodash/toLower';
 import difference from 'lodash/difference';
 import startsWith from 'lodash/startsWith';
 import addYears from 'date-fns/addYears';
@@ -82,8 +83,10 @@ export default {
       removePhoneTag: 'phone/removeTag',
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
-      getTerritory: 'territory/getTerritory',
+      setPhone: 'phone/setPhone',
+      setAddress: 'address/setAddress',
     }),
+    toLower,
     formatLanguage,
     async updateTag(tag) {
       if (this.disabled) return;
@@ -93,7 +96,6 @@ export default {
 
       if (index !== -1 && tag.state) {
         await this.removeTag(tag);
-        this.$set(this.selectedTags, index, tag.caption);
       } else if (startsWith(tag.caption, DNC_TAG)) {
         await this.doNotCall(tag);
       } else if (startsWith(tag.caption, NF_TAG)) {
@@ -120,16 +122,17 @@ export default {
     },
     async addTag(tag) {
       if (this.user && this.record && this.selectedTags) {
-        this.$set(this.selectedTags, this.selectedTags.length, tag);
         if (this.record.type === 'Phone') {
+          await this.setPhone(this.record);
           await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
         } else {
+          await this.setAddress(this.record);
           await this.addAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
         }
       }
     },
     async removeTag(tag) {
-      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2}`;
+      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2 || ''}`;
       const response = await this.$bvModal.msgBoxConfirm(
         formatLanguage(tag.caption, this.language), {
           title,
@@ -141,8 +144,10 @@ export default {
 
       if (response) {
         if (this.record.type === 'Phone') {
+          await this.setPhone(this.record);
           await this.removePhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
         } else {
+          await this.setAddress(this.record);
           await this.removeAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
         }
       }
@@ -156,7 +161,6 @@ export default {
       if (response) {
         const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
         await this.markAsDoNotCall({ addressId: this.record.id, userid: this.user.id, tag: datestamped });
-        await this.getTerritory({ id: this.record.territory_id });
       }
     },
     async notForeign(tag) {
@@ -167,7 +171,6 @@ export default {
 
       if (response) {
         await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
-        await this.getTerritory({ id: this.record.territory_id });
       }
     },
     hasPhone() {
@@ -182,7 +185,8 @@ export default {
 
       return true;
     },
-    highlight(tag) {
+    highlight(tag = '') {
+      if (!tag) return false;
       const tagsToHighlight = ['no number', 'do not mail', 'do not call', 'invalid'];
       return tagsToHighlight.includes(tag)
         || tag.includes('not ')
@@ -206,7 +210,7 @@ export default {
       congregation: 'congregation/congregation',
     }),
     language() {
-      return (get(this.congregation, 'language') || 'Tagalog').toLowerCase();
+      return toLower(get(this.congregation, 'language') || 'Tagalog');
     },
     availableTags() {
       const tags = this.record.type === 'Phone' ? PHONE_TAGS : ADDRESS_TAGS;
@@ -220,7 +224,7 @@ export default {
     },
     combinedTags() {
       const newArr = union(this.selectedTags, this.availableTags)
-        .map(t => t.toLowerCase())
+        .map(t => toLower(t))
         .filter(t => t && !this.hide(t))
         .sort();
 
@@ -229,18 +233,25 @@ export default {
     },
     selectedTags() {
       const notes = get(this.record, 'notes') || '';
-      return (notes.toLowerCase().split(',').filter(n => n.length)) || [];
+      return (toLower(notes).split(',').filter(n => n.length)) || [];
     },
     allTagsSelected() {
       return difference(this.availableTags, this.selectedTags).length === 0;
     },
     preview() {
       const all = this.selectedTags.sort();
+      const result = [];
       if (this.mode === 'phoneAddress') {
-        return all.filter(t => PHONE_ADDRESS_TAGS.includes(t));
+        result.push(...all.filter(t => PHONE_ADDRESS_TAGS.includes(t)));
+      } else {
+        result.push(...all.filter(t => !this.hide(t)));
       }
 
-      return all.filter(t => !this.hide(t)).map(t => ({ caption: t, state: true }));
+      if (result.length && typeof result[0] === 'string') {
+        return result.map(t => ({ caption: t, state: true }));
+      }
+
+      return result;
     },
     displayedTags() {
       return this.collapsed ? this.preview : this.combinedTags;

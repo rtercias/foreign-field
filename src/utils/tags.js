@@ -27,3 +27,14 @@ export const DNC_TAG = 'do not call';
 export function formatLanguage(tag = '', value) {
   return String(tag).replaceAll('#language#', value);
 }
+
+export function addTag(notes, tag) {
+  const tags = (notes || '').split(',') || [];
+  if (!tags.includes(tag)) tags.push(tag);
+  return tags.join(',');
+}
+
+export function removeTag(notes, tag) {
+  const tags = (notes || '').split(',') || [];
+  return tags.filter(t => !t.includes(tag)).join(',');
+}

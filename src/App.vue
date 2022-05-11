@@ -12,10 +12,26 @@
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view class="h-100" :key="key"></router-view>
     </div>
-    <footer v-if="isDesktop || isPWA" class="app-footer w-100 d-flex justify-content-end">
+    <footer class="app-footer w-100 d-flex justify-content-end">
       <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
-        class="desktop-nav alert-secondary d-flex justify-content-end border-medium
+        class="desktop-nav alert-secondary d-flex justify-content-between border-medium
           border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
+        <div class="d-flex">
+          <toggle-button
+            class="mr-2"
+            :value="collaborate"
+            @change="toggleCollaborate"
+            :sync="true"
+            :labels="{ checked: 'On', unchecked: 'Off' }"
+          />
+          Collaborate Mode
+          <font-awesome-icon
+            class="text-primary ml-2"
+            icon="info-circle"
+            size="sm"
+            @click="showCollaborateHelp">
+          </font-awesome-icon>
+        </div>
         <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
           <font-awesome-icon icon="link"></font-awesome-icon>
         </b-link>
@@ -26,13 +42,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import { ToggleButton } from 'vue-js-toggle-button';
 import get from 'lodash/get';
 import throttle from 'lodash/throttle';
-import { channel } from './main';
+import { subscription } from './main';
 import Masthead from './components/Masthead';
 import NavMenu from './components/NavMenu';
-import { AddressStatus } from './store';
-import { unmask } from './utils/phone';
 import { UnauthorizedUserError } from './store/exceptions/custom-errors';
 
 export default {
@@ -40,10 +55,12 @@ export default {
   components: {
     Masthead,
     NavMenu,
+    ToggleButton,
   },
   data() {
     return {
       hideMenu: false,
+      collaborate: false,
     };
   },
   created() {
@@ -55,88 +72,10 @@ export default {
     window.removeEventListener('scroll', throttle(this.handleScroll, 0));
   },
   async mounted() {
+    this.collaborate = sessionStorage.getItem('collaborate') === 'true';
     await this.refresh();
 
-    channel.bind('add-address', (address) => {
-      if (address && this.territory.id === address.territory_id) {
-        this.addAddress(address);
-      }
-    });
-    channel.bind('update-address', (address) => {
-      if (address) {
-        if (address.status !== AddressStatus.Active) {
-          this.deleteAddress(address);
-        } else {
-          this.updateAddress(address);
-        }
-      }
-    });
-    channel.bind('change-address-status', (address) => {
-      if (address && this.territory.id === address.territory_id) {
-        if (address.status !== AddressStatus.Active) {
-          this.deleteAddress(address);
-        } else {
-          this.updateAddress(address);
-        }
-      }
-    });
-    channel.bind('add-phone', (phone) => {
-      if (phone && this.territory.id === phone.territory_id) {
-        phone.phone = unmask(phone.phone);
-        this.addPhone(phone);
-      }
-    });
-    channel.bind('update-phone', (phone) => {
-      if (phone && this.territory.id === phone.territory_id) {
-        if (phone.status !== AddressStatus.Active) {
-          this.deletePhone(phone);
-        } else {
-          phone.phone = unmask(phone.phone);
-          this.updatePhone(phone);
-        }
-      }
-    });
-    channel.bind('change-phone-status', (phone) => {
-      if (phone && this.territory.id === phone.territory_id) {
-        if (phone.status !== AddressStatus.Active) {
-          this.deletePhone(phone);
-        } else {
-          this.updatePhone(phone);
-        }
-      }
-    });
-    channel.bind('add-log', (log) => {
-      if (log) {
-        this.setAddressLastActivity({ addressId: log.address_id, lastActivity: log });
-        this.setPhoneLastActivity({ phoneId: log.address_id, lastActivity: log });
-        this.setTerritoryLastActivity({ territoryId: log.territory_id, lastActivity: log });
-      }
-    });
-    channel.bind('add-note', (args) => {
-      if (args && this.territory) {
-        const { addressId, notes } = args;
-        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
-      }
-    });
-    channel.bind('remove-note', (args) => {
-      if (args && this.territory) {
-        const { addressId, notes } = args;
-        this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
-      }
-    });
-    channel.bind('add-phone-tag', (args) => {
-      if (args && this.territory) {
-        const { phoneId, notes } = args;
-        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
-      }
-    });
-    channel.bind('remove-phone-tag', (args) => {
-      if (args && this.territory) {
-        const { phoneId, notes } = args;
-        this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
-      }
-    });
-    channel.bind('checkout-territory', (args) => {
+    subscription.bind('checkout-territory', (args) => {
       if (args) {
         const { checkoutId, territoryId, publisher } = args;
         this.setTerritoryStatus({
@@ -150,7 +89,7 @@ export default {
         });
       }
     });
-    channel.bind('checkin-territory', (args) => {
+    subscription.bind('checkin-territory', (args) => {
       if (args) {
         const { checkoutId, territoryId, publisher } = args;
         this.setTerritoryStatus({
@@ -164,7 +103,7 @@ export default {
         });
       }
     });
-    channel.bind('reassign-territory', (args) => {
+    subscription.bind('reassign-territory', (args) => {
       if (args) {
         const { checkoutId, territoryId, publisher } = args;
         this.setTerritoryStatus({
@@ -207,17 +146,6 @@ export default {
       back: 'auth/back',
       authorize: 'auth/authorize',
       changeWindowSize: 'auth/changeWindowSize',
-      addAddress: 'territory/addAddress',
-      addPhone: 'territory/addPhone',
-      updateAddress: 'territory/updateAddress',
-      updatePhone: 'territory/updatePhone',
-      deleteAddress: 'territory/deleteAddress',
-      deletePhone: 'territory/deletePhone',
-      updateAddressNotes: 'territory/updateAddressNotes',
-      updatePhoneNotes: 'territory/updatePhoneNotes',
-      setTerritoryLastActivity: 'territory/setTerritoryLastActivity',
-      setAddressLastActivity: 'territory/setAddressLastActivity',
-      setPhoneLastActivity: 'territory/setPhoneLastActivity',
       updateStatus: 'territory/updateStatus',
       collapseNav: 'auth/collapseNav',
       setTerritoryStatus: 'territories/setStatus',
@@ -254,6 +182,28 @@ export default {
       this.logout();
       this.$router.push({ name: 'unauthorized' });
       throw new UnauthorizedUserError('Unauthorized');
+    },
+    toggleCollaborate() {
+      this.collaborate = !this.collaborate;
+      sessionStorage.setItem('collaborate', this.collaborate);
+      if (this.collaborate) {
+        this.$router.go();
+      } else {
+        subscription.disconnect();
+      }
+    },
+    showCollaborateHelp() {
+      this.$bvToast.hide();
+      this.$bvToast.toast(
+        `Collaborate Mode allows you to see territory updates in real time.
+        You only need this when collaborating with another user on the same territory.`, {
+          title: 'Collaborate Mode',
+          solid: true,
+          noCloseButton: false,
+          noAutoHide: true,
+          toaster: 'b-toaster-bottom-center',
+        },
+      );
     },
   },
   watch: {

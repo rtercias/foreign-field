@@ -5,6 +5,7 @@ import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
 import { model as addressModel, validate, isCity, ACTION_BUTTON_LIST, ADDRESS_STATUS } from './models/AddressModel';
 import { model as activityModel, createActivityLog } from './models/ActivityModel';
+import * as tagUtils from '../../utils/tags';
 
 const FETCH_ADDRESS = 'FETCH_ADDRESS';
 const SET_ADDRESS = 'SET_ADDRESS';
@@ -64,7 +65,12 @@ export const address = {
     DELETE_ADDRESS_FAIL(state, exception) {
       state.error = exception;
     },
-    CHANGE_STATUS(state, status) { state.address.status = status; },
+    CHANGE_STATUS(state, addr) {
+      if (state.address.id === addr.id) {
+        state.address.status = addr.status;
+        state.address.notes = tagUtils.addTag(state.address.notes, addr.note);
+      }
+    },
     ADD_LOG(state, log) {
       if (state.address.id === log.address_id) {
         if (state.address.activityLogs && state.address.activityLogs.length) {
@@ -83,18 +89,16 @@ export const address = {
         }
       }
     },
-    ADD_TAG(state, { addressId, tag }) {
+    ADD_TAG(state, { addressId, tag, notes }) {
       if (state.address.id === addressId) {
-        const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
-        arrTags.push(tag);
-        state.address.notes = arrTags.join(',');
+        state.address.notes = tagUtils.addTag(notes, tag);
       }
     },
 
-    REMOVE_TAG(state, tag) {
-      const arrTags = (state.address.notes && state.address.notes.split(',')) || [];
-      const newTags = arrTags.filter(t => t !== tag);
-      state.address.notes = newTags.join(',');
+    REMOVE_TAG(state, { addressId, tag, notes }) {
+      if (state.address.id === addressId) {
+        state.address.notes = tagUtils.removeTag(notes, tag);
+      }
     },
 
     UPDATE_GEOCODE(state, { longitude, latitude, addr1, city, stateProvince, zip }) {
@@ -209,7 +213,7 @@ export const address = {
       }
     },
 
-    async addLog({ commit, rootGetters }, { entityId, value, checkoutId }) {
+    async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId }) {
       try {
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
@@ -242,6 +246,11 @@ export const address = {
 
         const { addLog } = get(response, 'data.data') || {};
         commit(ADD_LOG, addLog);
+
+        // TODO: separate the calls by creating "addLog" function specifically for phones
+        dispatch('territory/setAddressLastActivity', { addressId: entityId, lastActivity: addLog }, { root: true });
+        dispatch('territory/setPhoneLastActivity', { phoneId: entityId, lastActivity: addLog }, { root: true });
+
         commit(FETCH_LAST_ACTIVITY_SUCCESS, addLog);
       } catch (e) {
         commit(LOG_FAIL, e);
@@ -360,7 +369,7 @@ export const address = {
         }
         const { updateAddress } = get(response, 'data.data');
         commit(UPDATE_ADDRESS, updateAddress);
-        dispatch('territory/updateAddress', addr, { root: true });
+        dispatch('territory/updateAddress', _address, { root: true });
       } catch (e) {
         commit(UPDATE_ADDRESS_FAIL, e);
         console.error(UPDATE_ADDRESS_FAIL, e);
@@ -441,7 +450,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.NF.value);
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.NF.value, userid, note: tag });
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -480,7 +489,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, ADDRESS_STATUS.DNC.value);
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid, note: tag });
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -490,7 +499,7 @@ export const address = {
       }
     },
 
-    async addTag({ commit }, { addressId, userid, tag }) {
+    async addTag({ commit, state }, { addressId, userid, tag }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -518,8 +527,8 @@ export const address = {
         }
 
         const { addNote } = get(response, 'data.data');
-        if (addNote) {
-          commit(ADD_TAG, { addressId, tag });
+        if (addNote && get(state, 'address.id') === addressId) {
+          commit(ADD_TAG, { addressId, tag, notes: tagUtils.addTag(get(state, 'address.notes'), tag) });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);
@@ -529,7 +538,7 @@ export const address = {
       }
     },
 
-    async removeTag({ commit }, { addressId, userid, tag }) {
+    async removeTag({ commit, state }, { addressId, userid, tag }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -555,8 +564,8 @@ export const address = {
           throw new Error(errors[0].message);
         }
         const { removeNote } = get(response, 'data.data');
-        if (removeNote) {
-          commit(REMOVE_TAG, tag);
+        if (removeNote && get(state, 'address.id') === addressId) {
+          commit(REMOVE_TAG, { addressId, tag, notes: tagUtils.removeTag(get(state, 'address.notes'), tag) });
         }
       } catch (e) {
         commit(REMOVE_TAG_FAIL, e);
