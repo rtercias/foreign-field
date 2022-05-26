@@ -76,7 +76,9 @@
         <td>
           <div class="flex justify-content-center">
             <div class="box-group">
-              <div class="text-left font-weight-bold">Terr. No. {{ group[0].territory_name }}</div>
+              <div class="terr-name text-left font-weight-bold text-truncate">
+                Terr. No. {{ group[0].territory_name }}
+              </div>
               <div v-if="sortField!=='territory_name'" class="terr-desc text-left small text-truncate">
                 {{ group[0].territory_description }}
               </div>
@@ -251,8 +253,8 @@ export default {
   .date-filter {
     width: 120px;
   }
-  .terr-desc {
-    width: 195px;
+  .terr-desc, .terr-name {
+    max-width: 195px;
   }
   @media print
   {
