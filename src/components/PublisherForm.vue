@@ -20,7 +20,7 @@
         <b-form-input v-model="model.lastname" maxlength="50"></b-form-input>
       </b-form-group>
       <b-form-group class="mt-3">
-        <b-form-checkbox :checked="model.status" v-model="model.status" :disabled="self">
+        <b-form-checkbox :checked="model.status" v-model="model.status" :disabled="isDisabled">
           Active
         </b-form-checkbox>
       </b-form-group>
@@ -162,6 +162,7 @@ export default {
       congregation: 'congregation/congregation',
       canWrite: 'auth/canWrite',
       canManage: 'auth/canManage',
+      canSwitch: 'auth/canSwitchCong',
     }),
     mode() {
       return this.publisherId ? Modes.edit : Modes.add;
@@ -184,6 +185,12 @@ export default {
     roleOptions() {
       if (this.isAdmin) return RoleOptions;
       return RoleOptions.filter(r => !r.adminOnly);
+    },
+    publisherIsCO() {
+      return get(this.model, 'role') === 'CO';
+    },
+    isDisabled() {
+      return !this.self && this.publisherIsCO && !this.isAdmin;
     },
   },
   watch: {
