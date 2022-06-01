@@ -15,7 +15,7 @@
         <div class="pb-3" v-if="!!checkoutId">
           Click
           <b-button class="p-0" variant="link" @click="toggleCheckout">here</b-button>
-          <span v-if="useCheckoutId"> to see all history.</span>
+          <span v-if="useCheckoutId"> to see the past year's history.</span>
           <span v-else> to see only the current checkout.</span>
         </div>
         <div class="group" v-for="(group, index) in groups" :key="index">
