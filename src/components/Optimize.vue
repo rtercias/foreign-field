@@ -70,7 +70,8 @@
             :territory="{ addresses: mappedAddresses }"
             :options="{ showSortOrder: true, simple: true }">
           </TerritoryMap>
-          <div class="d-flex px-0 col-sm-12" :class="{ 'col-md-6': showMap, 'col-md-12': fullscreen }">
+          <div class="address-list overflow-auto d-flex px-0 col-sm-12"
+            :class="{ 'col-md-6': showMap, 'col-md-12': fullscreen }">
             <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-6': isOptimize }">
               <div v-if="isOptimize" class="bg-info text-white">Old Position</div>
               <draggable
@@ -257,7 +258,7 @@ export default {
   .help {
     margin-top: -10px;
   }
-  .optimize-map {
+  .optimize-map, .address-list {
     height: 300px;
   }
   .optimize-map-buttons {
@@ -270,7 +271,7 @@ export default {
     cursor: pointer;
   }
   @media (min-width: 769px) {
-  .optimize-map {
+  .optimize-map, .address-list {
     height: calc(100vh - 450px);
   }
 }
