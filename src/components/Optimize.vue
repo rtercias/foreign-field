@@ -70,7 +70,7 @@
             :territory="{ addresses: mappedAddresses }"
             :options="{ showSortOrder: true, simple: true }">
           </TerritoryMap>
-          <div class="address-list overflow-auto d-flex px-0 col-sm-12"
+          <div class="address-list overflow-auto border d-flex px-0 col-sm-12"
             :class="{ 'col-md-6': showMap, 'col-md-12': fullscreen }">
             <b-list-group class="columns pr-0" :class="{ 'col-12': isStart || isManual, 'col-6': isOptimize }">
               <div v-if="isOptimize" class="bg-info text-white">Old Position</div>
@@ -80,6 +80,8 @@
                 ghost-class="ghost"
                 handle=".grip"
                 @update="onDragUpdate"
+                :scroll-sensitivity="50"
+                :force-fallback="true"
               >
                 <b-list-group-item
                   class="p-0"
