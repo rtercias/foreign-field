@@ -16,7 +16,7 @@
       Optimize
     </b-nav-item>
     <b-nav-item
-      v-if="!isForcedOut">
+      v-if="canLead && !isForcedOut">
       <span :class="{ 'text-warning': isCampaignMode }" @click="toggleCampaignMode">
         <font-awesome-icon v-if="togglingCampaignMode" icon="circle-notch" spin />
         <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
