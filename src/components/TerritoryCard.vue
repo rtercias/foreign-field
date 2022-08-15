@@ -187,7 +187,10 @@ export default {
         }),
       };
 
-      this.$bvModal.msgBoxOk(messages[type], { title: 'Territory Details', centered: true });
+      this.$bvModal.msgBoxOk(messages[type], {
+        title: 'Checkout Status',
+        centered: true,
+      });
     },
     assignedTo(showFull) {
       if (this.terr && this.terr.status && this.terr.status.publisher) {
@@ -196,7 +199,9 @@ export default {
         const pre = isFree ? `Last completed ${name}` : `Assigned to ${displayName(this.terr.status.publisher)}`;
         const timestamp = Number(this.terr.status.date);
         const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
-        return `${pre}${(showFull || isFree) ? formattedDate : ''}`;
+        const { name: campaignName } = this.currentCampaign;
+        const campaign = this.terr.status.campaign ? `Campaign: ${campaignName}` : '';
+        return `${pre}${(showFull || isFree) ? formattedDate : ''}${showFull ? `<br/>${campaign}` : ''}`;
       }
 
       return '';
@@ -222,6 +227,11 @@ export default {
     },
     status() {
       return this.terr && this.terr.status && this.terr.status.status || 'Available';
+    },
+    currentCampaign() {
+      const campaignId = get(this.terr, 'status.campaign_id') || null;
+      const historicalCampaigns = get(this.user, 'congregation.historicalCampaigns') || [];
+      return historicalCampaigns.find(h => h.id === campaignId) || {};
     },
     territoryDescriptions() {
       return this.terr && this.terr.description ? this.terr.description.split(',') : [];

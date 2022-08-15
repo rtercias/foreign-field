@@ -129,7 +129,7 @@ export default {
       isAuthenticated: 'auth/isAuthenticated',
     }),
     isCampaignMode() {
-      return !!get(this.user, 'congregation.campaign') || false;
+      return !!get(this.user, 'congregation.currentCampaign') || false;
     },
     key() {
       return `${this.$route.name}-${JSON.stringify(this.$route.params)}`;

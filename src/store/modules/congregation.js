@@ -2,6 +2,7 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import { model, validate } from './models/CongregationModel';
 
 const SET_CONGREGATION = 'SET_CONGREGATION';
@@ -14,6 +15,10 @@ const GET_CONGREGATION_SUCCESS = 'GET_CONGREGATION_SUCCESS';
 const GET_CONGREGATIONS_BY_CIRCUIT_SUCCESS = 'GET_CONGREGATIONS_BY_CIRCUIT_SUCCESS';
 const GET_CONGREGATIONS_BY_CIRCUIT_FAIL = 'GET_CONGREGATIONS_BY_CIRCUIT_FAIL';
 const RESET_ERROR = 'RESET_ERROR';
+const START_CAMPAIGN = 'START_CAMPAIGN';
+const END_CAMPAIGN = 'END_CAMPAIGN';
+const START_CAMPAIGN_FAIL = 'START_CAMPAIGN_FAIL';
+const END_CAMPAIGN_FAIL = 'END_CAMPAIGN_FAIL';
 
 const initialState = {
   congregation: {
@@ -25,9 +30,10 @@ const initialState = {
     publishers: [],
     groups: [],
     language: '',
-    campaign: '',
     admin_email: '',
     options: {},
+    currentCampaign: null,
+    historicalCampaigns: [],
   },
   congregationsByCircuit: [],
   error: null,
@@ -78,6 +84,18 @@ export const congregation = {
     },
     GET_CONGREGATIONS_BY_CIRCUIT_FAIL(state, exception) {
       state.error = exception;
+    },
+    START_CAMPAIGN(state, campaign) {
+      set(state, 'congregation.currentCampaign', campaign);
+    },
+    END_CAMPAIGN(state) {
+      set(state, 'congregation.currentCampaign', null);
+    },
+    START_CAMPAIGN_FAIL(state, error) {
+      state.error = error;
+    },
+    END_CAMPAIGN_FAIL(state, error) {
+      state.error = error;
     },
   },
 
@@ -274,6 +292,80 @@ export const congregation = {
       } catch (error) {
         commit(UPDATE_CONGREGATION_FAIL, error);
         console.error(GET_CONGREGATION_FAIL, error);
+      }
+    },
+    async startCampaign({ commit, rootGetters }, { name }) {
+      commit('auth/LOADING', true, { root: true });
+
+      const user = rootGetters['auth/user'];
+      const { congregation: cong } = user;
+
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation StartCampaign($name: String!, $congId: Int!, $publisherId: Int) {
+              startCampaign(name: $name, congId: $congId, publisherId: $publisherId) {
+                id
+                name
+                congregation_id
+                publisher_id
+                start_date
+                end_date
+              }
+            }`),
+            variables: {
+              name,
+              congId: cong.id,
+              publisherId: user.id,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        const { startCampaign: currentCampaign } = get(response, 'data.data');
+        commit(START_CAMPAIGN, currentCampaign);
+        commit('auth/LOADING', false, { root: true });
+      } catch (error) {
+        commit(START_CAMPAIGN_FAIL, error);
+        throw error;
+      }
+    },
+    async endCampaign({ commit }, { campaignId }) {
+      commit('auth/LOADING', true, { root: true });
+      try {
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation EndCampaign($campaignId: Int!) {
+              endCampaign(campaignId: $campaignId)
+            }`),
+            variables: {
+              campaignId,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+        commit(END_CAMPAIGN);
+        commit('auth/LOADING', false, { root: true });
+      } catch (error) {
+        commit(END_CAMPAIGN_FAIL, error);
+        throw error;
       }
     },
   },

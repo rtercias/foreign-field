@@ -15,6 +15,7 @@ export const model = gql`fragment TerritoryModel on Territory {
     date
     publisherid
     campaign
+    campaign_id
   }
   tags
 }`;

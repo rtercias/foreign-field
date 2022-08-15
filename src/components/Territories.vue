@@ -283,7 +283,7 @@ export default {
       return orderBy(filtered, toLower(this.sortOption), this.sortDirection);
     },
     isCampaignMode() {
-      return get(this.user, 'congregation.campaign') || false;
+      return !!get(this.user, 'congregation.currentCampaign');
     },
     typeText() {
       return (this.typeFilters.find(t => t.value === this.typeFilter) || { text: '' }).text;

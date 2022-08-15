@@ -202,6 +202,8 @@ export const territories = {
                     firstname
                     lastname
                   }
+                  campaign
+                  campaign_id
                 }
               }
             }`),
@@ -411,7 +413,7 @@ export const territories = {
       }
     },
 
-    async checkinAll({ commit }, { congId, username, tzOffset, timezone, campaign }) {
+    async checkinAll({ commit }, { congId, username, tzOffset, timezone }) {
       try {
         await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -421,10 +423,10 @@ export const territories = {
             query: print(
               gql`
                 mutation CheckinAll(
-                  $congId: Int! $username: String! $tz_offset: String! $timezone: String! $campaign: Boolean
+                  $congId: Int! $username: String! $tz_offset: String! $timezone: String!
                 ) {
                   checkinAll (
-                    congId: $congId, username: $username, tz_offset: $tz_offset, timezone: $timezone, campaign: $campaign
+                    congId: $congId, username: $username, tz_offset: $tz_offset, timezone: $timezone
                   )
               }`
             ),
@@ -433,7 +435,6 @@ export const territories = {
               username,
               tz_offset: tzOffset,
               timezone,
-              campaign,
             },
           },
         });
@@ -444,20 +445,19 @@ export const territories = {
       }
     },
 
-    async copyCheckouts({ commit }, { congId, username, campaign }) {
+    async copyCheckouts({ commit }, { congId, username }) {
       try {
         await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           cancelToken: axiosToken.token,
           data: {
-            query: print(gql`mutation CopyCheckouts($congId: Int! $username: String! $campaign: Boolean) {
-              copyCheckouts (congId: $congId, username: $username, campaign: $campaign)
+            query: print(gql`mutation CopyCheckouts($congId: Int! $username: String!) {
+              copyCheckouts (congId: $congId, username: $username)
             }`),
             variables: {
               congId,
               username,
-              campaign,
             },
           },
         });

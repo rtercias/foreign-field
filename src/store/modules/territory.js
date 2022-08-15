@@ -291,7 +291,7 @@ export const territory = {
   },
 
   actions: {
-    async checkinTerritory({ commit, dispatch }, args) {
+    async checkinTerritory({ commit, dispatch, rootGetters }, args) {
       try {
         if (!args) {
           throw new Error('Unable to check in territory because the required arguments were not provided');
@@ -312,11 +312,14 @@ export const territory = {
         });
 
         const checkoutId = get(response, 'data.data.checkinTerritory');
+        const cong = rootGetters['auth/congregation'];
         const status = {
           checkout_id: checkoutId,
           status: 'Recently Worked',
           publisher: args.publisher,
           date: args.date,
+          campaign: !!cong.currentCampaign,
+          campaign_id: get(cong, 'currentCampaign.id') || null,
         };
         commit(CHANGE_STATUS, status);
         dispatch('auth/getUserTerritories', args.username, { root: true });
@@ -326,7 +329,7 @@ export const territory = {
       }
     },
 
-    async checkoutTerritory({ commit, getters, dispatch }, args) {
+    async checkoutTerritory({ commit, getters, dispatch, rootGetters }, args) {
       commit(CHECKING_OUT, true);
       dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
       const response = await axios({
@@ -355,11 +358,14 @@ export const territory = {
         throw error;
       }
 
+      const cong = rootGetters['auth/congregation'];
       const status = {
         checkout_id: checkoutId,
         status: 'Checked Out',
         publisher: args.publisher,
         date: args.date,
+        campaign: !!cong.currentCampaign,
+        campaign_id: get(cong, 'currentCampaign.id') || null,
       };
 
       if (getters.territory.id === args.territoryId) {
@@ -374,7 +380,7 @@ export const territory = {
       dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
     },
 
-    async reassignCheckout({ commit, getters, dispatch }, args) {
+    async reassignCheckout({ commit, getters, dispatch, rootGetters }, args) {
       try {
         if (!args.checkoutId) throw new Error('checkout id is required');
         commit(CHECKING_OUT, true);
@@ -397,11 +403,14 @@ export const territory = {
           },
         });
 
+        const cong = rootGetters['auth/congregation'];
         const status = {
           checkout_id: args.checkoutId,
           status: 'Checked Out',
           publisher: args.publisher,
           date: args.date,
+          campaign: !!cong.currentCampaign,
+          campaign_id: get(cong, 'currentCampaign.id') || null,
         };
 
         if (getters.territory.id === args.territoryId) {
@@ -460,6 +469,8 @@ export const territory = {
                   publisher {
                     id username firstname lastname
                   }
+                  campaign
+                  campaign_id
                 }
                 lastActivity {
                   ...ActivityModel

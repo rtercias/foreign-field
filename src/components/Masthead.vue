@@ -24,7 +24,7 @@
           </div>
         </b-nav-text>
         <b-nav-text class="campaign-mode" v-if="isSearchHidden || isDesktop">
-          <span v-if="isCampaignMode">CAMPAIGN MODE</span>
+          <span v-if="isCampaignMode" class="text-nowrap">{{campaignName}}</span>
         </b-nav-text>
         <b-nav-text id="nav-search-bar" class="py-1 mx-0" :class="{
           'mx-0': !isSearchHidden,
@@ -171,7 +171,10 @@ export default {
       return this.$route.name !== 'home' && this.$route.name !== 'unauthorized';
     },
     isCampaignMode() {
-      return get(this.user, 'congregation.campaign') || false;
+      return !!get(this.user, 'congregation.currentCampaign');
+    },
+    campaignName() {
+      return get(this.user, 'congregation.currentCampaign.name') || '';
     },
     routeLabel() {
       return get(this.$route, 'meta.label');

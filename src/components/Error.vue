@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="lead p-2 pt-5">
-      Oops... something unexpected happened.
+      {{ $route.query.error || 'Oops... something unexpected happened.' }}<br/>
       Click <b-button variant="link" @click="restart" class="p-0">HERE</b-button> to restart.</div>
     <div v-if="$route.query.expired">Your session token may have expired.</div>
   </div>
