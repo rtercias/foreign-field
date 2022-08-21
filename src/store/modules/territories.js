@@ -176,7 +176,7 @@ export const territories = {
         return;
       }
 
-      const { congId, groupId, limit, offset } = params;
+      const { congId, groupId } = params;
       const tokenSource = axios.CancelToken.source();
       const cancelToken = tokenSource.token;
       commit(FETCH_STATUSES, tokenSource);
@@ -189,8 +189,8 @@ export const territories = {
           },
           cancelToken,
           data: {
-            query: print(gql`query TerritoriesByCongAndGroup($congId: Int $groupId: Int $limit: Int $offset: Int) {
-              territories (congId: $congId, group_id: $groupId, limit: $limit, offset: $offset) {
+            query: print(gql`query TerritoryStatusByCongAndGroup($congId: Int $groupId: Int) {
+              territories (congId: $congId, group_id: $groupId, withStatus: true) {
                 id
                 status {
                   checkout_id
@@ -210,8 +210,6 @@ export const territories = {
             variables: {
               congId,
               groupId,
-              limit,
-              offset,
             },
           },
         });

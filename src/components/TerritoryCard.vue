@@ -197,8 +197,7 @@ export default {
         const isFree = this.isRecentlyWorked || this.isAvailable;
         const name = showFull ? `${isFree ? 'by ' : ''}${displayName(this.terr.status.publisher)}` : '';
         const pre = isFree ? `Last completed ${name}` : `Assigned to ${displayName(this.terr.status.publisher)}`;
-        const timestamp = Number(this.terr.status.date);
-        const formattedDate = (!Number.isNaN(timestamp) && ` on ${format(new Date(timestamp), 'MM/dd/yyyy')}`) || '';
+        const formattedDate = this.terr.status.date ? ` on ${this.terr.status.date}` : '';
         const { name: campaignName } = this.currentCampaign;
         const campaign = this.terr.status.campaign ? `Campaign: ${campaignName}` : '';
         return `${pre}${(showFull || isFree) ? formattedDate : ''}${showFull ? `<br/>${campaign}` : ''}`;
