@@ -10,6 +10,11 @@ These instructions will get you a copy of the project up and running on your loc
 1. `npm install`
 2. `npm start`
 
+### Deploy
+1. Point VUE_APP_ROOT_API to the correct url
+2. For staging, `npm run deploy-staging`
+3. For production, `npm run deploy`
+
 ## Built With
 * [vue-js](https://github.com/vuejs/vue)
 
