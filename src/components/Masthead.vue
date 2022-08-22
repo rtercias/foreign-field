@@ -23,7 +23,7 @@
             </b-link>
           </div>
         </b-nav-text>
-        <b-nav-text class="campaign-mode" v-if="isSearchHidden || isDesktop">
+        <b-nav-text class="campaign-mode text-truncate" v-if="isSearchHidden || isDesktop">
           <span v-if="isCampaignMode" class="text-nowrap">{{campaignName}}</span>
         </b-nav-text>
         <b-nav-text id="nav-search-bar" class="py-1 mx-0" :class="{
@@ -212,6 +212,7 @@ export default {
 }
 .campaign-mode {
   width: 172px;
+  text-overflow: initial;
 }
 #nav-search-bar {
   &.w-full {
