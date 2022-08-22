@@ -6,6 +6,8 @@ firebase.config.js.unsecured
 /dist
 
 # local env files
+.env
+.env.*
 .env.local
 .env.*.local
 
