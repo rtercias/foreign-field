@@ -141,7 +141,7 @@ export default {
           territoryId: this.terr.id,
           publisher: publisher || {},
           username: user.username,
-          date: Date.now(),
+          date: format(Date.now(), 'MM/dd/yyyy'),
         });
 
         this.resetTerritoryActivities({

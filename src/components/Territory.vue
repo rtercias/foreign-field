@@ -82,6 +82,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import format from 'date-fns/format';
 import Loading from './Loading';
 import { store, defaultOptions, TerritoryType, AddressStatus } from '../store';
 import { displayName, displayShortName } from '../utils/publisher';
@@ -293,7 +294,7 @@ export default {
         territoryId: this.territoryId,
         publisher: get(this.territory, 'status.publisher') || {},
         username: this.user.username,
-        date: Date.now(),
+        date: format(Date.now(), 'MM/dd/yyyy'),
       });
 
       this.resetTerritoryActivities({
