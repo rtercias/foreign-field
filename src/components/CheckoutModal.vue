@@ -23,7 +23,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
-import format from 'date-fns/format';
 
 export default {
   name: 'CheckoutModal',
@@ -67,7 +66,7 @@ export default {
           territoryId: this.territory.id,
           publisher: this.selectedPublisher,
           username: this.user.username,
-          date: format(Date.now(), 'MM/dd/yyyy'),
+          date: Date.now(),
         });
 
         if (this.goToTerritory) {

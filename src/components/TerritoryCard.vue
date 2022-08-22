@@ -141,7 +141,7 @@ export default {
           territoryId: this.terr.id,
           publisher: publisher || {},
           username: user.username,
-          date: format(Date.now(), 'MM/dd/yyyy'),
+          date: Date.now(),
         });
 
         this.resetTerritoryActivities({
@@ -197,7 +197,9 @@ export default {
         const isFree = this.isRecentlyWorked || this.isAvailable;
         const name = showFull ? `${isFree ? 'by ' : ''}${displayName(this.terr.status.publisher)}` : '';
         const pre = isFree ? `Last completed ${name}` : `Assigned to ${displayName(this.terr.status.publisher)}`;
-        const formattedDate = this.terr.status.date ? ` on ${this.terr.status.date}` : '';
+        const dateString = typeof this.terr.status.date === 'string' ? this.terr.status.date
+          : format(new Date(this.terr.status.date), 'MM/dd/yyyy');
+        const formattedDate = dateString ? ` on ${dateString}` : '';
         const { name: campaignName } = this.currentCampaign;
         const campaign = this.terr.status.campaign ? `Campaign: ${campaignName}` : '';
         return `${pre}${(showFull || isFree) ? formattedDate : ''}${showFull ? `<br/>${campaign}` : ''}`;

@@ -45,7 +45,6 @@ import { mapGetters, mapActions } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import get from 'lodash/get';
 import throttle from 'lodash/throttle';
-import format from 'date-fns/format';
 import { subscription } from './main';
 import Masthead from './components/Masthead';
 import NavMenu from './components/NavMenu';
@@ -84,7 +83,7 @@ export default {
           status: {
             status: 'Checked Out',
             checkout_id: checkoutId,
-            date: format(new Date(), 'MM/dd/yyyy'),
+            date: new Date().getTime(),
             publisher,
           },
         });
@@ -98,7 +97,7 @@ export default {
           status: {
             status: 'Recently Worked',
             checkout_id: checkoutId,
-            date: format(new Date(), 'MM/dd/yyyy'),
+            date: new Date().getTime(),
             publisher,
           },
         });

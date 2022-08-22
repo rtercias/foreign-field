@@ -6,7 +6,6 @@ import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import set from 'lodash/set';
-import format from 'date-fns/format';
 import { model, validate } from './models/TerritoryModel';
 import { model as addressModel } from './models/AddressModel';
 import { model as phoneModel } from './models/PhoneModel';
@@ -100,7 +99,7 @@ export const territory = {
       set(state.territory, 'status', {
         checkout_id: args.checkout_id,
         status: args.status,
-        date: format(new Date(), 'MM/dd/yyyy'),
+        date: new Date().getTime(),
         publisher: args.publisher,
       });
     },
