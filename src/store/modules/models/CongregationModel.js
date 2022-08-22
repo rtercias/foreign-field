@@ -7,10 +7,23 @@ export const model = gql`fragment CongregationModel on Congregation {
   name
   description
   language
-  campaign
   admin_email
   options
   circuit
+  currentCampaign {
+    id
+    name
+    publisher_id
+    start_date
+    end_date
+  }
+  historicalCampaigns {
+    id
+    name
+    publisher_id
+    start_date
+    end_date
+  }
 }`;
 
 export function validate(_cong, isNew) {
@@ -37,18 +50,12 @@ export function validate(_cong, isNew) {
     cong.description = '';
   }
 
-  if (!cong.campaign) {
-    cong.campaign = 0;
-  } else {
-    cong.campaign = Number(cong.campaign);
-  }
-
   if (!cong.options) {
     cong.options = '';
   }
 
   const ignoredProperties = [
-    'territories', 'publishers', 'groups',
+    'territories', 'publishers', 'groups', 'currentCampaign', 'historicalCampaigns',
   ];
 
   for (const ignored of ignoredProperties) {

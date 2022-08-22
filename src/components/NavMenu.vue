@@ -22,7 +22,7 @@
         <font-awesome-icon v-else :icon="isCampaignMode ? 'ban' : 'bolt'" />
         {{isCampaignMode ? 'End Campaign' : 'New Campaign'}}
       </span>
-      <font-awesome-icon class="ml-1 text-info" icon="info-circle" @click="toggleCampaignHelp" />
+      <font-awesome-icon class="mb-2 text-info campaign-info" icon="info-circle" @click="toggleCampaignHelp" />
       <b-toaster name="campaign-help"></b-toaster>
     </b-nav-item>
     <b-nav-item-dropdown v-if="isAuthenticated">
@@ -55,6 +55,14 @@ export default {
     };
   },
   async mounted() {
+    this.$root.$on('bv::modal::shown', (bvEvent, modalId) => {
+      if (modalId === 'start-campaign') {
+        if (this.$refs.campaignName) {
+          this.$refs.campaignName.select();
+        }
+      }
+    });
+
     await this.getGroupsList();
   },
   computed: {
@@ -81,7 +89,7 @@ export default {
       return code === 'ALL' ? 0 : id || get(this.territory, 'group_id') || 0;
     },
     isCampaignMode() {
-      return get(this.user, 'congregation.campaign') || false;
+      return !!get(this.user, 'congregation.currentCampaign');
     },
   },
   methods: {
@@ -90,6 +98,8 @@ export default {
       logout: 'auth/logout',
       updateCongregation: 'congregation/updateCongregation',
       getGroups: 'group/getGroups',
+      startCongCampaign: 'congregation/startCampaign',
+      endCongCampaign: 'congregation/endCampaign',
     }),
     get,
     async toggleCampaignMode() {
@@ -101,55 +111,44 @@ export default {
     },
     async startCampaign() {
       const cong = { ...this.user.congregation };
-      const message = 'Start a new campaign?';
-      const response = await this.$bvModal.msgBoxConfirm(message, {
-        title: `${cong.name} Campaign`,
-        centered: true,
-      });
+      const campaignId = get(cong, 'currentCampaign.id');
+      if (campaignId) {
+        await this.$bvModal.msgBoxConfirm('A campaign is already in progress', {
+          title: 'Start Campaign',
+          centered: true,
+        });
 
+        return;
+      }
+
+      // using let instead of const here because it's being used
+      // as the v-model for the msgbox input
+      let name = 'Campaign'; // eslint-disable-line prefer-const
+      const modalId = 'start-campaign';
+      const response = await this.$bvModal.msgBoxConfirm(
+        <input ref="campaignName" vModel={name} class="w-100" />, {
+          id: modalId,
+          title: 'What is the name of the new campaign?',
+          centered: true,
+        },
+      );
       if (!response) return;
       this.togglingCampaignMode = true;
 
       // Step 1: toggle campaign mode
-      cong.campaign = !cong.campaign;
-      await this.updateCongregation(cong);
+      try {
+        await this.startCongCampaign({ name, congId: cong.id, publisherId: this.user.id });
+      } catch (error) {
+        console.log('error', error);
+        this.$router.push({ name: 'error', query: { error: 'Unable to start campaign.' } });
+        return;
+      }
 
-      // Step 2a: check in all
-      this.$bvToast.toast('Checking in all territories. The page will refresh when it\'s done.', {
+      this.$bvToast.toast(`Campaign has started. Checking in all territories.
+        We'll let you know when it's done.`, {
         variant: 'warning',
-        noAutoHide: true,
+        autohide: false,
       });
-
-      await this.checkinAll({
-        congId: cong.id,
-        username: this.user.username,
-        tzOffset: new Date().getTimezoneOffset().toString(),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        campaign: false,
-      });
-
-      this.togglingCampaignMode = false;
-      this.$router.go();
-    },
-    async endCampaign() {
-      const cong = { ...this.user.congregation };
-      const message = 'End the current campaign?';
-      const response = await this.$bvModal.msgBoxConfirm(message, {
-        title: 'Campaign',
-        centered: true,
-      });
-
-      if (!response) return;
-      this.togglingCampaignMode = true;
-
-      this.$bvToast.toast('Checking in all territories. The page will refresh when it\'s done.', {
-        variant: 'warning',
-        noAutoHide: true,
-      });
-
-      // Step 1: toggle campaign mode
-      cong.campaign = !cong.campaign;
-      await this.updateCongregation(cong);
 
       // Step 2: check in all
       await this.checkinAll({
@@ -157,10 +156,61 @@ export default {
         username: this.user.username,
         tzOffset: new Date().getTimezoneOffset().toString(),
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        campaign: true,
       });
 
       this.togglingCampaignMode = false;
+      this.$bvToast.toast('All territories have been checked in.', {
+        variant: 'warning',
+      });
+      this.$router.go();
+    },
+    async endCampaign() {
+      const cong = { ...this.user.congregation };
+      const message = 'End the current campaign?';
+      const response = await this.$bvModal.msgBoxConfirm(message, {
+        title: `${get(cong, 'currentCampaign.name') || 'Campaign'}`,
+        centered: true,
+      });
+
+      if (!response) return;
+      this.togglingCampaignMode = true;
+
+      // Step 1: toggle campaign mode
+      const campaignId = get(cong, 'currentCampaign.id');
+      if (!campaignId) {
+        await this.$bvModal.msgBoxConfirm('No current campaign found', {
+          title: 'End Campaign',
+          centered: true,
+        });
+
+        return;
+      }
+
+      try {
+        await this.endCongCampaign({ campaignId });
+      } catch (error) {
+        this.$router.push({ name: 'error', query: { error: 'Unable to end campaign.' } });
+        return;
+      }
+
+      this.$bvToast.toast(`Campaign has ended. Checking in all territories.
+        We'll let you know when it's done.`, {
+        variant: 'warning',
+        autohide: false,
+      });
+
+      // Step 2: check in all
+      await this.checkinAll({
+        congId: cong.id,
+        username: this.user.username,
+        tzOffset: new Date().getTimezoneOffset().toString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
+
+      this.togglingCampaignMode = false;
+      this.$bvToast.toast('All territories have been checked in.', {
+        variant: 'warning',
+      });
       this.$router.go();
     },
     toggleCampaignHelp() {
@@ -210,5 +260,8 @@ export default {
 <style lang="scss">
 .large-font-menu {
   font-size: 24px;
+}
+.campaign-info {
+  font-size: 14px;
 }
 </style>
