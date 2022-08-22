@@ -147,6 +147,7 @@ export default {
       this.$bvToast.toast(`Campaign has started. Checking in all territories.
         We'll let you know when it's done.`, {
         variant: 'warning',
+        autohide: false,
       });
 
       // Step 2: check in all
@@ -195,6 +196,7 @@ export default {
       this.$bvToast.toast(`Campaign has ended. Checking in all territories.
         We'll let you know when it's done.`, {
         variant: 'warning',
+        autohide: false,
       });
 
       // Step 2: check in all
