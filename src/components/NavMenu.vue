@@ -144,6 +144,11 @@ export default {
         return;
       }
 
+      this.$bvToast.toast(`Campaign has started. Checking in all territories.
+        We'll let you know when it's done.`, {
+        variant: 'warning',
+      });
+
       // Step 2: check in all
       await this.checkinAll({
         congId: cong.id,
@@ -153,7 +158,7 @@ export default {
       });
 
       this.togglingCampaignMode = false;
-      this.$bvToast.toast('New campaign started. All territories have been checked in.', {
+      this.$bvToast.toast('All territories have been checked in.', {
         variant: 'warning',
       });
       this.$router.go();
@@ -187,6 +192,11 @@ export default {
         return;
       }
 
+      this.$bvToast.toast(`Campaign has ended. Checking in all territories.
+        We'll let you know when it's done.`, {
+        variant: 'warning',
+      });
+
       // Step 2: check in all
       await this.checkinAll({
         congId: cong.id,
@@ -196,7 +206,7 @@ export default {
       });
 
       this.togglingCampaignMode = false;
-      this.$bvToast.toast('Campaign has ended. All territories have been checked in.', {
+      this.$bvToast.toast('All territories have been checked in.', {
         variant: 'warning',
       });
       this.$router.go();
