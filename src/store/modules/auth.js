@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import axios from 'axios';
-import firebase from 'firebase/app';
+import { getAuth, signOut } from 'firebase/auth';
+import firebase from 'firebase/compat/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
@@ -200,6 +201,10 @@ export const auth = {
     },
 
     logout({ commit }) {
+      const googleAuth = getAuth();
+      if (googleAuth) {
+        signOut(googleAuth);
+      }
       firebase.auth().signOut();
       sessionStorage.removeItem('firebaseui::token');
       sessionStorage.removeItem('firebaseui::pendingRedirect');
