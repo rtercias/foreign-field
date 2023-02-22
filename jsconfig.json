@@ -1,1 +1,8 @@
-{}
+{
+  "vueCompilerOptions": {
+    "extensions": [
+      ".vue"
+    ],
+    "target": 2 
+  },
+}
