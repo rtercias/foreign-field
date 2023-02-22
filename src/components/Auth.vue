@@ -34,7 +34,7 @@
 
 <script>
 import GoogleLogin from 'vue-google-login';
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import firebaseCompat from 'firebase/compat/app';
 import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
@@ -81,8 +81,8 @@ export default {
     },
     async googleLogin() {
       const auth = getAuth();
-      signInWithRedirect(auth, new GoogleAuthProvider());
-      const result = await getRedirectResult(auth);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
       this.onSignInSuccess(result);
     },
   },
