@@ -132,7 +132,10 @@ export default {
   span {
     margin-left: 12px;
   }
-  .mdl-card {
+}
+
+.firebaseui-container {
+  &.mdl-card {
     margin-top: -40px;
   }
 }
