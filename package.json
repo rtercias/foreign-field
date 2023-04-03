@@ -15,7 +15,7 @@
     "@capacitor/cli": "^3.3.2",
     "@capacitor/core": "^1.0.0-alpha.38",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
-    "@fortawesome/free-solid-svg-icons": "^5.13.0",
+    "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "@types/axios": "^0.14.0",
     "axios": "^0.24.0",
