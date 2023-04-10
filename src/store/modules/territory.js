@@ -428,6 +428,39 @@ export const territory = {
       }
     },
 
+    async unassignCheckout({ dispatch }, args) {
+      try {
+        if (!args.checkoutId) throw new Error('checkout id is required');
+        if (!args.territoryId) throw new Error('territory id is required');
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: true }, { root: true });
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data: {
+            query: print(gql`mutation UnassignCheckout($checkoutId: Int!, $territoryId: Int!) {
+              unassignCheckout(checkoutId: $checkoutId, territoryId: $territoryId) {
+                ...TerritoryModel
+              }
+            },
+            ${model}`),
+            variables: {
+              checkoutId: args.checkoutId,
+              territoryId: args.territoryId,
+            },
+          },
+        });
+
+        const { unassignCheckout: terr } = get(response, 'data.data');
+        dispatch('territories/setStatus', { id: args.territoryId, status: get(terr, 'status') }, { root: true });
+        dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
+      } catch (e) {
+        console.error('Unable to unassign territory', e);
+      }
+    },
+
     async getTerritory({ commit, getters, rootGetters, dispatch }, { id, getLastActivity }) {
       if (!id) {
         commit(RESET_TERRITORY);

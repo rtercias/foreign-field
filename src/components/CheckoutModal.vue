@@ -17,6 +17,18 @@
     <b-checkbox class="pt-4 text-right" v-model="goToTerritory" @change="remember">
       Go to territory after checkout
     </b-checkbox>
+    <template #modal-footer="{ ok, cancel }">
+    <!-- Button with custom close trigger value -->
+    <b-button variant="light" @click="unassign(cancel)" v-if="status === 'Checked Out'">
+        Unassign
+      </b-button>
+      <b-button variant="secondary" @click="cancel">
+        Cancel
+      </b-button>
+      <b-button variant="primary" @click="ok">
+        OK
+      </b-button>
+    </template>
   </b-modal>
 </template>
 
@@ -47,6 +59,7 @@ export default {
     ...mapActions({
       checkoutTerritory: 'territory/checkoutTerritory',
       reassignCheckout: 'territory/reassignCheckout',
+      unassignCheckout: 'territory/unassignCheckout',
     }),
 
     selectPublisher(publisher) {
@@ -98,6 +111,11 @@ export default {
       } else {
         await this.checkout();
       }
+    },
+
+    async unassign(cancel) {
+      this.unassignCheckout({ checkoutId: this.territory.status.checkout_id, territoryId: this.territory.id });
+      cancel();
     },
 
     remember(val) {
