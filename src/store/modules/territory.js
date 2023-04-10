@@ -453,7 +453,7 @@ export const territory = {
           },
         });
 
-        const { territory: terr } = get(response, 'data.data');
+        const { unassignCheckout: terr } = get(response, 'data.data');
         dispatch('territories/setStatus', { id: args.territoryId, status: get(terr, 'status') }, { root: true });
         dispatch('territories/setIsBusy', { id: args.territoryId, value: false }, { root: true });
       } catch (e) {
