@@ -1,3 +1,5 @@
+import toLower from 'lodash/toLower';
+
 export const ADDRESS_TAGS = [
   'verify',
   'day sleeper',
@@ -36,5 +38,5 @@ export function addTag(notes, tag) {
 
 export function removeTag(notes, tag) {
   const tags = (notes || '').split(',') || [];
-  return tags.filter(t => !t.includes(tag)).join(',');
+  return tags.filter(t => toLower(t) !== toLower(tag)).join(',');
 }
