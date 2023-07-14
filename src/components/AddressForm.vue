@@ -99,7 +99,7 @@
               :options="territoryOptions" required>
             </b-form-select>
           </b-form-group>
-          <b-form-group label="Notes" class="mt-3" v-if="canManage">
+          <b-form-group label="Notes" class="mt-3" v-if="canWrite">
             <b-form-input v-model="model.notes"></b-form-input>
           </b-form-group>
         </div>
