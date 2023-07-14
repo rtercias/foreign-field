@@ -99,8 +99,9 @@
               :options="territoryOptions" required>
             </b-form-select>
           </b-form-group>
-          <b-form-group label="Notes" class="mt-3" v-if="canWrite">
-            <b-form-input v-model="model.notes"></b-form-input>
+          <b-form-group label="Notes" class="mt-3">
+            <b-form-input v-if="canWrite" v-model="model.notes"></b-form-input>
+            <label v-else>{{ model.notes }}</label>
           </b-form-group>
         </div>
         <div v-if="isAdmin" class="mt-5">
