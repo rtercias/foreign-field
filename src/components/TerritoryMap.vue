@@ -3,22 +3,25 @@
     There are no addresses in this territory.
   </h3> -->
   <div class="territory-map">
-    <l-map
-      class="map"
-      :zoom="zoom"
-      :center="center"
-      :bounds="bounds">
+    <l-map class="map" :zoom="zoom" :center="center" :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
         v-for="(x, i) in territory.addresses"
         :key="i"
         @click="() => centerMarker(x)"
-        :lat-lng="getLatLng(x)">
+        :lat-lng="getLatLng(x)"
+      >
         <l-icon v-if="mapOptions.showSortOrder">
-          <div class="sort-order-icon font-weight-bolder text-primary bg-warning">{{i + 1}}</div>
+          <div class="sort-order-icon font-weight-bolder text-primary bg-warning">
+            {{ i + 1 }}
+          </div>
         </l-icon>
-        <l-popup>
-          <MapLinks :address='x' :simple="mapOptions.simple" :editable="mapOptions.editable"></MapLinks>
+        <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100 }">
+          <MapLinks
+            :address="x"
+            :simple="mapOptions.simple"
+            :editable="mapOptions.editable"
+          ></MapLinks>
         </l-popup>
       </l-marker>
     </l-map>
@@ -26,14 +29,7 @@
 </template>
 
 <script>
-import {
-  LMap,
-  LTileLayer,
-  LMarker,
-  LIcon,
-  LPopup,
-  LControlZoom,
-} from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControlZoom } from 'vue2-leaflet';
 import { latLngBounds } from 'leaflet';
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
@@ -69,7 +65,12 @@ export default {
       token: 'auth/token',
     }),
     bounds() {
-      return latLngBounds(get(this.territory, 'addresses', []).map(terr => [terr.latitude, terr.longitude]));
+      return latLngBounds(
+        get(this.territory, 'addresses', []).map(terr => [
+          terr.latitude,
+          terr.longitude,
+        ])
+      );
     },
     mapOptions() {
       return this.options || defaultOptions;
@@ -97,29 +98,30 @@ export default {
   },
   async mounted() {
     if (this.token && !this.territory) {
-      await this.getTerritory({ id: this.id });
+      await this.getTerritory({ id: this.id, getLastActivity: true });
     }
   },
 };
 </script>
 
 <style lang="scss" scoped>
-  .territory-map {
-    height: calc(100vh - 107px);
+.territory-map {
+  height: calc(100vh - 107px);
 
-    .map {
-      width: 100%;
-    }
+  .map {
+    width: 100%;
   }
-  .leaflet-popup h2 {
-    font-size: 18px;
-  }
-  .sort-order-icon {
-    border: solid 3px;
-    border-radius: 50%;
-    line-height: 22px;
-    min-height: 30px;
-    width: 30px;
-    font-size: 18px;
-  }
+}
+.leaflet-popup h2 {
+  font-size: 18px;
+}
+
+.sort-order-icon {
+  border: solid 3px;
+  border-radius: 50%;
+  line-height: 22px;
+  min-height: 30px;
+  width: 30px;
+  font-size: 18px;
+}
 </style>
