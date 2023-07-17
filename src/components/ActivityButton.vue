@@ -6,6 +6,7 @@
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <b-button
+        :disabled="busy"
         class="p-0"
         variant="link"
         @click="click(value)">
@@ -14,6 +15,7 @@
     </span>
   </div>
   <b-button
+    :disabled="busy"
     variant="link"
     v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction"
@@ -69,6 +71,7 @@ export default {
     'bg',
     'inverted',
     'iconOnly',
+    'busy',
   ],
   methods: {
     ...mapActions({

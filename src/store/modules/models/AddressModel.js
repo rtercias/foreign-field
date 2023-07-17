@@ -4,6 +4,9 @@ import intersection from 'lodash/intersection';
 import { InvalidAddressError } from '../../exceptions/custom-errors';
 
 const GEOCODE_CITY_TYPES = ['locality', 'sublocality'];
+export const DO_NOT_CALL = 'do not call';
+export const DO_NOT_MAIL = 'do not mail';
+export const LETTER_WRITING = 'mail sent';
 
 export const model = gql`fragment AddressModel on Address {
   congregationId
@@ -39,7 +42,7 @@ export const model = gql`fragment AddressModel on Address {
 export const ADDRESS_STATUS = {
   Active: { value: 'Active', text: 'Active' },
   Inactive: { value: 'Inactive', text: 'Inactive' },
-  NF: { value: 'NF', text: 'Does not speak #language#' },
+  // NF: { value: 'NF', text: 'Does not speak #language#' },
   DNC: { value: 'DNC', text: 'Do not call' },
 };
 
@@ -101,6 +104,27 @@ export const ACTION_BUTTON_LIST = [
     description: 'Do Not Mail',
     slashed: true,
   },
+  {
+    type: 'fa-icon',
+    value: 'do not call',
+    text: '',
+    icon: 'minus-circle',
+    color: 'danger',
+    description: 'Do Not Call',
+  },
+  {
+    type: 'fa-icon',
+    value: 'confirmed',
+    text: '',
+    icon: 'check',
+    color: 'success',
+    description: 'Confirmed',
+  },
+];
+
+export const ADDRESS_LEFT_BUTTON_LIST = [
+  'do not call',
+  'confirmed',
 ];
 
 export const ADDRESS_RIGHT_BUTTON_LIST = [
@@ -113,8 +137,8 @@ export const PHONE_ADDRESS_RIGHT_BUTTON_LIST = [
   'LW',
 ];
 export const PHONE_ADDRESS_LEFT_BUTTON_LIST = [
-  'no number',
   'do not mail',
+  'do not call',
 ];
 
 export const NOT_ALLOWED = [

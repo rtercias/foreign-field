@@ -3,7 +3,7 @@
     There are no addresses in this territory.
   </h3> -->
   <div class="territory-map">
-    <l-map class="map" :zoom="zoom" :center="center" :bounds="bounds">
+    <l-map class="map" :center="center" :bounds="bounds" :options="{zoomControl: false}">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
         v-for="(x, i) in territory.addresses"
@@ -19,8 +19,9 @@
         <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100 }">
           <MapLinks
             :address="x"
+            :territory="territory"
             :simple="mapOptions.simple"
-            :editable="mapOptions.editable"
+            :disabled="disabled"
           ></MapLinks>
         </l-popup>
       </l-marker>
@@ -29,7 +30,7 @@
 </template>
 
 <script>
-import { LMap, LTileLayer, LMarker, LIcon, LPopup, LControlZoom } from 'vue2-leaflet';
+import { LMap, LTileLayer, LMarker, LIcon, LPopup } from 'vue2-leaflet';
 import { latLngBounds } from 'leaflet';
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
@@ -48,10 +49,9 @@ export default {
     LIcon,
     LMarker,
     LPopup,
-    LControlZoom,
     MapLinks,
   },
-  props: ['id', 'territory', 'options'],
+  props: ['id', 'territory', 'options', 'disabled'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -65,12 +65,14 @@ export default {
       token: 'auth/token',
     }),
     bounds() {
-      return latLngBounds(
-        get(this.territory, 'addresses', []).map(terr => [
+      let latLng = [[0, 0]];
+      if (get(this.territory, 'addresses').length) {
+        latLng = get(this.territory, 'addresses').map(terr => [
           terr.latitude,
           terr.longitude,
-        ])
-      );
+        ]);
+      }
+      return latLngBounds(latLng);
     },
     mapOptions() {
       return this.options || defaultOptions;

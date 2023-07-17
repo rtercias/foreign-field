@@ -2,6 +2,7 @@
   <div class="address-links">
     <div
       class="address-header d-flex justify-content-between text-center pt-2"
+      :class="{ 'pb-2': disabled }"
     >
       <AddressCard
         v-if="address.type === 'Regular'"
@@ -9,6 +10,7 @@
         :address="address"
         :territoryId="address.territory_id"
         :incomingResponse="address.lastActivity"
+        @update-response="updateResponse"
       >
       </AddressCard>
       <div class="d-flex flex-column">
@@ -34,8 +36,8 @@
         </b-button>
       </div>
     </div>
-    <hr class="my-2" />
-    <b-list-group class="d-flex flex-row justify-content-between">
+    <hr class="my-2" v-if="!disabled" />
+    <b-list-group v-if="!disabled" class="d-flex flex-row justify-content-between">
       <b-list-group-item
         v-for="(button, index) in rightButtonList(address)"
         :key="index"
@@ -48,6 +50,9 @@
           :slashed="button.slashed"
           :inverted="get(address, 'lastActivity.value') !== button.value"
           :iconOnly="true"
+          :busy="address.isBusy"
+          :disabled="disabled"
+          @button-click="() => updateResponse(address, button.value)"
         >
         </ActivityButton>
       </b-list-group-item>
@@ -61,7 +66,7 @@ import {
   NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
 } from '../store/modules/models/AddressModel';
 
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import AddressCard from './AddressCard';
@@ -69,7 +74,7 @@ import ActivityButton from './ActivityButton';
 
 export default {
   name: 'MapLinks',
-  props: ['address', 'simple', 'editable', 'index'],
+  props: ['address', 'territory', 'simple', 'disabled', 'index'],
   components: {
     AddressCard,
     ActivityButton,
@@ -87,6 +92,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      addLog: 'address/addLog',
+    }),
     get,
     rightButtonList(item) {
       const rightButtons = ADDRESS_RIGHT_BUTTON_LIST;
@@ -112,12 +120,37 @@ export default {
         params: {
           territoryId: this.address.territory_id,
           addressId: this.address.id,
-          checkoutId: (this.$route.params && this.$route.params.checkoutId) || '',
+          checkoutId: get(this.territory, 'lastActivity.checkout_id') || '',
         },
         query: {
           origin: 'map-view',
         },
       });
+    },
+
+    async updateResponse(entity, _value) {
+      let value = _value;
+      if (entity.selectedResponse === 'START' && value === 'START') {
+        this.$set(entity, 'isBusy', false);
+        return;
+      }
+      if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
+
+      try {
+        this.$set(entity, 'isBusy', true);
+
+        await this.addLog({
+          entityId: entity.id,
+          value,
+          checkoutId: get(this.territory, 'lastActivity.checkout_id'),
+        });
+
+        this.$set(entity, 'isBusy', false);
+      } catch (e) {
+        console.error('Unable to save activity log', e);
+      }
     },
   },
 };

@@ -54,8 +54,13 @@
         ></Tags>
       </div>
       <div
-        class="static-buttons col-3 ml-n1"
-        :class="{ 'align-self-center': $route.name === 'phone-list' }">
+        class="static-buttons"
+        :class="{
+          'align-self-center': $route.name === 'phone-list',
+          'col-3 ml-n1': mode !== 'map',
+          'tiny-busy position-absolute mt-n3': mode === 'map',
+        }"
+      >
         <font-awesome-icon
           class="text-info text-left fa-2x"
           icon="circle-notch"
@@ -63,7 +68,7 @@
           v-if="isLogging || address.isBusy"
         />
         <span
-          v-else
+          v-else-if="mode !== 'map'"
           class="d-flex flex-column w-100">
           <ActivityButton
             v-if="!allowedToCall"
@@ -75,7 +80,6 @@
             :actionButtonList="actionButtonList">
           </ActivityButton>
           <ActivityButton
-            v-else-if="mode !== 'map'"
             class="selected-response fa-2x"
             :class="{
               faded: !isMySelectedResponse || isIncomingResponse,
@@ -318,6 +322,9 @@ export default {
 }
 .logging-spinner {
   font-size: 30px;
+}
+.tiny-busy {
+  font-size: 8px;
 }
 
 @media print {

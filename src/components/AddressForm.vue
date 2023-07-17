@@ -223,7 +223,7 @@ import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 import { Modes as _Modes } from '../utils/modes';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
-import { formatLanguage, NF_TAG, DNC_TAG, removeTag } from '../utils/tags';
+import { formatLanguage, NF_TAG, DNC_TAG, removeTag, removeDoNotCallTag } from '../utils/tags';
 
 const Modes = {
   ..._Modes,
@@ -302,9 +302,9 @@ export default {
           this.model.notes = '';
           await this.addAddress(this.model);
         } else if (this.mode === Modes.edit) {
-          if (this.model.status !== ADDRESS_STATUS.Active.value) {
-            const statusTag = ADDRESS_STATUS[this.model.status].text;
-            this.model.notes = removeTag(this.model.notes, statusTag);
+          if (this.model.status === ADDRESS_STATUS.Active.value
+          && this.address.status === ADDRESS_STATUS.DNC.value) {
+            this.model.notes = removeDoNotCallTag(this.model.notes);
           }
 
           await this.updateAddress(this.model);
