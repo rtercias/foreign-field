@@ -28,6 +28,7 @@ const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
 const GENERATE_PUBLISHER_TOKEN = 'GENERATE_PUBLISHER_TOKEN';
 const GENERATE_SHORT_LINK = 'GENERATE_SHORT_LINK';
 const SMS_SENT = 'SMS_SENT';
+const UPDATE_COORDINATES = 'UPDATE_COORDINATES';
 
 function initialState() {
   return {
@@ -51,6 +52,7 @@ function initialState() {
     scrollYPosition: { home: 0 },
     publisherToken: '',
     shortLink: '',
+    coordinates: [],
   };
 }
 
@@ -104,6 +106,7 @@ export const auth = {
     scrollYPosition: state => state.scrollYPosition,
     publisherToken: state => state.publisherToken,
     shortLink: state => state.shortLink,
+    coordinates: state => state.coordinates,
   },
 
   mutations: {
@@ -193,6 +196,9 @@ export const auth = {
       Vue.set(state, 'shortLink', shortLink);
     },
     SMS_SENT() {},
+    UPDATE_COORDINATES(state, coordinates) {
+      state.coordnates = coordinates;
+    },
   },
 
   actions: {
@@ -534,6 +540,10 @@ export const auth = {
         const { message } = errors[0];
         throw new Error('Unable to send SMS', message);
       }
+    },
+
+    updateCoordinates({ commit }, coordinates) {
+      commit(UPDATE_COORDINATES, coordinates);
     },
   },
 };

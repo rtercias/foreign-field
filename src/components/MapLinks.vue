@@ -41,7 +41,7 @@
       <b-list-group-item
         v-for="(button, index) in rightButtonList(address)"
         :key="index"
-        class="activity-button"
+        class="activity-button w-25"
       >
         <ActivityButton
           :value="button.value"

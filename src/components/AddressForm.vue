@@ -223,7 +223,7 @@ import Loading from './Loading';
 import { InvalidAddressError } from '../store/exceptions/custom-errors';
 import { Modes as _Modes } from '../utils/modes';
 import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
-import { formatLanguage, NF_TAG, DNC_TAG, removeTag, removeDoNotCallTag } from '../utils/tags';
+import { formatLanguage, DNC_TAG, removeTag, removeDoNotCallTag } from '../utils/tags';
 
 const Modes = {
   ..._Modes,
@@ -313,9 +313,10 @@ export default {
             this.deleteAddressFromTerritory(this.model);
           }
 
-          if (this.model.status === ADDRESS_STATUS.NF.value) {
-            await this.markAsNotForeign({ addressId: this.model.id, userid: this.user.id, tag: NF_TAG });
-          } else if (this.model.status === ADDRESS_STATUS.DNC.value) {
+          // if (this.model.status === ADDRESS_STATUS.NF.value) {
+          //   await this.markAsNotForeign({ addressId: this.model.id, userid: this.user.id, tag: NF_TAG });
+          // } else
+          if (this.model.status === ADDRESS_STATUS.DNC.value) {
             const dncTag = `${DNC_TAG} until ${format(addYears(new Date(), 1), 'P')}`;
             await this.markAsDoNotCall({ addressId: this.model.id, userid: this.user.id, tag: dncTag });
           }

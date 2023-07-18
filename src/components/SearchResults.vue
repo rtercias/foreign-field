@@ -23,9 +23,9 @@
             <b-badge v-if="isUnassigned(address)" variant="warning" class="text-lowercase">
               unassigned
             </b-badge>
-            <b-badge v-if="isNF(address)" variant="danger" class="text-lowercase">
+            <!-- <b-badge v-if="isNF(address)" variant="danger" class="text-lowercase">
               {{formatLanguage(statusText(address.status), language)}}
-            </b-badge>
+            </b-badge> -->
             <b-badge v-if="isDNC(address)" variant="danger" class="text-lowercase">
               {{ADDRESS_STATUS.DNC.text}}
             </b-badge>
@@ -134,9 +134,9 @@ export default {
     isUnassigned(address) {
       return get(address, 'territory_id') === 0;
     },
-    isNF(address) {
-      return get(address, 'status') === ADDRESS_STATUS.NF.value;
-    },
+    // isNF(address) {
+    //   return get(address, 'status') === ADDRESS_STATUS.NF.value;
+    // },
     isDNC(address) {
       return get(address, 'status') === ADDRESS_STATUS.DNC.value;
     },
@@ -144,7 +144,10 @@ export default {
       return get(address, 'status') === ADDRESS_STATUS.Inactive.value;
     },
     isDisabled(address) {
-      return this.isUnassigned(address) || this.isNF(address) || this.isDNC(address) || this.isInactive(address);
+      return this.isUnassigned(address)
+        // || this.isNF(address)
+        || this.isDNC(address)
+        || this.isInactive(address);
     },
     statusText(status) {
       return ADDRESS_STATUS[status].text;

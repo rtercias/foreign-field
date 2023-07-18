@@ -46,11 +46,20 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
-              <b-button variant="primary" :to="`/territories/${territoryId}/optimize`">
+              <b-button variant="success" class="text-white" @click="optimizeNearMe">
+                <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin class="mr-2" />
+                <font-awesome-icon v-else icon="location-arrow" class="mr-2" />
+                <span>Near Me</span>
+              </b-button>
+              <b-button
+                v-if="canManage"
+                variant="primary"
+                :to="`/territories/${territoryId}/optimize`"
+              >
                 Optimize
               </b-button>
             </b-button-group>
-            <b-button-group v-else-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
+            <b-button-group v-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
               <b-button v-if="canManage" variant="danger" @click="reset">
                 <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Reset</span>
@@ -82,6 +91,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import orderBy from 'lodash/orderBy';
 import Loading from './Loading';
 import { store, defaultOptions, TerritoryType, AddressStatus } from '../store';
 import { displayName, displayShortName } from '../utils/publisher';
@@ -122,6 +132,7 @@ export default {
       isCheckingIn: false,
       isResetting: false,
       filteredCount: '',
+      isOptimizing: false,
     };
   },
   async mounted() {
@@ -146,6 +157,8 @@ export default {
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
       userTerritories: 'auth/userTerritories',
+      optimized: 'addresses/optimized',
+      coordinates: 'auth/coordinates',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -218,6 +231,24 @@ export default {
     displayType() {
       return this.territory.type === 'Active' ? '' : get(TerritoryType[this.territory.type], 'text');
     },
+    optimizedAddresses() {
+      return orderBy(this.territory.addresses.map((address) => {
+        const optimized = get(this, 'optimized', []).find(o => o.id === address.id) || {};
+        let sort = get(this, 'optimized', []).findIndex(o => o.id === address.id);
+        sort = sort === -1 ? this.territory.addresses.length + address.sort : optimized.sort;
+        console.log('compare sort:', {
+          id: address.id,
+          addr1: address.addr1,
+          old: address.sort,
+          new: sort,
+          raw: optimized.sort,
+        });
+        return {
+          ...address,
+          sort,
+        };
+      }), ['sort']);
+    },
   },
   methods: {
     ...mapActions({
@@ -238,7 +269,7 @@ export default {
       setTerritoryLastActivity: 'territory/setTerritoryLastActivity',
       setAddressLastActivity: 'territory/setAddressLastActivity',
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
-
+      optimize: 'addresses/optimize',
     }),
 
     async refresh() {
@@ -414,6 +445,15 @@ export default {
           this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
         }
       });
+    },
+
+    async optimizeNearMe() {
+      this.isOptimizing = true;
+      // TODO: get coordinates if it's empty
+      if (!this.coordinates) return;
+      await this.optimize(this.territoryId, this.coordinates.latitude, this.coordinates.longitude);
+      this.territory.addresses = this.optimizedAddresses;
+      this.isOptimizing = false;
     },
   },
   watch: {

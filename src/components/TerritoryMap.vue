@@ -3,8 +3,24 @@
     There are no addresses in this territory.
   </h3> -->
   <div class="territory-map">
-    <l-map class="map" :center="center" :bounds="bounds" :options="{zoomControl: false}">
+    <l-map
+    class="map"
+    :center="center"
+    :bounds="bounds"
+    :options="{zoomControl: false}"
+    :setView="true"
+    :watch="true"
+    @ready="onReady"
+    @locationfound="onLocationFound"
+    @locateactivate="onLocating"
+  >
       <l-tile-layer :url="url"></l-tile-layer>
+      <l-locate-control ref="locateControl">
+        <font-awesome-icon v-if="isLocating" icon="circle-notch" spin class="location-icon text-primary">
+        </font-awesome-icon>
+        <font-awesome-icon v-else icon="location-arrow" class="location-icon text-primary">
+        </font-awesome-icon>
+      </l-locate-control>
       <l-marker
         v-for="(x, i) in territory.addresses"
         :key="i"
@@ -31,6 +47,7 @@
 
 <script>
 import { LMap, LTileLayer, LMarker, LIcon, LPopup } from 'vue2-leaflet';
+import LLocateControl from 'vue2-leaflet-locatecontrol';
 import { latLngBounds } from 'leaflet';
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
@@ -49,6 +66,7 @@ export default {
     LIcon,
     LMarker,
     LPopup,
+    LLocateControl,
     MapLinks,
   },
   props: ['id', 'territory', 'options', 'disabled'],
@@ -58,11 +76,13 @@ export default {
       zoom: 13,
       showCard: false,
       center: [0, 0],
+      isLocating: false,
     };
   },
   computed: {
     ...mapGetters({
       token: 'auth/token',
+      coordintes: 'auth/coordinates',
     }),
     bounds() {
       let latLng = [[0, 0]];
@@ -84,6 +104,7 @@ export default {
   methods: {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
+      updateCoordinates: 'auth/updateCoordinates',
     }),
     centerMarker(address) {
       this.heading = address.addr1;
@@ -96,6 +117,21 @@ export default {
         return [address.latitude, address.longitude];
       }
       return [0, 0];
+    },
+    onReady() {
+      const $svgContainer = get(this.$refs.locateControl, '$el') || {};
+      const $locationArrow = $svgContainer.getElementsByClassName('location-icon') || [];
+      const $parent = get(this.$refs.locateControl, 'parentContainer.$el') || {};
+      const $controlContainer = $parent.getElementsByClassName('fa-map-marker') || [];
+      $controlContainer[0].insertAdjacentElement('beforebegin', $locationArrow[0]);
+    },
+    onLocating() {
+      this.isLocating = true;
+    },
+    onLocationFound(location) {
+      this.isLocating = false;
+      this.coordinates = location.coords;
+      console.log('location', location);
     },
   },
   async mounted() {
