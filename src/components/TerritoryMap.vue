@@ -4,18 +4,26 @@
   </h3> -->
   <div class="territory-map">
     <l-map
-    class="map"
-    :center="center"
-    :bounds="bounds"
-    :options="{zoomControl: false}"
-    :setView="true"
-    :watch="true"
-    @ready="onReady"
-    @locationfound="onLocationFound"
-    @locateactivate="onLocating"
-  >
+      class="map"
+      :center="center"
+      :bounds="bounds"
+      :options="{ zoomControl: true }"
+      :setView="true"
+      :watch="true"
+      @ready="onReady"
+      @locationfound="onLocationFound"
+      @locateactivate="onLocating"
+      @locationerror="onLocationError"
+    >
       <l-tile-layer :url="url"></l-tile-layer>
-      <l-locate-control ref="locateControl">
+      <l-locate-control
+        ref="locateControl"
+        :options="{
+          setView: 'untilPan',
+          keepCurrentZoomLevel: true,
+          returnToPrevBounds: true,
+        }"
+      >
         <font-awesome-icon v-if="isLocating" icon="circle-notch" spin class="location-icon text-primary">
         </font-awesome-icon>
         <font-awesome-icon v-else icon="location-arrow" class="location-icon text-primary">
@@ -82,7 +90,7 @@ export default {
   computed: {
     ...mapGetters({
       token: 'auth/token',
-      coordintes: 'auth/coordinates',
+      coordinates: 'auth/coordinates',
     }),
     bounds() {
       let latLng = [[0, 0]];
@@ -119,19 +127,43 @@ export default {
       return [0, 0];
     },
     onReady() {
-      const $svgContainer = get(this.$refs.locateControl, '$el') || {};
-      const $locationArrow = $svgContainer.getElementsByClassName('location-icon') || [];
       const $parent = get(this.$refs.locateControl, 'parentContainer.$el') || {};
-      const $controlContainer = $parent.getElementsByClassName('fa-map-marker') || [];
-      $controlContainer[0].insertAdjacentElement('beforebegin', $locationArrow[0]);
+      const $locateContainer = $parent.getElementsByClassName('leaflet-control-locate') || [];
+      $locateContainer[0].classList.add('d-none');
+
+      // the code below is needed if we need to show the locate button on the map.
+      // it adds support for vue fontawesome icons
+      // const $controlContainer = $parent.getElementsByClassName('fa-map-marker') || [];
+      // const $svgContainer = get(this.$refs.locateControl, '$el') || {};
+      // const $locationArrow = $svgContainer.getElementsByClassName('location-icon') || [];
+      // $locationArrow[0].addEventListener('click', this.onLocationClick);
+      // $controlContainer[0].insertAdjacentElement('beforebegin', $locationArrow[0]);
     },
-    onLocating() {
+    onLocationClick() {
+      this.$emit('location-click');
+    },
+    async onLocating() {
       this.isLocating = true;
+      if (this.$parent.isNearMeClicked) {
+        this.$emit('locating');
+      }
     },
     onLocationFound(location) {
       this.isLocating = false;
-      this.coordinates = location.coords;
-      console.log('location', location);
+      this.updateCoordinates(location);
+      if (this.$parent.isNearMeClicked) {
+        this.$emit('location-found', location);
+      }
+    },
+    onLocationError(e) {
+      this.isLocating = false;
+      if (this.$parent.isNearMeClicked) {
+        this.$emit('location-error', e);
+      }
+      console.log('Unable to determine user location. Please try again.', e);
+    },
+    onMapClick() {
+      this.$emit('map-click');
     },
   },
   async mounted() {

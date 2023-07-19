@@ -52,7 +52,6 @@ function initialState() {
     scrollYPosition: { home: 0 },
     publisherToken: '',
     shortLink: '',
-    coordinates: [],
   };
 }
 
@@ -106,7 +105,7 @@ export const auth = {
     scrollYPosition: state => state.scrollYPosition,
     publisherToken: state => state.publisherToken,
     shortLink: state => state.shortLink,
-    coordinates: state => state.coordinates,
+    coordinates: state => state.user.coordinates,
   },
 
   mutations: {
@@ -197,7 +196,7 @@ export const auth = {
     },
     SMS_SENT() {},
     UPDATE_COORDINATES(state, coordinates) {
-      state.coordnates = coordinates;
+      Vue.set(state.user, 'coordinates', coordinates);
     },
   },
 
@@ -542,8 +541,8 @@ export const auth = {
       }
     },
 
-    updateCoordinates({ commit }, coordinates) {
-      commit(UPDATE_COORDINATES, coordinates);
+    updateCoordinates({ commit }, { latitude, longitude }) {
+      commit(UPDATE_COORDINATES, { latitude, longitude });
     },
   },
 };

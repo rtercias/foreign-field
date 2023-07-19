@@ -46,10 +46,15 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
-              <b-button variant="success" class="text-white" @click="optimizeNearMe">
+              <b-button
+                variant="success"
+                class="text-white"
+                @click="optimizeNearMe"
+                :disabled="isOptimizing"
+              >
                 <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin class="mr-2" />
-                <font-awesome-icon v-else icon="location-arrow" class="mr-2" />
-                <span>Near Me</span>
+                <font-awesome-icon v-else :icon="nearMeIcon" class="mr-2" />
+                <span>{{nearMeText}}</span>
               </b-button>
               <b-button
                 v-if="canManage"
@@ -79,11 +84,17 @@
         </div>
       </header>
       <router-view
+        :ref="viewMode"
         class="router-view"
         :disabled="!isCheckedOut"
         :territory="territory"
         :options="{ showSortOrder: true, editable: true }"
-        @update-count="updateCount" />
+        @update-count="updateCount"
+        @location-click="onLocationClick"
+        @locating="onLocating"
+        @location-found="onLocationFound"
+        @location-error="onLocationError"
+      />
     </div>
   </div>
 </template>
@@ -133,6 +144,9 @@ export default {
       isResetting: false,
       filteredCount: '',
       isOptimizing: false,
+      isNearMeClicked: false,
+      nearMeText: 'Near Me',
+      nearMeIcon: 'location-arrow',
     };
   },
   async mounted() {
@@ -158,7 +172,6 @@ export default {
       cancelTokens: 'territory/cancelTokens',
       userTerritories: 'auth/userTerritories',
       optimized: 'addresses/optimized',
-      coordinates: 'auth/coordinates',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -231,24 +244,6 @@ export default {
     displayType() {
       return this.territory.type === 'Active' ? '' : get(TerritoryType[this.territory.type], 'text');
     },
-    optimizedAddresses() {
-      return orderBy(this.territory.addresses.map((address) => {
-        const optimized = get(this, 'optimized', []).find(o => o.id === address.id) || {};
-        let sort = get(this, 'optimized', []).findIndex(o => o.id === address.id);
-        sort = sort === -1 ? this.territory.addresses.length + address.sort : optimized.sort;
-        console.log('compare sort:', {
-          id: address.id,
-          addr1: address.addr1,
-          old: address.sort,
-          new: sort,
-          raw: optimized.sort,
-        });
-        return {
-          ...address,
-          sort,
-        };
-      }), ['sort']);
-    },
   },
   methods: {
     ...mapActions({
@@ -270,6 +265,7 @@ export default {
       setAddressLastActivity: 'territory/setAddressLastActivity',
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       optimize: 'addresses/optimize',
+      reorderAddresses: 'territory/reorderAddresses',
     }),
 
     async refresh() {
@@ -448,11 +444,54 @@ export default {
     },
 
     async optimizeNearMe() {
+      this.isNearMeClicked = true;
+      if (this.nearMeText === 'Near Me') {
+        const message = 'Temporarily reorder addresses based on your current location.';
+        const confirm = await this.$bvModal.msgBoxConfirm(message, {
+          title: 'Reorder Addresses Near Me',
+          centered: true,
+          html: true,
+        });
+
+        if (!confirm) {
+          return;
+        }
+
+        this.nearMeText = 'Revert';
+        this.nearMeIcon = 'undo';
+      } else {
+        await this.reorderAddresses({ revert: true });
+        this.nearMeText = 'Near Me';
+        this.nearMeIcon = 'location-arrow';
+      }
+
+      /*
+        * traverse and call Leaflet Locate button and listen for
+        * 'onLocating', 'onLocationFound' and 'onLocationError' events
+        */
+      const $map = this.$refs['map-view'].$el || {};
+      const $locateContainer = $map.getElementsByClassName('leaflet-control-locate')[0];
+      const $locateBtn = $locateContainer.children[0];
+      $locateBtn.click();
+    },
+
+    onLocationClick() {
+      this.isNearMeClicked = false;
+    },
+
+    onLocating() {
       this.isOptimizing = true;
-      // TODO: get coordinates if it's empty
-      if (!this.coordinates) return;
-      await this.optimize(this.territoryId, this.coordinates.latitude, this.coordinates.longitude);
-      this.territory.addresses = this.optimizedAddresses;
+    },
+
+    async onLocationFound(location) {
+      await this.optimize(this.territoryId, location.latitude, location.longitude);
+      const sortList = orderBy(this.optimized.map(o => ({ id: o.id })), ['sort']);
+
+      await this.reorderAddresses({ sortList });
+      this.isOptimizing = false;
+    },
+
+    async onLocationError() {
       this.isOptimizing = false;
     },
   },

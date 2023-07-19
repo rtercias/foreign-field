@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
+import sortBy from 'lodash/sortBy';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import { model, validate } from './models/TerritoryModel';
@@ -44,6 +45,7 @@ const UPDATE_STATUS = 'UPDATE_STATUS';
 const CHECKING_OUT = 'CHECKING_OUT';
 const CHECKOUT_FAIL = 'CHECKOUT_FAIL';
 const SET_FILTER = 'SET_FILTER';
+const SET_ADDRESSES = 'SET_ADDRESSES';
 
 const initialState = {
   territory: {
@@ -287,6 +289,11 @@ export const territory = {
     },
     SET_FILTER(state, value) {
       state.filter = value;
+    },
+    SET_ADDRESSES(state, addresses) {
+      if (state.territory) {
+        Vue.set(state.territory, 'addresses', addresses);
+      }
     },
   },
 
@@ -840,6 +847,15 @@ export const territory = {
     },
     setFilter({ commit }, filter) {
       commit(SET_FILTER, filter);
+    },
+    reorderAddresses({ state, commit }, { sortList = [], revert }) {
+      const ordered = sortBy(state.territory.addresses, (address) => {
+        const sortedIndex = sortList.findIndex(o => o.id === address.id);
+        const sortOrder = sortedIndex === -1 ? 999 : (sortedIndex + 1);
+        return revert ? address.sort : sortOrder;
+      });
+
+      commit(SET_ADDRESSES, ordered);
     },
   },
 };
