@@ -10,7 +10,7 @@
                 {{territory.description}}
                 <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
               </h4>
-              <h4>
+              <h4 class="text-right">
                 <font-awesome-icon
                   class="text-primary d-xl-none"
                   icon="sms"
@@ -484,10 +484,16 @@ export default {
     },
 
     async onLocationFound(location) {
-      await this.optimize(this.territoryId, location.latitude, location.longitude);
-      const sortList = orderBy(this.optimized.map(o => ({ id: o.id })), ['sort']);
+      try {
+        await this.optimize(this.territoryId, location.latitude, location.longitude);
+        const sortList = orderBy(this.optimized.map(o => ({ id: o.id })), ['sort']);
 
-      await this.reorderAddresses({ sortList });
+        await this.reorderAddresses({ sortList });
+      } catch (e) {
+        console.warn('Unable to optimize the addresses', e);
+        this.nearMeText = 'Near Me';
+        this.nearMeIcon = 'location-arrow';
+      }
       this.isOptimizing = false;
     },
 

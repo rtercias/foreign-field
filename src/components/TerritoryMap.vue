@@ -36,7 +36,14 @@
         :lat-lng="getLatLng(x)"
       >
         <l-icon v-if="mapOptions.showSortOrder">
-          <div class="sort-order-icon font-weight-bolder text-primary bg-warning">
+          <div
+            class="sort-order-icon font-weight-bolder"
+            :class="{
+              'text-white bg-primary border-primary': ['HOME', 'LW'].includes(get(x, 'lastActivity.value')),
+              'bg-warning': get(x, 'lastActivity.value') === 'NH',
+              'bg-white': get(x, 'lastActivity.value', '') === '',
+            }"
+          >
             {{ i + 1 }}
           </div>
         </l-icon>
@@ -114,6 +121,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       updateCoordinates: 'auth/updateCoordinates',
     }),
+    get,
     centerMarker(address) {
       this.heading = address.addr1;
       if (address.latitude && address.longitude) {

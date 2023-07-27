@@ -29,6 +29,7 @@ export const CongDefault = {
         options: [
           { value: 'address-list', text: 'Address List' },
           { value: 'phone-list', text: 'Phone List' },
+          { value: 'map-view', text: 'Map View' },
         ],
       },
       redirectAfterCheckout: {
