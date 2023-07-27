@@ -73,7 +73,7 @@
               <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
                 <font-awesome-icon v-else icon="check" />
-                <span class="ml-2" :class="{ 'd-none': canManage }">Check In</span>
+                <span class="ml-2" :class="{ 'd-none': canManage && !isDesktop }">Check In</span>
               </b-button>
               <b-button
                 v-if="canWrite"
