@@ -65,7 +65,7 @@
                 <font-awesome-icon icon="compass" />
                 <span v-if="isDesktop" class="ml-2">Optimize</span>
               </b-button>
-              <b-button v-if="canManage" variant="danger" @click="reset">
+              <b-button v-if="canManage && isCheckedOut" variant="danger" @click="reset">
                 <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
                 <font-awesome-icon v-else icon="backward" />
                 <span v-if="isDesktop" class="ml-2">Reset</span>
