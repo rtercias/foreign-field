@@ -25,7 +25,7 @@
         </b-nav-text>
         <b-nav-text
           class="campaign-mode text-uppercase"
-          :class="{ 'text-truncate': !isDesktop }"
+          :class="{ 'text-truncate': !isDesktop, 'w-auto': isDesktop }"
           v-if="isSearchHidden || isDesktop">
           <span v-if="isCampaignMode" class="text-nowrap">{{campaignName}}</span>
         </b-nav-text>
