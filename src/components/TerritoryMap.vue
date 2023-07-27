@@ -46,6 +46,7 @@
               'text-white bg-primary border-primary': ['HOME', 'LW'].includes(get(x, 'lastActivity.value')),
               'bg-warning': get(x, 'lastActivity.value') === 'NH',
               'bg-white': get(x, 'lastActivity.value', '') === '',
+              'bg-light text-info border-info': disabled,
             }"
           >
             {{ i + 1 }}

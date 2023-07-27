@@ -68,7 +68,8 @@
             :class="{ 'col-md-6': !fullscreen }"
             v-show="showMap"
             :territory="{ addresses: mappedAddresses }"
-            :options="{ showSortOrder: true, simple: true }">
+            :options="{ showSortOrder: true, simple: true }"
+            :disabled="true">
           </TerritoryMap>
           <div class="address-list overflow-auto border d-flex px-0 col-sm-12"
             :class="{ 'col-md-6': showMap, 'col-md-12': fullscreen }">

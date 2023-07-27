@@ -45,39 +45,42 @@
                 Map
               </b-button>
             </b-button-group>
-            <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
+            <b-button-group size="sm" class="badge px-0">
               <b-button
+                v-if="viewMode==='map-view'"
                 variant="success"
                 class="text-white"
                 @click="optimizeNearMe"
                 :disabled="isOptimizing"
               >
-                <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin class="mr-2" />
-                <font-awesome-icon v-else :icon="nearMeIcon" class="mr-2" />
-                <span>{{nearMeText}}</span>
+                <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin />
+                <font-awesome-icon v-else :icon="nearMeIcon" />
+                <span v-if="isDesktop" class="ml-2">{{nearMeText}}</span>
               </b-button>
               <b-button
-                v-if="canManage"
+                v-if="canManage && viewMode==='map-view'"
                 variant="primary"
                 :to="`/territories/${territoryId}/optimize`"
               >
-                Optimize
+                <font-awesome-icon icon="compass" />
+                <span v-if="isDesktop" class="ml-2">Optimize</span>
               </b-button>
-            </b-button-group>
-            <b-button-group v-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
               <b-button v-if="canManage" variant="danger" @click="reset">
                 <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
-                <span v-else>Reset</span>
+                <font-awesome-icon v-else icon="backward" />
+                <span v-if="isDesktop" class="ml-2">Reset</span>
               </b-button>
               <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
-                <span v-else>Check In</span>
+                <font-awesome-icon v-else icon="check" />
+                <span class="ml-2" :class="{ 'd-none': canManage }">Check In</span>
               </b-button>
               <b-button
                 v-if="canWrite"
                 variant="success"
-                :to="`/territories/${territoryId}/addresses/add`">
-                <font-awesome-icon icon="plus"></font-awesome-icon>Address
+                :to="`/territories/${territoryId}/addresses/add?origin=map-view`">
+                <font-awesome-icon icon="plus"></font-awesome-icon>
+                <span v-if="isDesktop" class="ml-2">Address</span>
               </b-button>
             </b-button-group>
           </div>
@@ -118,6 +121,11 @@ export default {
   },
   props: ['territoryId'],
   beforeRouteEnter(to, from, next) {
+    if (from.query.origin) {
+      next();
+      return;
+    }
+
     try {
       const views = get(CongDefault.options, 'territory.defaultView.options', []).map(o => o.value);
       if (!views.includes(to.name)) {
