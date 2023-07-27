@@ -22,6 +22,10 @@
           setView: 'untilPan',
           keepCurrentZoomLevel: true,
           returnToPrevBounds: true,
+          flyTo: true,
+          strings: {
+            popup: 'Yep, you\'re the blue dot.',
+          },
         }"
       >
         <font-awesome-icon v-if="isLocating" icon="circle-notch" spin class="location-icon text-primary">
@@ -184,7 +188,7 @@ export default {
 
 <style lang="scss" scoped>
 .territory-map {
-  height: calc(100vh - 107px);
+  height: calc(100vh - 226px);
 
   .map {
     width: 100%;
