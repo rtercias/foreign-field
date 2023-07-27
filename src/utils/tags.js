@@ -1,4 +1,5 @@
 import toLower from 'lodash/toLower';
+import { DO_NOT_CALL } from '../store/modules/models/AddressModel';
 
 export const ADDRESS_TAGS = [
   'verify',
@@ -39,4 +40,9 @@ export function addTag(notes, tag) {
 export function removeTag(notes, tag) {
   const tags = (notes || '').split(',') || [];
   return tags.filter(t => toLower(t) !== toLower(tag)).join(',');
+}
+
+export function removeDoNotCallTag(notes) {
+  const tags = (notes || '').split(',') || [];
+  return tags.filter(t => !t.includes(DO_NOT_CALL)).join(',');
 }

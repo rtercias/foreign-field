@@ -10,7 +10,7 @@
                 {{territory.description}}
                 <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
               </h4>
-              <h4>
+              <h4 class="text-right">
                 <font-awesome-icon
                   class="text-primary d-xl-none"
                   icon="sms"
@@ -46,11 +46,25 @@
               </b-button>
             </b-button-group>
             <b-button-group v-if="viewMode==='map-view'" size="sm" class="badge px-0">
-              <b-button variant="primary" :to="`/territories/${territoryId}/optimize`">
+              <b-button
+                variant="success"
+                class="text-white"
+                @click="optimizeNearMe"
+                :disabled="isOptimizing"
+              >
+                <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin class="mr-2" />
+                <font-awesome-icon v-else :icon="nearMeIcon" class="mr-2" />
+                <span>{{nearMeText}}</span>
+              </b-button>
+              <b-button
+                v-if="canManage"
+                variant="primary"
+                :to="`/territories/${territoryId}/optimize`"
+              >
                 Optimize
               </b-button>
             </b-button-group>
-            <b-button-group v-else-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
+            <b-button-group v-if="['address-list', 'phone-list'].includes(viewMode)" size="sm" class="badge px-0">
               <b-button v-if="canManage" variant="danger" @click="reset">
                 <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
                 <span v-else>Reset</span>
@@ -70,11 +84,17 @@
         </div>
       </header>
       <router-view
+        :ref="viewMode"
         class="router-view"
         :disabled="!isCheckedOut"
         :territory="territory"
         :options="{ showSortOrder: true, editable: true }"
-        @update-count="updateCount" />
+        @update-count="updateCount"
+        @location-click="onLocationClick"
+        @locating="onLocating"
+        @location-found="onLocationFound"
+        @location-error="onLocationError"
+      />
     </div>
   </div>
 </template>
@@ -82,6 +102,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
+import orderBy from 'lodash/orderBy';
 import Loading from './Loading';
 import { store, defaultOptions, TerritoryType, AddressStatus } from '../store';
 import { displayName, displayShortName } from '../utils/publisher';
@@ -122,6 +143,10 @@ export default {
       isCheckingIn: false,
       isResetting: false,
       filteredCount: '',
+      isOptimizing: false,
+      isNearMeClicked: false,
+      nearMeText: 'Near Me',
+      nearMeIcon: 'location-arrow',
     };
   },
   async mounted() {
@@ -146,6 +171,7 @@ export default {
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
       userTerritories: 'auth/userTerritories',
+      optimized: 'addresses/optimized',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -238,7 +264,8 @@ export default {
       setTerritoryLastActivity: 'territory/setTerritoryLastActivity',
       setAddressLastActivity: 'territory/setAddressLastActivity',
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
-
+      optimize: 'addresses/optimize',
+      reorderAddresses: 'territory/reorderAddresses',
     }),
 
     async refresh() {
@@ -414,6 +441,64 @@ export default {
           this.updatePhoneNotes({ territoryId: this.territory.id, phoneId, notes });
         }
       });
+    },
+
+    async optimizeNearMe() {
+      this.isNearMeClicked = true;
+      if (this.nearMeText === 'Near Me') {
+        const message = 'Temporarily reorder addresses based on your current location.';
+        const confirm = await this.$bvModal.msgBoxConfirm(message, {
+          title: 'Reorder Addresses Near Me',
+          centered: true,
+          html: true,
+        });
+
+        if (!confirm) {
+          return;
+        }
+
+        this.nearMeText = 'Revert';
+        this.nearMeIcon = 'undo';
+      } else {
+        await this.reorderAddresses({ revert: true });
+        this.nearMeText = 'Near Me';
+        this.nearMeIcon = 'location-arrow';
+      }
+
+      /*
+        * traverse and call Leaflet Locate button and listen for
+        * 'onLocating', 'onLocationFound' and 'onLocationError' events
+        */
+      const $map = this.$refs['map-view'].$el || {};
+      const $locateContainer = $map.getElementsByClassName('leaflet-control-locate')[0];
+      const $locateBtn = $locateContainer.children[0];
+      $locateBtn.click();
+    },
+
+    onLocationClick() {
+      this.isNearMeClicked = false;
+    },
+
+    onLocating() {
+      this.isOptimizing = true;
+    },
+
+    async onLocationFound(location) {
+      try {
+        await this.optimize(this.territoryId, location.latitude, location.longitude);
+        const sortList = orderBy(this.optimized.map(o => ({ id: o.id })), ['sort']);
+
+        await this.reorderAddresses({ sortList });
+      } catch (e) {
+        console.warn('Unable to optimize the addresses', e);
+        this.nearMeText = 'Near Me';
+        this.nearMeIcon = 'location-arrow';
+      }
+      this.isOptimizing = false;
+    },
+
+    async onLocationError() {
+      this.isOptimizing = false;
     },
   },
   watch: {

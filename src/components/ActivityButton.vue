@@ -6,6 +6,7 @@
     :class="{ [`bg-${get('color')}`]: !invert }">
     <span class="pl-0">
       <b-button
+        :disabled="busy"
         class="p-0"
         variant="link"
         @click="click(value)">
@@ -14,6 +15,7 @@
     </span>
   </div>
   <b-button
+    :disabled="busy"
     variant="link"
     v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction"
@@ -39,7 +41,7 @@
       </font-awesome-layers>
     </span>
     <span
-      v-if="!displayOnly && !selected && !!get('description')"
+      v-if="showDescription"
       class="description"
       :class="{ [`text-${get('color')}`]: invert, 'text-white': !invert }">
       {{disabled ? get('disabledText') : get('description')}}
@@ -67,6 +69,9 @@ export default {
     'slashed',
     'disabled',
     'bg',
+    'inverted',
+    'iconOnly',
+    'busy',
   ],
   methods: {
     ...mapActions({
@@ -94,10 +99,16 @@ export default {
       return this.actionButtonList && this.actionButtonList.find(b => b.value === this.value) || {};
     },
     invert() {
-      return this.displayOnly || this.selected;
+      return this.displayOnly || this.selected || this.inverted;
     },
     isSlashed() {
       return this.slashed || this.get('slashed');
+    },
+    showDescription() {
+      if (this.iconOnly) {
+        return !this.iconOnly;
+      }
+      return !this.displayOnly && !this.selected && !!this.get('description');
     },
   },
 };
@@ -111,6 +122,7 @@ export default {
 .nh-text {
   font-size: 0.5em;
   text-align: center;
+  z-index: 200;
 }
 
 .interaction {

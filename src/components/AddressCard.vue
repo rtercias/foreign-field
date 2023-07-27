@@ -8,17 +8,22 @@
       'px-2 min-height': $route.name === 'address-list'
     }">
     <font-awesome-layers
+      v-show="mode !== 'map'"
       class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleLeftPanel">
+      @click="toggleLeftPanel"
+    >
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
     <div class="w-100 row">
       <div class="address-card col-9 row justify-content-between align-items-start ml-0 mr-0 text-black-50"
-        :class="{ 'min-height': $route.name === 'address-list' }">
+        :class="{
+          'min-height': $route.name === 'address-list',
+          'col-12': mode === 'map',
+        }">
         <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
           <b-link
             class="w-100"
-            :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
+            :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
             <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
               {{address.addr1}} {{address.addr2}}
             </div>
@@ -30,7 +35,7 @@
         <div v-else class="address flex-column pb-4">
           <div>
             <h5 class="mb-0">
-              <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail`">
+              <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
                 {{address.addr1}}
               </b-link>&nbsp;
             </h5>
@@ -43,11 +48,19 @@
         <Tags
           :record="address"
           :variant="$route.name === 'phone-list' ? 'info' : ''"
-          :class="{'pl-2': $route.name === 'phone-list'}"></Tags>
+          :class="{'pl-2': $route.name === 'phone-list'}"
+          :addressIndex="index"
+          v-on="$listeners"
+        ></Tags>
       </div>
       <div
-        class="static-buttons col-3 ml-n1"
-        :class="{ 'align-self-center': $route.name === 'phone-list' }">
+        class="static-buttons"
+        :class="{
+          'align-self-center': $route.name === 'phone-list',
+          'col-3 ml-n1': mode !== 'map',
+          'tiny-busy position-absolute mt-n3': mode === 'map',
+        }"
+      >
         <font-awesome-icon
           class="text-info text-left fa-2x"
           icon="circle-notch"
@@ -55,7 +68,7 @@
           v-if="isLogging || address.isBusy"
         />
         <span
-          v-else
+          v-else-if="mode !== 'map'"
           class="d-flex flex-column w-100">
           <ActivityButton
             v-if="!allowedToCall"
@@ -67,8 +80,7 @@
             :actionButtonList="actionButtonList">
           </ActivityButton>
           <ActivityButton
-            v-else
-            class="selected-response fa-2x d-flex"
+            class="selected-response fa-2x"
             :class="{
               faded: !isMySelectedResponse || isIncomingResponse,
               hidden: selectedResponse === 'START' || address.isBusy,
@@ -82,7 +94,11 @@
         </span>
       </div>
     </div>
-    <font-awesome-layers v-show="!isTerritoryBusy" class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
+    <font-awesome-layers
+      v-show="!isTerritoryBusy && mode !== 'map'"
+      class="ellipsis-v-static text-muted fa-1x"
+      @click="toggleRightPanel"
+    >
       <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
     </font-awesome-layers>
   </div>
@@ -240,6 +256,9 @@ export default {
       const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
       return notAllowedTags[0];
     },
+    mapQueryParam() {
+      return this.mode === 'map' ? '?origin=map-view' : '';
+    },
   },
 };
 </script>
@@ -303,6 +322,9 @@ export default {
 }
 .logging-spinner {
   font-size: 30px;
+}
+.tiny-busy {
+  font-size: 8px;
 }
 
 @media print {

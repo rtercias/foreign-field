@@ -87,6 +87,9 @@ import {
   faLink,
   faCopy,
   faBinoculars,
+  faMapMarker,
+  faLocationArrow,
+  faUndo,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 import VueClipboard from 'vue-clipboard2';
@@ -149,6 +152,9 @@ library.add(
   faLink,
   faCopy,
   faBinoculars,
+  faMapMarker,
+  faLocationArrow,
+  faUndo,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

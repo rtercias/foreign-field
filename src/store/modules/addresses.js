@@ -115,27 +115,37 @@ export const addresses = {
       }
     },
 
-    async optimize({ commit }, territoryId) {
+    async optimize({ commit }, territoryId, startLat, startLng) {
       try {
         if (!territoryId) {
           return;
         }
 
         /* eslint-disable max-len */
-        const base = `https://foreignfieldadmin.azurewebsites.net/api/addresses/getOptimizedRouteForTerritory?territoryId=${territoryId}`;
+        const base = 'https://foreignfieldadmin.azurewebsites.net/api/addresses/'
+          + `getOptimizedRouteForTerritory?territoryId=${territoryId}`
+          + `${startLat ? `&startLat=${startLat}` : ''}`
+          + `${startLng ? `&startLng=${startLng}` : ''}`;
+
         const proxy = 'https://cors-anywhere.herokuapp.com';
         const url = document.location.host.includes('localhost')
           || document.location.host.includes('staging') ? `${proxy}/${base}` : base;
         const response = await axios.get(url);
         const { data } = response;
-        commit(OPTIMIZE_SUCCESS, data.map(d => ({
-          id: d.Id,
-          addr1: d.Address1,
-          addr2: d.Address2,
-          city: d.City,
-          state_province: d.StateProvince,
-          sort: d.Sort,
-        })));
+        const optimized = data
+          .filter(d => d.Address1)
+          .map((d, index) => ({
+            id: d.Id,
+            addr1: d.Address1,
+            addr2: d.Address2,
+            city: d.City,
+            state_province: d.StateProvince,
+            sort: index + 1,
+            latitude: d.Latitude,
+            longitude: d.Longitude,
+          }));
+
+        commit(OPTIMIZE_SUCCESS, optimized);
       } catch (exception) {
         commit(OPTIMIZE_FAIL, exception);
         throw exception;

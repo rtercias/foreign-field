@@ -26,7 +26,7 @@
           </b-badge>
           <b-badge
             v-if="availableTags.length && !allTagsSelected"
-            v-on:click="collapsed = !collapsed"
+            @click="collapseTags"
             pill
             class="tag-button add-tag border-info d-flex mr-1 mb-1"
             :class="`border-${variant}`"
@@ -201,6 +201,9 @@ export default {
     color(tag) {
       const button = ACTION_BUTTON_LIST.find(b => b.value === tag);
       return button ? button.color : 'primary';
+    },
+    collapseTags() {
+      this.collapsed = !this.collapsed;
     },
   },
   computed: {

@@ -171,6 +171,8 @@ import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
+import format from 'date-fns/format';
+import addYears from 'date-fns/addYears';
 import { REJECT_TAGS } from '../store/modules/phone';
 import { unmask } from '../utils/phone';
 import {
@@ -184,10 +186,11 @@ import {
   PHONE_ADDRESS_RIGHT_BUTTON_LIST,
   NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
   ADDRESS_STATUS,
+  DO_NOT_CALL,
+  DO_NOT_MAIL,
+  LETTER_WRITING,
 } from '../store/modules/models/AddressModel';
 
-const DO_NOT_MAIL = 'do not mail';
-const LETTER_WRITING = 'mail sent';
 
 export default {
   name: 'PhoneAddressCard',
@@ -253,6 +256,7 @@ export default {
       removeLog: 'address/removeLog',
       updateAddress: 'address/updateAddress',
       phoneSearch: 'phone/phoneSearch',
+      markAsDoNotCall: 'address/markAsDoNotCall',
     }),
     actionButtonList(type) {
       if (type === 'Regular') {
@@ -263,15 +267,11 @@ export default {
     rightButtonList(item) {
       const rightButtons = item.type === 'Regular' ? PHONE_ADDRESS_RIGHT_BUTTON_LIST : RIGHT_BUTTON_LIST;
       const list = this.$route.name === 'address-list' ? ADDRESS_RIGHT_BUTTON_LIST : rightButtons;
-
-      if (!this.allowedToCall(item)) return [];
-      return this.actionButtonList(item.type)
-        .filter(b => list.includes(b.value));
+      return this.actionButtonList(item.type).filter(b => list.includes(b.value));
     },
     leftButtonList(type) {
       const leftButtons = type === 'Regular' ? PHONE_ADDRESS_LEFT_BUTTON_LIST : LEFT_BUTTON_LIST;
-      const list = this.$route.name === 'address-list' ? [] : leftButtons;
-      return this.actionButtonList(type).filter(b => list.includes(b.value));
+      return this.actionButtonList(type).filter(b => leftButtons.includes(b.value));
     },
     onActive() {
       const phoneEditing = this.address.phones && this.address.phones.find(p => p.editMode);
@@ -444,6 +444,12 @@ export default {
     // apply tag to address or phone
     async applyTag(entity, item, close) {
       if (typeof close === 'function') close();
+
+      if (item.value === DO_NOT_CALL) {
+        await this.doNotCall();
+        return;
+      }
+
       const newTag = item.description.toLowerCase();
       this.isAddressBusy = true;
       this.$set(entity, 'isBusy', true);
@@ -532,6 +538,18 @@ export default {
           checkoutId: this.territory.status && this.territory.status.checkout_id || '',
         },
       });
+    },
+
+    async doNotCall() {
+      const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
+        title: `${this.address.addr1} ${this.address.addr2} - Do Not Call`,
+        centered: true,
+      });
+
+      if (response) {
+        const datestamped = `${DO_NOT_CALL} until ${format(addYears(new Date(), 1), 'P')}`;
+        await this.markAsDoNotCall({ addressId: this.address.id, userid: this.user.id, tag: datestamped });
+      }
     },
   },
 };
