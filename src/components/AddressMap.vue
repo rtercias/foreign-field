@@ -7,6 +7,7 @@
       :center="center"
       :draggable="true"
       @update:bounds="getNearest"
+      @update:zoom="updateZoom($event)"
       :bounds="bounds">
       <l-tile-layer :url="url"></l-tile-layer>
       <l-marker
@@ -64,7 +65,7 @@ export default {
     MapLinks,
     'v-marker-cluster': Vue2LeafletMarkerCluster,
   },
-  props: ['address', 'zoom', 'step'],
+  props: ['address', 'defaultZoom', 'step'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -72,6 +73,7 @@ export default {
       center: [0, 0],
       newCoords: [],
       selectedTerritory: null,
+      zoom: this.defaultZoom,
     };
   },
   async mounted() {
@@ -85,7 +87,7 @@ export default {
       nearestTerritories: 'territories/nearestTerritories',
     }),
     bounds() {
-      return latLngBounds(this.getLatLng());
+      return latLngBounds([this.getLatLng()]);
     },
     sortDisplay(sort) {
       return !sort ? '' : sort;
@@ -106,16 +108,24 @@ export default {
       return [0, 0];
     },
     updateLatLng(coordinates) {
-      this.center = [coordinates.lat, coordinates.lng];
-      this.$emit('updated', coordinates);
+      if (coordinates) {
+        this.center = [coordinates.lat, coordinates.lng];
+        this.$emit('updated', coordinates);
+      }
     },
     selectTerritory(terr) {
       this.selectedTerritory = terr;
     },
     getRadius() {
-      const mapBoundNorthEast = this.$refs.addressMap.mapObject.getBounds().getNorthEast();
-      const mapDistance = mapBoundNorthEast.distanceTo(this.$refs.addressMap.mapObject.getCenter());
-      return Math.ceil(mapDistance / 1000 / 1.6);
+      try {
+        const bounds = this.$refs.addressMap.mapObject.getBounds();
+        const center = this.$refs.addressMap.mapObject.getCenter();
+        const mapBoundNorthEast = bounds.getNorthEast();
+        const mapDistance = mapBoundNorthEast.distanceTo(center);
+        return Math.ceil(mapDistance / 1000 / 1.6);
+      } catch (e) {
+        return 1;
+      }
     },
     async getNearest() {
       if (this.step === 3) {
@@ -144,8 +154,15 @@ export default {
             c.layer.bindTooltip(cluster.$attrs.name).openTooltip();
             vm.$emit('territory-selected', cluster.$attrs.id);
           });
+
+          // zoom out to show nearest territories
+          this.bounds.extend(cluster.mapObject.getBounds());
         }
       }
+    },
+
+    updateZoom(e) {
+      this.zoom = e;
     },
   },
   watch: {
