@@ -92,6 +92,7 @@ import {
   faUndo,
   faBackward,
   faCompass,
+  faFlagCheckered,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 import VueClipboard from 'vue-clipboard2';
@@ -159,6 +160,7 @@ library.add(
   faUndo,
   faBackward,
   faCompass,
+  faFlagCheckered,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

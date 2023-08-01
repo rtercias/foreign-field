@@ -184,7 +184,7 @@ export default {
       try {
         this.state = 'optimize';
         this.optimizing = true;
-        await this.optimize(this.territoryId);
+        await this.optimize({ territory: this.territory });
         if (this.optimized && this.optimized.length) {
           const optimized = this.optimizedAddresses.map((address) => {
             const opt = this.optimized.find(o => o.id === address.id) || {};
