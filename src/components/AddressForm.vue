@@ -136,7 +136,7 @@
         </p>
         <AddressMap
           :address="model"
-          :zoom="17"
+          :defaultZoom="17"
           :step="step"
           :key="step"
           @updated="updateCoordinates"
@@ -162,7 +162,7 @@
         </div>
         <AddressMap
           :address="model"
-          :zoom="14"
+          :defaultZoom="14"
           :step="step"
           :key="step"
           @territory-selected="updateTerritory">
