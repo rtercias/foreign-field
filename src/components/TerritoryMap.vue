@@ -47,6 +47,8 @@
               'bg-warning': get(x, 'lastActivity.value') === 'NH',
               'bg-white': get(x, 'lastActivity.value', '') === '',
               'bg-light text-info border-info': disabled,
+              'border-success text-success': get(x, 'id') === get(startingAddress, 'id'),
+              'border-danger text-danger': get(x, 'id') === get(endingAddress, 'id'),
             }"
           >
             {{ i + 1 }}
@@ -103,6 +105,8 @@ export default {
     ...mapGetters({
       token: 'auth/token',
       coordinates: 'auth/coordinates',
+      startingAddress: 'addresses/startingAddress',
+      endingAddress: 'addresses/endingAddress',
     }),
     bounds() {
       let latLng = [[0, 0]];

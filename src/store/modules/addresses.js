@@ -1,6 +1,7 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
+import get from 'lodash/get';
 import { print } from 'graphql/language/printer';
 
 const DNC_SUCCESS = 'DNC_SUCCESS';
@@ -14,6 +15,8 @@ const GET_CHANGE_LOG = 'GET_CHANGE_LOG';
 const CHANGE_LOGS_SUCCESS = 'CHANGE_LOGS_SUCCESS';
 const CHANGE_LOGS_FAIL = 'CHANGE_LOGS_FAIL';
 const RESET_CHANGE_LOG_PAYLOAD = 'RESET_CHANGE_LOG_PAYLOAD';
+const SET_STARTING_ADDRESS = 'SET_STARTING_ADDRESS';
+const SET_ENDING_ADDRESS = 'SET_ENDING_ADDRESS';
 
 export const addresses = {
   namespaced: true,
@@ -26,6 +29,8 @@ export const addresses = {
     logsPayload: {},
     cancelTokens: {},
     error: null,
+    startingAddress: null,
+    endingAddress: null,
   },
   getters: {
     dnc: state => state.dnc,
@@ -33,6 +38,8 @@ export const addresses = {
     search: state => state.search,
     logs: state => orderBy(state.logs, 'date', 'desc'),
     cancelTokens: state => state.cancelTokens,
+    startingAddress: state => state.startingAddress,
+    endingAddress: state => state.endingAddress,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -66,6 +73,12 @@ export const addresses = {
     },
     RESET_CHANGE_LOG_PAYLOAD(state) {
       state.logsPayload = {};
+    },
+    SET_STARTING_ADDRESS(state, address) {
+      state.startingAddress = address;
+    },
+    SET_ENDING_ADDRESS(state, address) {
+      state.endingAddress = address;
     },
   },
   actions: {
@@ -115,37 +128,69 @@ export const addresses = {
       }
     },
 
-    async optimize({ commit }, territoryId, startLat, startLng) {
+    async optimize({ commit, state }, { territory, startLat, startLng }) {
       try {
-        if (!territoryId) {
+        if (!territory) {
           return;
         }
 
-        /* eslint-disable max-len */
-        const base = 'https://foreignfieldadmin.azurewebsites.net/api/addresses/'
-          + `getOptimizedRouteForTerritory?territoryId=${territoryId}`
-          + `${startLat ? `&startLat=${startLat}` : ''}`
-          + `${startLng ? `&startLng=${startLng}` : ''}`;
+        const hasStartingCoords = !!startLat && !!startLng;
+        const mapQuestApiKey = process.env.VUE_APP_MAPQUEST_API_KEY;
+        const { addresses: _addresses = [] } = territory;
+        const startingAddress = _addresses.find(a => a.id === get(state, 'startingAddress.id'));
+        const endingAddress = _addresses.find(a => a.id === get(state, 'endingAddress.id'));
+        const remainingAddresses = _addresses
+          // remove the starting and ending address (those will be added in manually later)
+          .filter(a => a.id !== get(startingAddress, 'id') && a.id !== get(endingAddress, 'id'))
+          // remove non-Regular address types (ie. Phone) and addresses with no long/lat coordinates
+          .filter(a => a.type === 'Regular' && !!a.latitude && !!a.longitude);
 
-        const proxy = 'https://cors-anywhere.herokuapp.com';
-        const url = document.location.host.includes('localhost')
-          || document.location.host.includes('staging') ? `${proxy}/${base}` : base;
+        const raw = [];
+
+        // starting point
+        if (hasStartingCoords) {
+          raw.push({ location: `${startLat},${startLng}` });
+        }
+
+        // first address
+        if (startingAddress) {
+          raw.push({
+            ...startingAddress,
+            location: `${startingAddress.latitude},${startingAddress.longitude}`,
+          });
+        }
+
+        // all other addresses in the territory
+        raw.push(...remainingAddresses.map(a => ({
+          ...a,
+          location: `${a.latitude},${a.longitude}`,
+        })));
+
+        // last address
+        if (endingAddress) {
+          raw.push({
+            ...endingAddress,
+            location: `${endingAddress.latitude},${endingAddress.longitude}`,
+          });
+        }
+
+        const url = 'https://www.mapquestapi.com/directions/v2/optimizedroute?'
+          + `json={"locations":${JSON.stringify(raw.map(r => r.location))}}&outFormat=json`
+          + `&key=${mapQuestApiKey}`;
+
         const response = await axios.get(url);
-        const { data } = response;
-        const optimized = data
-          .filter(d => d.Address1)
-          .map((d, index) => ({
-            id: d.Id,
-            addr1: d.Address1,
-            addr2: d.Address2,
-            city: d.City,
-            state_province: d.StateProvince,
-            sort: index + 1,
-            latitude: d.Latitude,
-            longitude: d.Longitude,
-          }));
+        const { locationSequence } = get(response, 'data.route') || [];
 
-        commit(OPTIMIZE_SUCCESS, optimized);
+        // tie back to the original raw array (see above)
+        const optimized = raw.map((a, index) => {
+          const sequence = locationSequence.findIndex(l => index === l);
+          return {
+            ...a,
+            sort: sequence,
+          };
+        });
+
+        commit(OPTIMIZE_SUCCESS, orderBy(optimized, ['sort']));
       } catch (exception) {
         commit(OPTIMIZE_FAIL, exception);
         throw exception;
@@ -320,6 +365,14 @@ export const addresses = {
 
     resetChangeLogPayload({ commit }) {
       commit(RESET_CHANGE_LOG_PAYLOAD);
+    },
+
+    setStartingAddress({ commit }, address) {
+      commit(SET_STARTING_ADDRESS, address);
+    },
+
+    setEndingAddress({ commit }, address) {
+      commit(SET_ENDING_ADDRESS, address);
     },
   },
 };

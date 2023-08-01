@@ -493,7 +493,11 @@ export default {
 
     async onLocationFound(location) {
       try {
-        await this.optimize(this.territoryId, location.latitude, location.longitude);
+        await this.optimize({
+          territory: this.territory,
+          startLat: location.latitude,
+          startLng: location.longitude,
+        });
         const sortList = orderBy(this.optimized.map(o => ({ id: o.id })), ['sort']);
 
         await this.reorderAddresses({ sortList });
