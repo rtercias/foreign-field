@@ -93,7 +93,6 @@
         :territory="territory"
         :options="{ showSortOrder: true, editable: true }"
         @update-count="updateCount"
-        @location-click="onLocationClick"
         @locating="onLocating"
         @location-found="onLocationFound"
         @location-error="onLocationError"
@@ -483,10 +482,6 @@ export default {
       $locateBtn.click();
     },
 
-    onLocationClick() {
-      this.isNearMeClicked = false;
-    },
-
     onLocating() {
       this.isOptimizing = true;
     },
@@ -507,6 +502,7 @@ export default {
         this.nearMeIcon = 'location-arrow';
       }
       this.isOptimizing = false;
+      this.isNearMeClicked = false;
     },
 
     async onLocationError() {

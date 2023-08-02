@@ -156,9 +156,9 @@ export default {
       // $locationArrow[0].addEventListener('click', this.onLocationClick);
       // $controlContainer[0].insertAdjacentElement('beforebegin', $locationArrow[0]);
     },
-    onLocationClick() {
-      this.$emit('location-click');
-    },
+    // onLocationClick() {
+    //   this.$emit('location-click');
+    // },
     async onLocating() {
       this.isLocating = true;
       if (this.$parent.isNearMeClicked) {
