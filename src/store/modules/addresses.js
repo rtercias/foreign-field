@@ -175,10 +175,15 @@ export const addresses = {
         }
 
         const url = 'https://www.mapquestapi.com/directions/v2/optimizedroute?'
-          + `json={"locations":${JSON.stringify(raw.map(r => r.location))}}&outFormat=json`
-          + `&key=${mapQuestApiKey}`;
+          + `outFormat=json&key=${mapQuestApiKey}`;
 
-        const response = await axios.get(url);
+        const response = await axios.post(url, {
+          locations: raw.map(r => r.location),
+          options: {
+            routeType: 'shortest',
+            doReverseGeocode: false,
+          },
+        });
         const { locationSequence } = get(response, 'data.route') || [];
 
         // tie back to the original raw array (see above)
