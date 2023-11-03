@@ -96,6 +96,7 @@
         @locating="onLocating"
         @location-found="onLocationFound"
         @location-error="onLocationError"
+        @on-end-here-clicked="locate"
       />
     </div>
   </div>
@@ -250,6 +251,15 @@ export default {
     },
     displayType() {
       return this.territory.type === 'Active' ? '' : get(TerritoryType[this.territory.type], 'text');
+    },
+    isOptimized() {
+      return this.optimized && !!this.optimized.length;
+    },
+    $locateButton() {
+      const $map = this.$refs['map-view'].$el || {};
+      const $locateContainer = $map.getElementsByClassName('leaflet-control-locate')[0];
+      const $locateBtn = $locateContainer.children[0];
+      return $locateBtn;
     },
   },
   methods: {
@@ -451,7 +461,6 @@ export default {
     },
 
     async optimizeNearMe() {
-      this.isNearMeClicked = true;
       if (this.nearMeText === 'Near Me') {
         const message = 'Temporarily reorder addresses based on your current location.';
         const confirm = await this.$bvModal.msgBoxConfirm(message, {
@@ -472,14 +481,20 @@ export default {
         this.nearMeIcon = 'location-arrow';
       }
 
+      this.locate();
+    },
+
+    locate() {
+      this.isNearMeClicked = true;
+      this.isOptimizing = true;
+      const $popupCloseBtn = document.getElementsByClassName('leaflet-popup-close-button')[0];
+      if ($popupCloseBtn) $popupCloseBtn.click();
+
       /*
-        * traverse and call Leaflet Locate button and listen for
-        * 'onLocating', 'onLocationFound' and 'onLocationError' events
-        */
-      const $map = this.$refs['map-view'].$el || {};
-      const $locateContainer = $map.getElementsByClassName('leaflet-control-locate')[0];
-      const $locateBtn = $locateContainer.children[0];
-      $locateBtn.click();
+       * traverse and call Leaflet Locate button and listen for
+       * 'onLocating', 'onLocationFound' and 'onLocationError' events
+       */
+      this.$locateButton.click();
     },
 
     onLocating() {
@@ -496,6 +511,9 @@ export default {
         const sortList = orderBy(this.optimized.map(o => ({ id: o.id })), ['sort']);
 
         await this.reorderAddresses({ sortList });
+
+        // reset geolocation control button
+        this.$locateButton.click();
       } catch (e) {
         console.warn('Unable to optimize the addresses', e);
         this.nearMeText = 'Near Me';

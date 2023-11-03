@@ -60,6 +60,7 @@
             :territory="territory"
             :simple="mapOptions.simple"
             :disabled="disabled"
+            v-on="$listeners"
           ></MapLinks>
         </l-popup>
       </l-marker>
