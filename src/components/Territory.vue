@@ -487,7 +487,6 @@ export default {
     locate() {
       this.isNearMeClicked = true;
       this.isOptimizing = true;
-      // TODO: close popup
       const $popupCloseBtn = document.getElementsByClassName('leaflet-popup-close-button')[0];
       if ($popupCloseBtn) $popupCloseBtn.click();
 
