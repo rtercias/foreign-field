@@ -116,12 +116,16 @@ export default {
       actionButtonList: 'address/actionButtonList',
       startingAddress: 'addresses/startingAddress',
       endingAddress: 'addresses/endingAddress',
+      optimized: 'addresses/optimized',
     }),
     mapsUrl() {
       const addr1 = this.address.addr1 || '';
       const city = this.address.city || '';
       const state = this.address.state_province || '';
       return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
+    },
+    isOptimized() {
+      return this.optimized && !!this.optimized.length;
     },
   },
   methods: {
@@ -201,6 +205,9 @@ export default {
         this.setEndingAddress(null);
       } else {
         this.setEndingAddress(this.address);
+        if (this.$route.name === 'map-view') {
+          this.$emit('on-end-here-clicked');
+        }
       }
     },
   },
