@@ -16,6 +16,7 @@
         </font-awesome-icon>
       </h5>
       <Tags :record="phoneRecord" class="mt-3" variant="info" />
+      <Notes :record="phoneRecord" />
     </div>
     <div class="static-buttons col-3 pl-1">
       <font-awesome-icon class="logging-spinner text-info ml-3" icon="circle-notch" spin v-if="phoneRecord.isBusy" />
@@ -55,6 +56,7 @@ import format from 'date-fns/format';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import ActivityButton from './ActivityButton';
+import Notes from './Notes';
 import Tags from './Tags';
 import { format as formatPhone } from '../utils/phone';
 import { NOT_ALLOWED } from '../store/modules/models/PhoneModel';
@@ -65,6 +67,7 @@ export default {
   components: {
     ActivityButton,
     Tags,
+    Notes,
   },
   data() {
     return {
