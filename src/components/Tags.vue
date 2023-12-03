@@ -59,8 +59,6 @@ import { format as formatPhone } from '../utils/phone';
 import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
 import {
   formatLanguage,
-  ADDRESS_TAGS,
-  PHONE_TAGS,
   PHONE_ADDRESS_TAGS,
   NF_TAG,
   DNC_TAG,
@@ -211,32 +209,43 @@ export default {
       user: 'auth/user',
       updatedAddress: 'address/address',
       congregation: 'congregation/congregation',
+      builtInAddressTags: 'congregation/builtInAddressTags',
+      builtInPhoneTags: 'congregation/builtInPhoneTags',
+      customAddressTags: 'congregation/customAddressTags',
+      customPhoneTags: 'congregation/customPhoneTags',
     }),
     language() {
       return toLower(get(this.congregation, 'language') || 'Tagalog');
     },
     availableTags() {
-      const tags = this.record.type === 'Phone' ? PHONE_TAGS : ADDRESS_TAGS;
+      const tags = this.record.type === 'Phone' ? this.builtInPhoneTags : this.builtInAddressTags;
       return union(tags, this.customTags).filter(t => t);
     },
     customTags() {
-      const options = get(this.congregation, 'options', {});
-      const record = this.record.type === 'Regular' ? options.address : options.phone;
-      const tags = get(record, 'customTags', '');
-      return tags.split(',').map(t => t.trim()) || [];
+      return this.record.type === 'Regular' ? this.customAddressTags : this.customPhoneTags;
     },
     combinedTags() {
       const newArr = union(this.selectedTags, this.availableTags)
-        .map(t => toLower(t))
+        .map(t => toLower(t.trim()))
         .filter(t => t && !this.hide(t))
         .sort();
 
       const finalArr = map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
-      return finalArr;
+
+      const notesArray = (get(this.record, 'notes') || '')
+        .split(',')
+        .map(n => toLower(n.trim()));
+
+      return finalArr.filter(tag => !notesArray.includes(tag.caption));
     },
     selectedTags() {
       const notes = get(this.record, 'notes') || '';
-      return (toLower(notes).split(',').filter(n => n.length)) || [];
+      const tags = this.record.type === 'Regular'
+        ? union(this.builtInAddressTags, this.customAddressTags)
+        : union(this.builtInPhoneTags, this.customPhoneTags);
+
+      return (toLower(notes).split(',')
+        .filter(n => n.length && tags.includes(n))) || [];
     },
     allTagsSelected() {
       return difference(this.availableTags, this.selectedTags).length === 0;
@@ -251,7 +260,7 @@ export default {
       }
 
       if (result.length && typeof result[0] === 'string') {
-        return result.map(t => ({ caption: t, state: true }));
+        return result.map(t => ({ caption: toLower(t.trim()), state: true }));
       }
 
       return result;

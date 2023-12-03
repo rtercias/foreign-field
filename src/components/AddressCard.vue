@@ -5,10 +5,11 @@
       'min-height-phone-address': $route.name === 'phone-list',
       'mb-2': $route.name === 'phone-list' && isDesktop,
       'p-2': $route.name === 'phone-list',
-      'px-2 min-height': $route.name === 'address-list'
+      'px-2 min-height': $route.name === 'address-list',
+      'm-3': $route.name === 'address-detail',
     }">
     <font-awesome-layers
-      v-show="mode !== 'map'"
+      v-show="$route.name === 'address-list' || $route.name === 'phone-list'"
       class="ellipsis-v-static text-muted fa-1x"
       @click="toggleLeftPanel"
     >
@@ -23,30 +24,30 @@
         <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
           <b-link
             class="w-100"
-            :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
+            :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
             <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
-              {{address.addr1}} {{address.addr2}}
+              {{record.addr1}} {{record.addr2}}
             </div>
             <div class="text-left small font-weight-bold">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
+              {{record.city}} {{record.state_province}} {{record.postal_code}}
             </div>
           </b-link>
         </div>
         <div v-else class="address flex-column pb-4">
           <div>
             <h5 class="mb-0">
-              <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
-                {{address.addr1}}
+              <b-link :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
+                {{record.addr1}}
               </b-link>&nbsp;
             </h5>
-            {{address.addr2}}
+            {{record.addr2}}
             <div class="mb-1">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
+              {{record.city}} {{record.state_province}} {{record.postal_code}}
             </div>
           </div>
         </div>
         <Tags
-          :record="address"
+          :record="record"
           :variant="$route.name === 'phone-list' ? 'info' : ''"
           :class="{'pl-2': $route.name === 'phone-list'}"
           :addressIndex="index"
@@ -65,7 +66,7 @@
           class="text-info text-left fa-2x"
           icon="circle-notch"
           spin
-          v-if="isLogging || address.isBusy"
+          v-if="isLogging || record.isBusy"
         />
         <span
           v-else-if="mode !== 'map'"
@@ -83,7 +84,7 @@
             class="selected-response fa-2x"
             :class="{
               faded: !isMySelectedResponse || isIncomingResponse,
-              hidden: selectedResponse === 'START' || address.isBusy,
+              hidden: selectedResponse === 'START' || record.isBusy,
             }"
             :value="selectedResponse"
             :next="'START'"
@@ -93,9 +94,18 @@
           </ActivityButton>
         </span>
       </div>
+      <div v-if="$route.name === 'address-detail'">
+        <Notes :record="record" />
+        <div class="text-left">
+          TODO:<br/>
+          1. add all buttons from /detail page here<br/>
+          2. format address card to fit entire page on mobile<br/>
+          3. add prev/next address navigation<br/>
+        </div>
+      </div>
     </div>
     <font-awesome-layers
-      v-show="!isTerritoryBusy && mode !== 'map'"
+      v-show="!isTerritoryBusy && ($route.name === 'address-list' || $route.name === 'phone-list')"
       class="ellipsis-v-static text-muted fa-1x"
       @click="toggleRightPanel"
     >
@@ -112,20 +122,22 @@ import intersection from 'lodash/intersection';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import Tags from './Tags';
+import Notes from './Notes';
 import { format as formatPhone } from '../utils/phone';
 import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode'],
+  props: ['address', 'addressId', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode'],
   components: {
     AddressLinks,
     ActivityButton,
     Tags,
+    Notes,
   },
   data() {
     return {
-      storageId: `foreignfield-${this.address.id}`,
+      record: {},
       isIncomingResponse: false,
       responseText: '',
       animate: false,
@@ -136,6 +148,17 @@ export default {
       isLogging: false,
     };
   },
+  created() {
+    if (!this.address && this.territory.addresses.length) {
+      const address = this.territory.addresses.find(a => a.id === this.addressId)
+        || this.territory.addresses[0];
+      this.record = address || {};
+    } else {
+      this.record = this.address || {};
+    }
+    this.setAddress(this.record);
+  },
+
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
@@ -173,7 +196,7 @@ export default {
           },
         });
         const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: `${this.address.addr1} ${this.address.addr2}`,
+          title: `${this.record.addr1} ${this.record.addr2}`,
           centered: true,
           okTitle: 'Remove',
           cancelTitle: 'Close',
@@ -181,7 +204,7 @@ export default {
 
         if (value) {
           this.isLogging = true;
-          this.$emit('update-response', this.address, 'START', () => {
+          this.$emit('update-response', this.record, 'START', () => {
             this.isLogging = false;
           });
         }
@@ -228,7 +251,7 @@ export default {
     },
 
     formattedPhone() {
-      return this.address && this.address.phone && formatPhone(this.address.phone);
+      return this.record && this.record.phone && formatPhone(this.record.phone);
     },
 
     formattedSelectedResponseTS() {
@@ -237,7 +260,7 @@ export default {
       return format(new Date(timestamp), 'MM/dd/yy p');
     },
     lastActivity() {
-      return get(this.address, 'lastActivity') || { value: 'START', timestamp: '' };
+      return get(this.record, 'lastActivity') || { value: 'START', timestamp: '' };
     },
     selectedResponse() {
       return this.lastActivity.value;
@@ -248,16 +271,19 @@ export default {
       return publisherId.toString() === userId.toString();
     },
     allowedToCall() {
-      const tags = this.address.notes ? this.address.notes.split(',') : [];
+      const tags = this.record.notes ? this.record.notes.split(',') : [];
       return intersection(NOT_ALLOWED, tags).length === 0;
     },
     notAllowedTag() {
-      const tags = this.address.notes ? this.address.notes.split(',') : [];
+      const tags = this.record.notes ? this.record.notes.split(',') : [];
       const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
       return notAllowedTags[0];
     },
     mapQueryParam() {
       return this.mode === 'map' ? '?origin=map-view' : '';
+    },
+    storageId() {
+      return `foreignfield-${this.address.id}`;
     },
   },
 };
