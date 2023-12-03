@@ -1,6 +1,6 @@
 <template>
   <div
-    class="address-card-container d-flex align-items-center"
+    class="address-card-container d-flex align-items-center justify-content-center"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
       'mb-2': $route.name === 'phone-list' && isDesktop,
@@ -20,10 +20,12 @@
         :class="{
           'min-height': $route.name === 'address-list',
           'col-12': mode === 'map',
+          'pl-0': $route.name === 'address-detail',
         }">
         <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
           <b-link
             class="w-100"
+            @click="setAddress(record)"
             :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
             <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
               {{record.addr1}} {{record.addr2}}
@@ -33,7 +35,7 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address flex-column pb-4">
+        <div v-else class="address flex-column pb-3">
           <div>
             <h5 class="mb-0">
               <b-link :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
@@ -58,6 +60,7 @@
         class="static-buttons"
         :class="{
           'align-self-center': $route.name === 'phone-list',
+          'justify-content-end': $route.name === 'address-detail',
           'col-3 ml-n1': mode !== 'map',
           'tiny-busy position-absolute mt-n3': mode === 'map',
         }"
@@ -70,7 +73,7 @@
         />
         <span
           v-else-if="mode !== 'map'"
-          class="d-flex flex-column w-100">
+          class="d-flex flex-column">
           <ActivityButton
             v-if="!allowedToCall"
             class="fa-2x ml-n3 selected-tag"
@@ -94,14 +97,10 @@
           </ActivityButton>
         </span>
       </div>
-      <div v-if="$route.name === 'address-detail'">
+      <div v-if="$route.name === 'address-detail'" class="col-12 p-0">
+        <ActivityButtons class="pt-3" :address="record"/>
         <Notes :record="record" />
-        <div class="text-left">
-          TODO:<br/>
-          1. add all buttons from /detail page here<br/>
-          2. format address card to fit entire page on mobile<br/>
-          3. add prev/next address navigation<br/>
-        </div>
+        <AddressLinks />
       </div>
     </div>
     <font-awesome-layers
@@ -123,6 +122,7 @@ import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import Tags from './Tags';
 import Notes from './Notes';
+import ActivityButtons from './ActivityButtons';
 import { format as formatPhone } from '../utils/phone';
 import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
 
@@ -134,6 +134,7 @@ export default {
     ActivityButton,
     Tags,
     Notes,
+    ActivityButtons,
   },
   data() {
     return {
@@ -149,14 +150,17 @@ export default {
     };
   },
   created() {
-    if (!this.address && this.territory.addresses.length) {
+    if (
+      this.$route.name === 'address-detail'
+      && !this.address && this.territory.addresses.length
+    ) {
       const address = this.territory.addresses.find(a => a.id === this.addressId)
         || this.territory.addresses[0];
       this.record = address || {};
+      this.setAddress(this.record);
     } else {
       this.record = this.address || {};
     }
-    this.setAddress(this.record);
   },
 
   methods: {

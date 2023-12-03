@@ -31,7 +31,7 @@
             <b-button-group size="sm" class="badge px-0">
               <b-button
                 variant="outline-info"
-                :to="{ name: 'address-detail', params: { territoryId, addressId: firstAddress.id } }"
+                :to="{ name: 'address-detail', params: { territoryId, addressId: selectedAddress.id } }"
                 :pressed="viewMode === 'address-detail'">
                 Address
               </b-button>
@@ -171,6 +171,7 @@ export default {
     ...mapGetters({
       group: 'group/group',
       territory: 'territory/territory',
+      address: 'address/address',
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canViewReports: 'auth/canViewReports',
@@ -267,8 +268,9 @@ export default {
       const $locateBtn = $locateContainer.children[0];
       return $locateBtn;
     },
-    firstAddress() {
-      return get(this.territory, 'addresses[0]') || {};
+    selectedAddress() {
+      const firstAddress = get(this.territory, 'addresses[0]') || {};
+      return this.address || firstAddress;
     },
   },
   methods: {

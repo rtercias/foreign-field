@@ -1,60 +1,42 @@
 <template>
   <div class="address-links">
-    <Loading v-if="isLoading"></Loading>
-    <div v-else>
-      <div class="address-header justify-content-around align-items-center py-3">
-        <div class="lead font-weight-bold w-100 pl-5">
-          <div>{{get(address, 'addr1')}} {{get(address, 'addr2')}}</div>
-          <div>{{get(address, 'city')}} {{get(address, 'state_province')}} {{get(address, 'postal_code')}}</div>
-        </div>
-        <div class="pr-4">
-          <b-link
-            v-if="canWrite"
-            :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/edit${queryParamOrigin}`">
-            <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
-          </b-link>
-        </div>
-      </div>
-      <div class="lead border-top py-2">Link to...</div>
-      <b-list-group>
-        <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
-          <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;
-          Google Maps
-        </b-list-group-item>
-        <b-list-group-item
-          class="lead p-4 font-weight-bold w-auto"
-          variant="warning"
-          :href="lookupFastPeopleSearch"
-          target="_blank">
-          <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
-          Fast People Search
-        </b-list-group-item>
-        <b-list-group-item
-          class="lead p-4 font-weight-bold w-auto"
-          :href="lookup411"
-          variant="success"
-          target="_blank">
-          <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
-          411.com
-        </b-list-group-item>
-        <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="dark"
-          :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/history`">
-          <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
-          Activity History
-        </b-list-group-item>
-        <b-list-group-item v-if="canWrite" class="lead p-4 font-weight-bold w-auto" variant="danger"
-          :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/logs?fullscreen=true`">
-          <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
-          Address Change Log
-        </b-list-group-item>
-        <b-list-group-item
-          class="cancel lead p-4 font-weight-bold w-100"
-          @click="goBack"
-          variant="light">
-          Cancel
-        </b-list-group-item>
-      </b-list-group>
-    </div>
+    <b-list-group class="d-flex flex-row">
+      <b-list-group-item
+        class="w-25"
+        :href="mapsUrl"
+        variant="primary"
+        target="_blank"
+      >
+        <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;
+        Google Maps
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25"
+        variant="warning"
+        :href="lookupFastPeopleSearch"
+        target="_blank"
+      >
+        <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
+        Fast People Search
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25"
+        variant="dark"
+        :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/history`"
+      >
+        <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
+        Activity History
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25"
+        v-if="canWrite"
+        variant="danger"
+        :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/logs?fullscreen=true`"
+      >
+        <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
+        Change Log
+      </b-list-group-item>
+    </b-list-group>
   </div>
 </template>
 
@@ -76,10 +58,6 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    if (this.token) {
-      await this.fetchAddress({ addressId: this.addressId });
-    }
-    this.isLoading = false;
   },
   computed: {
     ...mapGetters({
@@ -148,11 +126,8 @@ export default {
 };
 </script>
 
-<style>
-  .address-header {
-    display: flex;
-  }
-  .cancel {
-    cursor: pointer;
+<style scoped lang="scss">
+  .address-links {
+    font-size: 12px;
   }
 </style>
