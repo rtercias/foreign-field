@@ -31,15 +31,21 @@
             <b-button-group size="sm" class="badge px-0">
               <b-button
                 variant="outline-info"
+                :to="{ name: 'address-detail', params: { territoryId, addressId: firstAddress.id } }"
+                :pressed="viewMode === 'address-detail'">
+                Address
+              </b-button>
+              <b-button
+                variant="outline-info"
                 :to="{ name: 'address-list', params: { territoryId } }"
                 :pressed="viewMode === 'address-list'">
-                Address
+                List
               </b-button>
               <b-button
                 variant="outline-info"
                 :to="{ name: 'phone-list', params: { territoryId } }"
                 :pressed="viewMode === 'phone-list'">
-                Phone
+                Phones
               </b-button>
               <b-button variant="outline-info" :to="`/territories/${territoryId}/map`" :pressed="viewMode==='map-view'">
                 Map
@@ -260,6 +266,9 @@ export default {
       const $locateContainer = $map.getElementsByClassName('leaflet-control-locate')[0];
       const $locateBtn = $locateContainer.children[0];
       return $locateBtn;
+    },
+    firstAddress() {
+      return get(this.territory, 'addresses[0]') || {};
     },
   },
   methods: {
