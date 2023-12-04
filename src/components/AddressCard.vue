@@ -1,6 +1,6 @@
 <template>
   <div
-    class="address-card-container d-flex align-items-center justify-content-center"
+    class="address-card-container d-flex align-items-center justify-content-center py-2"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
       'mb-2': $route.name === 'phone-list' && isDesktop,
@@ -16,7 +16,7 @@
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
     <div class="w-100 row">
-      <div class="address-card col-9 row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
         :class="{
           'min-height': $route.name === 'address-list',
           'col-12': mode === 'map',
@@ -37,70 +37,82 @@
         </div>
         <div v-else class="address flex-column pb-3">
           <div>
-            <h5 class="mb-0">
+            <h4 class="mb-0">
               <b-link :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
                 {{record.addr1}}
               </b-link>&nbsp;
-            </h5>
+            </h4>
             {{record.addr2}}
             <div class="mb-1">
               {{record.city}} {{record.state_province}} {{record.postal_code}}
             </div>
           </div>
         </div>
+        <div
+          class="static-buttons"
+          :class="{
+            'align-items-start': $route.name === 'address-list',
+            'align-self-center': $route.name === 'phone-list',
+            'justify-content-end align-items-start': $route.name === 'address-detail',
+            'ml-n1': mode !== 'map',
+            'tiny-busy position-absolute mt-n3': mode === 'map',
+          }"
+        >
+          <font-awesome-icon
+            class="text-info text-left fa-2x"
+            icon="circle-notch"
+            spin
+            v-if="isLogging || record.isBusy"
+          />
+          <span
+            v-else-if="mode !== 'map'"
+            class="d-flex flex-column">
+            <ActivityButton
+              v-if="!allowedToCall"
+              class="fa-2x ml-n3 selected-tag"
+              :value="notAllowedTag"
+              :selected="true"
+              :display-only="true"
+              :bg="$route.name === 'phone-list' ? 'light' : 'white'"
+              :actionButtonList="actionButtonList">
+            </ActivityButton>
+            <ActivityButton
+              class="selected-response fa-2x"
+              :class="{
+                faded: !isMySelectedResponse || isIncomingResponse,
+                hidden: selectedResponse === 'START' || record.isBusy,
+              }"
+              :value="selectedResponse"
+              :next="'START'"
+              :selected="true"
+              :actionButtonList="actionButtonList"
+              @button-click="confirmClearStatus">
+            </ActivityButton>
+          </span>
+        </div>
         <Tags
           :record="record"
           :variant="$route.name === 'phone-list' ? 'info' : ''"
+          class="h-100"
           :class="{'pl-2': $route.name === 'phone-list'}"
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-      </div>
-      <div
-        class="static-buttons"
-        :class="{
-          'align-self-center': $route.name === 'phone-list',
-          'justify-content-end': $route.name === 'address-detail',
-          'col-3 ml-n1': mode !== 'map',
-          'tiny-busy position-absolute mt-n3': mode === 'map',
-        }"
-      >
-        <font-awesome-icon
-          class="text-info text-left fa-2x"
-          icon="circle-notch"
-          spin
-          v-if="isLogging || record.isBusy"
-        />
-        <span
-          v-else-if="mode !== 'map'"
-          class="d-flex flex-column">
-          <ActivityButton
-            v-if="!allowedToCall"
-            class="fa-2x ml-n3 selected-tag"
-            :value="notAllowedTag"
-            :selected="true"
-            :display-only="true"
-            :bg="$route.name === 'phone-list' ? 'light' : 'white'"
-            :actionButtonList="actionButtonList">
-          </ActivityButton>
-          <ActivityButton
-            class="selected-response fa-2x"
-            :class="{
-              faded: !isMySelectedResponse || isIncomingResponse,
-              hidden: selectedResponse === 'START' || record.isBusy,
-            }"
-            :value="selectedResponse"
-            :next="'START'"
-            :selected="true"
-            :actionButtonList="actionButtonList"
-            @button-click="confirmClearStatus">
-          </ActivityButton>
-        </span>
-      </div>
-      <div v-if="$route.name === 'address-detail'" class="col-12 p-0">
-        <ActivityButtons class="pt-3" :address="record"/>
-        <Notes :record="record" />
-        <AddressLinks />
+        <div
+          class="col-12"
+          :class="{
+            'footer fixed-bottom': $route.name === 'address-detail',
+            'pt-4': $route.name !== 'address-detail',
+          }"
+        >
+          <div v-if="$route.name === 'address-detail'" class="col-12 p-0">
+            <ActivityButtons class="pt-3" :address="record"/>
+            <hr class="my-2" />
+          </div>
+          <div class="p-0">
+            <AddressLinks />
+          </div>
+        </div>
       </div>
     </div>
     <font-awesome-layers
@@ -355,6 +367,9 @@ export default {
 }
 .tiny-busy {
   font-size: 8px;
+}
+.footer {
+  margin-bottom: 75px;
 }
 
 @media print {

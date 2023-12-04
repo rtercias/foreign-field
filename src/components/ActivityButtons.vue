@@ -4,7 +4,7 @@
       <b-list-group-item
         v-for="(button, index) in rightButtonList(address)"
         :key="index"
-        class="activity-button w-25"
+        class="activity-button justify-content-center"
       >
         <ActivityButton
           :value="button.value"
@@ -12,7 +12,6 @@
           :actionButtonList="actionButtonList"
           :slashed="button.slashed"
           :inverted="get(address, 'lastActivity.value') !== button.value"
-          :iconOnly="true"
           :busy="address.isBusy"
           :disabled="disabled"
           @button-click="() => updateResponse(address, button.value)"
@@ -26,7 +25,7 @@
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import ActivityButton from './ActivityButton';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import {
   ADDRESS_RIGHT_BUTTON_LIST,
   NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
@@ -42,6 +41,9 @@ export default {
     disabled: false,
   }),
   methods: {
+    ...mapActions({
+      addLog: 'address/addLog',
+    }),
     get,
     rightButtonList(item) {
       const rightButtons = ADDRESS_RIGHT_BUTTON_LIST;
@@ -88,8 +90,16 @@ export default {
   computed: {
     ...mapGetters({
       actionButtonList: 'address/actionButtonList',
+      territory: 'territory/territory',
     }),
   },
 };
 </script>
-<style></style>
+<style scoped lang="scss">
+  .activity-button {
+    width: 33%;
+    .interaction {
+      width: 100%;
+    }
+  }
+</style>

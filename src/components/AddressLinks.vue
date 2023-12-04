@@ -2,39 +2,53 @@
   <div class="address-links">
     <b-list-group class="d-flex flex-row">
       <b-list-group-item
-        class="w-25"
+        class="w-25 p-2"
         :href="mapsUrl"
         variant="primary"
         target="_blank"
       >
-        <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;
-        Google Maps
+        <font-awesome-icon class="button" icon="car"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Google Maps</div>
       </b-list-group-item>
       <b-list-group-item
-        class="w-25"
+        class="w-25 p-2"
         variant="warning"
         :href="lookupFastPeopleSearch"
         target="_blank"
       >
-        <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
-        Fast People Search
+        <font-awesome-layers
+          class="fa-fw fa-stack mx-2">
+          <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
+          <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
+          <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
+        </font-awesome-layers>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">People Search</div>
       </b-list-group-item>
       <b-list-group-item
-        class="w-25"
+        class="w-25 p-2"
+        v-if="canWrite"
+        variant="success"
+        :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/edit${queryParamOrigin}`"
+      >
+        <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Edit Address</div>
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25 p-2"
         variant="dark"
         :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/history`"
       >
-        <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
-        Activity History
+        <font-awesome-icon class="button" icon="history"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Activity History</div>
       </b-list-group-item>
       <b-list-group-item
-        class="w-25"
+        class="w-25 p-2"
         v-if="canWrite"
         variant="danger"
         :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/logs?fullscreen=true`"
       >
-        <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
-        Change Log
+        <font-awesome-icon class="button" icon="archive"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Change Log</div>
       </b-list-group-item>
     </b-list-group>
   </div>

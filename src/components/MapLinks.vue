@@ -15,15 +15,6 @@
       </AddressCard>
       <div class="d-flex flex-column">
         <b-button
-          v-if="!simple"
-          id="get-direction"
-          class="w-100 font-weight-bold large-font-menu bg-white p-1 mb-1"
-        >
-          <a :href="mapsUrl" target="_blank">
-            <font-awesome-icon icon="directions"></font-awesome-icon>
-          </a>
-        </b-button>
-        <b-button
           v-if="simple"
           id="start-here"
           class="w-100 p-1 mb-1"
@@ -51,17 +42,6 @@
           <span class="d-block">
             <font-awesome-layers class="mx-2">
               <font-awesome-icon icon="flag-checkered"></font-awesome-icon>
-            </font-awesome-layers>
-          </span>
-        </b-button>
-        <b-button
-          id="activity-history"
-          class="w-100 bg-white p-1"
-          @click="goToActivityHistory"
-        >
-          <span class="d-block">
-            <font-awesome-layers class="text-success mx-2">
-              <font-awesome-icon icon="history"></font-awesome-icon>
             </font-awesome-layers>
           </span>
         </b-button>
