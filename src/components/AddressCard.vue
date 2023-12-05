@@ -6,7 +6,7 @@
       'mb-2': $route.name === 'phone-list' && isDesktop,
       'p-2': $route.name === 'phone-list',
       'px-2 min-height': $route.name === 'address-list',
-      'm-3': $route.name === 'address-detail',
+      'm-3 h-100': $route.name === 'address-detail',
     }">
     <font-awesome-layers
       v-show="$route.name === 'address-list' || $route.name === 'phone-list'"
@@ -15,8 +15,13 @@
     >
       <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
     </font-awesome-layers>
-    <div class="w-100 row">
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+    <div
+      class="w-100 row"
+      :class="{
+        'h-100': $route.name === 'address-detail',
+      }"
+    >
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50 h-100"
         :class="{
           'min-height': $route.name === 'address-list',
           'col-12': mode === 'map',
@@ -99,14 +104,17 @@
           v-on="$listeners"
         ></Tags>
         <div
-          class="col-12"
+          class="bg-white w-100"
           :class="{
+            'w-80': isDesktop && $route.name === 'address-detail',
             'footer fixed-bottom': $route.name === 'address-detail',
             'pt-4': $route.name !== 'address-detail',
+            'd-none': $route.name === 'phone-list',
           }"
         >
           <div v-if="$route.name === 'address-detail'" class="col-12 p-0">
-            <ActivityButtons class="pt-3" :address="record"/>
+            <hr class="mb-2 mt-0" />
+            <ActivityButtons :address="record"/>
             <hr class="my-2" />
           </div>
           <div class="p-0">
@@ -369,7 +377,8 @@ export default {
   font-size: 8px;
 }
 .footer {
-  margin-bottom: 75px;
+  margin-bottom: 57px;
+  left: unset;
 }
 
 @media print {

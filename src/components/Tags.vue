@@ -1,5 +1,5 @@
 <template>
-  <div class="tags w-100 h-100" :class="{ 'd-none': !selectedTags.length && !availableTags.length }">
+  <div class="tags w-100 h-100 px-2" :class="{ 'd-none': !selectedTags.length && !availableTags.length }">
     <div class="w-100 h-100 text-left">
       <b-button-group size="sm">
         <div class="combined-tags d-flex flex-wrap text-left">

@@ -1,5 +1,13 @@
 <template>
-  <div id="app" class="d-flex min-vh-100" :class="{ 'flex-row': isDesktop, 'flex-column': !isDesktop }">
+  <div
+    id="app"
+    class="d-flex min-vh-100"
+    :class="{
+      'flex-row': isDesktop,
+      'flex-column': !isDesktop,
+      'h-100': $route.name === 'address-detail',
+    }"
+  >
     <b-navbar
       v-if="isDesktop"
       class="align-items-start nav-footer-margin"
@@ -8,7 +16,7 @@
       variant="primary">
       <nav-menu />
     </b-navbar>
-    <div :class="{ 'w-80': isDesktop, 'mb-5': !isDesktop }">
+    <div class="h-100" :class="{ 'w-80': isDesktop, 'mb-5': !isDesktop }">
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view class="h-100" :key="key"></router-view>
     </div>
