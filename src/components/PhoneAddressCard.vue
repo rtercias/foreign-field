@@ -1,8 +1,8 @@
 <template>
   <div
-    class="phone-address-card d-flex align-items-baseline h-100"
+    class="phone-address-card d-flex align-items-baseline"
     :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
-    <div class="w-100 h-100">
+    <div class="w-100">
       <b-list-group>
         <swipe-list
           ref="list"
@@ -29,7 +29,7 @@
             </AddressCard>
             <div v-else-if="!item.editMode && item.type === 'Phone'">
               <PhoneCard
-                class="h-100 border"
+                class="border"
                 :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
                 :index="index"
                 :phoneRecord="item"

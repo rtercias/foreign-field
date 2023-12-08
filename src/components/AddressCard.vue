@@ -6,7 +6,7 @@
       'mb-2': $route.name === 'phone-list' && isDesktop,
       'p-2': $route.name === 'phone-list',
       'px-2 min-height': $route.name === 'address-list',
-      'm-3 h-100': $route.name === 'address-detail',
+      'm-3': $route.name === 'address-detail',
     }">
     <font-awesome-layers
       v-show="$route.name === 'address-list' || $route.name === 'phone-list'"
@@ -17,14 +17,11 @@
     </font-awesome-layers>
     <div
       class="w-100 row"
-      :class="{
-        'h-100': $route.name === 'address-detail',
-      }"
     >
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50 h-100"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
         :class="{
           'min-height': $route.name === 'address-list',
-          'col-12': mode === 'map',
+          'col-12 p-0': mode === 'map',
           'pl-0': $route.name === 'address-detail',
         }">
         <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
@@ -98,7 +95,6 @@
         <Tags
           :record="record"
           :variant="$route.name === 'phone-list' ? 'info' : ''"
-          class="h-100"
           :class="{'pl-2': $route.name === 'phone-list'}"
           :addressIndex="index"
           v-on="$listeners"
@@ -112,7 +108,7 @@
             'd-none': $route.name === 'phone-list',
           }"
         >
-          <div v-if="$route.name === 'address-detail'" class="col-12 p-0">
+          <div v-if="isCheckedOut && $route.name === 'address-detail'" class="col-12 p-0">
             <hr class="mb-2 mt-0" />
             <ActivityButtons :address="record"/>
             <hr class="my-2" />
@@ -255,6 +251,7 @@ export default {
       publisher: 'publisher/publisher',
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
+      isCheckedOut: 'territory/isCheckedOut',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;

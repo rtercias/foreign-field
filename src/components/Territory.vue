@@ -1,17 +1,7 @@
 <template>
-  <div
-  class="territory h-auto"
-  :class="{
-    'h-100': $route.name === 'address-detail'
-  }"
->
+  <div class="territory h-100">
     <Loading v-if="territoryIsLoading" />
-    <div
-      v-else
-      :class="{
-        'h-100': $route.name === 'address-detail',
-      }"
-    >
+    <div v-else>
       <header class="page-header sticky-top w-100 pt-2 px-2 pb-0 bg-white border-bottom" :sticky="true">
         <div class="w-100">
           <div class="w-100">
@@ -105,7 +95,6 @@
       <router-view
         :ref="viewMode"
         class="router-view"
-        :class="{ 'h-100': $route.name === 'address-detail' }"
         :disabled="!isCheckedOut"
         :territory="territory"
         :options="{ showSortOrder: true, editable: true }"

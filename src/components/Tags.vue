@@ -1,8 +1,22 @@
 <template>
-  <div class="tags w-100 h-100 px-2" :class="{ 'd-none': !selectedTags.length && !availableTags.length }">
-    <div class="w-100 h-100 text-left">
+  <div
+    class="tags w-100"
+    :class="{
+      'd-none': !selectedTags.length && !availableTags.length,
+      'px-0': $route.name === 'map-view',
+      'px-2': $route.name !== 'map-view',
+    }"
+  >
+    <div class="w-100 text-left">
       <b-button-group size="sm">
-        <div class="combined-tags d-flex flex-wrap text-left">
+        <div
+          class="combined-tags d-flex flex-wrap text-left vh-16 overflow-auto"
+          :class="{
+            'vh-37': !isCheckedOut && $route.name === 'address-detail',
+            'vh-22': isCheckedOut && $route.name === 'address-detail',
+            'vh-22': $route.name === 'map-view',
+          }"
+        >
           <b-badge
             v-if="availableTags.length && !allTagsSelected"
             @click="openAddDialog"
@@ -242,6 +256,7 @@ export default {
       builtInPhoneTags: 'congregation/builtInPhoneTags',
       customAddressTags: 'congregation/customAddressTags',
       customPhoneTags: 'congregation/customPhoneTags',
+      isCheckedOut: 'territory/isCheckedOut',
     }),
     language() {
       return toLower(get(this.congregation, 'language') || 'Tagalog');
@@ -299,6 +314,15 @@ export default {
 </script>
 
 <style>
+  .vh-16 {
+    height: 16vh;
+  }
+  .vh-22 {
+    height: 22vh;
+  }
+  .vh-37 {
+    height: 37vh;
+  }
   .tags {
     min-height: 18px;
     bottom: 10px;
@@ -329,13 +353,14 @@ export default {
   .tag-button {
     border: solid 1px;
     cursor: pointer;
-    padding: 0.25em 1em;
+    padding: 10px;
+    height: fit-content;
   }
   .tag-icon {
     font-size: 0.75em;
   }
   .tag-text {
-    font-size: 1.5em;
+    font-size: 1.25em;
   }
   .tag-button-preview {
     cursor: pointer;

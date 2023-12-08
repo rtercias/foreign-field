@@ -5,7 +5,6 @@
     :class="{
       'flex-row': isDesktop,
       'flex-column': !isDesktop,
-      'h-100': $route.name === 'address-detail',
     }"
   >
     <b-navbar
@@ -16,9 +15,9 @@
       variant="primary">
       <nav-menu />
     </b-navbar>
-    <div class="h-100" :class="{ 'w-80': isDesktop, 'mb-5': !isDesktop }">
+    <div :class="{ 'w-80': isDesktop, 'mb-5': !isDesktop }">
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
-      <router-view class="h-100" :key="key"></router-view>
+      <router-view :key="key"></router-view>
     </div>
     <footer class="app-footer w-100 d-flex justify-content-end">
       <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
