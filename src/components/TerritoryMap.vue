@@ -200,6 +200,9 @@ export default {
     width: 100%;
   }
 }
+.leaflet-popup {
+  margin-bottom: unset;
+}
 .leaflet-popup h2 {
   font-size: 18px;
 }

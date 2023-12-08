@@ -10,29 +10,13 @@
     <div class="w-100 text-left">
       <b-button-group size="sm">
         <div
-          class="combined-tags d-flex flex-wrap text-left vh-16 overflow-auto"
+          class="combined-tags d-flex flex-wrap text-left overflow-auto"
           :class="{
-            'vh-37': !isCheckedOut && $route.name === 'address-detail',
-            'vh-22': isCheckedOut && $route.name === 'address-detail',
-            'vh-22': $route.name === 'map-view',
+            'vh-37': !isDesktop && !isCheckedOut && $route.name === 'address-detail',
+            'vh-22': !isDesktop && isCheckedOut && $route.name === 'address-detail',
+            'vh-16': $route.name === 'map-view',
           }"
         >
-          <b-badge
-            v-if="availableTags.length && !allTagsSelected"
-            @click="openAddDialog"
-            pill
-            class="tag-button add-tag border-info d-flex mr-1 mb-1"
-            :class="`border-${variant}`"
-            :variant="variant"
-            size='sm'
-          >
-            <span
-              class="pl-1 tag-text d-flex align-items-center small font-weight-bold"
-              :class="{ 'text-white': variant === 'info' }">
-              <span v-if="collapsed">add note</span>
-              <span v-else>done</span>
-            </span>
-          </b-badge>
           <b-badge
             v-for="(tag, index) in displayedTags"
             pill
@@ -52,6 +36,22 @@
             <span class="tag-text d-flex align-items-center small">
               <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
               {{ formatLanguage(toLower(tag.caption), language) }}
+            </span>
+          </b-badge>
+          <b-badge
+            v-if="availableTags.length && !allTagsSelected"
+            @click="openAddDialog"
+            pill
+            class="tag-button add-tag border-info d-flex mr-1 mb-1"
+            :class="`border-${variant}`"
+            :variant="variant"
+            size='sm'
+          >
+            <span
+              class="pl-1 tag-text d-flex align-items-center small font-weight-bold"
+              :class="{ 'text-white': variant === 'info' }">
+              <span v-if="collapsed">add note</span>
+              <span v-else>done</span>
             </span>
           </b-badge>
         </div>
@@ -257,6 +257,7 @@ export default {
       customAddressTags: 'congregation/customAddressTags',
       customPhoneTags: 'congregation/customPhoneTags',
       isCheckedOut: 'territory/isCheckedOut',
+      isDesktop: 'auth/isDesktop',
     }),
     language() {
       return toLower(get(this.congregation, 'language') || 'Tagalog');
