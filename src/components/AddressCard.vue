@@ -39,11 +39,16 @@
         </div>
         <div v-else class="address flex-column pb-3">
           <div>
-            <h4 class="mb-0">
-              <b-link :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
-                {{record.addr1}}
-              </b-link>&nbsp;
-            </h4>
+            <div class="d-flex align-items-center">
+              <div class="sort-order-icon font-weight-bolder bg-white mr-2">
+                {{record.sort}}
+              </div>
+              <h4 class="d-inline mb-0">
+                <b-link :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
+                  {{record.addr1}}
+                </b-link>&nbsp;
+              </h4>
+            </div>
             {{record.addr2}}
             <div class="mb-1">
               {{record.city}} {{record.state_province}} {{record.postal_code}}
@@ -108,13 +113,27 @@
             'd-none': $route.name === 'phone-list',
           }"
         >
+          <b-button
+            v-if="showAddressLinksToggle"
+            class="toggle-address-links w-100 mt-0 text-black-50
+              d-flex align-items-center justify-content-center"
+            @click="showAddressLinks = !showAddressLinks"
+          >
+            <font-awesome-icon v-if="!showAddressLinks" icon="chevron-up" />
+            <font-awesome-icon v-else icon="chevron-down" />
+          </b-button>
           <div v-if="isCheckedOut && $route.name === 'address-detail'" class="col-12 p-0">
             <hr class="mb-2 mt-0" />
             <ActivityButtons :address="record"/>
             <hr class="my-2" />
           </div>
           <div class="p-0">
-            <AddressLinks />
+            <AddressLinks
+              :class="{
+                'slide-up': showAddressLinksToggle && showAddressLinks,
+                'slide-down': showAddressLinksToggle && !showAddressLinks,
+              }
+            "/>
           </div>
         </div>
       </div>
@@ -163,6 +182,7 @@ export default {
       transform: '',
       clickedToOpen: false,
       isLogging: false,
+      showAddressLinks: this.$route.name !== 'address-detail',
     };
   },
   created() {
@@ -253,6 +273,12 @@ export default {
       isDesktop: 'auth/isDesktop',
       isCheckedOut: 'territory/isCheckedOut',
     }),
+    showAddressLinksToggle() {
+      return !this.isDesktop && (
+        this.$route.name === 'address-detail'
+        || this.$route.name === 'map-view'
+      );
+    },
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
     },
@@ -331,6 +357,16 @@ export default {
     &.min-height {
       min-height: 60px;
     }
+
+    .slide-up {
+      transition: 0.5s;
+      height: 90px;
+    }
+
+    .slide-down {
+      transition: 0.5s;
+      height: 0px;
+    }
   }
 }
 .address {
@@ -372,6 +408,20 @@ export default {
 }
 .tiny-busy {
   font-size: 8px;
+}
+.sort-order-icon {
+  display: inline-block;
+  border: solid 3px;
+  border-radius: 50%;
+  line-height: 14px;
+  height: 20px;
+  width: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+.toggle-address-links {
+  border-radius: 5px 5px 0 0;
+  height: 25px;
 }
 .footer {
   margin-bottom: 57px;

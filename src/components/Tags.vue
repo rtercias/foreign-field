@@ -314,15 +314,17 @@ export default {
 };
 </script>
 
-<style>
+<style scoped lang="scss">
+  $addressLinksHeight: 20px;
+
   .vh-16 {
-    height: 16vh;
+    height: calc(16vh + $addressLinksHeight);
   }
   .vh-22 {
-    height: 22vh;
+    height: calc(22vh + $addressLinksHeight);
   }
   .vh-37 {
-    height: 37vh;
+    height: calc(37vh + $addressLinksHeight);
   }
   .tags {
     min-height: 18px;

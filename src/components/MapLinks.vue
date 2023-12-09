@@ -1,5 +1,5 @@
 <template>
-  <div class="address-links">
+  <div class="address-links" :class="{ 'max-size-mobile': !isDesktop }">
     <div
       class="address-header d-flex justify-content-between text-center pt-2"
       :class="{ 'pb-2': disabled }"
@@ -97,6 +97,7 @@ export default {
       startingAddress: 'addresses/startingAddress',
       endingAddress: 'addresses/endingAddress',
       optimized: 'addresses/optimized',
+      isDesktop: 'auth/isDesktop',
     }),
     mapsUrl() {
       const addr1 = this.address.addr1 || '';
@@ -194,7 +195,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped lang="scss">
+.address-links {
+  overflow-y: scroll;
+}
+.max-size-mobile {
+  max-height: 225px;
+  max-width: 100%;
+}
 .leaflet-popup-content {
   width: 100%;
 }
