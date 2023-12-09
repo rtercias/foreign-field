@@ -202,6 +202,7 @@ export default {
 <style lang="scss">
 @import "../assets/foreign-field-theme.scss";
 .masthead {
+  z-index: 2000;
   .navbar {
     min-height: $header-height;
   }

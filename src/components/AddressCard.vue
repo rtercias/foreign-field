@@ -6,7 +6,7 @@
       'mb-2': $route.name === 'phone-list' && isDesktop,
       'p-2': $route.name === 'phone-list',
       'px-2 min-height': $route.name === 'address-list',
-      'm-3': $route.name === 'address-detail',
+      'm-3 pb-0': $route.name === 'address-detail',
     }">
     <font-awesome-layers
       v-show="$route.name === 'address-list' || $route.name === 'phone-list'"
@@ -37,7 +37,7 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address flex-column pb-3">
+        <div v-else class="address flex-column pb-1">
           <div>
             <div class="d-flex align-items-center">
               <div class="sort-order-icon font-weight-bolder bg-white mr-2">
@@ -99,7 +99,7 @@
         </div>
         <Tags
           :record="record"
-          :variant="$route.name === 'phone-list' ? 'info' : ''"
+          :variant="$route.name === 'phone-list' ? 'info' : 'primary'"
           :class="{'pl-2': $route.name === 'phone-list'}"
           :addressIndex="index"
           v-on="$listeners"
@@ -124,7 +124,7 @@
           </b-button>
           <div v-if="isCheckedOut && $route.name === 'address-detail'" class="col-12 p-0">
             <hr class="mb-2 mt-0" />
-            <ActivityButtons :address="record"/>
+            <ActivityButtons :address="record" :selectedResponse="selectedResponse" />
             <hr class="my-2" />
           </div>
           <div class="p-0">
@@ -132,8 +132,11 @@
               :class="{
                 'slide-up': showAddressLinksToggle && showAddressLinks,
                 'slide-down': showAddressLinksToggle && !showAddressLinks,
-              }
-            "/>
+              }"
+              :territoryId="territory.id"
+              :addressId="record.id"
+              :checkoutId="get(this.territory, 'status.checkout_id')"
+            />
           </div>
         </div>
       </div>
@@ -205,6 +208,7 @@ export default {
       setAddress: 'address/setAddress',
       fetchPublisher: 'publisher/fetchPublisher',
     }),
+    get,
     toggleRightPanel() {
       this.$emit('toggle-right-panel', this.index, this.revealed);
     },

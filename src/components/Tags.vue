@@ -20,11 +20,10 @@
           <b-badge
             v-for="(tag, index) in displayedTags"
             pill
-            class="tag-button d-flex mr-1 mb-1 text-white small"
+            class="tag-button d-flex mr-1 mb-1 small border-dark"
             :class="{
               active: false,
               [`border-${color(tag.caption)}`]: true,
-              [`text-${color(tag.caption)}`]: !tag.state,
               'border-danger': tag.state && highlight(tag.caption),
             }"
             size='sm'
@@ -48,7 +47,7 @@
             size='sm'
           >
             <span
-              class="pl-1 tag-text d-flex align-items-center small font-weight-bold"
+              class="tag-text d-flex align-items-center small font-weight-bold"
               :class="{ 'text-white': variant === 'info' }">
               <span v-if="collapsed">add note</span>
               <span v-else>done</span>
@@ -213,7 +212,7 @@ export default {
     },
     color(tag) {
       const button = ACTION_BUTTON_LIST.find(b => b.value === tag);
-      return button ? button.color : 'primary';
+      return button ? button.color : 'light';
     },
     collapseTags() {
       this.collapsed = !this.collapsed;

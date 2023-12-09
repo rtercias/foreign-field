@@ -48,26 +48,7 @@
       </div>
     </div>
     <hr class="my-2" v-if="!disabled" />
-    <b-list-group v-if="!disabled" class="d-flex flex-row justify-content-between">
-      <b-list-group-item
-        v-for="(button, index) in rightButtonList(address)"
-        :key="index"
-        class="activity-button w-25"
-      >
-        <ActivityButton
-          :value="button.value"
-          :text="button.text"
-          :actionButtonList="actionButtonList"
-          :slashed="button.slashed"
-          :inverted="get(address, 'lastActivity.value') !== button.value"
-          :iconOnly="true"
-          :busy="address.isBusy"
-          :disabled="disabled"
-          @button-click="() => updateResponse(address, button.value)"
-        >
-        </ActivityButton>
-      </b-list-group-item>
-    </b-list-group>
+    <ActivityButtons :address="address" />
   </div>
 </template>
 
@@ -81,14 +62,14 @@ import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
 import AddressCard from './AddressCard';
-import ActivityButton from './ActivityButton';
+import ActivityButtons from './ActivityButtons';
 
 export default {
   name: 'MapLinks',
   props: ['address', 'territory', 'simple', 'disabled', 'index'],
   components: {
     AddressCard,
-    ActivityButton,
+    ActivityButtons,
   },
   computed: {
     ...mapGetters({

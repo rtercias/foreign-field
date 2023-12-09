@@ -28,7 +28,11 @@
         class="w-25 p-2"
         v-if="canWrite"
         variant="success"
-        :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/edit${queryParamOrigin}`"
+        :to="{
+          name: 'address-edit',
+          params: { territoryId, addressId, mode: 'edit' },
+          query: { origin: $route.name }
+        }"
       >
         <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
         <div class="pt-2" v-if="$route.name === 'address-detail'">Edit Address</div>
@@ -36,7 +40,11 @@
       <b-list-group-item
         class="w-25 p-2"
         variant="dark"
-        :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/history`"
+        :to="{
+          name: 'activity-history',
+          params: { territoryId, addressId, checkoutId },
+          query: { origin: $route.name }
+        }"
       >
         <font-awesome-icon class="button" icon="history"></font-awesome-icon>
         <div class="pt-2" v-if="$route.name === 'address-detail'">Activity History</div>
@@ -45,7 +53,11 @@
         class="w-25 p-2"
         v-if="canWrite"
         variant="danger"
-        :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/logs?fullscreen=true`"
+        :to="{
+          name: 'change-logs',
+          params: { territoryId, addressId },
+          query: { origin: $route.name }
+        }"
       >
         <font-awesome-icon class="button" icon="archive"></font-awesome-icon>
         <div class="pt-2" v-if="$route.name === 'address-detail'">Change Log</div>
@@ -61,7 +73,7 @@ import Loading from './Loading';
 
 export default {
   name: 'AddressLinks',
-  props: ['addressId', 'territoryId'],
+  props: ['addressId', 'territoryId', 'checkoutId'],
   components: {
     Loading,
   },
@@ -109,10 +121,6 @@ export default {
       }
 
       return `/territories/${this.territoryId}/${origin}`;
-    },
-    queryParamOrigin() {
-      const { origin = '' } = this.$route.query;
-      return origin ? `?origin=${origin}` : '';
     },
     congregationIdStatus() {
       return get(this.user, 'congregation.id') && get(this.address, 'congregationId');

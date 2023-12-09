@@ -47,7 +47,10 @@
                 :pressed="viewMode === 'phone-list'">
                 Phones
               </b-button>
-              <b-button variant="outline-info" :to="`/territories/${territoryId}/map`" :pressed="viewMode==='map-view'">
+              <b-button
+                variant="outline-info"
+                :to="{ name: 'map-view', params: { territoryId } }"
+                :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
@@ -84,7 +87,12 @@
               <b-button
                 v-if="canWrite"
                 variant="success"
-                :to="`/territories/${territoryId}/addresses/add?origin=map-view`">
+                :to="{
+                  name: 'address-new-terr',
+                  params: { territoryId, mode: 'add' },
+                  query: { origin: $route.name },
+                }"
+              >
                 <font-awesome-icon icon="plus"></font-awesome-icon>
                 <span v-if="isDesktop" class="ml-2">Address</span>
               </b-button>

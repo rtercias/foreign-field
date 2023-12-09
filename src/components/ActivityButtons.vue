@@ -4,7 +4,8 @@
       <b-list-group-item
         v-for="(button, index) in rightButtonList(address)"
         :key="index"
-        class="activity-button justify-content-center"
+        class="activity-button justify-content-center px-0"
+        :class="{ [`bg-${button.color}`]: get(address, 'lastActivity.value') === button.value }"
       >
         <ActivityButton
           :value="button.value"
@@ -53,11 +54,14 @@ export default {
     },
     async updateResponse(entity, _value) {
       let value = _value;
-      if (entity.selectedResponse === 'START' && value === 'START') {
+      if (this.selectedResponse === 'START' && value === 'START') {
         this.$set(entity, 'isBusy', false);
         return;
       }
       if (!this.actionButtonList.some(b => b.value === value)) {
+        value = 'START';
+      }
+      if (value === this.selectedResponse) {
         value = 'START';
       }
 
@@ -92,6 +96,9 @@ export default {
       actionButtonList: 'address/actionButtonList',
       territory: 'territory/territory',
     }),
+    selectedResponse() {
+      return get(this.address, 'lastActivity.value') || 'START';
+    },
   },
 };
 </script>

@@ -43,7 +43,7 @@ export default {
     swipeThreshold: 10,
   }),
   mounted() {
-    document.scrollTop = 0;
+    // document.scrollTop = 0;
   },
   computed: {
     ...mapGetters({
