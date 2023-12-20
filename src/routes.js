@@ -212,17 +212,6 @@ const routes = [
       label: 'Address Change Log',
     },
   },
-  // {
-  //   name: 'address-links',
-  //   path: '/territories/:territoryId/addresses/:addressId/detail',
-  //   component: AddressLinks,
-  //   props: true,
-  //   meta: {
-  //     permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
-  //     back: 'address-list',
-  //     label: 'Address Info',
-  //   },
-  // },
   {
     name: 'activity-history',
     path: '/territories/:territoryId/addresses/:addressId/history',
