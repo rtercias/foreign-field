@@ -1,5 +1,5 @@
 <template>
-  <div class="territory">
+  <div class="territory h-100">
     <Loading v-if="territoryIsLoading" />
     <div v-else>
       <header class="page-header sticky-top w-100 pt-2 px-2 pb-0 bg-white border-bottom" :sticky="true">
@@ -31,17 +31,26 @@
             <b-button-group size="sm" class="badge px-0">
               <b-button
                 variant="outline-info"
+                :to="{ name: 'address-detail', params: { territoryId, addressId: selectedAddress.id } }"
+                :pressed="viewMode === 'address-detail'">
+                Address
+              </b-button>
+              <b-button
+                variant="outline-info"
                 :to="{ name: 'address-list', params: { territoryId } }"
                 :pressed="viewMode === 'address-list'">
-                Address
+                List
               </b-button>
               <b-button
                 variant="outline-info"
                 :to="{ name: 'phone-list', params: { territoryId } }"
                 :pressed="viewMode === 'phone-list'">
-                Phone
+                Phones
               </b-button>
-              <b-button variant="outline-info" :to="`/territories/${territoryId}/map`" :pressed="viewMode==='map-view'">
+              <b-button
+                variant="outline-info"
+                :to="{ name: 'map-view', params: { territoryId } }"
+                :pressed="viewMode==='map-view'">
                 Map
               </b-button>
             </b-button-group>
@@ -72,13 +81,18 @@
               </b-button>
               <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
                 <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
-                <font-awesome-icon v-else icon="check" />
+                <font-awesome-icon v-else icon="shopping-cart" />
                 <span class="ml-2" :class="{ 'd-none': canManage && !isDesktop }">Check In</span>
               </b-button>
               <b-button
                 v-if="canWrite"
                 variant="success"
-                :to="`/territories/${territoryId}/addresses/add?origin=map-view`">
+                :to="{
+                  name: 'address-new-terr',
+                  params: { territoryId, mode: 'add' },
+                  query: { origin: $route.name },
+                }"
+              >
                 <font-awesome-icon icon="plus"></font-awesome-icon>
                 <span v-if="isDesktop" class="ml-2">Address</span>
               </b-button>
@@ -165,6 +179,7 @@ export default {
     ...mapGetters({
       group: 'group/group',
       territory: 'territory/territory',
+      address: 'address/address',
       authIsLoading: 'auth/loading',
       user: 'auth/user',
       canViewReports: 'auth/canViewReports',
@@ -260,6 +275,10 @@ export default {
       const $locateContainer = $map.getElementsByClassName('leaflet-control-locate')[0];
       const $locateBtn = $locateContainer.children[0];
       return $locateBtn;
+    },
+    selectedAddress() {
+      const firstAddress = get(this.territory, 'addresses[0]') || {};
+      return this.address || firstAddress;
     },
   },
   methods: {

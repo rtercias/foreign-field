@@ -2,8 +2,10 @@
   <div class="masthead lead sticky-top">
     <vue-pull-refresh class="bg-primary" :on-refresh="onPageRefresh" :config="refreshOptions">
       <b-navbar
-        class="py-0"
-        :class="{ 'alert-secondary border-bottom border-secondary': isDesktop, 'border-warning gold-bottom': !isDesktop }"
+        class="py-0 sticky-top"
+        :class="{
+          'alert-secondary border-bottom border-secondary': isDesktop,
+          'border-warning gold-bottom': !isDesktop }"
         :type="isDesktop ? 'light' : 'dark'"
         :variant="isDesktop ? 'none' : 'primary'"
         toggleable
@@ -200,6 +202,7 @@ export default {
 <style lang="scss">
 @import "../assets/foreign-field-theme.scss";
 .masthead {
+  z-index: 2000;
   .navbar {
     min-height: $header-height;
   }

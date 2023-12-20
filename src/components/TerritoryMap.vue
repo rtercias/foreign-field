@@ -43,7 +43,7 @@
           <div
             class="sort-order-icon font-weight-bolder"
             :class="{
-              'text-white bg-primary border-primary': ['HOME', 'LW'].includes(get(x, 'lastActivity.value')),
+              'text-white bg-success border-primary': ['HOME', 'LW'].includes(get(x, 'lastActivity.value')),
               'bg-warning': get(x, 'lastActivity.value') === 'NH',
               'bg-white': get(x, 'lastActivity.value', '') === '',
               'bg-light text-info border-info': disabled,
@@ -199,6 +199,9 @@ export default {
   .map {
     width: 100%;
   }
+}
+.leaflet-popup {
+  margin-bottom: unset;
 }
 .leaflet-popup h2 {
   font-size: 18px;

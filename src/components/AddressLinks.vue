@@ -1,60 +1,68 @@
 <template>
   <div class="address-links">
-    <Loading v-if="isLoading"></Loading>
-    <div v-else>
-      <div class="address-header justify-content-around align-items-center py-3">
-        <div class="lead font-weight-bold w-100 pl-5">
-          <div>{{get(address, 'addr1')}} {{get(address, 'addr2')}}</div>
-          <div>{{get(address, 'city')}} {{get(address, 'state_province')}} {{get(address, 'postal_code')}}</div>
-        </div>
-        <div class="pr-4">
-          <b-link
-            v-if="canWrite"
-            :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/edit${queryParamOrigin}`">
-            <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
-          </b-link>
-        </div>
-      </div>
-      <div class="lead border-top py-2">Link to...</div>
-      <b-list-group>
-        <b-list-group-item class="lead p-4 font-weight-bold w-auto" :href="mapsUrl" variant="primary" target="_blank">
-          <font-awesome-icon class="button" icon="directions"></font-awesome-icon>&nbsp;
-          Google Maps
-        </b-list-group-item>
-        <b-list-group-item
-          class="lead p-4 font-weight-bold w-auto"
-          variant="warning"
-          :href="lookupFastPeopleSearch"
-          target="_blank">
-          <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
-          Fast People Search
-        </b-list-group-item>
-        <b-list-group-item
-          class="lead p-4 font-weight-bold w-auto"
-          :href="lookup411"
-          variant="success"
-          target="_blank">
-          <font-awesome-icon class="button" icon="phone-alt"></font-awesome-icon>&nbsp;
-          411.com
-        </b-list-group-item>
-        <b-list-group-item class="lead p-4 font-weight-bold w-auto" variant="dark"
-          :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/history`">
-          <font-awesome-icon icon="history"></font-awesome-icon>&nbsp;
-          Activity History
-        </b-list-group-item>
-        <b-list-group-item v-if="canWrite" class="lead p-4 font-weight-bold w-auto" variant="danger"
-          :to="`/territories/${territoryId}/addresses/${get(address, 'id')}/logs?fullscreen=true`">
-          <font-awesome-icon icon="archive"></font-awesome-icon>&nbsp;
-          Address Change Log
-        </b-list-group-item>
-        <b-list-group-item
-          class="cancel lead p-4 font-weight-bold w-100"
-          @click="goBack"
-          variant="light">
-          Cancel
-        </b-list-group-item>
-      </b-list-group>
-    </div>
+    <b-list-group class="d-flex flex-row">
+      <b-list-group-item
+        class="w-25 p-2"
+        :href="mapsUrl"
+        variant="primary"
+        target="_blank"
+      >
+        <font-awesome-icon class="button" icon="car"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Google Maps</div>
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25 p-2"
+        variant="warning"
+        :href="lookupFastPeopleSearch"
+        target="_blank"
+      >
+        <font-awesome-layers
+          class="fa-fw fa-stack mx-2">
+          <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
+          <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
+          <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
+        </font-awesome-layers>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">People Search</div>
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25 p-2"
+        v-if="canWrite"
+        variant="success"
+        :to="{
+          name: 'address-edit',
+          params: { territoryId, addressId, mode: 'edit' },
+          query: { origin: $route.name }
+        }"
+      >
+        <font-awesome-icon class="button" icon="edit"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Edit Address</div>
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25 p-2"
+        variant="dark"
+        :to="{
+          name: 'activity-history',
+          params: { territoryId, addressId, checkoutId },
+          query: { origin: $route.name }
+        }"
+      >
+        <font-awesome-icon class="button" icon="history"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Activity History</div>
+      </b-list-group-item>
+      <b-list-group-item
+        class="w-25 p-2"
+        v-if="canWrite"
+        variant="danger"
+        :to="{
+          name: 'change-logs',
+          params: { territoryId, addressId },
+          query: { origin: $route.name }
+        }"
+      >
+        <font-awesome-icon class="button" icon="archive"></font-awesome-icon>
+        <div class="pt-2" v-if="$route.name === 'address-detail'">Change Log</div>
+      </b-list-group-item>
+    </b-list-group>
   </div>
 </template>
 
@@ -65,7 +73,7 @@ import Loading from './Loading';
 
 export default {
   name: 'AddressLinks',
-  props: ['addressId', 'territoryId'],
+  props: ['addressId', 'territoryId', 'checkoutId'],
   components: {
     Loading,
   },
@@ -76,10 +84,6 @@ export default {
   },
   async mounted() {
     this.isLoading = true;
-    if (this.token) {
-      await this.fetchAddress({ addressId: this.addressId });
-    }
-    this.isLoading = false;
   },
   computed: {
     ...mapGetters({
@@ -118,10 +122,6 @@ export default {
 
       return `/territories/${this.territoryId}/${origin}`;
     },
-    queryParamOrigin() {
-      const { origin = '' } = this.$route.query;
-      return origin ? `?origin=${origin}` : '';
-    },
     congregationIdStatus() {
       return get(this.user, 'congregation.id') && get(this.address, 'congregationId');
     },
@@ -148,11 +148,8 @@ export default {
 };
 </script>
 
-<style>
-  .address-header {
-    display: flex;
-  }
-  .cancel {
-    cursor: pointer;
+<style scoped lang="scss">
+  .address-links {
+    font-size: 12px;
   }
 </style>

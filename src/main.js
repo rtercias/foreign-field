@@ -93,6 +93,8 @@ import {
   faBackward,
   faCompass,
   faFlagCheckered,
+  faShoppingCart,
+  faCar,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 import VueClipboard from 'vue-clipboard2';
@@ -161,6 +163,8 @@ library.add(
   faBackward,
   faCompass,
   faFlagCheckered,
+  faShoppingCart,
+  faCar,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

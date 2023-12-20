@@ -27,21 +27,22 @@
               @toggle-right-panel="toggleRightPanel"
               @toggle-left-panel="toggleLeftPanel">
             </AddressCard>
-            <PhoneCard
-              v-else-if="!item.editMode && item.type === 'Phone'"
-              class="h-100 border"
-              :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-              :index="index"
-              :phoneRecord="item"
-              :address="address"
-              :revealed="revealed"
-              :incomingResponse="item.lastActivity"
-              :disabled="disabled"
-              @update-response="updateResponse"
-              @toggle-right-panel="toggleRightPanel"
-              @toggle-left-panel="toggleLeftPanel"
-              @edit-phone="editPhone">
-            </PhoneCard>
+            <div v-else-if="!item.editMode && item.type === 'Phone'">
+              <PhoneCard
+                class="border"
+                :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+                :index="index"
+                :phoneRecord="item"
+                :address="address"
+                :revealed="revealed"
+                :incomingResponse="item.lastActivity"
+                :disabled="disabled"
+                @update-response="updateResponse"
+                @toggle-right-panel="toggleRightPanel"
+                @toggle-left-panel="toggleLeftPanel"
+                @edit-phone="editPhone">
+              </PhoneCard>
+            </div>
             <b-list-group-item v-else class="d-flex py-4 border-0">
               <the-mask
                 class="form-control mr-2"
@@ -89,7 +90,7 @@
               <span class="people-search-text description text-white pt-1">People Search</span>
             </b-button>
             <b-button
-              v-show="!item.isBusy"
+              v-show="!item.isBusy && item.type === 'Phone'"
               variant="link"
               class="interaction bg-success text-decoration-none"
               :class="{ 'py-3': item.type === 'Regular', 'mb-2': isDesktop && mode === 'phone-list' }"

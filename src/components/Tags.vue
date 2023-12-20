@@ -1,16 +1,29 @@
 <template>
-  <div class="tags w-100" :class="{ 'd-none': !selectedTags.length && !availableTags.length }">
+  <div
+    class="tags w-100"
+    :class="{
+      'd-none': !selectedTags.length && !availableTags.length,
+      'px-0': $route.name === 'map-view',
+      'px-2': $route.name !== 'map-view',
+    }"
+  >
     <div class="w-100 text-left">
       <b-button-group size="sm">
-        <div class="combined-tags d-flex flex-wrap text-left">
+        <div
+          class="combined-tags d-flex flex-wrap text-left overflow-auto"
+          :class="{
+            'vh-37': !isDesktop && !isCheckedOut && $route.name === 'address-detail',
+            'vh-22': !isDesktop && isCheckedOut && $route.name === 'address-detail',
+            'vh-16': $route.name === 'map-view',
+          }"
+        >
           <b-badge
             v-for="(tag, index) in displayedTags"
             pill
-            class="tag-button d-flex mr-1 mb-1 text-white small"
+            class="tag-button d-flex mr-1 mb-1 small border-dark"
             :class="{
               active: false,
               [`border-${color(tag.caption)}`]: true,
-              [`text-${color(tag.caption)}`]: !tag.state,
               'border-danger': tag.state && highlight(tag.caption),
             }"
             size='sm'
@@ -19,23 +32,24 @@
             :variant="tag.state
               ? (highlight(tag.caption) ? 'danger' : color(tag.caption))
               : `outline-${color(tag.caption)}`">
-            <span class="tag-text d-flex align-items-center small font-weight-bold">
+            <span class="tag-text d-flex align-items-center small">
               <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
               {{ formatLanguage(toLower(tag.caption), language) }}
             </span>
           </b-badge>
           <b-badge
             v-if="availableTags.length && !allTagsSelected"
-            @click="collapseTags"
+            @click="openAddDialog"
             pill
             class="tag-button add-tag border-info d-flex mr-1 mb-1"
             :class="`border-${variant}`"
             :variant="variant"
-            size='sm'>
+            size='sm'
+          >
             <span
               class="tag-text d-flex align-items-center small font-weight-bold"
               :class="{ 'text-white': variant === 'info' }">
-              <span v-if="collapsed">add tag</span>
+              <span v-if="collapsed">add note</span>
               <span v-else>done</span>
             </span>
           </b-badge>
@@ -59,8 +73,6 @@ import { format as formatPhone } from '../utils/phone';
 import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
 import {
   formatLanguage,
-  ADDRESS_TAGS,
-  PHONE_TAGS,
   PHONE_ADDRESS_TAGS,
   NF_TAG,
   DNC_TAG,
@@ -200,10 +212,38 @@ export default {
     },
     color(tag) {
       const button = ACTION_BUTTON_LIST.find(b => b.value === tag);
-      return button ? button.color : 'primary';
+      return button ? button.color : 'light';
     },
     collapseTags() {
       this.collapsed = !this.collapsed;
+    },
+    async openAddDialog() {
+      /* TODO:
+        - add save functionality
+        - list other tags
+        - add click to edit?
+      */
+      const h = this.$createElement;
+      const messages = {
+        note: h('input', {
+          class: 'new-note',
+          domProps: {
+            type: 'text',
+            maxLength: '30',
+          },
+        }),
+      };
+
+      const response = await this.$bvModal.msgBoxConfirm(messages.note, {
+        title: `Add new note for ${this.record.addr1} ${this.record.addr2}`,
+        centered: true,
+        okTitle: 'Save',
+        cancelTitle: 'Cancel',
+      });
+
+      if (response) {
+        await this.addTag({ caption: get(messages, 'note.elm.value', '') });
+      }
     },
   },
   computed: {
@@ -211,32 +251,35 @@ export default {
       user: 'auth/user',
       updatedAddress: 'address/address',
       congregation: 'congregation/congregation',
+      builtInAddressTags: 'congregation/builtInAddressTags',
+      builtInPhoneTags: 'congregation/builtInPhoneTags',
+      customAddressTags: 'congregation/customAddressTags',
+      customPhoneTags: 'congregation/customPhoneTags',
+      isCheckedOut: 'territory/isCheckedOut',
+      isDesktop: 'auth/isDesktop',
     }),
     language() {
       return toLower(get(this.congregation, 'language') || 'Tagalog');
     },
     availableTags() {
-      const tags = this.record.type === 'Phone' ? PHONE_TAGS : ADDRESS_TAGS;
+      const tags = this.record.type === 'Phone' ? this.builtInPhoneTags : this.builtInAddressTags;
       return union(tags, this.customTags).filter(t => t);
     },
     customTags() {
-      const options = get(this.congregation, 'options', {});
-      const record = this.record.type === 'Regular' ? options.address : options.phone;
-      const tags = get(record, 'customTags', '');
-      return tags.split(',').map(t => t.trim()) || [];
+      return this.record.type === 'Regular' ? this.customAddressTags : this.customPhoneTags;
     },
     combinedTags() {
       const newArr = union(this.selectedTags, this.availableTags)
-        .map(t => toLower(t))
+        .map(t => t.trim())
         .filter(t => t && !this.hide(t))
         .sort();
 
-      const finalArr = map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
-      return finalArr;
+      return map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
     },
     selectedTags() {
       const notes = get(this.record, 'notes') || '';
-      return (toLower(notes).split(',').filter(n => n.length)) || [];
+      return (notes.split(',')
+        .filter(n => n.length)) || [];
     },
     allTagsSelected() {
       return difference(this.availableTags, this.selectedTags).length === 0;
@@ -251,7 +294,7 @@ export default {
       }
 
       if (result.length && typeof result[0] === 'string') {
-        return result.map(t => ({ caption: t, state: true }));
+        return result.map(t => ({ caption: t.trim(), state: true }));
       }
 
       return result;
@@ -270,7 +313,18 @@ export default {
 };
 </script>
 
-<style>
+<style scoped lang="scss">
+  $addressLinksHeight: 20px;
+
+  .vh-16 {
+    height: calc(16vh + $addressLinksHeight);
+  }
+  .vh-22 {
+    height: calc(22vh + $addressLinksHeight);
+  }
+  .vh-37 {
+    height: calc(37vh + $addressLinksHeight);
+  }
   .tags {
     min-height: 18px;
     bottom: 10px;
@@ -301,16 +355,21 @@ export default {
   .tag-button {
     border: solid 1px;
     cursor: pointer;
-    font-size: 14px;
+    padding: 10px;
+    height: fit-content;
   }
   .tag-icon {
-    font-size: 10px;
+    font-size: 0.75em;
   }
   .tag-text {
-    font-size: 14px;
+    font-size: 1.25em;
   }
   .tag-button-preview {
     cursor: pointer;
+  }
+
+  .new-note {
+    width: 100%;
   }
 
   @media print {
