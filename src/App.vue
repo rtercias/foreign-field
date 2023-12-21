@@ -16,22 +16,6 @@
       <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
         class="desktop-nav alert-secondary d-flex justify-content-between border-medium
           border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
-        <div class="d-flex">
-          <toggle-button
-            class="mr-2"
-            :value="collaborate"
-            @change="toggleCollaborate"
-            :sync="true"
-            :labels="{ checked: 'On', unchecked: 'Off' }"
-          />
-          Collaborate Mode
-          <font-awesome-icon
-            class="text-primary ml-2"
-            icon="info-circle"
-            size="sm"
-            @click="showCollaborateHelp">
-          </font-awesome-icon>
-        </div>
         <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
           <font-awesome-icon icon="link"></font-awesome-icon>
         </b-link>
@@ -60,7 +44,6 @@ export default {
   data() {
     return {
       hideMenu: false,
-      collaborate: false,
     };
   },
   created() {
@@ -72,7 +55,6 @@ export default {
     window.removeEventListener('scroll', throttle(this.handleScroll, 0));
   },
   async mounted() {
-    this.collaborate = sessionStorage.getItem('collaborate') === 'true';
     await this.refresh();
 
     subscription.bind('checkout-territory', (args) => {
@@ -182,28 +164,6 @@ export default {
       this.logout();
       this.$router.push({ name: 'unauthorized' });
       throw new UnauthorizedUserError('Unauthorized');
-    },
-    toggleCollaborate() {
-      this.collaborate = !this.collaborate;
-      sessionStorage.setItem('collaborate', this.collaborate);
-      if (this.collaborate) {
-        this.$router.go();
-      } else {
-        subscription.disconnect();
-      }
-    },
-    showCollaborateHelp() {
-      this.$bvToast.hide();
-      this.$bvToast.toast(
-        `Collaborate Mode allows you to see territory updates in real time.
-        You only need this when collaborating with another user on the same territory.`, {
-          title: 'Collaborate Mode',
-          solid: true,
-          noCloseButton: false,
-          noAutoHide: true,
-          toaster: 'b-toaster-bottom-center',
-        },
-      );
     },
   },
   watch: {
