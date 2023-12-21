@@ -8,17 +8,10 @@
       'px-2 min-height': $route.name === 'address-list',
       'm-3 pb-0': $route.name === 'address-detail',
     }">
-    <font-awesome-layers
-      v-show="$route.name === 'address-list' || $route.name === 'phone-list'"
-      class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleLeftPanel"
-    >
-      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
-    </font-awesome-layers>
     <div
       class="w-100 row"
     >
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-dark"
         :class="{
           'min-height': $route.name === 'address-list',
           'col-12 p-0': mode === 'map',
@@ -37,65 +30,17 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address flex-column pb-1">
-          <div>
-            <div class="d-flex align-items-center">
-              <div class="sort-order-icon font-weight-bolder bg-white mr-2">
-                {{record.sort}}
-              </div>
-              <h4 class="d-inline mb-0">
-                <b-link :to="`/territories/${territory.id}/addresses/${record.id}${mapQueryParam}`">
-                  {{record.addr1}}
-                </b-link>&nbsp;
-              </h4>
+        <div v-else class="d-flex pb-1">
+          <AddressIcon :index="index" :record="record" :mode-="mode" :isLogging="isLogging" />
+          <div class="pl-2">
+            <div class="address d-flex align-items-center">
+              <div class="d-inline mb-0">{{record.addr1}}&nbsp;</div>
+              {{record.addr2}}
             </div>
-            {{record.addr2}}
-            <div class="mb-1">
+            <div class="text-left city-state-zip mb-1">
               {{record.city}} {{record.state_province}} {{record.postal_code}}
             </div>
           </div>
-        </div>
-        <div
-          class="static-buttons"
-          :class="{
-            'align-items-start': $route.name === 'address-list',
-            'align-self-center': $route.name === 'phone-list',
-            'justify-content-end align-items-start': $route.name === 'address-detail',
-            'ml-n1': mode !== 'map',
-            'tiny-busy position-absolute mt-n3': mode === 'map',
-          }"
-        >
-          <font-awesome-icon
-            class="text-info text-left fa-2x"
-            icon="circle-notch"
-            spin
-            v-if="isLogging || record.isBusy"
-          />
-          <span
-            v-else-if="mode !== 'map'"
-            class="d-flex flex-column">
-            <ActivityButton
-              v-if="!allowedToCall"
-              class="fa-2x ml-n3 selected-tag"
-              :value="notAllowedTag"
-              :selected="true"
-              :display-only="true"
-              :bg="$route.name === 'phone-list' ? 'light' : 'white'"
-              :actionButtonList="actionButtonList">
-            </ActivityButton>
-            <ActivityButton
-              class="selected-response fa-2x"
-              :class="{
-                faded: !isMySelectedResponse || isIncomingResponse,
-                hidden: selectedResponse === 'START' || record.isBusy,
-              }"
-              :value="selectedResponse"
-              :next="'START'"
-              :selected="true"
-              :actionButtonList="actionButtonList"
-              @button-click="confirmClearStatus">
-            </ActivityButton>
-          </span>
         </div>
         <Tags
           :record="record"
@@ -141,13 +86,6 @@
         </div>
       </div>
     </div>
-    <font-awesome-layers
-      v-show="!isTerritoryBusy && ($route.name === 'address-list' || $route.name === 'phone-list')"
-      class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleRightPanel"
-    >
-      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
-    </font-awesome-layers>
   </div>
 </template>
 
@@ -155,14 +93,13 @@
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
-import intersection from 'lodash/intersection';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
+import AddressIcon from './AddressIcon';
 import Tags from './Tags';
 import Notes from './Notes';
 import ActivityButtons from './ActivityButtons';
 import { format as formatPhone } from '../utils/phone';
-import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
 
 export default {
   name: 'AddressCard',
@@ -173,11 +110,11 @@ export default {
     Tags,
     Notes,
     ActivityButtons,
+    AddressIcon,
   },
   data() {
     return {
       record: {},
-      isIncomingResponse: false,
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -206,7 +143,6 @@ export default {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
-      fetchPublisher: 'publisher/fetchPublisher',
     }),
     get,
     toggleRightPanel() {
@@ -215,54 +151,8 @@ export default {
     toggleLeftPanel() {
       this.$emit('toggle-left-panel', this.index, this.revealed);
     },
-    async confirmClearStatus() {
-      try {
-        const h = this.$createElement;
-        let publisherName = '';
-        if (this.lastActivity.publisher_id === this.user.id) {
-          publisherName = 'you';
-        } else {
-          await this.getLastActivityPublisher();
-          if (this.publisher) {
-            publisherName = this.publisher.firstname && this.publisher.lastname
-              && `${this.publisher.firstname} ${this.publisher.lastname}`;
-          } else {
-            publisherName = 'a guest publisher';
-          }
-        }
-
-        const message = h('p', {
-          domProps: {
-            innerHTML:
-            `<div class="pb-3">
-              ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}`,
-          },
-        });
-        const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: `${this.record.addr1} ${this.record.addr2}`,
-          centered: true,
-          okTitle: 'Remove',
-          cancelTitle: 'Close',
-        });
-
-        if (value) {
-          this.isLogging = true;
-          this.$emit('update-response', this.record, 'START', () => {
-            this.isLogging = false;
-          });
-        }
-      } catch (err) {
-        // do nothing
-      }
-    },
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
-    },
-
-    async getLastActivityPublisher() {
-      const id = Number.parseInt(this.lastActivity.publisher_id, 10);
-      await this.fetchPublisher({ id });
     },
   },
   computed: {
@@ -272,7 +162,6 @@ export default {
       updatedAddress: 'address/address',
       actionButtonList: 'address/actionButtonList',
       user: 'auth/user',
-      publisher: 'publisher/publisher',
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
       isCheckedOut: 'territory/isCheckedOut',
@@ -315,20 +204,6 @@ export default {
     },
     selectedResponse() {
       return this.lastActivity.value;
-    },
-    isMySelectedResponse() {
-      const publisherId = get(this.lastActivity, 'publisher_id') || '';
-      const userId = get(this.user, 'id') || '';
-      return publisherId.toString() === userId.toString();
-    },
-    allowedToCall() {
-      const tags = this.record.notes ? this.record.notes.split(',') : [];
-      return intersection(NOT_ALLOWED, tags).length === 0;
-    },
-    notAllowedTag() {
-      const tags = this.record.notes ? this.record.notes.split(',') : [];
-      const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
-      return notAllowedTags[0];
     },
     mapQueryParam() {
       return this.mode === 'map' ? '?origin=map-view' : '';
@@ -376,7 +251,9 @@ export default {
 .address {
   display: flex;
   text-align: left;
+  font-size: 18px;
 }
+
 .phone-address {
   white-space: nowrap;
   text-overflow: ellipsis;

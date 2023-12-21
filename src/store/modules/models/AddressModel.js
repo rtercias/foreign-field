@@ -99,10 +99,10 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'do not mail',
     text: '',
-    icon: 'envelope',
+    icon: 'ban',
     color: 'danger',
     description: 'Do Not Mail',
-    slashed: true,
+    slashed: false,
   },
   {
     type: 'fa-icon',

@@ -19,15 +19,7 @@
       <Masthead :hide-menu="hideMenu" @hide-complete="resetHideMenu"></Masthead>
       <router-view :key="key"></router-view>
     </div>
-    <footer class="app-footer w-100 d-flex justify-content-end">
-      <b-navbar :class="isDesktop ? 'w-80' : 'w-100'"
-        class="desktop-nav alert-secondary d-flex justify-content-between border-medium
-          border-top border-bottom-0 border-left-0 border-right-0 px-4 pt-1 pb-2">
-        <b-link class="button" v-if="isAuthenticated" v-clipboard:copy="location.href" v-clipboard:success="urlCopied">
-          <font-awesome-icon icon="link"></font-awesome-icon>
-        </b-link>
-      </b-navbar>
-    </footer>
+    <footer class="app-footer w-100 d-flex justify-content-end"></footer>
   </div>
 </template>
 
@@ -152,14 +144,6 @@ export default {
           }
         }
       }
-    },
-    urlCopied() {
-      this.$bvToast.toast(`Copied link: ${document.location.href}`, {
-        variant: 'success',
-        toaster: 'b-toaster-bottom-right mr-5',
-        noCloseButton: true,
-        autoHideDelay: 1000,
-      });
     },
     handleScroll() {
       this.hideMenu = true;
