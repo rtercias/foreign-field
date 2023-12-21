@@ -42,6 +42,30 @@
             </div>
           </div>
         </div>
+        <b-dropdown variant="light" right>
+          <template #button-content>
+            <font-awesome-icon icon="ellipsis-h" />
+          </template>
+          <b-dropdown-item :href="mapsUrl" target="_blank">
+            Get Driving Direction
+          </b-dropdown-item>
+          <b-dropdown-item :href="lookupFastPeopleSearch" target="_blank">
+            Lookup Fast People Search
+          </b-dropdown-item>
+          <b-dropdown-item
+            v-if="canWrite"
+            :to="{
+              name: 'address-edit',
+              params: { territoryId, addressId: address.id, mode: 'edit' },
+              query: { origin: $route.name }
+            }"
+          >
+            Edit Address
+          </b-dropdown-item>
+          <b-dropdown-item v-if="canWrite" variant="danger" @click="removeAddress">
+            Delete
+          </b-dropdown-item>
+        </b-dropdown>
         <Tags
           :record="record"
           :variant="$route.name === 'phone-list' ? 'info' : 'primary'"
@@ -72,17 +96,6 @@
             <ActivityButtons :address="record" :selectedResponse="selectedResponse" />
             <hr class="my-2" />
           </div>
-          <div class="p-0">
-            <AddressLinks
-              :class="{
-                'slide-up': showAddressLinksToggle && showAddressLinks,
-                'slide-down': showAddressLinksToggle && !showAddressLinks,
-              }"
-              :territoryId="territory.id"
-              :addressId="record.id"
-              :checkoutId="get(this.territory, 'status.checkout_id')"
-            />
-          </div>
         </div>
       </div>
     </div>
@@ -100,6 +113,7 @@ import Tags from './Tags';
 import Notes from './Notes';
 import ActivityButtons from './ActivityButtons';
 import { format as formatPhone } from '../utils/phone';
+import { AddressStatus } from '../store';
 
 export default {
   name: 'AddressCard',
@@ -143,6 +157,7 @@ export default {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
+      updateAddress: 'address/updateAddress',
     }),
     get,
     toggleRightPanel() {
@@ -153,6 +168,27 @@ export default {
     },
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
+    },
+    async removeAddress() {
+      this.$set(this.record, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        'Remove address from the list?', {
+          title: `${this.record.addr1} ${this.record.addr2}`,
+          centered: true,
+        }
+      );
+
+      if (response) {
+        this.isAddressBusy = true;
+        await this.updateAddress({ ...this.record, status: AddressStatus.Inactive });
+        this.isAddressBusy = false;
+      }
+
+      // remove address from list if it's no longer active
+      if (this.territory && this.territory.id === this.territoryId) {
+        const index = this.territory.addresses.findIndex(a => a.id === this.record.id);
+        if (index >= 0) this.territory.addresses.splice(index, 1);
+      }
     },
   },
   computed: {
@@ -165,6 +201,7 @@ export default {
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
       isCheckedOut: 'territory/isCheckedOut',
+      canWrite: 'auth/canWrite',
     }),
     showAddressLinksToggle() {
       return !this.isDesktop && (
@@ -210,6 +247,18 @@ export default {
     },
     storageId() {
       return `foreignfield-${this.address.id}`;
+    },
+    mapsUrl() {
+      const addr1 = get(this.record, 'addr1') || '';
+      const city = get(this.record, 'city') || '';
+      const state = get(this.record, 'state_province') || '';
+      return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
+    },
+    lookupFastPeopleSearch() {
+      const addr1 = `${(get(this.record, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.record, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.record, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
   },
 };
