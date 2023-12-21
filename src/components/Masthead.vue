@@ -5,7 +5,7 @@
         class="py-0 sticky-top"
         :class="{
           'alert-secondary border-bottom border-secondary': isDesktop,
-          'border-warning gold-bottom': !isDesktop }"
+          'border-warning': !isDesktop }"
         :type="isDesktop ? 'light' : 'dark'"
         :variant="isDesktop ? 'none' : 'primary'"
         toggleable

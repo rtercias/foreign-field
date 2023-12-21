@@ -1,14 +1,17 @@
-$primary: #5184B7;
+$primary: #16518D;
 $secondary: #D4E0ED;
 $success: #76B772;
 $info: #7EA2C9;
 $warning: #FCBB5A;
-$danger: #742F2F;
-$light: #D4E0ED;
+$danger: #D00000;
+$light: #EFEFEF;
 $dark: #18293A;
-$header-height: 58px;
+$header-height: 52px;
 
-html, body { height: 100% }
+html, body {
+  color: #212529;
+  height: 100%;
+}
 .list-group-item + .list-group-item {
   border-top-width: 1px;
 }
@@ -35,9 +38,14 @@ html, body { height: 100% }
     top: $header-height;
   }
 }
-.dropdown {
-  .dropdown-menu {
-    z-index: 10000;
+.dropdown-menu {
+  z-index: 10000;
+}
+.dropdown-toggle {
+  padding: 0 7px;
+  height: 24px;
+  &::after {
+    display: none;
   }
 }
 .header-height {
