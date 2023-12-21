@@ -39,6 +39,30 @@
             </div>
           </div>
         </div>
+        <b-dropdown variant="light" right>
+          <template #button-content>
+            <font-awesome-icon icon="ellipsis-h" />
+          </template>
+          <b-dropdown-item :href="mapsUrl" target="_blank">
+            Get Driving Direction
+          </b-dropdown-item>
+          <b-dropdown-item :href="lookupFastPeopleSearch" target="_blank">
+            Lookup Fast People Search
+          </b-dropdown-item>
+          <b-dropdown-item
+            v-if="canWrite"
+            :to="{
+              name: 'address-edit',
+              params: { territoryId, addressId: address.id, mode: 'edit' },
+              query: { origin: $route.name }
+            }"
+          >
+            Edit Address
+          </b-dropdown-item>
+          <b-dropdown-item v-if="canWrite" variant="danger" @click="removeAddress">
+            Delete
+          </b-dropdown-item>
+        </b-dropdown>
         <Tags
           :record="address"
           :variant="$route.name === 'phone-list' ? 'info' : ''"
@@ -46,46 +70,30 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-      </div>
-      <div
-        class="static-buttons"
-        :class="{
-          'align-self-center': $route.name === 'phone-list',
-          'col-3 ml-n1': mode !== 'map',
-          'tiny-busy position-absolute mt-n3': mode === 'map',
-        }"
-      >
-        <font-awesome-icon
-          class="text-info text-left fa-2x"
-          icon="circle-notch"
-          spin
-          v-if="isLogging || address.isBusy"
-        />
-        <span
-          v-else-if="mode !== 'map'"
-          class="d-flex flex-column w-100">
-          <ActivityButton
-            v-if="!allowedToCall"
-            class="fa-2x ml-n3 selected-tag"
-            :value="notAllowedTag"
-            :selected="true"
-            :display-only="true"
-            :bg="$route.name === 'phone-list' ? 'light' : 'white'"
-            :actionButtonList="actionButtonList">
-          </ActivityButton>
-          <ActivityButton
-            class="selected-response fa-2x"
-            :class="{
-              faded: !isMySelectedResponse || isIncomingResponse,
-              hidden: selectedResponse === 'START' || address.isBusy,
-            }"
-            :value="selectedResponse"
-            :next="'START'"
-            :selected="true"
-            :actionButtonList="actionButtonList"
-            @button-click="confirmClearStatus">
-          </ActivityButton>
-        </span>
+        <div
+          class="bg-white w-100"
+          :class="{
+            'w-80': isDesktop && $route.name === 'address-detail',
+            'footer fixed-bottom': $route.name === 'address-detail',
+            'pt-4': $route.name !== 'address-detail',
+            'd-none': $route.name === 'phone-list',
+          }"
+        >
+          <b-button
+            v-if="showAddressLinksToggle"
+            class="toggle-address-links w-100 mt-0 text-black-50
+              d-flex align-items-center justify-content-center"
+            @click="showAddressLinks = !showAddressLinks"
+          >
+            <font-awesome-icon v-if="!showAddressLinks" icon="chevron-up" />
+            <font-awesome-icon v-else icon="chevron-down" />
+          </b-button>
+          <div v-if="isCheckedOut && $route.name === 'address-detail'" class="col-12 p-0">
+            <hr class="mb-2 mt-0" />
+            <ActivityButtons :address="record" :selectedResponse="selectedResponse" />
+            <hr class="my-2" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -100,6 +108,7 @@ import ActivityButton from './ActivityButton';
 import AddressIcon from './AddressIcon';
 import Tags from './Tags';
 import { format as formatPhone } from '../utils/phone';
+import { AddressStatus } from '../store';
 
 export default {
   name: 'AddressCard',
@@ -128,6 +137,7 @@ export default {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
+      updateAddress: 'address/updateAddress',
     }),
     toggleRightPanel() {
       this.$emit('toggle-right-panel', this.index, this.revealed);
@@ -137,6 +147,27 @@ export default {
     },
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
+    },
+    async removeAddress() {
+      this.$set(this.record, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        'Remove address from the list?', {
+          title: `${this.record.addr1} ${this.record.addr2}`,
+          centered: true,
+        }
+      );
+
+      if (response) {
+        this.isAddressBusy = true;
+        await this.updateAddress({ ...this.record, status: AddressStatus.Inactive });
+        this.isAddressBusy = false;
+      }
+
+      // remove address from list if it's no longer active
+      if (this.territory && this.territory.id === this.territoryId) {
+        const index = this.territory.addresses.findIndex(a => a.id === this.record.id);
+        if (index >= 0) this.territory.addresses.splice(index, 1);
+      }
     },
   },
   computed: {
@@ -148,6 +179,8 @@ export default {
       user: 'auth/user',
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
+      isCheckedOut: 'territory/isCheckedOut',
+      canWrite: 'auth/canWrite',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
@@ -184,6 +217,21 @@ export default {
     },
     mapQueryParam() {
       return this.mode === 'map' ? '?origin=map-view' : '';
+    },
+    storageId() {
+      return `foreignfield-${this.address.id}`;
+    },
+    mapsUrl() {
+      const addr1 = get(this.record, 'addr1') || '';
+      const city = get(this.record, 'city') || '';
+      const state = get(this.record, 'state_province') || '';
+      return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
+    },
+    lookupFastPeopleSearch() {
+      const addr1 = `${(get(this.record, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.record, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.record, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
   },
 };
