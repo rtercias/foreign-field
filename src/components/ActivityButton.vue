@@ -20,9 +20,10 @@
     v-else-if="displayOnly || get('type') === 'fa-icon'" @click="click(get('next') || get('value'))"
     class="interaction"
     :class="{ [`bg-${get('color')}`]: !invert, 'display-only': displayOnly }">
-    <span class="w-100">
+    <span>
       <font-awesome-layers
-        class="fa-layers text-white fa-2x w-100"
+        v-if="get('icon')"
+        class="fa-layers text-white"
         :class="{ [`text-${get('color')}`]: invert }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
@@ -35,18 +36,16 @@
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
-          class="nh-text font-weight-bold w-100"
+          class="nh-text font-weight-bold"
           :class="{ [`text-${get('color')}`]: !invert, 'text-white': invert }">
         </font-awesome-layers-text>
       </font-awesome-layers>
-    </span>
-    <span
-      v-if="showDescription"
-      class="description"
-      :class="{ [`text-${get('color')}`]: invert, 'text-white': !invert }">
-      {{disabled ? get('disabledText') : get('description')}}
+      <span v-else>{{ get('text') }}</span>
     </span>
   </b-button>
+  <div v-else class="interaction">
+    <span>{{ get('text') }}</span>
+  </div>
 </template>
 
 <script>
@@ -130,7 +129,6 @@ export default {
   text-decoration: none;
 
   &.btn {
-    border-radius: 0;
     &.display-only {
       text-decoration: none;
       cursor: default !important;

@@ -7,15 +7,10 @@
       'p-2': $route.name === 'phone-list',
       'px-2 min-height': $route.name === 'address-list'
     }">
-    <font-awesome-layers
-      v-show="mode !== 'map'"
-      class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleLeftPanel"
+    <div
+      class="w-100 row"
     >
-      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
-    </font-awesome-layers>
-    <div class="w-100 row">
-      <div class="address-card col-9 row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-dark"
         :class="{
           'min-height': $route.name === 'address-list',
           'col-12': mode === 'map',
@@ -32,16 +27,15 @@
             </div>
           </b-link>
         </div>
-        <div v-else class="address flex-column pb-4">
-          <div>
-            <h5 class="mb-0">
-              <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
-                {{address.addr1}}
-              </b-link>&nbsp;
-            </h5>
-            {{address.addr2}}
-            <div class="mb-1">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
+        <div v-else class="d-flex pb-1">
+          <AddressIcon :index="index" :record="record" :mode-="mode" :isLogging="isLogging" />
+          <div class="pl-2">
+            <div class="address d-flex align-items-center">
+              <div class="d-inline mb-0">{{record.addr1}}&nbsp;</div>
+              {{record.addr2}}
+            </div>
+            <div class="text-left city-state-zip mb-1">
+              {{record.city}} {{record.state_province}} {{record.postal_code}}
             </div>
           </div>
         </div>
@@ -94,13 +88,6 @@
         </span>
       </div>
     </div>
-    <font-awesome-layers
-      v-show="!isTerritoryBusy && mode !== 'map'"
-      class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleRightPanel"
-    >
-      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
-    </font-awesome-layers>
   </div>
 </template>
 
@@ -108,12 +95,11 @@
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
-import intersection from 'lodash/intersection';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
+import AddressIcon from './AddressIcon';
 import Tags from './Tags';
 import { format as formatPhone } from '../utils/phone';
-import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
 
 export default {
   name: 'AddressCard',
@@ -122,11 +108,13 @@ export default {
     AddressLinks,
     ActivityButton,
     Tags,
+    Notes,
+    ActivityButtons,
+    AddressIcon,
   },
   data() {
     return {
-      storageId: `foreignfield-${this.address.id}`,
-      isIncomingResponse: false,
+      record: {},
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -140,7 +128,6 @@ export default {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
-      fetchPublisher: 'publisher/fetchPublisher',
     }),
     toggleRightPanel() {
       this.$emit('toggle-right-panel', this.index, this.revealed);
@@ -148,54 +135,8 @@ export default {
     toggleLeftPanel() {
       this.$emit('toggle-left-panel', this.index, this.revealed);
     },
-    async confirmClearStatus() {
-      try {
-        const h = this.$createElement;
-        let publisherName = '';
-        if (this.lastActivity.publisher_id === this.user.id) {
-          publisherName = 'you';
-        } else {
-          await this.getLastActivityPublisher();
-          if (this.publisher) {
-            publisherName = this.publisher.firstname && this.publisher.lastname
-              && `${this.publisher.firstname} ${this.publisher.lastname}`;
-          } else {
-            publisherName = 'a guest publisher';
-          }
-        }
-
-        const message = h('p', {
-          domProps: {
-            innerHTML:
-            `<div class="pb-3">
-              ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}`,
-          },
-        });
-        const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: `${this.address.addr1} ${this.address.addr2}`,
-          centered: true,
-          okTitle: 'Remove',
-          cancelTitle: 'Close',
-        });
-
-        if (value) {
-          this.isLogging = true;
-          this.$emit('update-response', this.address, 'START', () => {
-            this.isLogging = false;
-          });
-        }
-      } catch (err) {
-        // do nothing
-      }
-    },
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
-    },
-
-    async getLastActivityPublisher() {
-      const id = Number.parseInt(this.lastActivity.publisher_id, 10);
-      await this.fetchPublisher({ id });
     },
   },
   computed: {
@@ -205,7 +146,6 @@ export default {
       updatedAddress: 'address/address',
       actionButtonList: 'address/actionButtonList',
       user: 'auth/user',
-      publisher: 'publisher/publisher',
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
     }),
@@ -242,20 +182,6 @@ export default {
     selectedResponse() {
       return this.lastActivity.value;
     },
-    isMySelectedResponse() {
-      const publisherId = get(this.lastActivity, 'publisher_id') || '';
-      const userId = get(this.user, 'id') || '';
-      return publisherId.toString() === userId.toString();
-    },
-    allowedToCall() {
-      const tags = this.address.notes ? this.address.notes.split(',') : [];
-      return intersection(NOT_ALLOWED, tags).length === 0;
-    },
-    notAllowedTag() {
-      const tags = this.address.notes ? this.address.notes.split(',') : [];
-      const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
-      return notAllowedTags[0];
-    },
     mapQueryParam() {
       return this.mode === 'map' ? '?origin=map-view' : '';
     },
@@ -289,7 +215,9 @@ export default {
 .address {
   display: flex;
   text-align: left;
+  font-size: 18px;
 }
+
 .phone-address {
   white-space: nowrap;
   text-overflow: ellipsis;

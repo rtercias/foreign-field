@@ -198,6 +198,7 @@ export default {
 
   .map {
     width: 100%;
+    z-index: 1;
   }
 }
 .leaflet-popup h2 {

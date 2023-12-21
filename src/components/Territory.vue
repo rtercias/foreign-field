@@ -9,17 +9,28 @@
             <div class="text-left">{{ territoryName }}</div>
             <div class="d-flex justify-content-between">
               <div class="d-inline-flex align-items-center">
-                <h4 class="text-truncate">
+                <h4 class="text-truncate font-weight-bold">
                   {{territory.description}}
                   <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
                 </h4>
-                <b-badge variant="warning" class="ml-2">{{displayType}}</b-badge>
+                <b-badge
+                  variant="warning"
+                  class="ml-2"
+                  v-if="displayType !== 'Regular'"
+                >
+                  {{displayType}}
+                </b-badge>
               </div>
               <b-dropdown variant="light" right>
                 <template #button-content>
                   <font-awesome-icon icon="ellipsis-h" />
                 </template>
-                <b-dropdown-item @click="checkIn(true)">Check-in Territory</b-dropdown-item>
+                <b-dropdown-item
+                  @click="checkIn(true)"
+                  v-if="isCheckedOut"
+                >
+                  Check-in Territory
+                </b-dropdown-item>
                 <b-dropdown-item v-if="canWrite"
                   :to="{
                     name: 'address-new-terr',
@@ -31,12 +42,15 @@
                 </b-dropdown-item>
                 <b-dropdown-item
                   v-if="isAuthenticated"
-                  v-clipboard:copy="location.href"
+                  v-clipboard:copy="href"
                   v-clipboard:success="urlCopied"
                 >
                   Copy Link To Territory
                 </b-dropdown-item>
-                <b-dropdown-item @click="toggleCollaborate">
+                <b-dropdown-item
+                  @click="toggleCollaborate"
+                  v-if="isCheckedOut"
+                >
                   <span v-if="collaborate">Turn Off</span>
                   <span v-else>Turn On</span>
                   Collaborate Mode
@@ -46,7 +60,7 @@
                 </b-dropdown-item>
               </b-dropdown>
             </div>
-            <div class="d-flex justify-content-between">
+            <div class="checkout-info d-flex justify-content-between">
               <span>{{currentPublisher}}</span>
             </div>
           </div>
@@ -233,6 +247,7 @@ export default {
       token: 'auth/token',
       territoryIsLoading: 'territory/isLoading',
       isTerritoryBusy: 'territory/isBusy',
+      isAuthenticated: 'auth/isAuthenticated',
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
       userTerritories: 'auth/userTerritories',
@@ -311,6 +326,13 @@ export default {
       const $locateBtn = $locateContainer.children[0];
       return $locateBtn;
     },
+    selectedAddress() {
+      const firstAddress = get(this.territory, 'addresses[0]') || {};
+      return this.address || firstAddress;
+    },
+    href() {
+      return window.location.href;
+    },
   },
   methods: {
     ...mapActions({
@@ -334,7 +356,7 @@ export default {
       optimize: 'addresses/optimize',
       reorderAddresses: 'territory/reorderAddresses',
     }),
-
+    get,
     async refresh() {
       if (this.territory.id === this.territoryId && !!this.territory.addresses) {
         if (!this.cancelTokens.FETCH_LAST_ACTIVITY) {
@@ -586,6 +608,14 @@ export default {
         subscription.disconnect();
       }
     },
+    urlCopied() {
+      this.$bvToast.toast(`Copied link: ${document.location.href}`, {
+        variant: 'success',
+        toaster: 'b-toaster-bottom-right mr-5',
+        noCloseButton: true,
+        autoHideDelay: 1000,
+      });
+    },
   },
   watch: {
     '$route.name': {
@@ -610,8 +640,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-$very-light: #F8F9FA;
-$light: #EFEFEF;
+@import '../assets/foreign-field-theme.scss';
+
 .territory {
   .page-header {
     z-index: 2;
@@ -620,7 +650,7 @@ $light: #EFEFEF;
     font-size: 24px;
     margin-bottom: 0;
   }
-  font-size: 12px;
+  font-size: 14px;
   .collaboration-mode {
     color: #fff;
     height: 18px;
@@ -641,6 +671,10 @@ $light: #EFEFEF;
         }
       }
     }
+  }
+
+  .checkout-info {
+    height: 1em;
   }
 }
 .list-group {

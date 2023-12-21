@@ -5,8 +5,10 @@ $info: #7EA2C9;
 $warning: #FCBB5A;
 $danger: #D00000;
 $light: #EFEFEF;
-$dark: #18293A;
+$dark: #292929;
 $header-height: 52px;
+$very-light: #F8F9FA;
+$white: #fff;
 
 html, body {
   color: #212529;
@@ -29,8 +31,16 @@ html, body {
   border-width: medium !important;
 }
 .interaction {
-  width: 80px;
-  border-radius: 0;
+  width: 30px;
+  height: 30px;
+  background: $dark;
+  color: $white;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .page-header {
   background-color: white;
@@ -44,6 +54,7 @@ html, body {
 .dropdown-toggle {
   padding: 0 7px;
   height: 24px;
+  background-color: $very-light;
   &::after {
     display: none;
   }
