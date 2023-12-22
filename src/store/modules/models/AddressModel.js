@@ -52,7 +52,8 @@ export const ACTION_BUTTON_LIST = [
     value: 'START',
     text: '',
     icon: '',
-    color: 'success',
+    color: '',
+    description: '(Cleared)',
   },
   {
     type: 'fa-icon',

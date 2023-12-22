@@ -35,21 +35,26 @@
         {{ button.description }}
       </b-dropdown-item>
     </b-dropdown>
-    <div
-      v-for="log in entity.activityLogs"
-      :key="log.id"
-      :class="getBgColor(log.value)"
-    >
-      <span>{{ formatDate(log.timestamp) }}</span>
-      <span>{{ getDescription(log.value) }}</span>
-      <b-button>
-        <font-awesome-icon icon="times" />
-      </b-button>
-    </div>
+    <table class="recent-logs w-100">
+      <tr
+        v-for="log in recentActivityLogs"
+        :key="log.id"
+        :class="getBgColor(log.value)"
+      >
+        <td class="text-left log-date pl-2">{{ formatDate(log.timestamp) }}</td>
+        <td class="text-left log-description">{{ getDescription(log.value) }}</td>
+        <td>
+          <b-button variant="link" class="remove-log px-0" @click="() => remove(log)">
+            <font-awesome-icon icon="times" />
+          </b-button>
+        </td>
+      </tr>
+    </table>
   </div>
 </template>
 <script>
 import get from 'lodash/get';
+import orderBy from 'lodash/orderBy';
 import { mapActions, mapGetters } from 'vuex';
 import format from 'date-fns/format';
 import {
@@ -63,6 +68,7 @@ export default {
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
+      removeLog: 'address/removeLog',
     }),
     async updateResponse(_value) {
       let value = _value;
@@ -87,10 +93,10 @@ export default {
       }
     },
     getActionButton(status, attr) {
-      const actionButton = this.actionButtonList.find(btn => btn.value === status) || {};
+      const actionButton = ACTION_BUTTON_LIST.find(btn => btn.value === status) || {};
       switch (attr) {
         case 'color':
-          return `bg-${actionButton[attr] || 'light'}`;
+          return `bg-light-${actionButton[attr] || 'light'}`;
         default:
           return actionButton[attr];
       }
@@ -102,8 +108,23 @@ export default {
       return this.getActionButton(status, 'description');
     },
     formatDate(timestamp) {
-      const d = new Date(timestamp);
-      return format(d, 'MMM dd ddd');
+      if (Number.isNaN(timestamp)) {
+        return '';
+      }
+      const d = new Date(Number(timestamp));
+      return format(d, 'MMM dd EEE');
+    },
+    async remove({ id, value, timestamp }) {
+      const description = this.getDescription(value);
+      const date = this.formatDate(timestamp);
+      const response = await this.$bvModal.msgBoxConfirm(`Remove ${description} record from ${date}?`, {
+        title: 'Visit Record',
+        centered: true,
+      });
+
+      if (response) {
+        await this.removeLog({ id, entityId: this.entity.id });
+      }
     },
   },
   computed: {
@@ -124,6 +145,11 @@ export default {
     },
     checkoutId() {
       return get(this.territory, 'status.checkout_id');
+    },
+    recentActivityLogs() {
+      const logs = get(this.entity, 'activityLogs') || [];
+      const ordered = orderBy(logs, ['timestamp'], ['desc']);
+      return ordered.slice(0, 3);
     },
   },
 };
@@ -151,7 +177,7 @@ export default {
 
         &::after {
           top: 14px;
-          right: 7px;
+          right: 11px;
           position: absolute;
         }
       }
@@ -166,5 +192,23 @@ export default {
         }
       }
     }
+
+    .recent-logs {
+      font-size: 14px;
+      border-spacing: 0px 8px;
+      border-collapse: separate;
+
+      .log-date {
+        width: 30%;
+      }
+      .log-description {
+        width: 60%;
+      }
+      .remove-log {
+        font-size: 12px;
+      }
+    }
   }
+
+
 </style>

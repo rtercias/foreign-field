@@ -9,11 +9,34 @@ $dark: #292929;
 $header-height: 52px;
 $extra-light: #F8F9FA;
 $white: #fff;
+$light-success: #D4EDDA;
+$light-warning: #FFF3CD;
 
 html, body {
   color: #212529;
   height: 100%;
 }
+
+.bg-light-success {
+  background-color: $light-success !important;
+}
+
+.bg-light-warning {
+  background-color: $light-warning !important;
+}
+
+.bg-light-light {
+  background-color: $light !important;
+}
+
+.bg-light-primary {
+  background-color: $primary !important;
+}
+
+.bg-light-danger {
+  background-color: $danger !important;
+}
+
 .list-group-item + .list-group-item {
   border-top-width: 1px;
 }

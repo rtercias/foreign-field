@@ -277,7 +277,7 @@ export default {
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
-      fetchLastActivities: 'territory/fetchLastActivities',
+      fetchActivityLogs: 'territory/fetchActivityLogs',
       setTerritory: 'territories/setTerritory',
       addAddress: 'territory/addAddress',
       addPhone: 'territory/addPhone',
@@ -296,11 +296,12 @@ export default {
     get,
     async refresh() {
       if (this.territory.id === this.territoryId && !!this.territory.addresses) {
-        if (!this.cancelTokens.FETCH_LAST_ACTIVITY) {
-          await this.fetchLastActivities(this.territory);
+        if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
+          await this.fetchActivityLogs(this.territory);
         }
       } else {
         await this.getTerritory({ id: this.territoryId, getLastActivity: true });
+        await this.fetchActivityLogs(this.territory);
       }
 
       if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
