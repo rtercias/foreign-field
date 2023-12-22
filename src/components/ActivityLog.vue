@@ -76,7 +76,7 @@ export default {
         this.$set(this.entity, 'isBusy', false);
         return;
       }
-      if (!this.actionButtonList(this.entity.type).some(b => b.value === value)) {
+      if (!this.actionButtonList.some(b => b.value === value)) {
         value = 'START';
       }
 
