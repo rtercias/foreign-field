@@ -1,13 +1,13 @@
 $primary: #16518D;
-$secondary: #D4E0ED;
+$secondary: #6C757D;
 $success: #76B772;
-$info: #7EA2C9;
+$info: #E3F2FD;
 $warning: #FCBB5A;
 $danger: #D00000;
 $light: #EFEFEF;
 $dark: #292929;
 $header-height: 52px;
-$very-light: #F8F9FA;
+$extra-light: #F8F9FA;
 $white: #fff;
 
 html, body {
@@ -54,7 +54,11 @@ html, body {
 .dropdown-toggle {
   padding: 0 7px;
   height: 24px;
-  background-color: $very-light;
+
+  &.btn-light {
+    background-color: $extra-light;
+  }
+
   &::after {
     display: none;
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap">
+  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap bg-light">
     <SearchBar
       class="w-100"
       :search-text="'Search this territory'"
@@ -13,11 +13,10 @@
     <PhoneAddressCard
       v-for="(a, index) in filteredAddresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
-      class="phone-address-card-container"
+      class="phone-address-card-container mx-2 mb-2 bg-white"
       :class="{
         'border-success border-medium': a.id === foundId,
         'border': $route.name === 'address-list',
-        'm-2': $route.name === 'address-list' && isDesktop,
       }"
       :address="a"
       :territory="territory"

@@ -2,7 +2,7 @@
   <div
     class="search-bar sticky-top bg-light"
     :style="{ top: top }"
-    :class="{ 'p-0': noPadding, 'p-2 border-bottom': !noPadding }">
+    :class="{ 'p-0': noPadding, 'p-2': !noPadding }">
     <div :class="{
       'd-flex justify-content-between': showFilter,
       'position-relative': !showFilter,
