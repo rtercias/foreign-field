@@ -1,41 +1,43 @@
 <template>
-  <div class="tags w-100" :class="{ 'd-none': !selectedTags.length && !availableTags.length }">
+  <div
+    class="tags w-100 mt-2"
+    :class="{
+      'd-none': !selectedTags.length && !availableTags.length,
+      'px-0': $route.name === 'map-view',
+      'px-2': $route.name !== 'map-view',
+    }"
+  >
     <div class="w-100 text-left">
       <b-button-group size="sm">
         <div class="combined-tags d-flex flex-wrap text-left">
           <b-badge
             v-for="(tag, index) in displayedTags"
-            pill
-            class="tag-button d-flex mr-1 mb-1 text-white small"
+            class="tag-button d-flex mr-2 mb-2 p-2 border-0"
             :class="{
               active: false,
-              [`border-${color(tag.caption)}`]: true,
-              [`text-${color(tag.caption)}`]: !tag.state,
-              'border-danger': tag.state && highlight(tag.caption),
+              'bg-danger': tag.state && highlight(tag.caption),
             }"
             size='sm'
             :key="index"
             @click="() => updateTag(tag)"
-            :variant="tag.state
-              ? (highlight(tag.caption) ? 'danger' : color(tag.caption))
-              : `outline-${color(tag.caption)}`">
-            <span class="tag-text d-flex align-items-center small font-weight-bold">
+            :variant="tag.state && (highlight(tag.caption) ? 'danger' : 'light')"
+          >
+            <span class="tag-text d-flex align-items-center small">
               <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
-              {{ formatLanguage(toLower(tag.caption), language) }}
+              {{ formatLanguage(tag.caption, language) }}
             </span>
           </b-badge>
           <b-badge
             v-if="availableTags.length && !allTagsSelected"
-            @click="collapseTags"
-            pill
-            class="tag-button add-tag border-info d-flex mr-1 mb-1"
-            :class="`border-${variant}`"
-            :variant="variant"
-            size='sm'>
-            <span
-              class="tag-text d-flex align-items-center small font-weight-bold"
-              :class="{ 'text-white': variant === 'info' }">
-              <span v-if="collapsed">add tag</span>
+            @click="openAddDialog"
+            class="tag-button add-tag mr-2 mb-2 p-2"
+            size='sm'
+          >
+            <span class="tag-text d-flex align-items-center">
+              <span v-if="collapsed">
+                <font-awesome-icon icon="plus" class="tag-icon" />
+                Add Note
+              </span>
               <span v-else>done</span>
             </span>
           </b-badge>
@@ -270,7 +272,19 @@ export default {
 };
 </script>
 
-<style>
+<style scoped lang="scss">
+  @import '../assets/foreign-field-theme.scss';
+  $addressLinksHeight: 20px;
+
+  .vh-16 {
+    height: calc(16vh + $addressLinksHeight);
+  }
+  .vh-22 {
+    height: calc(22vh + $addressLinksHeight);
+  }
+  .vh-37 {
+    height: calc(37vh + $addressLinksHeight);
+  }
   .tags {
     min-height: 18px;
     bottom: 10px;
@@ -286,10 +300,10 @@ export default {
     flex-direction: row;
     flex-wrap: wrap;
     overflow: hidden;
-    font-size: large;
+    font-size: 16px;
   }
   .combined-tags {
-    font-size: large;
+    font-size: 16px;
     color: initial;
   }
   .slide-up-enter-active, .slide-up-leave-active {
@@ -299,7 +313,7 @@ export default {
     height: 0%;
   }
   .tag-button {
-    border: solid 1px;
+    background-color: $extra-light;
     cursor: pointer;
     font-size: 14px;
   }
@@ -311,6 +325,10 @@ export default {
   }
   .tag-button-preview {
     cursor: pointer;
+  }
+  .add-tag {
+    border: solid 1px;
+    color: $secondary;
   }
 
   @media print {

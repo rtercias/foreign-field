@@ -58,7 +58,7 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'NH',
     text: 'NH',
-    icon: 'circle',
+    icon: '',
     color: 'warning',
     description: 'Not Home',
   },
@@ -83,8 +83,8 @@ export const ACTION_BUTTON_LIST = [
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'primary',
-    description: 'Letter',
+    color: 'success',
+    description: 'Letter Sent',
     disabledText: 'Do Not Mail',
   },
   {
@@ -128,8 +128,10 @@ export const ADDRESS_LEFT_BUTTON_LIST = [
 ];
 
 export const ADDRESS_RIGHT_BUTTON_LIST = [
-  'NH',
   'HOME',
+  'do not mail',
+  'NH',
+  'do not call',
   'LW',
 ];
 

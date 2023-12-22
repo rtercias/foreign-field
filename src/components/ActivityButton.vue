@@ -36,11 +36,17 @@
         </font-awesome-icon>
         <font-awesome-layers-text
           :value="get('text')"
-          class="nh-text font-weight-bold"
-          :class="{ [`text-${get('color')}`]: !invert, 'text-white': invert }">
+          class="font-weight-bold"
+          :class="{
+            [`text-${get('color')}`]: !invert,
+            'text-white': invert,
+            [`${value}-text`]: true,
+          }">
         </font-awesome-layers-text>
       </font-awesome-layers>
-      <span v-else>{{ get('text') }}</span>
+      <span v-else class="text-white" :class="{ [`${value}-text`]: true }">
+        {{ get('text') }}
+      </span>
     </span>
   </b-button>
   <div v-else class="interaction">
@@ -118,10 +124,8 @@ export default {
     opacity: 0.9;
   }
 }
-.nh-text {
-  font-size: 0.5em;
-  text-align: center;
-  z-index: 200;
+.NH-text {
+  font-size: 16px;
 }
 
 .interaction {

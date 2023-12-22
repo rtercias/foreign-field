@@ -10,7 +10,7 @@
     <div
       class="w-100 row"
     >
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-dark"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-dark w-100"
         :class="{
           'min-height': $route.name === 'address-list',
           'col-12': mode === 'map',
@@ -70,30 +70,7 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <div
-          class="bg-white w-100"
-          :class="{
-            'w-80': isDesktop && $route.name === 'address-detail',
-            'footer fixed-bottom': $route.name === 'address-detail',
-            'pt-4': $route.name !== 'address-detail',
-            'd-none': $route.name === 'phone-list',
-          }"
-        >
-          <b-button
-            v-if="showAddressLinksToggle"
-            class="toggle-address-links w-100 mt-0 text-black-50
-              d-flex align-items-center justify-content-center"
-            @click="showAddressLinks = !showAddressLinks"
-          >
-            <font-awesome-icon v-if="!showAddressLinks" icon="chevron-up" />
-            <font-awesome-icon v-else icon="chevron-down" />
-          </b-button>
-          <div v-if="isCheckedOut && $route.name === 'address-detail'" class="col-12 p-0">
-            <hr class="mb-2 mt-0" />
-            <ActivityButtons :address="record" :selectedResponse="selectedResponse" />
-            <hr class="my-2" />
-          </div>
-        </div>
+        <ActivityLog :entity="record" />
       </div>
     </div>
   </div>
@@ -107,6 +84,8 @@ import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import AddressIcon from './AddressIcon';
 import Tags from './Tags';
+import Notes from './Notes';
+import ActivityLog from './ActivityLog';
 import { format as formatPhone } from '../utils/phone';
 import { AddressStatus } from '../store';
 
@@ -118,8 +97,8 @@ export default {
     ActivityButton,
     Tags,
     Notes,
-    ActivityButtons,
     AddressIcon,
+    ActivityLog,
   },
   data() {
     return {
@@ -301,6 +280,20 @@ export default {
 }
 .tiny-busy {
   font-size: 8px;
+}
+.sort-order-icon {
+  display: inline-block;
+  border: solid 3px;
+  border-radius: 50%;
+  line-height: 14px;
+  height: 20px;
+  width: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+.footer {
+  margin-bottom: 57px;
+  left: unset;
 }
 
 @media print {

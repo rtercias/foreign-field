@@ -60,7 +60,7 @@
                 </b-dropdown-item>
               </b-dropdown>
             </div>
-            <div class="checkout-info d-flex justify-content-between">
+            <div class="checkout-info d-flex justify-content-between my-1">
               <span>{{currentPublisher}}</span>
             </div>
           </div>
@@ -88,70 +88,6 @@
                 <span class="pl-2">Phone ({{ phoneCount }})</span>
               </b-nav-item>
             </b-nav>
-            <!-- <b-button-group class="px-0 w-100">
-              <b-button
-                class="d-flex justify-content-center align-items-center"
-                variant="outline-info"
-                :to="{ name: 'address-list', params: { territoryId } }"
-                :pressed="viewMode === 'address-list'">
-                <font-awesome-icon icon="bars" />
-                <span class="pl-2">List ({{ addressCount }})</span>
-              </b-button>
-              <b-button
-                class="d-flex justify-content-center align-items-center"
-                variant="outline-info"
-                :to="{ name: 'map-view', params: { territoryId } }"
-                :pressed="viewMode==='map-view'">
-                <font-awesome-icon icon="map-marked-alt" />
-                <span class="pl-2">Map ({{ addressCount }})</span>
-              </b-button>
-              <b-button
-                class="d-flex justify-content-center align-items-center"
-                variant="outline-info"
-                :to="{ name: 'phone-list', params: { territoryId } }"
-                :pressed="viewMode === 'phone-list'">
-                <font-awesome-icon icon="mobile-alt" />
-                <span class="pl-2">Phone ({{ phoneCount }})</span>
-              </b-button>
-            </b-button-group> -->
-            <!-- <b-button-group size="sm" class="badge px-0">
-              <b-button
-                v-if="viewMode==='map-view'"
-                variant="success"
-                class="text-white"
-                @click="optimizeNearMe"
-                :disabled="isOptimizing"
-              >
-                <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin />
-                <font-awesome-icon v-else :icon="nearMeIcon" />
-                <span v-if="isDesktop" class="ml-2">{{nearMeText}}</span>
-              </b-button>
-              <b-button
-                v-if="canManage && viewMode==='map-view'"
-                variant="primary"
-                :to="`/territories/${territoryId}/optimize`"
-              >
-                <font-awesome-icon icon="compass" />
-                <span v-if="isDesktop" class="ml-2">Optimize</span>
-              </b-button>
-              <b-button v-if="canManage && isCheckedOut" variant="danger" @click="reset">
-                <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
-                <font-awesome-icon v-else icon="backward" />
-                <span v-if="isDesktop" class="ml-2">Reset</span>
-              </b-button>
-              <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
-                <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
-                <font-awesome-icon v-else icon="check" />
-                <span class="ml-2" :class="{ 'd-none': canManage && !isDesktop }">Check In</span>
-              </b-button>
-              <b-button
-                v-if="canWrite"
-                variant="success"
-                :to="`/territories/${territoryId}/addresses/add?origin=map-view`">
-                <font-awesome-icon icon="plus"></font-awesome-icon>
-                <span v-if="isDesktop" class="ml-2">Address</span>
-              </b-button>
-            </b-button-group> -->
           </div>
         </div>
       </header>

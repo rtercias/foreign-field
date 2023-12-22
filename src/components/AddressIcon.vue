@@ -1,7 +1,8 @@
 <template>
   <div>
+    <font-awesome-icon v-if="record.isBusy" icon="circle-notch" spin class="busy text-primary" />
     <ActivityButton
-      v-if="!allowedToCall"
+      v-else-if="!allowedToCall"
       class="selected-tag"
       :value="notAllowedTag"
       :bg="$route.name === 'phone-list' ? 'light' : 'white'"
@@ -12,12 +13,10 @@
       class="selected-response"
       :class="{
         faded: !isMySelectedResponse || isIncomingResponse,
-        hidden: record.isBusy,
       }"
       :value="selectedResponse"
       :next="'START'"
       :actionButtonList="actionButtonList"
-      @button-click="confirmClearStatus"
     />
     <ActivityButton
       v-else
@@ -74,47 +73,6 @@ export default {
     ...mapActions({
       fetchPublisher: 'publisher/fetchPublisher',
     }),
-    async confirmClearStatus() {
-      try {
-        const h = this.$createElement;
-        let publisherName = '';
-        if (this.lastActivity.publisher_id === this.user.id) {
-          publisherName = 'you';
-        } else {
-          await this.getLastActivityPublisher();
-          if (this.publisher) {
-            publisherName = this.publisher.firstname && this.publisher.lastname
-              && `${this.publisher.firstname} ${this.publisher.lastname}`;
-          } else {
-            publisherName = 'a guest publisher';
-          }
-        }
-
-        const message = h('p', {
-          domProps: {
-            innerHTML:
-            `<div class="pb-3">
-              ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}`,
-          },
-        });
-        const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: `${this.record.addr1} ${this.record.addr2}`,
-          centered: true,
-          okTitle: 'Remove',
-          cancelTitle: 'Close',
-        });
-
-        if (value) {
-          this.isLogging = true;
-          this.$emit('update-response', this.record, 'START', () => {
-            this.isLogging = false;
-          });
-        }
-      } catch (err) {
-        // do nothing
-      }
-    },
     async getLastActivityPublisher() {
       const id = Number.parseInt(this.lastActivity.publisher_id, 10);
       await this.fetchPublisher({ id });
@@ -123,4 +81,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+  .busy {
+    font-size: 30px;
+  }
 </style>
