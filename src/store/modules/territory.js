@@ -22,9 +22,16 @@ const RESET_TERRITORY_ACTIVITIES = 'RESET_TERRITORY_ACTIVITIES';
 const FETCH_LAST_ACTIVITY = 'FETCH_LAST_ACTIVITY';
 const CANCEL_FETCH_LAST_ACTIVITY = 'CANCEL_FETCH_LAST_ACTIVITY';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
+const FETCH_ACTIVITY_LOGS = 'FETCH_ACTIVITY_LOGS';
+const CANCEL_FETCH_ACTIVITY_LOGS = 'CANCEL_FETCH_ACTIVITY_LOGS';
+const FETCH_ACTIVITY_LOGS_FAIL = 'FETCH_ACTIVITY_LOGS_FAIL';
 const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
 const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
+const SET_ADDRESS_ACTIVITY_LOGS = 'SET_ADDRESS_ACTIVITY_LOGS';
+const SET_PHONE_ACTIVITY_LOGS = 'SET_PHONE_ACTIVITY_LOGS';
+const ADD_ADDRESS_ACTIVITY_LOG = 'ADD_ADDRESS_ACTIVITY_LOG';
+const REMOVE_ADDRESS_ACTIVITY_LOG = 'REMOVE_ADDRESS_ACTIVITY_LOG';
 const LOADING_TERRITORY_TRUE = 'LOADING_TERRITORY_TRUE';
 const LOADING_TERRITORY_FALSE = 'LOADING_TERRITORY_FALSE';
 const ADD_TERRITORY = 'ADD_TERRITORY';
@@ -150,6 +157,24 @@ export const territory = {
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
     },
+
+    FETCH_ACTIVITY_LOGS(state, cancelToken) {
+      state.cancelTokens = { ...state.cancelTokens, FETCH_ACTIVITY_LOGS: cancelToken };
+      const terr = state.territory;
+      if (terr && terr.addresses) {
+        const addresses = terr.addresses || [];
+        for (const address of addresses) {
+          address.isBusy = true;
+        }
+      }
+    },
+    CANCEL_FETCH_ACTIVITY_LOGS(state) {
+      state.cancelTokens.FETCH_ACTIVITY_LOGS = null;
+    },
+    FETCH_ACTIVITY_LOGS_FAIL(state, exception) {
+      state.error = exception;
+    },
+
     SET_TERRITORY_LAST_ACTIVITY(state, { territoryId, lastActivity }) {
       if (state.territory.id === territoryId) {
         Vue.set(state.territory, 'lastActivity', lastActivity);
@@ -159,9 +184,41 @@ export const territory = {
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
       const addresses = get(state, 'territory.addresses') || [];
       const address = addresses.find(a => a.id === addressId);
+      const activity = lastActivity
+        || orderBy(get(address, 'activityLogs', []), ['timestamp'], ['desc'])[0];
+
       if (address) {
-        Vue.set(address, 'lastActivity', lastActivity);
+        Vue.set(address, 'lastActivity', activity);
         Vue.set(address, 'isBusy', false);
+      }
+    },
+    SET_ADDRESS_ACTIVITY_LOGS(state, { addressId, activityLogs }) {
+      const addresses = get(state, 'territory.addresses') || [];
+      const address = addresses.find(a => a.id === addressId);
+      if (address) {
+        Vue.set(address, 'activityLogs', activityLogs);
+        Vue.set(address, 'isBusy', false);
+      }
+    },
+    ADD_ADDRESS_ACTIVITY_LOG(state, { addressId, activityLog }) {
+      const addresses = get(state, 'territory.addresses') || [];
+      const address = addresses.find(a => a.id === addressId) || {};
+      const { activityLogs } = address;
+      if (activityLogs) {
+        activityLogs.push(activityLog);
+        // Vue.set(address, 'activityLogs', activityLogs);
+      }
+    },
+    REMOVE_ADDRESS_ACTIVITY_LOG(state, { addressId, logId }) {
+      const addresses = get(state, 'territory.addresses') || [];
+      const address = addresses.find(a => a.id === addressId) || {};
+      const { activityLogs } = address;
+      if (activityLogs) {
+        const index = activityLogs.findIndex(l => l.id === logId);
+        if (index >= 0) {
+          activityLogs.splice(index, 1);
+        }
+        // Vue.set(address, 'activityLogs', activityLogs);
       }
     },
     SET_PHONE_LAST_ACTIVITY(state, { phoneId, lastActivity }) {
@@ -170,6 +227,18 @@ export const territory = {
         for (const phone of address.phones) {
           if (phone.id === phoneId) {
             Vue.set(phone, 'lastActivity', lastActivity);
+            Vue.set(phone, 'isBusy', false);
+            break;
+          }
+        }
+      }
+    },
+    SET_PHONE_ACTIVITY_LOGS(state, { phoneId, activityLogs }) {
+      const addresses = get(state, 'territory.addresses') || [];
+      for (const address of addresses) {
+        for (const phone of address.phones) {
+          if (phone.id === phoneId) {
+            Vue.set(phone, 'activityLogs', activityLogs);
             Vue.set(phone, 'isBusy', false);
             break;
           }
@@ -604,6 +673,10 @@ export const territory = {
       commit(CANCEL_FETCH_LAST_ACTIVITY);
     },
 
+    cancelFetchActivityLogs({ commit }) {
+      commit(CANCEL_FETCH_ACTIVITY_LOGS);
+    },
+
     async setTerritory({ commit }, terr) {
       commit(SET_TERRITORY, terr);
     },
@@ -651,8 +724,24 @@ export const territory = {
       commit(SET_ADDRESS_LAST_ACTIVITY, { addressId, lastActivity });
     },
 
+    setAddressActivityLogs({ commit }, { addressId, activityLogs }) {
+      commit(SET_ADDRESS_ACTIVITY_LOGS, { addressId, activityLogs });
+    },
+
+    addAddressActivityLog({ commit }, { addressId, activityLog }) {
+      commit(ADD_ADDRESS_ACTIVITY_LOG, { addressId, activityLog });
+    },
+
+    removeAddressActivityLog({ commit }, { addressId, logId }) {
+      commit(REMOVE_ADDRESS_ACTIVITY_LOG, { addressId, logId });
+    },
+
     setPhoneLastActivity({ commit }, { phoneId, lastActivity }) {
       commit(SET_PHONE_LAST_ACTIVITY, { phoneId, lastActivity });
+    },
+
+    setPhoneActivityLogs({ commit }, { phoneId, activityLogs }) {
+      commit(SET_PHONE_ACTIVITY_LOGS, { phoneId, activityLogs });
     },
 
     async getTerritoryInfo({ commit, rootGetters }, { id }) {
@@ -856,6 +945,27 @@ export const territory = {
       });
 
       commit(SET_ADDRESSES, ordered);
+    },
+
+    fetchActivityLogs({ state, commit, dispatch }, { checkoutId }) {
+      const tokenSource = axios.CancelToken.source();
+      const cancelToken = tokenSource.token;
+      commit(FETCH_ACTIVITY_LOGS, tokenSource);
+
+      try {
+        const { addresses = [] } = state.territory || {};
+        addresses.forEach((address) => {
+          dispatch('address/fetchActivityLogs', {
+            addressId: address.id,
+            checkoutId,
+            cancelToken,
+          }, {
+            root: true,
+          });
+        });
+      } catch (e) {
+        commit(FETCH_ACTIVITY_LOGS_FAIL, e);
+      }
     },
   },
 };

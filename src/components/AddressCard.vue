@@ -70,7 +70,7 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <ActivityLog :entity="record" />
+        <ActivityLog :entity="record" v-if="isCheckedOut" />
       </div>
     </div>
   </div>

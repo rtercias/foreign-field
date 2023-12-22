@@ -42,7 +42,7 @@ export default {
     Loading,
   },
   beforeRouteLeave(to, from, next) {
-    const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
+    const token = get(this.territoryCancelTokens, 'FETCH_ACTIVITY_LOGS');
     if (token && this.isTerritoryBusy) {
       token.cancel();
       this.cancelFetchLastActivity();

@@ -20,6 +20,8 @@ const REMOVE_TAG = 'REMOVE_TAG';
 const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
 const FETCH_LAST_ACTIVITY_SUCCESS = 'FETCH_LAST_ACTIVITY_SUCCESS';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
+const FETCH_ACTIVITY_LOGS_SUCCESS = 'FETCH_ACTIVITY_LOGS_SUCCESS';
+const FETCH_ACTIVITY_LOGS_FAIL = 'FETCH_ACTIVITY_LOGS_FAIL';
 const FETCH_ADDRESS_FAIL = 'FETCH_ADDRESS_FAIL';
 const ADD_ADDRESS_FAIL = 'ADD_ADDRESS_FAIL';
 const UPDATE_ADDRESS_FAIL = 'UPDATE_ADDRESS_FAIL';
@@ -118,6 +120,13 @@ export const address = {
       state.error = null;
       state.address.lastActivity = lastActivity;
     },
+    FETCH_ACTIVITY_LOGS_FAIL(state, exception) {
+      state.error = exception;
+    },
+    FETCH_ACTIVITY_LOGS_SUCCESS(state, activityLogs) {
+      state.error = null;
+      state.address.activityLogs = activityLogs;
+    },
   },
 
   actions: {
@@ -213,6 +222,49 @@ export const address = {
       }
     },
 
+    async fetchActivityLogs({ commit, dispatch }, { addressId, checkoutId, cancelToken }) {
+      try {
+        if (!addressId) {
+          commit(FETCH_ACTIVITY_LOGS_FAIL, 'id is required');
+          return;
+        }
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cancelToken,
+          data: {
+            query: print(gql`query Address($addressId: Int $checkoutId: Int) {
+              address(id: $addressId) {
+                activityLogs(checkout_id: $checkoutId) {
+                  ...ActivityModel
+                }
+              }
+            }
+            ${activityModel}`),
+            variables: {
+              addressId,
+              checkoutId,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+
+        const { activityLogs } = get(response, 'data.data.address') || {};
+        dispatch('territory/setAddressActivityLogs', { addressId, activityLogs }, { root: true });
+        commit(FETCH_ACTIVITY_LOGS_SUCCESS, activityLogs);
+      } catch (e) {
+        commit(FETCH_ACTIVITY_LOGS_FAIL, e);
+      }
+    },
+
     async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId }) {
       try {
         const user = rootGetters['auth/user'];
@@ -260,7 +312,7 @@ export const address = {
       }
     },
 
-    async removeLog({ commit }, { id, entityId }) {
+    async removeLog({ commit, dispatch }, { id, entityId }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -281,6 +333,17 @@ export const address = {
         });
 
         commit(REMOVE_LOG, { id, entityId });
+        dispatch(
+          'territory/removeAddressActivityLog',
+          { addressId: entityId, logId: id },
+          { root: true },
+        );
+
+        dispatch(
+          'territory/setAddressLastActivity',
+          { addressId: entityId },
+          { root: true },
+        );
       } catch (e) {
         commit(LOG_FAIL, e);
       }
