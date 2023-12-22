@@ -301,6 +301,7 @@ export const address = {
 
         // TODO: separate the calls by creating "addLog" function specifically for phones
         dispatch('territory/setAddressLastActivity', { addressId: entityId, lastActivity: addLog }, { root: true });
+        dispatch('territory/addAddressActivityLog', { addressId: entityId, activityLog: addLog }, { root: true });
         dispatch('territory/setPhoneLastActivity', { phoneId: entityId, lastActivity: addLog }, { root: true });
 
         commit(FETCH_LAST_ACTIVITY_SUCCESS, addLog);
