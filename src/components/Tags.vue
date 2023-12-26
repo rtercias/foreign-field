@@ -12,18 +12,23 @@
         <div class="combined-tags d-flex flex-wrap text-left">
           <b-badge
             v-for="(tag, index) in displayedTags"
-            class="tag-button d-flex mr-2 mb-2 p-2 border-0"
+            class="badge tag-button d-flex mr-2 mb-2 p-2 border-0"
             :class="{
               active: false,
               'bg-danger': tag.state && highlight(tag.caption),
             }"
             size='sm'
             :key="index"
-            @click="() => updateTag(tag)"
             :variant="tag.state && (highlight(tag.caption) ? 'danger' : 'light')"
+            @click="(e) => e.stopPropagation()"
           >
             <span class="tag-text d-flex align-items-center small">
-              <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
+              <font-awesome-icon
+                v-if="tag.state"
+                class="tag-icon mr-1"
+                icon="times"
+                @click="() => updateTag(tag)"
+              />
               {{ formatLanguage(tag.caption, language) }}
             </span>
           </b-badge>
@@ -55,8 +60,6 @@ import get from 'lodash/get';
 import toLower from 'lodash/toLower';
 import difference from 'lodash/difference';
 import startsWith from 'lodash/startsWith';
-import addYears from 'date-fns/addYears';
-import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
 import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
 import {
@@ -134,12 +137,15 @@ export default {
       }
     },
     async removeTag(tag) {
-      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2 || ''}`;
+      const body = `Are you sure you want to delete the tag
+        "${formatLanguage(tag.caption, this.language)}"?
+      `;
       const response = await this.$bvModal.msgBoxConfirm(
-        formatLanguage(tag.caption, this.language), {
-          title,
+        body, {
+          title: 'Delete Tag',
           centered: true,
-          okTitle: 'Remove',
+          okVariant: 'danger',
+          okTitle: 'Delete',
           cancelTitle: 'Close',
         }
       );
@@ -161,8 +167,7 @@ export default {
       });
 
       if (response) {
-        const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
-        await this.markAsDoNotCall({ addressId: this.record.id, userid: this.user.id, tag: datestamped });
+        await this.markAsDoNotCall({ addr: this.record, userid: this.user.id, tag: tag.caption });
       }
     },
     async notForeign(tag) {

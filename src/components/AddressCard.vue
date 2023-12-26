@@ -70,7 +70,7 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <ActivityLog :entity="record" v-if="isCheckedOut" />
+        <ActivityLog :entity="record" v-if="isCheckedOut && !isDoNotCall" />
       </div>
     </div>
   </div>
@@ -160,6 +160,7 @@ export default {
       isDesktop: 'auth/isDesktop',
       isCheckedOut: 'territory/isCheckedOut',
       canWrite: 'auth/canWrite',
+      isDoNotCall: 'address/isDoNotCall',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;

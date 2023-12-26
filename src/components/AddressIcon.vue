@@ -2,10 +2,9 @@
   <div>
     <font-awesome-icon v-if="record.isBusy" icon="circle-notch" spin class="busy text-primary" />
     <ActivityButton
-      v-else-if="!allowedToCall"
-      class="selected-tag"
+      v-else-if="notAllowedTag"
+      class="selected-tag bg-danger text-white"
       :value="notAllowedTag"
-      :bg="$route.name === 'phone-list' ? 'light' : 'white'"
       :actionButtonList="actionButtonList"
     />
     <ActivityButton
@@ -25,7 +24,6 @@
   </div>
 </template>
 <script>
-import intersection from 'lodash/intersection';
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
@@ -48,14 +46,9 @@ export default {
       publisher: 'publisher/publisher',
       actionButtonList: 'address/actionButtonList',
     }),
-    allowedToCall() {
-      const tags = this.record.notes ? this.record.notes.split(',') : [];
-      return intersection(NOT_ALLOWED, tags).length === 0;
-    },
     notAllowedTag() {
       const tags = this.record.notes ? this.record.notes.split(',') : [];
-      const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
-      return notAllowedTags[0];
+      return NOT_ALLOWED.find(na => tags.some(t => t.includes(na)));
     },
     lastActivity() {
       return get(this.record, 'lastActivity') || { value: 'START', timestamp: '' };
@@ -83,5 +76,9 @@ export default {
 <style scoped lang="scss">
   .busy {
     font-size: 30px;
+  }
+
+  .btn:hover {
+    cursor: default;
   }
 </style>
