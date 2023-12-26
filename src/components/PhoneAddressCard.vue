@@ -479,7 +479,7 @@ export default {
 
       if (response) {
         const datestamped = `${DO_NOT_CALL} until ${format(addYears(new Date(), 1), 'P')}`;
-        await this.markAsDoNotCall({ addressId: this.address.id, userid: this.user.id, tag: datestamped });
+        await this.markAsDoNotCall({ addr: this.address, userid: this.user.id, tag: datestamped });
       }
     },
   },

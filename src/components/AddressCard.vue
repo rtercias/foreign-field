@@ -73,7 +73,7 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <ActivityLog :entity="record" v-if="isCheckedOut" />
+        <ActivityLog :entity="record" v-if="isCheckedOut && !isDoNotCall" />
       </div>
     </div>
   </div>
@@ -179,6 +179,7 @@ export default {
       isDesktop: 'auth/isDesktop',
       isCheckedOut: 'territory/isCheckedOut',
       canWrite: 'auth/canWrite',
+      isDoNotCall: 'address/isDoNotCall',
     }),
     showAddressLinksToggle() {
       return !this.isDesktop && (

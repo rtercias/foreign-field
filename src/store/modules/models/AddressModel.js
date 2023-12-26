@@ -109,7 +109,7 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'do not call',
     text: '',
-    icon: 'minus-circle',
+    icon: 'ban',
     color: 'danger',
     description: 'Do Not Call',
   },
@@ -124,17 +124,16 @@ export const ACTION_BUTTON_LIST = [
 ];
 
 export const ADDRESS_LEFT_BUTTON_LIST = [
+  'do not mail',
   'do not call',
-  'confirmed',
 ];
 
 export const ADDRESS_RIGHT_BUTTON_LIST = [
   'HOME',
-  'do not mail',
   'NH',
-  'do not call',
   'LW',
 ];
+
 
 export const PHONE_ADDRESS_RIGHT_BUTTON_LIST = [
   'LW',

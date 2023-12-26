@@ -29,6 +29,7 @@ const SET_TERRITORY_LAST_ACTIVITY = 'SET_TERRITORY_LAST_ACTIVITY';
 const SET_ADDRESS_LAST_ACTIVITY = 'SET_ADDRESS_LAST_ACTIVITY';
 const SET_PHONE_LAST_ACTIVITY = 'SET_PHONE_LAST_ACTIVITY';
 const SET_ADDRESS_ACTIVITY_LOGS = 'SET_ADDRESS_ACTIVITY_LOGS';
+const SET_ADDRESS_IS_BUSY = 'SET_ADDRESS_IS_BUSY';
 const SET_PHONE_ACTIVITY_LOGS = 'SET_PHONE_ACTIVITY_LOGS';
 const ADD_ADDRESS_ACTIVITY_LOG = 'ADD_ADDRESS_ACTIVITY_LOG';
 const REMOVE_ADDRESS_ACTIVITY_LOG = 'REMOVE_ADDRESS_ACTIVITY_LOG';
@@ -198,6 +199,13 @@ export const territory = {
       if (address) {
         Vue.set(address, 'activityLogs', activityLogs);
         Vue.set(address, 'isBusy', false);
+      }
+    },
+    SET_ADDRESS_IS_BUSY(state, { addressId, status }) {
+      const addresses = get(state, 'territory.addresses') || [];
+      const address = addresses.find(a => a.id === addressId);
+      if (address) {
+        Vue.set(address, 'isBusy', status);
       }
     },
     ADD_ADDRESS_ACTIVITY_LOG(state, { addressId, activityLog }) {
@@ -954,18 +962,25 @@ export const territory = {
 
       try {
         const { addresses = [] } = state.territory || {};
-        addresses.forEach((address) => {
-          dispatch('address/fetchActivityLogs', {
+        addresses.forEach(async (address) => {
+          await dispatch('address/fetchActivityLogs', {
             addressId: address.id,
             checkoutId,
             cancelToken,
           }, {
             root: true,
           });
+          // commit(ADD_ADDRESS_ACTIVITY_LOG, {
+          //   addressId: address.id,
+          //   activityLogs: address.activityLogs,
+          // });
         });
       } catch (e) {
         commit(FETCH_ACTIVITY_LOGS_FAIL, e);
       }
+    },
+    setAddressIsBusy({ commit }, { addressId, status }) {
+      commit(SET_ADDRESS_IS_BUSY, { addressId, status });
     },
   },
 };

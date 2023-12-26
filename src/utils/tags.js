@@ -31,8 +31,9 @@ export function formatLanguage(tag = '', value) {
   return String(tag).replaceAll('#language#', value);
 }
 
-export function addTag(notes, tag) {
+export function addTag(notes, _tag) {
   const tags = (notes || '').split(',') || [];
+  const tag = _tag.charAt(0 === ',') ? _tag.substring(0) : _tag;
   if (!tags.includes(tag)) tags.push(tag);
   return tags.join(',');
 }

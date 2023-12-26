@@ -392,7 +392,7 @@ export default {
       });
       subscription.bind('update-address', (address) => {
         if (address) {
-          if (address.status !== AddressStatus.Active) {
+          if ([AddressStatus.Active, AddressStatus.DNC].includes(address.status)) {
             this.deleteAddress(address);
           } else {
             this.updateAddress(address);
@@ -405,7 +405,7 @@ export default {
         address.territory_id = address.territory_id || this.territory.id;
         const addresses = this.territory.addresses || [];
         if (addresses.some(a => a.id === address.id)) {
-          if (address.status !== AddressStatus.Active) {
+          if (![AddressStatus.Active, AddressStatus.DNC].includes(address.status)) {
             this.deleteAddress(address);
           } else {
             this.updateAddress(address);
@@ -447,12 +447,14 @@ export default {
       subscription.bind('add-note', (args) => {
         if (args && this.territory) {
           const { addressId, notes } = args;
+          debugger;
           this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
         }
       });
       subscription.bind('remove-note', (args) => {
         if (args && this.territory) {
           const { addressId, notes } = args;
+          debugger;
           this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
         }
       });

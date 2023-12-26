@@ -318,7 +318,7 @@ export default {
           // } else
           if (this.model.status === ADDRESS_STATUS.DNC.value) {
             const dncTag = `${DNC_TAG} until ${format(addYears(new Date(), 1), 'P')}`;
-            await this.markAsDoNotCall({ addressId: this.model.id, userid: this.user.id, tag: dncTag });
+            await this.markAsDoNotCall({ addr: this.model, userid: this.user.id, tag: dncTag });
           }
         }
 

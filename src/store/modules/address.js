@@ -3,7 +3,16 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import { model as addressModel, validate, isCity, ACTION_BUTTON_LIST, ADDRESS_STATUS } from './models/AddressModel';
+import format from 'date-fns/format';
+import addYears from 'date-fns/addYears';
+import {
+  model as addressModel,
+  validate,
+  isCity,
+  ACTION_BUTTON_LIST,
+  ADDRESS_STATUS,
+  DO_NOT_CALL,
+} from './models/AddressModel';
 import { model as activityModel, createActivityLog } from './models/ActivityModel';
 import * as tagUtils from '../../utils/tags';
 
@@ -49,6 +58,7 @@ export const address = {
 
     actionButtonList: () => ACTION_BUTTON_LIST,
 
+    isDoNotCall: (state => state.address.notes && state.address.notes.includes(DO_NOT_CALL)),
     tags: state => ((state.address.notes && state.address.notes
       .toLowerCase()
       .split(',')
@@ -524,9 +534,12 @@ export const address = {
       }
     },
 
-    async markAsDoNotCall({ commit }, { addressId, userid, tag }) {
+    async markAsDoNotCall({ commit, dispatch }, { addr, userid, tag }) {
       try {
         commit('auth/LOADING', true, { root: true });
+        const { id: addressId } = addr;
+        const status = tag.caption || tag;
+        const datestamped = `${status} until ${format(addYears(new Date(), 1), 'P')}`;
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -540,9 +553,9 @@ export const address = {
             }`),
             variables: {
               addressId,
-              status: ADDRESS_STATUS.DNC.value,
+              status: ADDRESS_STATUS.Active.value,
               userid,
-              tag,
+              tag: datestamped,
             },
           },
         });
@@ -553,7 +566,16 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid, note: tag });
+          dispatch('territory/setAddressIsBusy', { addressId, status: false }, { root: true });
+          dispatch('territory/updateAddressNotes', {
+            ...addr,
+            territoryId: addr.territory_id,
+            addressId: addr.id,
+            notes: tagUtils.addTag(addr.notes, datestamped),
+          }, {
+            root: true,
+          });
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid, note: datestamped });
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);

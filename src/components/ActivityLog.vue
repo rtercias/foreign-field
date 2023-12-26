@@ -29,7 +29,7 @@
       <b-dropdown-header>Mark as...</b-dropdown-header>
       <b-dropdown-item
         v-for="button in actionButtonList" :key="button.value"
-        @click="() => updateResponse(button.value)"
+        @click="() => addRecord(button.value)"
         :variant="button.color === 'danger' && button.color || ''"
       >
         {{ button.description }}
@@ -43,8 +43,8 @@
       >
         <td class="text-left log-date pl-2">{{ formatDate(log.timestamp) }}</td>
         <td class="text-left log-description">{{ getDescription(log.value) }}</td>
-        <td>
-          <b-button variant="link" class="remove-log px-0" @click="() => remove(log)">
+        <td class="remove-log-container">
+          <b-button variant="link" class="remove-log p-0" @click="() => removeLog(log)">
             <font-awesome-icon icon="times" />
           </b-button>
         </td>
@@ -57,8 +57,10 @@ import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
 import { mapActions, mapGetters } from 'vuex';
 import format from 'date-fns/format';
+import { format as formatPhone } from '../utils/phone';
 import {
   ACTION_BUTTON_LIST,
+  ADDRESS_LEFT_BUTTON_LIST,
   ADDRESS_RIGHT_BUTTON_LIST,
 } from '../store/modules/models/AddressModel';
 
@@ -67,10 +69,37 @@ export default {
   props: ['entity'],
   methods: {
     ...mapActions({
-      addLog: 'address/addLog',
-      removeLog: 'address/removeLog',
+      addAddressLog: 'address/addLog',
+      removeAddressLog: 'address/removeLog',
+      markAsDoNotCall: 'address/markAsDoNotCall',
     }),
-    async updateResponse(_value) {
+    async addRecord(value) {
+      if (this.isActionTag(value)) {
+        await this.addTag(value);
+      } else if (this.isActivity(value)) {
+        await this.addLog(value);
+      }
+    },
+    async addTag(value) {
+      const item = this.entity.type === 'Regular'
+        ? `${this.entity.addr1} ${this.entity.addr2}`
+        : formatPhone(this.entity.phone);
+
+      const response = await this.$bvModal.msgBoxConfirm(`Mark ${item} as a 'do not call'?`, {
+        title: 'Do Not Call',
+        centered: true,
+      });
+
+      if (response) {
+        this.$set(this.entity, 'isBusy', true);
+        await this.markAsDoNotCall({
+          addr: this.entity,
+          userid: this.user.id,
+          tag: value,
+        });
+      }
+    },
+    async addLog(_value) {
       let value = _value;
       if (this.entity.selectedResponse === 'START' && value === 'START') {
         this.$set(this.entity, 'isBusy', false);
@@ -82,7 +111,7 @@ export default {
 
       try {
         this.$set(this.entity, 'isBusy', true);
-        await this.addLog({
+        await this.addAddressLog({
           entityId: this.entity.id,
           value,
           checkoutId: this.checkoutId,
@@ -114,28 +143,42 @@ export default {
       const d = new Date(Number(timestamp));
       return format(d, 'MMM dd EEE');
     },
-    async remove({ id, value, timestamp }) {
+    async removeLog({ id, value, timestamp }) {
       const description = this.getDescription(value);
       const date = this.formatDate(timestamp);
-      const response = await this.$bvModal.msgBoxConfirm(`Remove ${description} record from ${date}?`, {
-        title: 'Visit Record',
+      const response = await this.$bvModal.msgBoxConfirm(`
+        Are you sure you want to delete this "${description}" record from ${date}?
+      `, {
+        title: 'Delete Record',
         centered: true,
+        okVariant: 'danger',
+        okTitle: 'Delete',
       });
 
       if (response) {
-        await this.removeLog({ id, entityId: this.entity.id });
+        await this.removeAddressLog({ id, entityId: this.entity.id });
       }
+    },
+    isActionTag(value) {
+      return ADDRESS_LEFT_BUTTON_LIST.includes(value);
+    },
+    isActivity(value) {
+      return ADDRESS_RIGHT_BUTTON_LIST.includes(value);
     },
   },
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
+      user: 'auth/user',
     }),
     addressButtonList() {
-      return ADDRESS_RIGHT_BUTTON_LIST
-        .map(value => (
-          ACTION_BUTTON_LIST.find((btn => btn.value === value))
-        ));
+      const combined = [
+        ...ADDRESS_RIGHT_BUTTON_LIST,
+        ...ADDRESS_LEFT_BUTTON_LIST,
+      ];
+      return combined.map(value => (
+        ACTION_BUTTON_LIST.find((btn => btn.value === value))
+      ));
     },
     actionButtonList() {
       if (this.entity.type === 'Regular') {
@@ -204,8 +247,11 @@ export default {
       .log-description {
         width: 60%;
       }
-      .remove-log {
-        font-size: 12px;
+      .remove-log-container {
+        height: 32px;
+        .remove-log {
+          font-size: 12px;
+        }
       }
     }
   }
