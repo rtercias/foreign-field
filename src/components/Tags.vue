@@ -151,7 +151,6 @@ export default {
           centered: true,
           okVariant: 'danger',
           okTitle: 'Delete',
-          cancelTitle: 'Close',
         }
       );
 
