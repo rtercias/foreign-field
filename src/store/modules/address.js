@@ -11,7 +11,6 @@ import {
   isCity,
   ACTION_BUTTON_LIST,
   ADDRESS_STATUS,
-  DO_NOT_CALL,
 } from './models/AddressModel';
 import { model as activityModel, createActivityLog } from './models/ActivityModel';
 import * as tagUtils from '../../utils/tags';
@@ -58,7 +57,6 @@ export const address = {
 
     actionButtonList: () => ACTION_BUTTON_LIST,
 
-    isDoNotCall: (state => state.address.notes && state.address.notes.includes(DO_NOT_CALL)),
     tags: state => ((state.address.notes && state.address.notes
       .toLowerCase()
       .split(',')
@@ -77,10 +75,10 @@ export const address = {
     DELETE_ADDRESS_FAIL(state, exception) {
       state.error = exception;
     },
-    CHANGE_STATUS(state, addr) {
-      if (state.address.id === addr.id) {
+    CHANGE_STATUS(state, { addr, tag }) {
+      if (addr && get(state, 'address.id') === addr.id) {
         state.address.status = addr.status;
-        state.address.notes = tagUtils.addTag(state.address.notes, addr.note);
+        state.address.notes = tagUtils.addTag(state.address.notes, tag);
       }
     },
     ADD_LOG(state, log) {
@@ -524,7 +522,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.NF.value, userid, note: tag });
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.NF.value, userid }, tag);
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -575,7 +573,7 @@ export const address = {
           }, {
             root: true,
           });
-          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid, note: datestamped });
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid }, datestamped);
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);

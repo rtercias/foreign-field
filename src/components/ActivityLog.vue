@@ -1,5 +1,5 @@
 <template>
-  <div class="activity-log w-100">
+  <div class="activity-log w-100" v-if="isCheckedOut && !includesDoNotCall">
     <hr class="w-100 my-2" />
     <div class="d-flex justify-content-between align-items-center">
       <span>Visit Record</span>
@@ -55,6 +55,7 @@
 <script>
 import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
+import toUpper from 'lodash/toUpper';
 import { mapActions, mapGetters } from 'vuex';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
@@ -62,6 +63,8 @@ import {
   ACTION_BUTTON_LIST,
   ADDRESS_LEFT_BUTTON_LIST,
   ADDRESS_RIGHT_BUTTON_LIST,
+  DO_NOT_CALL,
+  DO_NOT_MAIL,
 } from '../store/modules/models/AddressModel';
 
 export default {
@@ -72,9 +75,10 @@ export default {
       addAddressLog: 'address/addLog',
       removeAddressLog: 'address/removeLog',
       markAsDoNotCall: 'address/markAsDoNotCall',
+      addAddressTag: 'address/addTag',
     }),
     async addRecord(value) {
-      if (this.isActionTag(value)) {
+      if (this.isDoNotCall(value) || this.isDoNotMail(value)) {
         await this.addTag(value);
       } else if (this.isActivity(value)) {
         await this.addLog(value);
@@ -85,18 +89,29 @@ export default {
         ? `${this.entity.addr1} ${this.entity.addr2}`
         : formatPhone(this.entity.phone);
 
-      const response = await this.$bvModal.msgBoxConfirm(`Mark ${item} as a 'do not call'?`, {
-        title: 'Do Not Call',
-        centered: true,
-      });
+      if (this.isDoNotCall(value)) {
+        const response = await this.$bvModal.msgBoxConfirm(`Mark ${item} as ${value}?`, {
+          title: toUpper(value),
+          centered: true,
+        });
 
-      if (response) {
+        if (response) {
+          this.$set(this.entity, 'isBusy', true);
+          await this.markAsDoNotCall({
+            addr: this.entity,
+            userid: this.user.id,
+            tag: value,
+          });
+          this.$set(this.entity, 'isBusy', false);
+        }
+      } else {
         this.$set(this.entity, 'isBusy', true);
-        await this.markAsDoNotCall({
-          addr: this.entity,
+        await this.addAddressTag({
+          addressId: this.entity.id,
           userid: this.user.id,
           tag: value,
         });
+        this.$set(this.entity, 'isBusy', false);
       }
     },
     async addLog(_value) {
@@ -159,8 +174,11 @@ export default {
         await this.removeAddressLog({ id, entityId: this.entity.id });
       }
     },
-    isActionTag(value) {
-      return ADDRESS_LEFT_BUTTON_LIST.includes(value);
+    isDoNotCall(value) {
+      return value.includes(DO_NOT_CALL);
+    },
+    isDoNotMail(value) {
+      return value.includes(DO_NOT_MAIL);
     },
     isActivity(value) {
       return ADDRESS_RIGHT_BUTTON_LIST.includes(value);
@@ -170,21 +188,35 @@ export default {
     ...mapGetters({
       territory: 'territory/territory',
       user: 'auth/user',
+      isCheckedOut: 'territory/isCheckedOut',
     }),
     addressButtonList() {
+      let activityButtons = ADDRESS_RIGHT_BUTTON_LIST;
+      let tagButtons = ADDRESS_LEFT_BUTTON_LIST;
+
+      if (this.includesDoNotMail) {
+        // hide LW when marked 'do not mail'
+        activityButtons = activityButtons.filter(btn => btn !== 'LW');
+        // hide DO_NOT_MAIL when marked 'do not mail'
+        tagButtons = tagButtons.filter(btn => this.includesDoNotMail && btn !== DO_NOT_MAIL);
+      }
+
+      if (this.includesDoNotCall) {
+        // hide DO_NOT_CALL when marked 'do not call'
+        tagButtons = tagButtons.filter(btn => btn !== DO_NOT_CALL);
+      }
+
       const combined = [
-        ...ADDRESS_RIGHT_BUTTON_LIST,
-        ...ADDRESS_LEFT_BUTTON_LIST,
+        ...activityButtons,
+        ...tagButtons,
       ];
+
       return combined.map(value => (
         ACTION_BUTTON_LIST.find((btn => btn.value === value))
       ));
     },
     actionButtonList() {
-      if (this.entity.type === 'Regular') {
-        return this.addressButtonList;
-      }
-      return this.phoneButtonList;
+      return this.entity.type === 'Regular' ? this.addressButtonList : this.phoneButtonList;
     },
     checkoutId() {
       return get(this.territory, 'status.checkout_id');
@@ -193,6 +225,12 @@ export default {
       const logs = get(this.entity, 'activityLogs') || [];
       const ordered = orderBy(logs, ['timestamp'], ['desc']);
       return ordered.slice(0, 3);
+    },
+    includesDoNotCall() {
+      return this.entity.notes.includes(DO_NOT_CALL);
+    },
+    includesDoNotMail() {
+      return this.entity.notes.includes(DO_NOT_MAIL);
     },
   },
 };
@@ -242,12 +280,11 @@ export default {
       border-collapse: separate;
 
       .log-date {
-        width: 30%;
-      }
-      .log-description {
-        width: 60%;
+        width: 100px;
+        max-width: 100px;
       }
       .remove-log-container {
+        width: 34px;
         height: 32px;
         .remove-log {
           font-size: 12px;

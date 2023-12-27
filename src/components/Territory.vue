@@ -446,14 +446,12 @@ export default {
       subscription.bind('add-note', (args) => {
         if (args && this.territory) {
           const { addressId, notes } = args;
-          debugger;
           this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
         }
       });
       subscription.bind('remove-note', (args) => {
         if (args && this.territory) {
           const { addressId, notes } = args;
-          debugger;
           this.updateAddressNotes({ territoryId: this.territory.id, addressId, notes });
         }
       });

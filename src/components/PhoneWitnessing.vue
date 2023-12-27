@@ -8,7 +8,7 @@
       :model="keywordFilter"
       :results="filteredAddresses"
       :allow-exclude="true"
-      top="172px"
+      top="180px"
     />
     <PhoneAddressCard
       v-for="(a, index) in filteredAddresses" :key="a.id"
