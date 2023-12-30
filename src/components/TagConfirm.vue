@@ -14,7 +14,7 @@
     </b-badge>
     <b-modal
       :id="`tag-confirm-${id}`"
-      :title="`Add new note for ${this.record.addr1} ${this.record.addr2}`"
+      :title="`Add new note for ${this.record.addr1} ${this.record.addr2 || ''}`"
       ok-title="Create"
       @ok="() => addTag()"
       footerClass="border-top-0 pt-0"
