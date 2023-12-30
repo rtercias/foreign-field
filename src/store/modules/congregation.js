@@ -49,6 +49,17 @@ export const congregation = {
     congregation: state => state.congregation,
     error: state => state.error,
     congregationsByCircuit: state => state.congregationsByCircuit,
+    builtInAddressTags: () => ADDRESS_TAGS,
+    builtInPhoneTags: () => PHONE_ADDRESS_TAGS,
+    language: state => get(state.congregation, 'language') || 'Tagalog',
+    customAddressTags: (state) => {
+      const { customTags = '' } = get(state.congregation, 'options.address') || {};
+      return customTags.split(',').map(t => t.trim()) || [];
+    },
+    customPhoneTags: (state) => {
+      const { customTags = '' } = get(state.congregation, 'options.phone') || {};
+      return customTags.split(',').map(t => t.trim()) || [];
+    },
   },
 
   mutations: {
