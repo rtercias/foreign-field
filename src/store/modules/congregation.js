@@ -52,6 +52,7 @@ export const congregation = {
     congregationsByCircuit: state => state.congregationsByCircuit,
     builtInAddressTags: () => ADDRESS_TAGS,
     builtInPhoneTags: () => PHONE_ADDRESS_TAGS,
+    language: state => get(state.congregation, 'language') || 'Tagalog',
     customAddressTags: (state) => {
       const { customTags = '' } = get(state.congregation, 'options.address') || {};
       return customTags.split(',').map(t => t.trim()) || [];

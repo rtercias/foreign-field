@@ -55,7 +55,7 @@
 <script>
 import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
-import toUpper from 'lodash/toUpper';
+import startCase from 'lodash/startCase';
 import { mapActions, mapGetters } from 'vuex';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
@@ -90,9 +90,12 @@ export default {
         : formatPhone(this.entity.phone);
 
       if (this.isDoNotCall(value)) {
-        const response = await this.$bvModal.msgBoxConfirm(`Mark ${item} as ${value}?`, {
-          title: toUpper(value),
+        const message = `Are you sure you want to mark ${item} as a "${startCase(value)}"?`;
+        const response = await this.$bvModal.msgBoxConfirm(message, {
+          title: startCase(value),
           centered: true,
+          okTitle: `Mark as ${startCase(value)}`,
+          okVariant: 'danger',
         });
 
         if (response) {

@@ -27,7 +27,6 @@
             size='sm'
             :key="index"
             :variant="tag.state && (highlight(tag.caption) ? 'danger' : 'light')"
-            @click="(e) => e.stopPropagation()"
           >
             <span class="tag-text d-flex align-items-center small">
               <font-awesome-icon
@@ -39,20 +38,7 @@
               {{ formatLanguage(tag.caption, language) }}
             </span>
           </b-badge>
-          <b-badge
-            v-if="availableTags.length && !allTagsSelected"
-            @click="openAddDialog"
-            class="tag-button add-tag mr-2 mb-2 p-2"
-            size='sm'
-          >
-            <span class="tag-text d-flex align-items-center">
-              <span v-if="collapsed">
-                <font-awesome-icon icon="plus" class="tag-icon" />
-                Add Note
-              </span>
-              <span v-else>done</span>
-            </span>
-          </b-badge>
+          <TagConfirm :id="record.id" :record="record" :available-tags="filteredTags" />
         </div>
       </b-button-group>
     </div>
@@ -69,6 +55,7 @@ import difference from 'lodash/difference';
 import startsWith from 'lodash/startsWith';
 import { format as formatPhone } from '../utils/phone';
 import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
+import TagConfirm from './TagConfirm';
 import {
   formatLanguage,
   PHONE_ADDRESS_TAGS,
@@ -79,6 +66,9 @@ import {
 export default {
   name: 'Tags',
   props: ['record', 'disabled', 'variant'],
+  components: {
+    TagConfirm,
+  },
   data() {
     return {
       collapsed: true,
@@ -217,11 +207,6 @@ export default {
       this.collapsed = !this.collapsed;
     },
     async openAddDialog() {
-      /* TODO:
-        - add save functionality
-        - list other tags
-        - add click to edit?
-      */
       const h = this.$createElement;
       const messages = {
         note: h('input', {
@@ -301,6 +286,9 @@ export default {
     displayedTags() {
       return this.collapsed ? this.preview : this.combinedTags;
     },
+    filteredTags() {
+      return this.availableTags.filter(a => !this.selectedTags.includes(a));
+    },
     formattedPhone() {
       const { phone } = this.record;
       return formatPhone(phone);
@@ -354,22 +342,18 @@ export default {
   }
   .tag-button {
     background-color: $extra-light;
-    cursor: pointer;
     padding: 10px;
     height: fit-content;
   }
   .tag-icon {
     font-size: 0.75em;
+    cursor: pointer;
   }
   .tag-text {
     font-size: 1.25em;
   }
   .tag-button-preview {
     cursor: pointer;
-  }
-  .add-tag {
-    border: solid 1px;
-    color: $secondary;
   }
 
   .new-note {
