@@ -75,7 +75,7 @@ import intersection from 'lodash/intersection';
 import format from 'date-fns/format';
 import addYears from 'date-fns/addYears';
 import { REJECT_TAGS } from '../store/modules/phone';
-import { unmask } from '../utils/phone';
+import { format as formatPhone, unmask } from '../utils/phone';
 import {
   LEFT_BUTTON_LIST,
   RIGHT_BUTTON_LIST,
@@ -89,6 +89,7 @@ import {
   DO_NOT_CALL,
   DO_NOT_MAIL,
   LETTER_WRITING,
+  ADDRESS_STATUS,
 } from '../store/modules/models/AddressModel';
 
 
@@ -120,6 +121,7 @@ export default {
       congId: 'auth/congId',
       phone: 'phone/phone',
       isDesktop: 'auth/isDesktop',
+      search: 'phone/search',
     }),
     mode() {
       return this.$route.name;
@@ -148,6 +150,7 @@ export default {
       addLog: 'address/addLog',
       removeLog: 'address/removeLog',
       markAsDoNotCall: 'address/markAsDoNotCall',
+      phoneSearch: 'phone/phoneSearch',
     }),
     actionButtonList(type) {
       if (type === 'Regular') {
@@ -216,6 +219,35 @@ export default {
       await this.addPhone(phone);
       this.newPhone = '';
       this.isAdding = false;
+    },
+    async checkDuplicates(phone, id) {
+      const title = formatPhone(phone);
+      await this.phoneSearch({ congId: this.congId, searchTerm: phone });
+      const searchResults = this.search.filter(s => s.address.status === ADDRESS_STATUS.Active.value);
+      if (searchResults && searchResults.length) {
+        // same record is ok
+        if (id && searchResults.some(s => s.id === id)) return false;
+
+        if (searchResults.some(s => s.parent_id === this.address.id)) {
+          this.$bvModal.msgBoxOk('This number already exists.', { title, centered: true });
+        } else {
+          const terr = searchResults[0].territory;
+          const h = this.$createElement;
+          const message = h('p', {
+            domProps: {
+              innerHTML:
+              `This number already exists in territory
+              <b-link :to="/territories/${terr.id}">
+                ${terr.name}
+              </b-link>`,
+            },
+          });
+          this.$bvModal.msgBoxOk(message, { title, centered: true });
+        }
+        return true;
+      }
+
+      return false;
     },
     getRejectTag(phone) {
       return phone.notes.split(',').find(n => REJECT_TAGS.includes(n));
