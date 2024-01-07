@@ -60,12 +60,17 @@ import { mapActions, mapGetters } from 'vuex';
 import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
 import {
-  ACTION_BUTTON_LIST,
+  ACTION_BUTTON_LIST as ADDRESS_ACTION_BUTTON_LIST,
   ADDRESS_LEFT_BUTTON_LIST,
   ADDRESS_RIGHT_BUTTON_LIST,
   DO_NOT_CALL,
   DO_NOT_MAIL,
 } from '../store/modules/models/AddressModel';
+import {
+  ACTION_BUTTON_LIST as PHONE_ACTION_BUTTON_LIST,
+  LEFT_BUTTON_LIST as PHONE_LEFT_BUTTON_LIST,
+  RIGHT_BUTTON_LIST as PHONE_RIGHT_BUTTON_LIST,
+} from '../store/modules/models/PhoneModel';
 
 export default {
   name: 'ActivityLog',
@@ -140,7 +145,7 @@ export default {
       }
     },
     getActionButton(status, attr) {
-      const actionButton = ACTION_BUTTON_LIST.find(btn => btn.value === status) || {};
+      const actionButton = this.actionButtonList.find(btn => btn.value === status) || {};
       switch (attr) {
         case 'color':
           return `bg-light-${actionButton[attr] || 'light'}`;
@@ -215,11 +220,29 @@ export default {
       ];
 
       return combined.map(value => (
-        ACTION_BUTTON_LIST.find((btn => btn.value === value))
+        ADDRESS_ACTION_BUTTON_LIST.find((btn => btn.value === value))
+      ));
+    },
+    phoneButtonList() {
+      const activityButtons = PHONE_RIGHT_BUTTON_LIST;
+      const tagButtons = PHONE_LEFT_BUTTON_LIST;
+
+      const combined = [
+        ...activityButtons,
+        ...tagButtons,
+      ];
+
+      return combined.map(value => (
+        PHONE_ACTION_BUTTON_LIST.find((btn => btn.value === value))
       ));
     },
     actionButtonList() {
-      return this.entity.type === 'Regular' ? this.addressButtonList : this.phoneButtonList;
+      const buttonLists = {
+        Regular: this.addressButtonList,
+        Phone: this.phoneButtonList,
+      };
+
+      return buttonLists[this.entity.type];
     },
     checkoutId() {
       return get(this.territory, 'status.checkout_id');

@@ -1,51 +1,48 @@
 <template>
   <div
-    class="phone-card p-2 d-flex align-items-center justify-content-between"
+    class="phone-card p-2 text-left"
     :class="{ 'mb-2': isDesktop }">
-    <font-awesome-layers class="left-panel-button ellipsis-v-static text-muted fa-1x" @click="toggleLeftPanel">
-      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
-    </font-awesome-layers>
-    <div class="d-flex flex-column pl-4 col-9">
-      <h5 class="mb-0 mr-auto">
-        <a v-if="allowedToCall && !disabled" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
-        <span v-else>{{ formattedPhone }}</span>
-        <font-awesome-icon
-          class="edit-phone small text-primary ml-3"
-          icon="pencil-alt"
-          @click="edit">
-        </font-awesome-icon>
-      </h5>
+    <div>
+      <div v-if="!phoneRecord.editMode" class="d-flex justify-content-between mt-2">
+        <div class="d-flex align-items-center">
+          <AddressIcon :index="index+1" :record="phoneRecord" bg="light" />
+          <h5 class="mb-0 ml-2">
+            <a v-if="allowedToCall && !disabled" :href="`tel:${phoneRecord.phone}`">{{ formattedPhone }}</a>
+            <span v-else>{{ formattedPhone }}</span>
+          </h5>
+        </div>
+        <b-dropdown variant="light" right>
+          <template #button-content>
+            <font-awesome-icon icon="ellipsis-h" />
+          </template>
+          <b-dropdown-item @click="edit">Edit</b-dropdown-item>
+          <b-dropdown-item @click="remove" variant="danger">Delete</b-dropdown-item>
+        </b-dropdown>
+      </div>
+      <div v-else class="d-flex border-0">
+        <the-mask
+          class="form-control mr-2 pl-4"
+          type="tel"
+          :mask="'###-###-####'"
+          :masked="false"
+          v-model="phoneRecord.phone"
+        >
+        </the-mask>
+        <b-button
+          variant="white"
+          class="cancel text-danger position-absolute px-2"
+          @click="() => cancel(phoneRecord)"
+        >
+          <font-awesome-icon icon="times"></font-awesome-icon>
+        </b-button>
+        <b-button class="ml-1 text-primary" variant="light" @click="() => update(phoneRecord)">
+          <font-awesome-icon v-if="phoneRecord.isBusy" icon="circle-notch" spin></font-awesome-icon>
+          <font-awesome-icon v-else icon="save"></font-awesome-icon>
+        </b-button>
+      </div>
       <Tags :record="phoneRecord" class="mt-3" variant="info" />
+      <ActivityLog :entity="phoneRecord" />
     </div>
-    <div class="static-buttons col-3 pl-1">
-      <font-awesome-icon class="logging-spinner text-info ml-3" icon="circle-notch" spin v-if="phoneRecord.isBusy" />
-      <span v-else class="d-flex flex-column w-100">
-        <ActivityButton
-          v-if="!allowedToCall"
-          class="fa-2x px-2 ml-n2"
-          :value="notAllowedTag"
-          :selected="true"
-          :display-only="true"
-          :actionButtonList="actionButtonList">
-        </ActivityButton>
-        <ActivityButton
-          v-else
-          class="selected-response fa-2x px-2"
-          :class="{
-            faded: !isMySelectedResponse || isIncomingResponse,
-            hidden: selectedResponse === 'START' || phoneRecord.isBusy,
-          }"
-          :value="selectedResponse"
-          :next="'START'"
-          :selected="true"
-          :actionButtonList="actionButtonList"
-          @button-click="confirmClearStatus">
-        </ActivityButton>
-      </span>
-    </div>
-    <font-awesome-layers class="ellipsis-v-static text-muted fa-1x" @click="toggleRightPanel">
-      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
-    </font-awesome-layers>
   </div>
 </template>
 
@@ -54,17 +51,22 @@ import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
 import intersection from 'lodash/intersection';
-import ActivityButton from './ActivityButton';
 import Tags from './Tags';
-import { format as formatPhone } from '../utils/phone';
+import AddressIcon from './AddressIcon';
+import ActivityLog from './ActivityLog';
+import { format as formatPhone, unmask } from '../utils/phone';
 import { NOT_ALLOWED } from '../store/modules/models/PhoneModel';
+import { TheMask } from 'vue-the-mask';
+import { ADDRESS_STATUS } from '../store/modules/models/AddressModel';
 
 export default {
   name: 'PhoneCard',
   props: ['phoneRecord', 'address', 'incomingResponse', 'revealed', 'index', 'editPhone', 'disabled'],
   components: {
-    ActivityButton,
     Tags,
+    TheMask,
+    AddressIcon,
+    ActivityLog,
   },
   data() {
     return {
@@ -78,6 +80,7 @@ export default {
       isLeftPanelVisible: false,
       transform: '',
       clickedToOpen: false,
+      oldPhone: '',
     };
   },
   methods: {
@@ -85,6 +88,8 @@ export default {
       addLog: 'address/addLog',
       setPhone: 'phone/setPhone',
       fetchPublisher: 'publisher/fetchPublisher',
+      phoneSearch: 'phone/phoneSearch',
+      updatePhone: 'phone/updatePhone',
     }),
     toggleRightPanel() {
       this.$emit('toggle-right-panel', this.index, this.revealed);
@@ -142,7 +147,66 @@ export default {
     },
     edit() {
       this.$set(this.phoneRecord, 'editMode', !this.phoneRecord.editMode);
-      this.$emit('edit-phone', this.phoneRecord.phone);
+    },
+    cancel(phone) {
+      if (this.oldPhone) this.$set(phone, 'phone', formatPhone(this.oldPhone));
+      this.$set(phone, 'editMode', false);
+    },
+    async update(phone) {
+      this.$set(phone, 'isBusy', true);
+      const duplicates = await this.checkDuplicates(phone.phone, phone.id);
+      if (duplicates) {
+        this.$set(phone, 'isBusy', false);
+        return;
+      }
+      phone.phone = unmask(phone.phone);
+      await this.updatePhone(phone);
+      this.$set(phone, 'editMode', false);
+      this.$set(phone, 'isBusy', false);
+    },
+    async checkDuplicates(phone, id) {
+      const title = formatPhone(phone);
+      await this.phoneSearch({ congId: this.congId, searchTerm: phone });
+      const searchResults = this.search.filter(s => s.address.status === ADDRESS_STATUS.Active.value);
+      if (searchResults && searchResults.length) {
+        // same record is ok
+        if (id && searchResults.some(s => s.id === id)) return false;
+
+        if (searchResults.some(s => s.parent_id === this.address.id)) {
+          this.$bvModal.msgBoxOk('This number already exists.', { title, centered: true });
+        } else {
+          const terr = searchResults[0].territory;
+          const h = this.$createElement;
+          const message = h('p', {
+            domProps: {
+              innerHTML:
+              `This number already exists in territory
+              <b-link :to="/territories/${terr.id}">
+                ${terr.name}
+              </b-link>`,
+            },
+          });
+          this.$bvModal.msgBoxOk(message, { title, centered: true });
+        }
+        return true;
+      }
+
+      return false;
+    },
+    async remove(phone) {
+      this.$set(phone, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        `Remove "${formatPhone(phone.phone)}" from the list?`, {
+          title: 'Remove Phone',
+          centered: true,
+        }
+      );
+
+      if (response) {
+        phone.phone = unmask(phone.phone);
+        await this.updatePhone({ ...phone, status: ADDRESS_STATUS.Inactive.value });
+      }
+      this.$set(phone, 'isBusy', false);
     },
   },
   computed: {
@@ -152,6 +216,7 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
       isDesktop: 'auth/isDesktop',
+      search: 'phone/search',
     }),
 
     overflowRatio() {

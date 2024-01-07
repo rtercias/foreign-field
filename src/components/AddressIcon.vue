@@ -1,6 +1,15 @@
 <template>
   <div>
-    <font-awesome-icon v-if="record.isBusy" icon="circle-notch" spin class="busy text-primary" />
+    <font-awesome-icon
+      v-if="record.isBusy"
+      icon="circle-notch"
+      spin
+      class="busy"
+      :class="{
+        'text-primary': $route.name === 'address-list',
+        'text-white': $route.name === 'phone-list',
+      }"
+    />
     <ActivityButton
       v-else-if="notAllowedTag"
       class="selected-tag bg-danger text-white"
@@ -19,7 +28,8 @@
     />
     <ActivityButton
       v-else
-      :text="record.sort"
+      :class="{ [`bg-${bg}`]: bg }"
+      :text="index"
     />
   </div>
 </template>
@@ -31,7 +41,7 @@ import ActivityButton from './ActivityButton.vue';
 
 export default {
   name: 'AddressIcon',
-  props: ['record', 'index', 'mode', 'isLogging'],
+  props: ['record', 'index', 'bg'],
   components: {
     ActivityButton,
   },

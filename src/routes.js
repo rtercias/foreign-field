@@ -14,7 +14,6 @@ import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
 import PhoneWitnessing from './components/PhoneWitnessing';
-import AddressCarousel from './components/AddressCarousel';
 import TerritoryForm from './components/TerritoryForm';
 import CongregationForm from './components/CongregationForm';
 import GroupForm from './components/GroupForm';
@@ -97,16 +96,6 @@ const routes = [
       back: 'group',
     },
     children: [{
-      name: 'address-detail',
-      path: 'addresses/:addressId(\\d+)',
-      component: AddressCarousel,
-      props: true,
-      meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
-        back: 'group',
-        label: 'Territory',
-      },
-    }, {
       name: 'address-list',
       path: '/',
       component: PhoneWitnessing,

@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
@@ -165,7 +164,7 @@ export const territory = {
       if (terr && terr.addresses) {
         const addresses = terr.addresses || [];
         for (const address of addresses) {
-          address.isBusy = true;
+          address.isBusy = false;
         }
       }
     },
@@ -178,8 +177,8 @@ export const territory = {
 
     SET_TERRITORY_LAST_ACTIVITY(state, { territoryId, lastActivity }) {
       if (state.territory.id === territoryId) {
-        Vue.set(state.territory, 'lastActivity', lastActivity);
-        Vue.set(state.territory, 'isBusy', false);
+        set(state.territory, 'lastActivity', lastActivity);
+        set(state.territory, 'isBusy', false);
       }
     },
     SET_ADDRESS_LAST_ACTIVITY(state, { addressId, lastActivity }) {
@@ -189,23 +188,23 @@ export const territory = {
         || orderBy(get(address, 'activityLogs', []), ['timestamp'], ['desc'])[0];
 
       if (address) {
-        Vue.set(address, 'lastActivity', activity);
-        Vue.set(address, 'isBusy', false);
+        set(address, 'lastActivity', activity);
+        set(address, 'isBusy', false);
       }
     },
     SET_ADDRESS_ACTIVITY_LOGS(state, { addressId, activityLogs }) {
       const addresses = get(state, 'territory.addresses') || [];
       const address = addresses.find(a => a.id === addressId);
       if (address) {
-        Vue.set(address, 'activityLogs', activityLogs);
-        Vue.set(address, 'isBusy', false);
+        set(address, 'activityLogs', activityLogs);
+        set(address, 'isBusy', false);
       }
     },
     SET_ADDRESS_IS_BUSY(state, { addressId, status }) {
       const addresses = get(state, 'territory.addresses') || [];
       const address = addresses.find(a => a.id === addressId);
       if (address) {
-        Vue.set(address, 'isBusy', status);
+        set(address, 'isBusy', status);
       }
     },
     ADD_ADDRESS_ACTIVITY_LOG(state, { addressId, activityLog }) {
@@ -214,7 +213,7 @@ export const territory = {
       const { activityLogs } = address;
       if (activityLogs) {
         activityLogs.push(activityLog);
-        // Vue.set(address, 'activityLogs', activityLogs);
+        // set(address, 'activityLogs', activityLogs);
       }
     },
     REMOVE_ADDRESS_ACTIVITY_LOG(state, { addressId, logId }) {
@@ -226,7 +225,7 @@ export const territory = {
         if (index >= 0) {
           activityLogs.splice(index, 1);
         }
-        // Vue.set(address, 'activityLogs', activityLogs);
+        // set(address, 'activityLogs', activityLogs);
       }
     },
     SET_PHONE_LAST_ACTIVITY(state, { phoneId, lastActivity }) {
@@ -234,8 +233,8 @@ export const territory = {
       for (const address of addresses) {
         for (const phone of address.phones) {
           if (phone.id === phoneId) {
-            Vue.set(phone, 'lastActivity', lastActivity);
-            Vue.set(phone, 'isBusy', false);
+            set(phone, 'lastActivity', lastActivity);
+            set(phone, 'isBusy', false);
             break;
           }
         }
@@ -246,19 +245,19 @@ export const territory = {
       for (const address of addresses) {
         for (const phone of address.phones) {
           if (phone.id === phoneId) {
-            Vue.set(phone, 'activityLogs', activityLogs);
-            Vue.set(phone, 'isBusy', false);
+            set(phone, 'activityLogs', activityLogs);
+            set(phone, 'isBusy', false);
             break;
           }
         }
       }
     },
     LOADING_TERRITORY_TRUE(state) {
-      Vue.set(state, 'isLoading', true);
+      set(state, 'isLoading', true);
       state.territory = { ...initialState.territory };
     },
     LOADING_TERRITORY_FALSE(state) {
-      Vue.set(state, 'isLoading', false);
+      set(state, 'isLoading', false);
     },
     ADD_TERRITORY(state, cong) {
       state.congregation = cong;
@@ -316,7 +315,7 @@ export const territory = {
         address.id = address.id || address.addressId;
         const index = state.territory.addresses.findIndex(a => a.id === address.id);
         if (index >= 0) {
-          Vue.set(state.territory.addresses[index], 'isBusy', false);
+          set(state.territory.addresses[index], 'isBusy', false);
           state.territory.addresses.splice(index, 1);
         }
       }
@@ -345,14 +344,14 @@ export const territory = {
     UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes }) {
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.id === addressId);
-        if (address) Vue.set(address, 'notes', notes);
+        if (address) set(address, 'notes', notes);
       }
     },
     UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes }) {
       if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
         const address = state.territory.addresses.find(a => a.phones.some(p => p.id === phoneId));
         const phone = address && address.phones.find(p => p.id === phoneId);
-        if (phone) Vue.set(phone, 'notes', notes);
+        if (phone) set(phone, 'notes', notes);
       }
     },
     UPDATE_STATUS(state, status) {
@@ -369,7 +368,7 @@ export const territory = {
     },
     SET_ADDRESSES(state, addresses) {
       if (state.territory) {
-        Vue.set(state.territory, 'addresses', addresses);
+        set(state.territory, 'addresses', addresses);
       }
     },
   },
@@ -963,6 +962,8 @@ export const territory = {
       try {
         const { addresses = [] } = state.territory || {};
         addresses.forEach(async (address) => {
+          commit(SET_ADDRESS_IS_BUSY, { addressId: address.id, status: true });
+
           await dispatch('address/fetchActivityLogs', {
             addressId: address.id,
             checkoutId,
@@ -974,6 +975,7 @@ export const territory = {
           //   addressId: address.id,
           //   activityLogs: address.activityLogs,
           // });
+          commit(SET_ADDRESS_IS_BUSY, { addressId: address.id, status: false });
         });
       } catch (e) {
         commit(FETCH_ACTIVITY_LOGS_FAIL, e);

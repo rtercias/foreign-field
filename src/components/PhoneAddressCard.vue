@@ -3,91 +3,62 @@
     class="phone-address-card d-flex align-items-baseline"
     :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
     <div class="w-100">
-      <b-list-group>
-        <swipe-list
-          ref="list"
-          :items="combinedAddressAndPhones || []"
-          item-key="id"
-          :revealed.sync="revealed"
-          @active="onActive">
-          <template v-slot="{ item, index, revealed }">
-            <AddressCard
-              v-if="item.type === 'Regular'"
-              mode="phoneAddress"
+      <div>
+        <AddressCard
+          :mode="mode"
+          :index="index"
+          :class="{
+            'border-warning active': isActiveAddress(address.id),
+            'bg-secondary border-right-0 border-left-0': mode === 'phone-list',
+            'bg-white': mode === 'address-list',
+          }"
+          :address="address"
+          :territoryId="territory.id"
+        >
+        </AddressCard>
+        <div v-if="mode === 'phone-list'">
+          <div v-for="(phone, index) in phones" :key="index">
+            <PhoneCard
+              class="bg-white"
+              :class="isActiveAddress(phone.id) ? ['border-warning border-medium', 'active'] : []"
               :index="index"
-              :class="{
-                'border-warning active': isActiveAddress(item.id),
-                'bg-light border-right-0 border-left-0': mode === 'phone-list',
-              }"
-              :address="item"
-              :territoryId="territory.id"
-              :incomingResponse="item.lastActivity"
-              :revealed="revealed"
-              @update-response="updateResponse"
-              @toggle-right-panel="toggleRightPanel"
-              @toggle-left-panel="toggleLeftPanel">
-            </AddressCard>
-            <div v-else-if="!item.editMode && item.type === 'Phone'">
-              <PhoneCard
-                class="border"
-                :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
-                :index="index"
-                :phoneRecord="item"
-                :address="address"
-                :revealed="revealed"
-                :incomingResponse="item.lastActivity"
-                :disabled="disabled"
-                @update-response="updateResponse"
-                @toggle-right-panel="toggleRightPanel"
-                @toggle-left-panel="toggleLeftPanel"
-                @edit-phone="editPhone">
-              </PhoneCard>
-            </div>
-            <b-list-group-item v-else class="d-flex py-4 border-0">
-              <the-mask
-                class="form-control mr-2"
-                type="tel"
-                :mask="'###-###-####'"
-                :masked="false"
-                v-model="item.phone">
-              </the-mask>
-              <b-button variant="white" class="cancel text-danger position-absolute" @click="() => cancel(item)">
-                <font-awesome-icon icon="times"></font-awesome-icon>
-              </b-button>
-              <b-button class="ml-1 text-primary" variant="light" @click="() => update(item)">
-                <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
-                <font-awesome-icon v-else icon="save"></font-awesome-icon>
-              </b-button>
+              :phoneRecord="phone"
+              :address="address"
+              :incomingResponse="phone.lastActivity"
+              :disabled="disabled"
+            >
+            </PhoneCard>
+          </div>
+          <b-list-group>
+            <b-list-group-item
+              v-if="mode === 'phone-list'"
+              class="new-phone d-flex p-0 border-0"
+              :class="{ 'pt-0': isDesktop, 'mt-2 mx-2': !isDesktop }">
+              <b-input-group size="lg">
+                <b-input-group-prepend>
+                  <b-input-group-text class="text-gray bg-white">
+                    <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+                  </b-input-group-text>
+                </b-input-group-prepend>
+                <the-mask
+                  class="form-control phone-input"
+                  type="tel"
+                  :mask="'###-###-####'"
+                  :masked="false"
+                  v-model="newPhone"
+                  @mousedown.native="onActive">
+                </the-mask>
+                <b-input-group-append>
+                  <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
+                    <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
+                    <font-awesome-icon v-else icon="plus"></font-awesome-icon>
+                  </b-button>
+                </b-input-group-append>
+              </b-input-group>
             </b-list-group-item>
-          </template>
-        </swipe-list>
-        <b-list-group-item
-          v-if="mode === 'phone-list'"
-          class="new-phone d-flex p-0 pb-2 border-0"
-          :class="{ 'pt-0': isDesktop, 'mt-2 mx-2': !isDesktop }">
-          <b-input-group size="lg">
-            <b-input-group-prepend>
-              <b-input-group-text class="text-gray bg-white">
-                <font-awesome-icon icon="phone-alt"></font-awesome-icon>
-              </b-input-group-text>
-            </b-input-group-prepend>
-            <the-mask
-              class="form-control phone-input"
-              type="tel"
-              :mask="'###-###-####'"
-              :masked="false"
-              v-model="newPhone"
-              @mousedown.native="onActive">
-            </the-mask>
-            <b-input-group-append>
-              <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
-                <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
-                <font-awesome-icon v-else icon="plus"></font-awesome-icon>
-              </b-button>
-            </b-input-group-append>
-          </b-input-group>
-        </b-list-group-item>
-      </b-list-group>
+          </b-list-group>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -96,7 +67,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
 import AddressCard from './AddressCard';
-import { SwipeList } from 'vue-swipe-actions';
 import ActivityButton from './ActivityButton';
 import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
@@ -116,7 +86,6 @@ import {
   PHONE_ADDRESS_LEFT_BUTTON_LIST,
   PHONE_ADDRESS_RIGHT_BUTTON_LIST,
   NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
-  ADDRESS_STATUS,
   DO_NOT_CALL,
   DO_NOT_MAIL,
   LETTER_WRITING,
@@ -129,7 +98,6 @@ export default {
   components: {
     PhoneCard,
     AddressCard,
-    SwipeList,
     ActivityButton,
     TheMask,
   },
@@ -138,7 +106,6 @@ export default {
       enabled: true,
       revealed: {},
       newPhone: '',
-      oldPhone: '',
       isAddressBusy: false,
       addressLeftButtonList: PHONE_ADDRESS_LEFT_BUTTON_LIST,
       isAdding: false,
@@ -152,7 +119,6 @@ export default {
       user: 'auth/user',
       congId: 'auth/congId',
       phone: 'phone/phone',
-      search: 'phone/search',
       isDesktop: 'auth/isDesktop',
     }),
     mode() {
@@ -168,11 +134,8 @@ export default {
     doNotMail() {
       return this.phoneAddressTags.includes(DO_NOT_MAIL);
     },
-    combinedAddressAndPhones() {
-      if (this.mode === 'phone-list' && this.address && this.address.phones) {
-        return [this.address, ...this.address.phones];
-      }
-      return this.address ? [this.address] : [];
+    phones() {
+      return this.address.phones;
     },
   },
   methods: {
@@ -182,11 +145,8 @@ export default {
       addPhoneTag: 'phone/addTag',
       addAddressTag: 'address/addTag',
       removePhoneTag: 'phone/removeTag',
-      removeAddressTag: 'phone/removeTag',
       addLog: 'address/addLog',
       removeLog: 'address/removeLog',
-      updateAddress: 'address/updateAddress',
-      phoneSearch: 'phone/phoneSearch',
       markAsDoNotCall: 'address/markAsDoNotCall',
     }),
     actionButtonList(type) {
@@ -256,95 +216,6 @@ export default {
       await this.addPhone(phone);
       this.newPhone = '';
       this.isAdding = false;
-    },
-    cancel(phone) {
-      if (this.oldPhone) this.$set(phone, 'phone', this.formatPhone(this.oldPhone));
-      this.$set(phone, 'editMode', false);
-    },
-    async checkDuplicates(phone, id) {
-      const title = this.formatPhone(phone);
-      await this.phoneSearch({ congId: this.congId, searchTerm: phone });
-      const searchResults = this.search.filter(s => s.address.status === ADDRESS_STATUS.Active.value);
-      if (searchResults && searchResults.length) {
-        // same record is ok
-        if (id && searchResults.some(s => s.id === id)) return false;
-
-        if (searchResults.some(s => s.parent_id === this.address.id)) {
-          this.$bvModal.msgBoxOk('This number already exists.', { title, centered: true });
-        } else {
-          const terr = searchResults[0].territory;
-          const h = this.$createElement;
-          const message = h('p', {
-            domProps: {
-              innerHTML:
-              `This number already exists in territory
-              <b-link :to="/territories/${terr.id}">
-                ${terr.name}
-              </b-link>`,
-            },
-          });
-          this.$bvModal.msgBoxOk(message, { title, centered: true });
-        }
-        return true;
-      }
-
-      return false;
-    },
-    async update(phone) {
-      this.$set(phone, 'isBusy', true);
-      const duplicates = await this.checkDuplicates(phone.phone, phone.id);
-      if (duplicates) {
-        this.$set(phone, 'isBusy', false);
-        return;
-      }
-      phone.phone = unmask(phone.phone);
-      await this.updatePhone(phone);
-      this.$set(phone, 'editMode', false);
-      this.$set(phone, 'isBusy', false);
-    },
-    async remove(item, close) {
-      if (item.type === 'Regular') await this.removeAddress(item, close);
-      else if (item.type === 'Phone') await this.removePhone(item, close);
-    },
-    async removePhone(phone, close) {
-      this.$set(phone, 'isBusy', true);
-      const response = await this.$bvModal.msgBoxConfirm(
-        `Remove "${this.formatPhone(phone.phone)}" from the list?`, {
-          title: 'Remove Phone',
-          centered: true,
-        }
-      );
-
-      if (response) {
-        this.isAddressBusy = true;
-        phone.phone = unmask(phone.phone);
-        await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
-        this.isAddressBusy = false;
-      }
-      this.$set(phone, 'isBusy', false);
-      if (typeof close === 'function') close();
-    },
-    async removeAddress(address) {
-      this.$set(address, 'isBusy', true);
-      const response = await this.$bvModal.msgBoxConfirm(
-        'Remove address from the list?', {
-          title: `${address.addr1} ${address.addr2}`,
-          centered: true,
-        }
-      );
-
-      if (response) {
-        this.isAddressBusy = true;
-        await this.updateAddress({ ...address, status: AddressStatus.Inactive });
-        this.isAddressBusy = false;
-      }
-
-      // remove address from list if it's no longer active
-      const index = this.territory.addresses.findIndex(a => a.id === address.id);
-      if (index >= 0) this.territory.addresses.splice(index, 1);
-    },
-    formatPhone(phone) {
-      return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
     },
     getRejectTag(phone) {
       return phone.notes.split(',').find(n => REJECT_TAGS.includes(n));
