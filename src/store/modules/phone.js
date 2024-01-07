@@ -161,7 +161,7 @@ export const phone = {
       }
     },
 
-    async updatePhone({ commit, rootGetters }, _phone) {
+    async updatePhone({ commit, rootGetters, dispatch }, _phone) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -199,6 +199,7 @@ export const phone = {
         }
         const { updatePhone } = get(response, 'data.data');
         commit(UPDATE_PHONE, updatePhone);
+        dispatch('territory/updatePhone', updatePhone, { root: true });
       } catch (e) {
         commit(UPDATE_PHONE_FAIL, e);
         console.error(UPDATE_PHONE_FAIL, e);

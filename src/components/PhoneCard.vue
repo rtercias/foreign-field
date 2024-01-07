@@ -97,47 +97,47 @@ export default {
     toggleLeftPanel() {
       this.$emit('toggle-left-panel', this.index, this.revealed);
     },
-    async confirmClearStatus() {
-      try {
-        const h = this.$createElement;
-        let publisherName = '';
-        if (this.lastActivity.publisher_id === this.user.id) {
-          publisherName = 'you';
-        } else {
-          this.$set(this.phoneRecord, 'isBusy', true);
-          await this.getLastActivityPublisher();
-          if (this.publisher) {
-            publisherName = this.publisher.firstname && this.publisher.lastname
-              && `${this.publisher.firstname} ${this.publisher.lastname}`;
-          } else {
-            publisherName = `Unknown (ID: ${this.lastActivity.publisher_id})`;
-          }
-          this.$set(this.phoneRecord, 'isBusy', false);
-        }
-        const message = h('p', {
-          domProps: {
-            innerHTML:
-            `<div class="pb-3">
-              ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}`,
-          },
-        });
-        const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: this.formattedPhone,
-          centered: true,
-          okTitle: 'Remove',
-          cancelTitle: 'Close',
-        });
-        if (value) {
-          this.$set(this.phoneRecord, 'isBusy', true);
-          this.$emit('update-response', this.phoneRecord, 'START', () => {
-            this.$set(this.phoneRecord, 'isBusy', false);
-          });
-        }
-      } catch (err) {
-        // do nothing
-      }
-    },
+    // async confirmClearStatus() {
+    //   try {
+    //     const h = this.$createElement;
+    //     let publisherName = '';
+    //     if (this.lastActivity.publisher_id === this.user.id) {
+    //       publisherName = 'you';
+    //     } else {
+    //       this.$set(this.phoneRecord, 'isBusy', true);
+    //       await this.getLastActivityPublisher();
+    //       if (this.publisher) {
+    //         publisherName = this.publisher.firstname && this.publisher.lastname
+    //           && `${this.publisher.firstname} ${this.publisher.lastname}`;
+    //       } else {
+    //         publisherName = `Unknown (ID: ${this.lastActivity.publisher_id})`;
+    //       }
+    //       this.$set(this.phoneRecord, 'isBusy', false);
+    //     }
+    //     const message = h('p', {
+    //       domProps: {
+    //         innerHTML:
+    //         `<div class="pb-3">
+    //           ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
+    //         </div>` : ''}`,
+    //       },
+    //     });
+    //     const value = await this.$bvModal.msgBoxConfirm([message], {
+    //       title: this.formattedPhone,
+    //       centered: true,
+    //       okTitle: 'Remove',
+    //       cancelTitle: 'Close',
+    //     });
+    //     if (value) {
+    //       this.$set(this.phoneRecord, 'isBusy', true);
+    //       this.$emit('update-response', this.phoneRecord, 'START', () => {
+    //         this.$set(this.phoneRecord, 'isBusy', false);
+    //       });
+    //     }
+    //   } catch (err) {
+    //     // do nothing
+    //   }
+    // },
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
@@ -193,20 +193,20 @@ export default {
 
       return false;
     },
-    async remove(phone) {
-      this.$set(phone, 'isBusy', true);
+    async remove() {
+      this.$set(this.phoneRecord, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
-        `Remove "${formatPhone(phone.phone)}" from the list?`, {
+        `Remove "${formatPhone(this.phoneRecord.phone)}" from the list?`, {
           title: 'Remove Phone',
           centered: true,
         }
       );
 
       if (response) {
-        phone.phone = unmask(phone.phone);
-        await this.updatePhone({ ...phone, status: ADDRESS_STATUS.Inactive.value });
+        this.phoneRecord.phone = unmask(this.phoneRecord.phone);
+        await this.updatePhone({ ...this.phoneRecord, status: ADDRESS_STATUS.Inactive.value });
       }
-      this.$set(phone, 'isBusy', false);
+      this.$set(this.phoneRecord, 'isBusy', false);
     },
   },
   computed: {

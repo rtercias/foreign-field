@@ -324,9 +324,11 @@ export const territory = {
       if (state.territory && state.territory.addresses) {
         const address = state.territory.addresses.find(a => a.id === phone.parent_id);
         const origPhone = address && address.phones.find(p => p.id === phone.id);
+        set(address, 'isBusy', false);
         if (origPhone && phone) {
           for (const property in phone) {
             origPhone[property] = phone[property];
+            set(phone, 'isBusy', false);
           }
         }
       }
