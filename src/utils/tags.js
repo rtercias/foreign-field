@@ -14,7 +14,6 @@ export const PHONE_TAGS = [
 
 export const PHONE_ADDRESS_TAGS = [
   'no number',
-  'do not mail',
   'verify',
   'business',
 ];

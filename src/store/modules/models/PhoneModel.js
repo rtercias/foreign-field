@@ -86,9 +86,9 @@ export const ACTION_BUTTON_LIST = [
 ];
 
 export const LEFT_BUTTON_LIST = [
-  'do not call',
   'invalid',
   'confirmed',
+  'do not call',
 ];
 
 export const RIGHT_BUTTON_LIST = [

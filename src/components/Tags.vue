@@ -23,7 +23,7 @@
           >
             <span class="tag-text d-flex align-items-center small">
               <font-awesome-icon
-                v-if="tag.state"
+                v-if="tag.state && isEditable"
                 class="tag-icon mr-1"
                 icon="times"
                 @click="() => updateTag(tag)"
@@ -31,7 +31,12 @@
               {{ formatLanguage(tag.caption, language) }}
             </span>
           </b-badge>
-          <TagConfirm :id="record.id" :record="record" :available-tags="filteredTags" />
+          <TagConfirm
+            v-if="isEditable"
+            :id="record.id"
+            :record="record"
+            :available-tags="filteredTags"
+          />
         </div>
       </b-button-group>
     </div>
@@ -284,6 +289,10 @@ export default {
     formattedPhone() {
       const { phone } = this.record;
       return formatPhone(phone);
+    },
+    isEditable() {
+      return (this.$route.name === 'address-list' && this.record.type === 'Regular')
+        || (this.$route.name === 'phone-list' && this.record.type === 'Phone');
     },
   },
   mounted() {

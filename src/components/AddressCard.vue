@@ -1,6 +1,6 @@
 <template>
   <div
-    class="address-card-container d-flex align-items-center"
+    class="address-card-container d-flex justify-content-center py-2"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
       'mb-2': $route.name === 'phone-list' && isDesktop,
@@ -10,25 +10,14 @@
     <div
       class="w-100 row"
     >
-      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 text-dark w-100"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 w-100"
         :class="{
-          'min-height': $route.name === 'address-list',
-          'col-12': mode === 'map',
+          'min-height text-dark': $route.name === 'address-list',
+          'text-white': $route.name === 'phone-list',
+          'col-12 p-0': mode === 'map-view',
         }">
-        <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
-          <b-link
-            class="w-100"
-            :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
-            <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
-              {{address.addr1}} {{address.addr2}}
-            </div>
-            <div class="text-left small font-weight-bold">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
-            </div>
-          </b-link>
-        </div>
-        <div v-else class="d-flex pb-1">
-          <AddressIcon :index="index" :record="record" :mode-="mode" :isLogging="isLogging" />
+        <div class="d-flex pb-1">
+          <AddressIcon :index="index+1" :record="record" />
           <div class="pl-2">
             <div class="address d-flex align-items-center">
               <div class="d-inline mb-0">{{record.addr1}}&nbsp;</div>
@@ -39,7 +28,10 @@
             </div>
           </div>
         </div>
-        <b-dropdown variant="light" right>
+        <b-dropdown
+          variant="light"
+          right
+        >
           <template #button-content>
             <font-awesome-icon icon="ellipsis-h" />
           </template>
@@ -70,7 +62,7 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <ActivityLog :entity="record" />
+        <ActivityLog v-if="mode==='address-list'" :entity="record" />
       </div>
     </div>
   </div>
@@ -91,7 +83,7 @@ import { AddressStatus } from '../store';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode'],
+  props: ['address', 'addressId', 'territoryId', 'index', 'mode'],
   components: {
     AddressLinks,
     ActivityButton,
@@ -118,12 +110,7 @@ export default {
       setAddress: 'address/setAddress',
       updateAddress: 'address/updateAddress',
     }),
-    toggleRightPanel() {
-      this.$emit('toggle-right-panel', this.index, this.revealed);
-    },
-    toggleLeftPanel() {
-      this.$emit('toggle-left-panel', this.index, this.revealed);
-    },
+    get,
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
@@ -140,12 +127,12 @@ export default {
         this.isAddressBusy = true;
         await this.updateAddress({ ...this.record, status: AddressStatus.Inactive });
         this.isAddressBusy = false;
-      }
 
-      // remove address from list if it's no longer active
-      if (this.territory && this.territory.id === this.territoryId) {
-        const index = this.territory.addresses.findIndex(a => a.id === this.record.id);
-        if (index >= 0) this.territory.addresses.splice(index, 1);
+        // remove address from list if it's no longer active
+        if (this.territory && this.territory.id === this.territoryId) {
+          const index = this.territory.addresses.findIndex(a => a.id === this.record.id);
+          if (index >= 0) this.territory.addresses.splice(index, 1);
+        }
       }
     },
   },
@@ -221,17 +208,12 @@ export default {
   height: 100%;
 }
 .address-card-container {
-  &.min-height-phone-address {
-    min-height: 91px;
-  }
   &.min-height {
     min-height: 150px;
   }
   .address-card {
     display: flex;
     flex-direction: row;
-    overflow: hidden;
-    position: relative;
     transition: ease-in-out 0.3s;
 
     &.min-height {

@@ -6,15 +6,19 @@ $warning: #FCBB5A;
 $danger: #D00000;
 $light: #EFEFEF;
 $dark: #292929;
-$header-height: 52px;
 $extra-light: #F8F9FA;
 $white: #fff;
 $light-success: #D4EDDA;
 $light-warning: #FFF3CD;
+$header-height: 52px;
 
 html, body {
   color: #212529;
   height: 100%;
+}
+
+.bg-light {
+  color: $secondary !important;
 }
 
 .bg-light-success {
@@ -107,4 +111,10 @@ html, body {
 }
 .mdl-dialog.firebaseui-dialog.firebaseui-id-dialog {
   height: fit-content;
+}
+.fa-layers svg.svg-inline--fa {
+  top: 2px;
+}
+.input-group-append {
+  z-index: 0;
 }

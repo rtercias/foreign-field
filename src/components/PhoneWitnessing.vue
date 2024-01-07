@@ -13,10 +13,9 @@
     <PhoneAddressCard
       v-for="(a, index) in filteredAddresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
-      class="phone-address-card-container mx-2 mb-2 bg-white"
+      class="phone-address-card-container mx-2 mb-2 bg-light"
       :class="{
         'border-success border-medium': a.id === foundId,
-        'border': $route.name === 'address-list',
       }"
       :address="a"
       :territory="territory"
@@ -187,7 +186,6 @@ li {
   .phone-address-card-container {
     width: 48%;
     flex: auto;
-    border: 1px solid $secondary;
   }
 }
 

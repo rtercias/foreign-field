@@ -11,7 +11,7 @@
               <div class="d-inline-flex align-items-center">
                 <h4 class="text-truncate font-weight-bold">
                   {{territory.description}}
-                  <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
+                  <font-awesome-icon icon="circle-notch" spin class="text-black-50" v-if="isTerritoryBusy" />
                 </h4>
                 <b-badge
                   variant="warning"

@@ -1,8 +1,8 @@
-import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import format from 'date-fns/format';
 import addYears from 'date-fns/addYears';
 import {
@@ -87,7 +87,7 @@ export const address = {
           state.address.activityLogs.push(log);
         } else {
           state.address.activityLogs = [log];
-          Vue.set(address, 'lastActivity', log);
+          set(address, 'lastActivity', log);
         }
       }
     },
@@ -267,6 +267,7 @@ export const address = {
 
         const { activityLogs } = get(response, 'data.data.address') || {};
         dispatch('territory/setAddressActivityLogs', { addressId, activityLogs }, { root: true });
+        dispatch('territory/setAddressIsBusy', { addressId, status: false }, { root: true });
         commit(FETCH_ACTIVITY_LOGS_SUCCESS, activityLogs);
       } catch (e) {
         commit(FETCH_ACTIVITY_LOGS_FAIL, e);

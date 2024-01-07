@@ -14,7 +14,7 @@
     </b-badge>
     <b-modal
       :id="`tag-confirm-${id}`"
-      :title="`Add new note for ${this.record.addr1} ${this.record.addr2 || ''}`"
+      :title="title"
       ok-title="Create"
       @ok="() => addTag()"
       footerClass="border-top-0 pt-0"
@@ -48,6 +48,7 @@
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import { formatLanguage } from '../utils/tags';
+import { format as formatPhone } from '../utils/phone';
 
 export default {
   name: 'TagConfirm',
@@ -65,6 +66,14 @@ export default {
     tags() {
       const notes = get(this.record, 'notes') || '';
       return notes.split(',');
+    },
+    title() {
+      const labels = {
+        'address-list': `${this.record.addr1} ${this.record.addr2 || ''}`,
+        'phone-list': formatPhone(this.record.phone),
+      };
+      const description = labels[this.$route.name];
+      return `Add new note for ${description}`;
     },
   },
   methods: {
