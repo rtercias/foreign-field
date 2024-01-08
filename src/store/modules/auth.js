@@ -5,7 +5,6 @@ import firebase from 'firebase/compat/app';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import intersection from 'lodash/intersection';
 import { config } from '../../../firebase.config';
 import { router } from '../../routes';
@@ -172,9 +171,9 @@ export const auth = {
     },
 
     USER_TERRITORIES_ADDED(state, territories) {
-      set(state.user, 'territories', territories);
-      set(state, 'userTerritories', territories);
-      set(state, 'myTerritoriesLoading', false);
+      Vue.set(state.user, 'territories', territories);
+      Vue.set(state, 'userTerritories', territories);
+      Vue.set(state, 'myTerritoriesLoading', false);
     },
     WINDOW_RESIZE(state) {
       state.isSwitchedToDesktop = window.matchMedia('(min-width: 801px)').matches;
@@ -186,18 +185,18 @@ export const auth = {
       const territories = get(state, 'user.territories') || [];
       const territory = territories.find(t => t.id === id);
       if (territory) {
-        set(territory, 'lastActivity', lastActivity);
+        Vue.set(territory, 'lastActivity', lastActivity);
       }
     },
     GENERATE_PUBLISHER_TOKEN(state, token) {
       state.publisherToken = token;
     },
     GENERATE_SHORT_LINK(state, shortLink) {
-      set(state, 'shortLink', shortLink);
+      Vue.set(state, 'shortLink', shortLink);
     },
     SMS_SENT() {},
     UPDATE_COORDINATES(state, coordinates) {
-      set(state.user, 'coordinates', coordinates);
+      Vue.set(state.user, 'coordinates', coordinates);
     },
   },
 

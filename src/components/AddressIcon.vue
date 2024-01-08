@@ -1,13 +1,13 @@
 <template>
   <div>
     <font-awesome-icon
-      v-if="record.isBusy"
+      v-if="isBusy"
       icon="circle-notch"
       spin
       class="busy"
       :class="{
         'text-primary': $route.name === 'address-list',
-        'text-white': $route.name === 'phone-list',
+        'text-white': $route.name === 'phone-list' && record.type === 'Regular',
       }"
     />
     <ActivityButton
@@ -17,12 +17,12 @@
       :actionButtonList="actionButtonList"
     />
     <ActivityButton
-      v-else-if="selectedResponse !== 'START'"
+      v-else-if="selectedResponse() !== 'START'"
       class="selected-response"
       :class="{
-        faded: !isMySelectedResponse || isIncomingResponse,
+        faded: !isMySelectedResponse() || isIncomingResponse,
       }"
-      :value="selectedResponse"
+      :value="selectedResponse()"
       :next="'START'"
       :actionButtonList="actionButtonList"
     />
@@ -36,7 +36,13 @@
 <script>
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
-import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
+import {
+  NOT_ALLOWED,
+  ACTION_BUTTON_LIST as ADDRESS_ACTION_BUTTON_LIST,
+} from '../store/modules/models/AddressModel';
+import {
+  ACTION_BUTTON_LIST as PHONE_ACTION_BUTTON_LIST,
+} from '../store/modules/models/PhoneModel';
 import ActivityButton from './ActivityButton.vue';
 
 export default {
@@ -54,22 +60,21 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       publisher: 'publisher/publisher',
-      actionButtonList: 'address/actionButtonList',
     }),
     notAllowedTag() {
       const tags = this.record.notes ? this.record.notes.split(',') : [];
       return NOT_ALLOWED.find(na => tags.some(t => t.includes(na)));
     },
-    lastActivity() {
-      return get(this.record, 'lastActivity') || { value: 'START', timestamp: '' };
+    isBusy() {
+      return get(this.record, 'isBusy') || false;
     },
-    selectedResponse() {
-      return this.lastActivity.value;
-    },
-    isMySelectedResponse() {
-      const publisherId = get(this.lastActivity, 'publisher_id') || '';
-      const userId = get(this.user, 'id') || '';
-      return publisherId.toString() === userId.toString();
+    actionButtonList() {
+      const buttonLists = {
+        Regular: ADDRESS_ACTION_BUTTON_LIST,
+        Phone: PHONE_ACTION_BUTTON_LIST,
+      };
+
+      return buttonLists[this.record.type];
     },
   },
   methods: {
@@ -77,8 +82,17 @@ export default {
       fetchPublisher: 'publisher/fetchPublisher',
     }),
     async getLastActivityPublisher() {
-      const id = Number.parseInt(this.lastActivity.publisher_id, 10);
+      const publisherId = get(this.record, 'lastActivity.publisher_id');
+      const id = Number.parseInt(publisherId, 10);
       await this.fetchPublisher({ id });
+    },
+    selectedResponse() {
+      return get(this.record, 'lastActivity.value') || 'START';
+    },
+    isMySelectedResponse() {
+      const publisherId = get(this.record, 'lastActivity.publisher_id') || '';
+      const userId = get(this.user, 'id') || '';
+      return publisherId.toString() === userId.toString();
     },
   },
 };

@@ -1,9 +1,9 @@
+import Vue from 'vue';
 import axios from 'axios';
 import { axiosToken } from '..';
 import gql from 'graphql-tag';
 import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import groupBy from 'lodash/groupBy';
 import toArray from 'lodash/toArray';
 import differenceInDays from 'date-fns/differenceInDays';
@@ -69,7 +69,7 @@ export const territories = {
     SET_ALL_TERRITORIES: (state, all) => state.allTerritories = all,
     SET_LOADING: (state, value) => state.loading = value,
     SET_LOADING_STATUSES: (state, value) => {
-      set(state, 'loadingStatuses', value);
+      Vue.set(state, 'loadingStatuses', value);
     },
     SET_ERROR: (state, value) => state.error = value,
     SET_NEAREST_TERRITORIES: (state, nearest) => {
@@ -95,7 +95,7 @@ export const territories = {
       if (terrAddressCount) {
         for (const terr of state.territories) {
           const count = terrAddressCount.find(t => t.id === terr.id);
-          if (count) set(terr, 'addressCount', get(count, 'addressCount', 0));
+          if (count) Vue.set(terr, 'addressCount', get(count, 'addressCount', 0));
         }
       }
     },
@@ -103,20 +103,20 @@ export const territories = {
       if (terrPhoneCount) {
         for (const terr of state.territories) {
           const count = terrPhoneCount.find(t => t.id === terr.id);
-          if (count) set(terr, 'phoneCount', get(count, 'phoneCount', 0));
+          if (count) Vue.set(terr, 'phoneCount', get(count, 'phoneCount', 0));
         }
       }
     },
     SET_IS_BUSY: (state, { id, value }) => {
       const terr = state.territories.find(t => t.id === id);
-      if (terr) set(terr, 'isBusy', value);
+      if (terr) Vue.set(terr, 'isBusy', value);
     },
     SET_SORT_FILTER: (state, filter) => {
       state.selectedSortAndFilters = { ...state.selectedSortAndFilters, ...filter };
     },
     SET_STATUS: (state, { id, status }) => {
       const terr = state.territories.find(t => t.id === id);
-      if (terr) set(terr, 'status', status);
+      if (terr) Vue.set(terr, 'status', status);
     },
   },
   actions: {

@@ -2,7 +2,8 @@
   <div class="activity-log w-100" v-if="isCheckedOut && !includesDoNotCall">
     <hr class="w-100 my-2" />
     <div class="d-flex justify-content-between align-items-center">
-      <span>Visit Record</span>
+      <span v-if="$route.name === 'address-list'">Visit Record</span>
+      <span v-if="$route.name === 'phone-list'">Call Record</span>
       <b-button
         variant="link"
         class="see-history pr-0"
@@ -37,13 +38,13 @@
     </b-dropdown>
     <table class="recent-logs w-100">
       <tr
-        v-for="log in recentActivityLogs"
+        v-for="log = {} in getRecentActivity(entity.activityLogs)"
         :key="log.id"
         :class="getBgColor(log.value)"
       >
         <td class="text-left log-date pl-2">{{ formatDate(log.timestamp) }}</td>
         <td class="text-left log-description">{{ getDescription(log.value) }}</td>
-        <td class="remove-log-container">
+        <td class="remove-log-container text-center">
           <b-button variant="link" class="remove-log p-0" @click="() => removeLog(log)">
             <font-awesome-icon icon="times" />
           </b-button>
@@ -77,11 +78,15 @@ export default {
   props: ['entity'],
   methods: {
     ...mapActions({
-      addAddressLog: 'address/addLog',
-      removeAddressLog: 'address/removeLog',
+      addEntityLog: 'address/addLog',
+      removeEntityLog: 'address/removeLog',
       markAsDoNotCall: 'address/markAsDoNotCall',
       addAddressTag: 'address/addTag',
     }),
+    getRecentActivity(logs = []) {
+      const ordered = orderBy(logs, ['timestamp'], ['desc']);
+      return ordered.slice(0, 3);
+    },
     async addRecord(value) {
       if (this.isDoNotCall(value) || this.isDoNotMail(value)) {
         await this.addTag(value);
@@ -134,10 +139,12 @@ export default {
 
       try {
         this.$set(this.entity, 'isBusy', true);
-        await this.addAddressLog({
+        await this.addEntityLog({
           entityId: this.entity.id,
           value,
           checkoutId: this.checkoutId,
+          parentId: this.entity.parent_id,
+          type: this.entity.type,
         });
         this.$set(this.entity, 'isBusy', false);
       } catch (e) {
@@ -157,10 +164,10 @@ export default {
       return this.getActionButton(status, 'color');
     },
     getDescription(status) {
-      return this.getActionButton(status, 'description');
+      return this.getActionButton(status, 'description') || '(Cleared)';
     },
     formatDate(timestamp) {
-      if (Number.isNaN(timestamp)) {
+      if (!timestamp || Number.isNaN(timestamp)) {
         return '';
       }
       const d = new Date(Number(timestamp));
@@ -179,7 +186,12 @@ export default {
       });
 
       if (response) {
-        await this.removeAddressLog({ id, entityId: this.entity.id });
+        await this.removeEntityLog({
+          id,
+          entityId: this.entity.id,
+          parentId: this.entity.parent_id,
+          type: this.entity.type,
+        });
       }
     },
     isDoNotCall(value) {
@@ -189,8 +201,13 @@ export default {
       return value.includes(DO_NOT_MAIL);
     },
     isActivity(value) {
-      return ADDRESS_RIGHT_BUTTON_LIST.includes(value);
+      return this.activityButtons.includes(value);
     },
+    // recentActivityLogs() {
+    //   const logs = get(this.entity, 'activityLogs') || [];
+    //   const ordered = orderBy(logs, ['timestamp'], ['desc']);
+    //   return ordered.splice(0, 3);
+    // },
   },
   computed: {
     ...mapGetters({
@@ -198,6 +215,14 @@ export default {
       user: 'auth/user',
       isCheckedOut: 'territory/isCheckedOut',
     }),
+    activityButtons() {
+      const list = {
+        Regular: ADDRESS_RIGHT_BUTTON_LIST,
+        Phone: PHONE_RIGHT_BUTTON_LIST,
+      };
+
+      return list[this.entity.type];
+    },
     addressButtonList() {
       let activityButtons = ADDRESS_RIGHT_BUTTON_LIST;
       let tagButtons = ADDRESS_LEFT_BUTTON_LIST;
@@ -246,11 +271,6 @@ export default {
     },
     checkoutId() {
       return get(this.territory, 'status.checkout_id');
-    },
-    recentActivityLogs() {
-      const logs = get(this.entity, 'activityLogs') || [];
-      const ordered = orderBy(logs, ['timestamp'], ['desc']);
-      return ordered.slice(0, 3);
     },
     includesDoNotCall() {
       return this.entity.notes.includes(DO_NOT_CALL);

@@ -1,8 +1,8 @@
+import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import { model, validate } from './models/CongregationModel';
 
 const SET_CONGREGATION = 'SET_CONGREGATION';
@@ -97,10 +97,10 @@ export const congregation = {
       state.error = exception;
     },
     START_CAMPAIGN(state, campaign) {
-      set(state, 'congregation.currentCampaign', campaign);
+      Vue.set(state, 'congregation.currentCampaign', campaign);
     },
     END_CAMPAIGN(state) {
-      set(state, 'congregation.currentCampaign', null);
+      Vue.set(state, 'congregation.currentCampaign', null);
     },
     START_CAMPAIGN_FAIL(state, error) {
       state.error = error;
