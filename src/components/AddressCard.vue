@@ -18,14 +18,14 @@
           'col-12 p-0': mode === 'map-view',
         }">
         <div class="d-flex pb-1">
-          <AddressIcon :index="index+1" :record="record" />
+          <AddressIcon :index="index+1" :record="address" />
           <div class="pl-2">
             <div class="address d-flex align-items-center">
-              <div class="d-inline mb-0">{{record.addr1}}&nbsp;</div>
-              {{record.addr2}}
+              <div class="d-inline mb-0">{{address.addr1}}&nbsp;</div>
+              {{address.addr2}}
             </div>
             <div class="text-left city-state-zip mb-1">
-              {{record.city}} {{record.state_province}} {{record.postal_code}}
+              {{address.city}} {{address.state_province}} {{address.postal_code}}
             </div>
           </div>
         </div>
@@ -57,13 +57,13 @@
           </b-dropdown-item>
         </b-dropdown>
         <Tags
-          :record="record"
+          :record="address"
           :variant="$route.name === 'phone-list' ? 'info' : 'primary'"
           :class="{'pl-2': $route.name === 'phone-list'}"
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <ActivityLog v-if="mode==='address-list'" :entity="record" />
+        <ActivityLog v-if="mode==='address-list'" :entity="address" />
       </div>
     </div>
   </div>
@@ -95,7 +95,6 @@ export default {
   },
   data() {
     return {
-      record: {},
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -113,10 +112,7 @@ export default {
     ) {
       const address = this.territory.addresses.find(a => a.id === this.addressId)
         || this.territory.addresses[0];
-      this.record = address || {};
-      this.setAddress(this.record);
-    } else {
-      this.record = this.address || {};
+      this.setAddress(address);
     }
   },
 
@@ -131,22 +127,19 @@ export default {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
     async removeAddress() {
-      this.$set(this.record, 'isBusy', true);
       const response = await this.$bvModal.msgBoxConfirm(
         'Remove address from the list?', {
-          title: `${this.record.addr1} ${this.record.addr2}`,
+          title: `${this.address.addr1} ${this.address.addr2}`,
           centered: true,
         }
       );
 
       if (response) {
-        this.isAddressBusy = true;
-        await this.updateAddress({ ...this.record, status: AddressStatus.Inactive });
-        this.isAddressBusy = false;
+        await this.updateAddress({ ...this.address, status: AddressStatus.Inactive });
 
         // remove address from list if it's no longer active
         if (this.territory && this.territory.id === this.territoryId) {
-          const index = this.territory.addresses.findIndex(a => a.id === this.record.id);
+          const index = this.territory.addresses.findIndex(a => a.id === this.address.id);
           if (index >= 0) this.territory.addresses.splice(index, 1);
         }
       }
@@ -189,7 +182,7 @@ export default {
     },
 
     formattedPhone() {
-      return this.record && this.record.phone && formatPhone(this.record.phone);
+      return this.address && this.address.phone && formatPhone(this.address.phone);
     },
 
     formattedSelectedResponseTS() {
@@ -198,7 +191,7 @@ export default {
       return format(new Date(timestamp), 'MM/dd/yy p');
     },
     lastActivity() {
-      return get(this.record, 'lastActivity') || { value: 'START', timestamp: '' };
+      return get(this.address, 'lastActivity') || { value: 'START', timestamp: '' };
     },
     selectedResponse() {
       return this.lastActivity.value;
@@ -210,15 +203,15 @@ export default {
       return `foreignfield-${this.address.id}`;
     },
     mapsUrl() {
-      const addr1 = get(this.record, 'addr1') || '';
-      const city = get(this.record, 'city') || '';
-      const state = get(this.record, 'state_province') || '';
+      const addr1 = get(this.address, 'addr1') || '';
+      const city = get(this.address, 'city') || '';
+      const state = get(this.address, 'state_province') || '';
       return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
     },
     lookupFastPeopleSearch() {
-      const addr1 = `${(get(this.record, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
-      const city = `${(get(this.record, 'city') || '').trim().replace(/\s+/g, '-')}`;
-      const state = `${(get(this.record, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
+      const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
       return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
     },
   },

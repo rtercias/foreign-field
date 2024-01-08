@@ -1,8 +1,10 @@
+import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import set from 'lodash/set';
+import orderBy from 'lodash/orderBy';
+import first from 'lodash/first';
 import format from 'date-fns/format';
 import addYears from 'date-fns/addYears';
 import {
@@ -87,7 +89,7 @@ export const address = {
           state.address.activityLogs.push(log);
         } else {
           state.address.activityLogs = [log];
-          set(address, 'lastActivity', log);
+          Vue.set(address, 'lastActivity', log);
         }
       }
     },
@@ -237,6 +239,8 @@ export const address = {
           return;
         }
 
+        dispatch('territory/setAddressIsBusy', { addressId, status: true }, { root: true });
+
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -265,7 +269,10 @@ export const address = {
           throw new Error(errors[0].message);
         }
 
-        const { activityLogs } = get(response, 'data.data.address') || {};
+        const { activityLogs } = get(response, 'data.data.address') || [];
+        const ordered = orderBy(activityLogs, ['timestamp'], ['desc']);
+        const lastActivity = first(ordered);
+        dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
         dispatch('territory/setAddressActivityLogs', { addressId, activityLogs }, { root: true });
         dispatch('territory/setAddressIsBusy', { addressId, status: false }, { root: true });
         commit(FETCH_ACTIVITY_LOGS_SUCCESS, activityLogs);
@@ -274,12 +281,13 @@ export const address = {
       }
     },
 
-    async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId }) {
+    async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId, parentId, type }) {
       try {
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
 
         commit('auth/LOADING', true, { root: true });
+        dispatch('territory/setAddressIsBusy', { addressId: entityId, status: true }, { root: true });
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -308,11 +316,36 @@ export const address = {
         const { addLog } = get(response, 'data.data') || {};
         commit(ADD_LOG, addLog);
 
-        // TODO: separate the calls by creating "addLog" function specifically for phones
-        dispatch('territory/setAddressLastActivity', { addressId: entityId, lastActivity: addLog }, { root: true });
-        dispatch('territory/addAddressActivityLog', { addressId: entityId, activityLog: addLog }, { root: true });
-        dispatch('territory/setPhoneLastActivity', { phoneId: entityId, lastActivity: addLog }, { root: true });
-
+        if (type === 'Regular') {
+          dispatch('territory/setAddressLastActivity', {
+            addressId: entityId,
+            lastActivity: addLog,
+          }, { root: true });
+          dispatch('territory/addAddressActivityLog', {
+            addressId: entityId,
+            activityLog: addLog,
+          }, { root: true });
+          dispatch('territory/setAddressIsBusy', {
+            addressId: entityId,
+            status: false,
+          }, { root: true });
+        } else if (type === 'Phone') {
+          dispatch('territory/setPhoneLastActivity', {
+            phoneId: entityId,
+            addressId: parentId,
+            lastActivity: addLog,
+          }, { root: true });
+          dispatch('territory/addPhoneActivityLog', {
+            phoneId: entityId,
+            addressId: parentId,
+            activityLog: addLog,
+          }, { root: true });
+          dispatch('territory/setPhoneIsBusy', {
+            phoneId: entityId,
+            addressId: parentId,
+            status: false,
+          }, { root: true });
+        }
         commit(FETCH_LAST_ACTIVITY_SUCCESS, addLog);
       } catch (e) {
         commit(LOG_FAIL, e);
@@ -322,7 +355,7 @@ export const address = {
       }
     },
 
-    async removeLog({ commit, dispatch }, { id, entityId }) {
+    async removeLog({ commit, dispatch }, { id, entityId, parentId, type }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -343,17 +376,32 @@ export const address = {
         });
 
         commit(REMOVE_LOG, { id, entityId });
-        dispatch(
-          'territory/removeAddressActivityLog',
-          { addressId: entityId, logId: id },
-          { root: true },
-        );
 
-        dispatch(
-          'territory/setAddressLastActivity',
-          { addressId: entityId },
-          { root: true },
-        );
+        if (type === 'Regular') {
+          dispatch(
+            'territory/removeAddressActivityLog',
+            { addressId: entityId, logId: id },
+            { root: true },
+          );
+
+          dispatch(
+            'territory/setAddressLastActivity',
+            { addressId: entityId },
+            { root: true },
+          );
+        } else if (type === 'Phone') {
+          dispatch(
+            'territory/removePhoneActivityLog',
+            { addressId: parentId, phoneId: entityId, logId: id },
+            { root: true },
+          );
+
+          dispatch(
+            'territory/setPhoneLastActivity',
+            { phoneId: entityId, addressId: parentId },
+            { root: true },
+          );
+        }
       } catch (e) {
         commit(LOG_FAIL, e);
       }
