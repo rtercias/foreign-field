@@ -24,7 +24,10 @@
       <font-awesome-layers
         v-if="get('icon')"
         class="fa-layers text-white"
-        :class="{ [`text-${get('color')}`]: invert }"
+        :class="{
+          [`text-${get('color')}`]: invert,
+          [`${value}-icon`]: true,
+        }"
         @click="click(get('next') || get('value'))">
         <font-awesome-icon :icon="get('icon')" v-if="!!get('icon')"></font-awesome-icon>
         <font-awesome-icon icon="slash" v-if="isSlashed"
@@ -44,7 +47,11 @@
           }">
         </font-awesome-layers-text>
       </font-awesome-layers>
-      <span v-else class="text-white" :class="{ [`${value}-text`]: true }">
+      <span v-else
+        :class="{
+          [`${value}-text font-16`]: true,
+          'text-white': invert,
+        }">
         {{ get('text') }}
       </span>
     </span>
@@ -115,6 +122,9 @@ export default {
       }
       return !this.displayOnly && !this.selected && !!this.get('description');
     },
+    getIcon() {
+      return this.get('icon');
+    },
   },
 };
 </script>
@@ -124,10 +134,14 @@ export default {
     opacity: 0.9;
   }
 }
-.NH-text {
+.font-16 {
   font-size: 16px;
 }
-
+.NA-icon, .VM-icon {
+  svg.svg-inline--fa {
+    left: -2px;
+  }
+}
 .interaction {
   cursor: pointer;
   text-decoration: none;
