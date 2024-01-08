@@ -8,7 +8,7 @@
           :mode="mode"
           :index="index"
           :class="{
-            'border-warning active': isActiveAddress(address.id),
+            'border-warning border-medium active': isActiveAddress(address.id),
             'bg-secondary border-right-0 border-left-0': mode === 'phone-list',
             'bg-white': mode === 'address-list',
           }"
@@ -20,7 +20,9 @@
           <div v-for="(phone, index) in phones" :key="index">
             <PhoneCard
               class="bg-white"
-              :class="isActiveAddress(phone.id) ? ['border-warning border-medium', 'active'] : []"
+              :class="{
+                'border-warning border-medium active': isActiveAddress(phone.id),
+              }"
               :index="index"
               :phoneRecord="phone"
               :address="address"
