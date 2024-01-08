@@ -295,9 +295,9 @@ export default {
     get,
     async refresh() {
       if (this.territory.id === this.territoryId && !!this.territory.addresses) {
-        if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
-          await this.fetchActivityLogs(this.territory);
-        }
+        // if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
+        //   await this.fetchActivityLogs(this.territory);
+        // }
       } else {
         await this.getTerritory({ id: this.territoryId, getLastActivity: true });
         await this.fetchActivityLogs(this.territory);
@@ -581,7 +581,7 @@ export default {
 
 .territory {
   .page-header {
-    z-index: 2;
+    z-index: 10;
   }
   h4 {
     font-size: 24px;

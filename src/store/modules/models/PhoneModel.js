@@ -25,12 +25,13 @@ export const ACTION_BUTTON_LIST = [
     text: '',
     icon: '',
     color: 'success',
+    description: '(Cleared)',
   },
   {
     type: 'fa-icon',
     value: 'NA',
-    text: '',
-    icon: 'comment-slash',
+    text: 'NA',
+    icon: '',
     color: 'warning',
     description: 'No Answer',
   },
@@ -38,8 +39,8 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'CT',
     text: '',
-    icon: 'comment',
-    color: 'primary',
+    icon: 'check',
+    color: 'success',
     description: 'Contacted',
   },
   {
@@ -47,7 +48,7 @@ export const ACTION_BUTTON_LIST = [
     value: 'VM',
     text: '',
     icon: 'voicemail',
-    color: 'primary',
+    color: 'success',
     description: 'Voicemail',
   },
   {
@@ -55,7 +56,7 @@ export const ACTION_BUTTON_LIST = [
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'primary',
+    color: 'success',
     description: 'Letter',
     disabledText: 'Do Not Mail',
   },
@@ -92,8 +93,8 @@ export const LEFT_BUTTON_LIST = [
 ];
 
 export const RIGHT_BUTTON_LIST = [
-  'NA',
   'CT',
+  'NA',
   'VM',
 ];
 
