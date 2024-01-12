@@ -7,6 +7,7 @@ const GEOCODE_CITY_TYPES = ['locality', 'sublocality'];
 export const DO_NOT_CALL = 'do not call';
 export const DO_NOT_MAIL = 'do not mail';
 export const LETTER_WRITING = 'mail sent';
+export const INVALID = 'invalid';
 
 export const model = gql`fragment AddressModel on Address {
   congregationId

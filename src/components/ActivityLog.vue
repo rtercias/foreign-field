@@ -1,5 +1,5 @@
 <template>
-  <div class="activity-log w-100" v-if="isCheckedOut && !includesDoNotCall">
+  <div class="activity-log w-100" v-if="isCheckedOut && !isDisabled">
     <hr class="w-100 my-2" />
     <div class="d-flex justify-content-between align-items-center">
       <span v-if="$route.name === 'address-list'">Visit Record</span>
@@ -66,6 +66,7 @@ import {
   ADDRESS_RIGHT_BUTTON_LIST,
   DO_NOT_CALL,
   DO_NOT_MAIL,
+  INVALID,
 } from '../store/modules/models/AddressModel';
 import {
   ACTION_BUTTON_LIST as PHONE_ACTION_BUTTON_LIST,
@@ -82,45 +83,59 @@ export default {
       removeEntityLog: 'address/removeLog',
       markAsDoNotCall: 'address/markAsDoNotCall',
       addAddressTag: 'address/addTag',
+      addPhoneTag: 'phone/addTag',
     }),
     getRecentActivity(logs = []) {
       const ordered = orderBy(logs, ['timestamp'], ['desc']);
       return ordered.slice(0, 3);
     },
     async addRecord(value) {
-      if (this.isDoNotCall(value) || this.isDoNotMail(value)) {
-        await this.addTag(value);
-      } else if (this.isActivity(value)) {
+      if (this.isActivity(value)) {
         await this.addLog(value);
+      } else {
+        await this.addTag(value);
       }
     },
     async addTag(value) {
-      const item = this.entity.type === 'Regular'
-        ? `${this.entity.addr1} ${this.entity.addr2}`
+      const isAddress = this.entity.type === 'Regular';
+      const isPhone = this.entity.type === 'Phone';
+
+      const item = isAddress
+        ? `${this.entity.addr1 || ''} ${this.entity.addr2 || ''}`
         : formatPhone(this.entity.phone);
 
-      if (this.isDoNotCall(value)) {
-        const message = `Are you sure you want to mark ${item} as a "${startCase(value)}"?`;
-        const response = await this.$bvModal.msgBoxConfirm(message, {
-          title: startCase(value),
-          centered: true,
-          okTitle: `Mark as ${startCase(value)}`,
-          okVariant: 'danger',
-        });
+      if (isAddress) {
+        if (this.isDoNotCall(value)) {
+          const message = `Are you sure you want to mark ${item} as a "${startCase(value)}"?`;
+          const response = await this.$bvModal.msgBoxConfirm(message, {
+            title: startCase(value),
+            centered: true,
+            okTitle: `Mark as ${startCase(value)}`,
+            okVariant: 'danger',
+          });
 
-        if (response) {
+          if (response) {
+            this.$set(this.entity, 'isBusy', true);
+            await this.markAsDoNotCall({
+              addr: this.entity,
+              userid: this.user.id,
+              tag: value,
+            });
+            this.$set(this.entity, 'isBusy', false);
+          }
+        } else {
           this.$set(this.entity, 'isBusy', true);
-          await this.markAsDoNotCall({
+          await this.addAddressTag({
             addr: this.entity,
             userid: this.user.id,
             tag: value,
           });
           this.$set(this.entity, 'isBusy', false);
         }
-      } else {
+      } else if (isPhone) {
         this.$set(this.entity, 'isBusy', true);
-        await this.addAddressTag({
-          addressId: this.entity.id,
+        await this.addPhoneTag({
+          phoneRecord: this.entity,
           userid: this.user.id,
           tag: value,
         });
@@ -277,6 +292,12 @@ export default {
     },
     includesDoNotMail() {
       return this.entity.notes.includes(DO_NOT_MAIL);
+    },
+    includesInvalid() {
+      return this.entity.notes.includes(INVALID);
+    },
+    isDisabled() {
+      return this.includesDoNotCall || this.includesInvalid;
     },
   },
 };

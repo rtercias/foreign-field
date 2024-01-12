@@ -375,15 +375,18 @@ export const territory = {
       }
     },
     UPDATE_ADDRESS_NOTES(state, { territoryId, addressId, notes }) {
-      if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
-        const address = state.territory.addresses.find(a => a.id === addressId);
+      const terr = get(state, 'territory') || {};
+      if (terr.addresses && terr.id === territoryId) {
+        const address = terr.addresses.find(a => a.id === addressId);
         if (address) Vue.set(address, 'notes', notes);
       }
     },
-    UPDATE_PHONE_NOTES(state, { territoryId, phoneId, notes }) {
-      if (state.territory && state.territory.addresses && state.territory.id === territoryId) {
-        const address = state.territory.addresses.find(a => a.phones.some(p => p.id === phoneId));
-        const phone = address && address.phones.find(p => p.id === phoneId);
+    UPDATE_PHONE_NOTES(state, { territoryId, addressId, phoneId, notes }) {
+      const terr = get(state, 'territory') || {};
+      if (terr.addresses && terr.id === territoryId) {
+        const address = terr.addresses.find(a => a.id === addressId) || {};
+        const phones = address.phones || [];
+        const phone = phones.find(p => p.id === phoneId) || {};
         if (phone) Vue.set(phone, 'notes', notes);
       }
     },
@@ -974,8 +977,8 @@ export const territory = {
     updateAddressNotes({ commit }, { territoryId, addressId, notes }) {
       commit(UPDATE_ADDRESS_NOTES, { territoryId, addressId, notes });
     },
-    updatePhoneNotes({ commit }, { territoryId, phoneId, notes }) {
-      commit(UPDATE_PHONE_NOTES, { territoryId, phoneId, notes });
+    updatePhoneNotes({ commit }, { territoryId, addressId, phoneId, notes }) {
+      commit(UPDATE_PHONE_NOTES, { territoryId, addressId, phoneId, notes });
     },
     updateStatus({ commit }, status) {
       const result = status.status === 'Checked Out' ? status : null;

@@ -27,7 +27,7 @@
           v-for="(tag, index) in availableTags"
           :key="index"
           class="badge available-tags mr-2 mb-2 p-2 border-0"
-          variant="light"
+          :variant="color(tag)"
           @click="() => addTag(tag)"
         >
           {{ formatLanguage(tag, language) }}
@@ -46,9 +46,15 @@
 </template>
 <script>
 import get from 'lodash/get';
+import startCase from 'lodash/startCase';
 import { mapGetters, mapActions } from 'vuex';
 import { formatLanguage } from '../utils/tags';
 import { format as formatPhone } from '../utils/phone';
+import {
+  ACTION_BUTTON_LIST as ADDRESS_ACTION_BUTTON_LIST,
+  DO_NOT_CALL,
+} from '../store/modules/models/AddressModel';
+import { ACTION_BUTTON_LIST as PHONE_ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
 
 export default {
   name: 'TagConfirm',
@@ -69,35 +75,71 @@ export default {
     },
     title() {
       const labels = {
-        'address-list': `${this.record.addr1} ${this.record.addr2 || ''}`,
+        'address-list': `${this.record.addr1 || ''} ${this.record.addr2 || ''}`,
         'phone-list': formatPhone(this.record.phone),
       };
       const description = labels[this.$route.name];
       return `Add new note for ${description}`;
     },
+    actionButtonList() {
+      return this.record.type === 'Regular' ? ADDRESS_ACTION_BUTTON_LIST : PHONE_ACTION_BUTTON_LIST;
+    },
   },
   methods: {
     ...mapActions({
       addAddressTag: 'address/addTag',
-      removeAddressTag: 'address/removeTag',
       addPhoneTag: 'phone/addTag',
+      markAsDoNotCall: 'address/markAsDoNotCall',
+      removeAddressTag: 'address/removeTag',
       removePhoneTag: 'phone/removeTag',
       setPhone: 'phone/setPhone',
       setAddress: 'address/setAddress',
     }),
     formatLanguage,
+    isDoNotCall(value) {
+      return value.includes(DO_NOT_CALL);
+    },
     async addTag(_tag) {
       const tag = _tag || this.newTag;
+      const isAddress = this.record.type === 'Regular';
+      const isPhone = this.record.type === 'Phone';
+      const item = isAddress
+        ? `${this.record.addr1 || ''} ${this.record.addr2 || ''}`
+        : formatPhone(this.record.phone);
+
       if (this.user && this.record) {
-        if (this.record.type === 'Phone') {
+        if (isPhone) {
           await this.setPhone(this.record);
-          await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag });
+          await this.addPhoneTag({ phoneRecord: this.record, userid: this.user.id, tag });
         } else {
           await this.setAddress(this.record);
-          await this.addAddressTag({ addressId: this.record.id, userid: this.user.id, tag });
+
+          if (this.isDoNotCall(tag)) {
+            const message = `Are you sure you want to mark ${item} as a "${startCase(tag)}"?`;
+            const response = await this.$bvModal.msgBoxConfirm(message, {
+              title: startCase(tag),
+              centered: true,
+              okTitle: `Mark as ${startCase(tag)}`,
+              okVariant: 'danger',
+            });
+
+            if (response) {
+              await this.markAsDoNotCall({
+                addr: this.record,
+                userid: this.user.id,
+                tag,
+              });
+            }
+          } else {
+            await this.addAddressTag({ addr: this.record, userid: this.user.id, tag });
+          }
         }
       }
       this.$bvModal.hide(`tag-confirm-${this.id}`);
+    },
+    color(tag) {
+      const button = this.actionButtonList.find(b => b.value === tag);
+      return button ? button.color : 'light';
     },
   },
 };
@@ -107,7 +149,6 @@ export default {
 
   .available-tags {
     font-size: 14px;
-    color: initial;
     font-weight: 300;
     cursor: pointer;
   }
