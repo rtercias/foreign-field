@@ -37,10 +37,11 @@
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import {
-  NOT_ALLOWED,
+  NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
   ACTION_BUTTON_LIST as ADDRESS_ACTION_BUTTON_LIST,
 } from '../store/modules/models/AddressModel';
 import {
+  NOT_ALLOWED as PHONE_NOT_ALLOWED,
   ACTION_BUTTON_LIST as PHONE_ACTION_BUTTON_LIST,
 } from '../store/modules/models/PhoneModel';
 import ActivityButton from './ActivityButton.vue';
@@ -61,9 +62,12 @@ export default {
       user: 'auth/user',
       publisher: 'publisher/publisher',
     }),
+    notAllowedList() {
+      return [...ADDRESS_NOT_ALLOWED, ...PHONE_NOT_ALLOWED];
+    },
     notAllowedTag() {
       const tags = this.record.notes ? this.record.notes.split(',') : [];
-      return NOT_ALLOWED.find(na => tags.some(t => t.includes(na)));
+      return this.notAllowedList.find(na => tags.some(t => t.includes(na)));
     },
     isBusy() {
       return get(this.record, 'isBusy') || false;

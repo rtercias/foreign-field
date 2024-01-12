@@ -615,7 +615,6 @@ export const address = {
         if (changeAddressStatus) {
           dispatch('territory/setAddressIsBusy', { addressId, status: false }, { root: true });
           dispatch('territory/updateAddressNotes', {
-            ...addr,
             territoryId: addr.territory_id,
             addressId: addr.id,
             notes: tagUtils.addTag(addr.notes, datestamped),
@@ -632,9 +631,14 @@ export const address = {
       }
     },
 
-    async addTag({ commit, state }, { addressId, userid, tag }) {
+    async addTag({ commit, dispatch }, { addr, userid, tag }) {
       try {
+        const { id: addressId, territory_id: territoryId } = addr || {};
         commit('auth/LOADING', true, { root: true });
+        dispatch('territory/setAddressIsBusy', {
+          addressId,
+          status: true,
+        }, { root: true });
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -660,8 +664,25 @@ export const address = {
         }
 
         const { addNote } = get(response, 'data.data');
-        if (addNote && get(state, 'address.id') === addressId) {
-          commit(ADD_TAG, { addressId, tag, notes: tagUtils.addTag(get(state, 'address.notes'), tag) });
+        const notes = tagUtils.addTag(addr.notes, tag);
+
+        if (addNote) {
+          commit(ADD_TAG, {
+            addressId,
+            tag,
+            notes,
+          });
+
+          dispatch('territory/updateAddressNotes', {
+            territoryId,
+            addressId,
+            notes,
+          }, { root: true });
+
+          dispatch('territory/setAddressIsBusy', {
+            addressId,
+            status: false,
+          }, { root: true });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);

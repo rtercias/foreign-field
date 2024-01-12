@@ -52,6 +52,7 @@ import toLower from 'lodash/toLower';
 import difference from 'lodash/difference';
 import startsWith from 'lodash/startsWith';
 import { format as formatPhone } from '../utils/phone';
+import { DO_NOT_CALL } from '../store/modules/models/AddressModel';
 import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
 import TagConfirm from './TagConfirm';
 import {
@@ -77,14 +78,14 @@ export default {
   },
   methods: {
     ...mapActions({
-      addAddressTag: 'address/addTag',
       removeAddressTag: 'address/removeTag',
-      addPhoneTag: 'phone/addTag',
       removePhoneTag: 'phone/removeTag',
-      markAsDoNotCall: 'address/markAsDoNotCall',
-      markAsNotForeign: 'address/markAsNotForeign',
       setPhone: 'phone/setPhone',
       setAddress: 'address/setAddress',
+      // addAddressTag: 'address/addTag',
+      // addPhoneTag: 'phone/addTag',
+      // markAsDoNotCall: 'address/markAsDoNotCall',
+      // markAsNotForeign: 'address/markAsNotForeign',
     }),
     toLower,
     formatLanguage,
@@ -120,17 +121,17 @@ export default {
         }
       });
     },
-    async addTag(tag) {
-      if (this.user && this.record && this.selectedTags) {
-        if (this.record.type === 'Phone') {
-          await this.setPhone(this.record);
-          await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
-        } else {
-          await this.setAddress(this.record);
-          await this.addAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
-        }
-      }
-    },
+    // async addTag(tag) {
+    //   if (this.user && this.record && this.selectedTags) {
+    //     if (this.record.type === 'Phone') {
+    //       await this.setPhone(this.record);
+    //       await this.addPhoneTag({ phoneRecord: this.record, userid: this.user.id, tag: tag.caption });
+    //     } else {
+    //       await this.setAddress(this.record);
+    //       await this.addAddressTag({ addr: this.record, userid: this.user.id, tag: tag.caption });
+    //     }
+    //   }
+    // },
     async removeTag(tag) {
       const body = `Are you sure you want to delete the tag
         "${formatLanguage(tag.caption, this.language)}"?
@@ -154,26 +155,26 @@ export default {
         }
       }
     },
-    async doNotCall(tag) {
-      const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
-        title: `${this.record.addr1} ${this.record.addr2} - Do Not Call`,
-        centered: true,
-      });
+    // async doNotCall(tag) {
+    //   const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
+    //     title: `${this.record.addr1} ${this.record.addr2} - Do Not Call`,
+    //     centered: true,
+    //   });
 
-      if (response) {
-        await this.markAsDoNotCall({ addr: this.record, userid: this.user.id, tag: tag.caption });
-      }
-    },
-    async notForeign(tag) {
-      const response = await this.$bvModal.msgBoxConfirm('Press OK to remove this address from the territory.', {
-        title: `${this.record.addr1} ${this.record.addr2} - Remove address`,
-        centered: true,
-      });
+    //   if (response) {
+    //     await this.markAsDoNotCall({ addr: this.record, userid: this.user.id, tag: tag.caption });
+    //   }
+    // },
+    // async notForeign(tag) {
+    //   const response = await this.$bvModal.msgBoxConfirm('Press OK to remove this address from the territory.', {
+    //     title: `${this.record.addr1} ${this.record.addr2} - Remove address`,
+    //     centered: true,
+    //   });
 
-      if (response) {
-        await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
-      }
-    },
+    //   if (response) {
+    //     await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+    //   }
+    // },
     hasPhone() {
       if (!this.record.phone) {
         this.$bvToast.toast('There is no phone number on record', {
@@ -206,29 +207,29 @@ export default {
     collapseTags() {
       this.collapsed = !this.collapsed;
     },
-    async openAddDialog() {
-      const h = this.$createElement;
-      const messages = {
-        note: h('input', {
-          class: 'new-note',
-          domProps: {
-            type: 'text',
-            maxLength: '30',
-          },
-        }),
-      };
+    // async openAddDialog() {
+    //   const h = this.$createElement;
+    //   const messages = {
+    //     note: h('input', {
+    //       class: 'new-note',
+    //       domProps: {
+    //         type: 'text',
+    //         maxLength: '30',
+    //       },
+    //     }),
+    //   };
 
-      const response = await this.$bvModal.msgBoxConfirm(messages.note, {
-        title: `Add new note for ${this.record.addr1} ${this.record.addr2}`,
-        centered: true,
-        okTitle: 'Save',
-        cancelTitle: 'Cancel',
-      });
+    //   const response = await this.$bvModal.msgBoxConfirm(messages.note, {
+    //     title: `Add new note for ${this.record.addr1} ${this.record.addr2}`,
+    //     centered: true,
+    //     okTitle: 'Save',
+    //     cancelTitle: 'Cancel',
+    //   });
 
-      if (response) {
-        await this.addTag({ caption: get(messages, 'note.elm.value', '') });
-      }
-    },
+    //   if (response) {
+    //     await this.addTag({ caption: get(messages, 'note.elm.value', '') });
+    //   }
+    // },
   },
   computed: {
     ...mapGetters({
@@ -284,7 +285,9 @@ export default {
       return this.collapsed ? this.preview : this.combinedTags;
     },
     filteredTags() {
-      return this.availableTags.filter(a => !this.selectedTags.includes(a));
+      // remove do not call datestamp
+      const selected = this.selectedTags.map(t => (t.startsWith(DO_NOT_CALL) ? DO_NOT_CALL : t));
+      return this.availableTags.filter(a => !selected.includes(a));
     },
     formattedPhone() {
       const { phone } = this.record;

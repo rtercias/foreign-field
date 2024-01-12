@@ -81,16 +81,13 @@ import { format as formatPhone, unmask } from '../utils/phone';
 import {
   LEFT_BUTTON_LIST,
   RIGHT_BUTTON_LIST,
-  NOT_ALLOWED as PHONE_NOT_ALLOWED,
 } from '../store/modules/models/PhoneModel';
 import {
   ADDRESS_RIGHT_BUTTON_LIST,
   PHONE_ADDRESS_LEFT_BUTTON_LIST,
   PHONE_ADDRESS_RIGHT_BUTTON_LIST,
-  NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
   DO_NOT_CALL,
   DO_NOT_MAIL,
-  LETTER_WRITING,
   ADDRESS_STATUS,
 } from '../store/modules/models/AddressModel';
 
@@ -256,125 +253,125 @@ export default {
     },
 
     // update NH status for address or phone
-    async updateResponse(entity, _value, close) {
-      if (typeof close === 'function') close();
-      let value = _value;
-      if (entity.selectedResponse === 'START' && value === 'START') {
-        this.$set(entity, 'isBusy', false);
-        return;
-      }
-      if (!this.actionButtonList(entity.type).some(b => b.value === value)) {
-        value = 'START';
-      }
+    // async updateResponse(entity, _value, close) {
+    //   if (typeof close === 'function') close();
+    //   let value = _value;
+    //   if (entity.selectedResponse === 'START' && value === 'START') {
+    //     this.$set(entity, 'isBusy', false);
+    //     return;
+    //   }
+    //   if (!this.actionButtonList(entity.type).some(b => b.value === value)) {
+    //     value = 'START';
+    //   }
 
-      try {
-        this.$set(entity, 'isBusy', true);
-        await this.addLog({ entityId: entity.id, value, checkoutId: get(this.territory, 'status.checkout_id') });
-        this.$set(entity, 'isBusy', false);
-        if (typeof close === 'function') close();
-      } catch (e) {
-        console.error('Unable to save activity log', e);
-      }
-    },
+    //   try {
+    //     this.$set(entity, 'isBusy', true);
+    //     await this.addLog({ entityId: entity.id, value, checkoutId: get(this.territory, 'status.checkout_id') });
+    //     this.$set(entity, 'isBusy', false);
+    //     if (typeof close === 'function') close();
+    //   } catch (e) {
+    //     console.error('Unable to save activity log', e);
+    //   }
+    // },
 
     // apply tag to address or phone
-    async applyTag(entity, item, close) {
-      if (typeof close === 'function') close();
+    // async applyTag(entity, item, close) {
+    //   if (typeof close === 'function') close();
 
-      if (item.value === DO_NOT_CALL) {
-        await this.doNotCall();
-        return;
-      }
+    //   if (item.value === DO_NOT_CALL) {
+    //     await this.doNotCall();
+    //     return;
+    //   }
 
-      const newTag = item.description.toLowerCase();
-      this.isAddressBusy = true;
-      this.$set(entity, 'isBusy', true);
-      try {
-        const notesArray = entity.notes ? entity.notes.split(',') : [];
-        // check if new tag already exists
-        if (notesArray.includes(newTag)) {
-          this.isAddressBusy = false;
-          this.$set(entity, 'isBusy', false);
-          return;
-        }
+    //   const newTag = item.description.toLowerCase();
+    //   this.isAddressBusy = true;
+    //   this.$set(entity, 'isBusy', true);
+    //   try {
+    //     const notesArray = entity.notes ? entity.notes.split(',') : [];
+    //     // check if new tag already exists
+    //     if (notesArray.includes(newTag)) {
+    //       this.isAddressBusy = false;
+    //       this.$set(entity, 'isBusy', false);
+    //       return;
+    //     }
 
-        const newArray = entity.type === 'Phone' ? await this.tagAndExclude(entity, newTag) : notesArray;
+    //     const newArray = entity.type === 'Phone' ? await this.tagAndExclude(entity, newTag) : notesArray;
 
-        // add new tag
-        if (entity.type === 'Phone') {
-          await this.addPhoneTag({ phoneId: entity.id, userid: this.user.id, tag: newTag });
-        } else {
-          await this.addAddressTag({ addressId: entity.id, userid: this.user.id, tag: newTag });
-        }
-        newArray.push(newTag);
+    //     // add new tag
+    //     if (entity.type === 'Phone') {
+    //       await this.addPhoneTag({ phone: entity, userid: this.user.id, tag: newTag });
+    //     } else {
+    //       await this.addAddressTag({ address: entity, userid: this.user.id, tag: newTag });
+    //     }
+    //     newArray.push(newTag);
 
-        // update UI phone
-        const updatedNotes = newArray.join(',');
-        this.$set(entity, 'notes', `${updatedNotes}`);
-        this.$set(entity, 'isBusy', false);
-        this.isAddressBusy = false;
-        if (typeof close === 'function') close();
-      } catch (e) {
-        console.error('Unable to apply tag', e);
-      }
-    },
+    //     // update UI phone
+    //     const updatedNotes = newArray.join(',');
+    //     this.$set(entity, 'notes', `${updatedNotes}`);
+    //     this.$set(entity, 'isBusy', false);
+    //     this.isAddressBusy = false;
+    //     if (typeof close === 'function') close();
+    //   } catch (e) {
+    //     console.error('Unable to apply tag', e);
+    //   }
+    // },
 
-    async tagAndExclude(phone, newTag) {
-      // if new tag is exclusive, then remove all other exclusive tags
-      const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
-      const oldArray = phone.notes ? phone.notes.split(',') : [];
-      let newArray = [...oldArray];
+    // async tagAndExclude(phone, newTag) {
+    //   // if new tag is exclusive, then remove all other exclusive tags
+    //   const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
+    //   const oldArray = phone.notes ? phone.notes.split(',') : [];
+    //   let newArray = [...oldArray];
 
-      if (exclusiveTags.includes(newTag)) {
-        for (const tag of exclusiveTags) {
-          await this.removePhoneTag({ phoneId: phone.id, userid: this.user.id, tag });
-        }
-        newArray = oldArray.filter(a => !exclusiveTags.includes(a));
-      }
+    //   if (exclusiveTags.includes(newTag)) {
+    //     for (const tag of exclusiveTags) {
+    //       await this.removePhoneTag({ phoneId: phone.id, userid: this.user.id, tag });
+    //     }
+    //     newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+    //   }
 
-      return newArray;
-    },
-    async toggleLetterWriting() {
-      if (this.address.lastActivity.value === 'LW') {
-        await this.removeLog({ id: this.address.lastActivity.id, entityId: this.address.id });
-      } else {
-        await this.addLog({
-          entityId: this.address.id,
-          value: LETTER_WRITING,
-          checkoutId: get(this.territory, 'status.checkout_id'),
-        });
-      }
-    },
-    lookupFastPeopleSearch() {
-      const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
-      const addr2 = `${(get(this.address, 'addr2') || '').trim().replace(/\s+/g, '-')}`;
-      const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
-      const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
-      window.open(`https://www.fastpeoplesearch.com/address/${addr1}-${addr2}_${city}-${state}`, '_blank');
-      this.$refs.list.closeActions();
-    },
+    //   return newArray;
+    // },
+    // async toggleLetterWriting() {
+    //   if (this.address.lastActivity.value === 'LW') {
+    //     await this.removeLog({ id: this.address.lastActivity.id, entityId: this.address.id });
+    //   } else {
+    //     await this.addLog({
+    //       entityId: this.address.id,
+    //       value: LETTER_WRITING,
+    //       checkoutId: get(this.territory, 'status.checkout_id'),
+    //     });
+    //   }
+    // },
+    // lookupFastPeopleSearch() {
+    //   const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+    //   const addr2 = `${(get(this.address, 'addr2') || '').trim().replace(/\s+/g, '-')}`;
+    //   const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
+    //   const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
+    //   window.open(`https://www.fastpeoplesearch.com/address/${addr1}-${addr2}_${city}-${state}`, '_blank');
+    //   this.$refs.list.closeActions();
+    // },
 
-    selectedNotAllowed(item) {
-      const notes = get(item, 'notes', '') || '';
-      const tags = notes ? notes.split(',') : [];
-      const notAllowed = item.type === 'Regular' ? ADDRESS_NOT_ALLOWED : PHONE_NOT_ALLOWED;
-      return intersection(notAllowed, tags) || [];
-    },
+    // selectedNotAllowed(item) {
+    //   const notes = get(item, 'notes', '') || '';
+    //   const tags = notes ? notes.split(',') : [];
+    //   const notAllowed = item.type === 'Regular' ? ADDRESS_NOT_ALLOWED : PHONE_NOT_ALLOWED;
+    //   return intersection(notAllowed, tags) || [];
+    // },
 
-    allowedToCall(item) {
-      return this.selectedNotAllowed(item).length === 0;
-    },
+    // allowedToCall(item) {
+    //   return this.selectedNotAllowed(item).length === 0;
+    // },
 
-    goToActivityHistory(item) {
-      this.$router.push({
-        name: 'activity-history-checkout',
-        params: {
-          territoryId: this.territory.id,
-          addressId: item.type === 'Phone' ? item.id : this.address.id,
-          checkoutId: this.territory.status && this.territory.status.checkout_id || '',
-        },
-      });
-    },
+    // goToActivityHistory(item) {
+    //   this.$router.push({
+    //     name: 'activity-history-checkout',
+    //     params: {
+    //       territoryId: this.territory.id,
+    //       addressId: item.type === 'Phone' ? item.id : this.address.id,
+    //       checkoutId: this.territory.status && this.territory.status.checkout_id || '',
+    //     },
+    //   });
+    // },
 
     async doNotCall() {
       const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {

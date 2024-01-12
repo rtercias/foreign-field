@@ -268,8 +268,14 @@ export const phone = {
       }
     },
 
-    async addTag({ commit, state }, { phoneId, userid, tag }) {
+    async addTag({ commit, dispatch }, { phoneRecord, userid, tag }) {
       try {
+        const {
+          id: phoneId,
+          parent_id: addressId,
+          territory_id: territoryId,
+        } = phoneRecord || {};
+
         commit('auth/LOADING', true, { root: true });
 
         const response = await axios({
@@ -295,8 +301,27 @@ export const phone = {
           throw new Error(errors[0].message);
         }
         const { addPhoneTag } = get(response, 'data.data');
-        if (addPhoneTag && get(state, 'phone.id') === phoneId) {
-          commit(ADD_TAG, { phoneId, tag, notes: tagUtils.addTag(get(state, 'phone.notes'), tag) });
+        const notes = tagUtils.addTag(phoneRecord.notes, tag);
+
+        if (addPhoneTag) {
+          commit(ADD_TAG, {
+            phoneId,
+            tag,
+            notes,
+          });
+
+          dispatch('territory/updatePhoneNotes', {
+            territoryId,
+            addressId,
+            phoneId,
+            notes,
+          }, { root: true });
+
+          dispatch('territory/setPhoneIsBusy', {
+            addressId,
+            phoneId,
+            status: false,
+          }, { root: true });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);
