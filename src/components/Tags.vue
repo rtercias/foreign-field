@@ -9,7 +9,13 @@
   >
     <div class="w-100 text-left">
       <b-button-group size="sm">
-        <div class="combined-tags d-flex flex-wrap text-left">
+        <div
+          class="combined-tags d-flex flex-wrap text-left overflow-auto"
+          :class="{
+            'vh-37': !isDesktop && !isCheckedOut && $route.name === 'address-detail',
+            'vh-22': !isDesktop && isCheckedOut && $route.name === 'address-detail',
+          }"
+        >
           <b-badge
             v-for="(tag, index) in displayedTags"
             class="badge tag-button d-flex mr-2 mb-2 p-2 border-0"

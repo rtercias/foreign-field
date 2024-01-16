@@ -82,7 +82,7 @@ export default {
 </script>
 <style lang="scss" scoped>
   .search-bar {
-    z-index: 10;
+    z-index: 9;
     .search-btn {
       font-size: 18px;
     }
