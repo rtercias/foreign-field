@@ -14,7 +14,6 @@
           :class="{
             'vh-37': !isDesktop && !isCheckedOut && $route.name === 'address-detail',
             'vh-22': !isDesktop && isCheckedOut && $route.name === 'address-detail',
-            'vh-16': $route.name === 'map-view',
           }"
         >
           <b-badge

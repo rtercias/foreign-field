@@ -17,7 +17,7 @@
           'text-white': $route.name === 'phone-list',
           'col-12 p-0': mode === 'map-view',
         }">
-        <div class="d-flex pb-1">
+        <div class="d-flex pb-1" :class="{ 'w-75': $route.name === 'map-view' }">
           <AddressIcon :index="index+1" :record="address" />
           <div class="pl-2">
             <div class="address d-flex align-items-center">
@@ -36,6 +36,8 @@
           <template #button-content>
             <font-awesome-icon icon="ellipsis-h" />
           </template>
+          <b-dropdown-item @click="startHere">Reorder - Start Here</b-dropdown-item>
+          <b-dropdown-item @click="endHere">Reorder - End Here</b-dropdown-item>
           <b-dropdown-item :href="mapsUrl" target="_blank">
             Get Driving Direction
           </b-dropdown-item>
@@ -63,7 +65,7 @@
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-        <ActivityLog v-if="mode==='address-list'" :entity="address" />
+        <ActivityLog v-if="mode!=='phone-list'" :entity="address" />
       </div>
     </div>
   </div>
@@ -121,6 +123,8 @@ export default {
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
       updateAddress: 'address/updateAddress',
+      setStartingAddress: 'addresses/setStartingAddress',
+      setEndingAddress: 'addresses/setEndingAddress',
     }),
     get,
     getPxValue(styleValue) {
@@ -141,6 +145,25 @@ export default {
         if (this.territory && this.territory.id === this.territoryId) {
           const index = this.territory.addresses.findIndex(a => a.id === this.address.id);
           if (index >= 0) this.territory.addresses.splice(index, 1);
+        }
+      }
+    },
+
+    startHere() {
+      if (get(this.startingAddress, 'id') === get(this.address, 'id')) {
+        this.setStartingAddress(null);
+      } else {
+        this.setStartingAddress(this.address);
+      }
+    },
+
+    endHere() {
+      if (get(this.endingAddress, 'id') === get(this.address, 'id')) {
+        this.setEndingAddress(null);
+      } else {
+        this.setEndingAddress(this.address);
+        if (this.$route.name === 'map-view') {
+          this.$emit('on-end-here-clicked');
         }
       }
     },

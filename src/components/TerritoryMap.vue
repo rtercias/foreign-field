@@ -54,7 +54,7 @@
             {{ i + 1 }}
           </div>
         </l-icon>
-        <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100 }">
+        <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100, minWidth: 250 }">
           <MapLinks
             :address="x"
             :territory="territory"
@@ -206,6 +206,8 @@ export default {
 }
 .leaflet-popup h2 {
   font-size: 18px;
+}
+.leaflet-popup-content {
 }
 
 .sort-order-icon {

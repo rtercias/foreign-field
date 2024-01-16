@@ -26,6 +26,12 @@
                   <font-awesome-icon icon="ellipsis-h" />
                 </template>
                 <b-dropdown-item
+                  @click="optimizeNearMe"
+                >
+                  Reorder Addresses
+                </b-dropdown-item>
+                <b-dropdown-divider></b-dropdown-divider>
+                <b-dropdown-item
                   @click="checkIn(true)"
                   v-if="isCheckedOut"
                 >
