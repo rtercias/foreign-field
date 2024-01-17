@@ -11,6 +11,7 @@
         :territoryId="address.territory_id"
         :incomingResponse="address.lastActivity"
         @update-response="updateResponse"
+        :index="index"
       >
       </AddressCard>
     </div>

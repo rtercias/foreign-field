@@ -40,23 +40,12 @@
         :lat-lng="getLatLng(x)"
       >
         <l-icon v-if="mapOptions.showSortOrder">
-          <div
-            class="sort-order-icon font-weight-bolder"
-            :class="{
-              'text-white bg-success border-primary': ['HOME', 'LW'].includes(get(x, 'lastActivity.value')),
-              'bg-warning': get(x, 'lastActivity.value') === 'NH',
-              'bg-white': get(x, 'lastActivity.value', '') === '',
-              'bg-light text-info border-info': disabled,
-              'border-success text-success': get(x, 'id') === get(startingAddress, 'id'),
-              'border-danger text-danger': get(x, 'id') === get(endingAddress, 'id'),
-            }"
-          >
-            {{ i + 1 }}
-          </div>
+          <AddressIcon :index="i+1" :record="x" />
         </l-icon>
         <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100, minWidth: 250 }">
           <MapLinks
             :address="x"
+            :index="i"
             :territory="territory"
             :simple="mapOptions.simple"
             :disabled="disabled"
@@ -75,6 +64,7 @@ import { latLngBounds } from 'leaflet';
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import MapLinks from './MapLinks';
+import AddressIcon from './AddressIcon';
 
 const defaultOptions = {
   showSortOrder: false,
@@ -91,6 +81,7 @@ export default {
     LPopup,
     LLocateControl,
     MapLinks,
+    AddressIcon,
   },
   props: ['id', 'territory', 'options', 'disabled'],
   data() {

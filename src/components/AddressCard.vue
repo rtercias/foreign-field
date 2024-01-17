@@ -36,8 +36,18 @@
           <template #button-content>
             <font-awesome-icon icon="ellipsis-h" />
           </template>
-          <b-dropdown-item @click="startHere">Reorder - Start Here</b-dropdown-item>
-          <b-dropdown-item @click="endHere">Reorder - End Here</b-dropdown-item>
+          <b-dropdown-item
+            v-if="$route.name === 'map-view'"
+            @click="startHere"
+          >
+            Reorder - Start Here
+          </b-dropdown-item>
+          <b-dropdown-item
+            v-if="$route.name === 'map-view'"
+            @click="endHere"
+          >
+            Reorder - End Here
+          </b-dropdown-item>
           <b-dropdown-item :href="mapsUrl" target="_blank">
             Get Driving Direction
           </b-dropdown-item>
