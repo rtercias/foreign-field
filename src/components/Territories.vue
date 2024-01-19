@@ -30,8 +30,11 @@
           </b-button-group>
         </div>
         <div class="d-flex flex-column text-nowrap" :class="{ 'col-4 p-0': !isDesktop }">
-          <div class="d-flex justify-content-end">
-            <b-dropdown right :variant="typeFilter || availability? 'warning' : 'secondary'" class="pr-2 text-left">
+          <div class="d-flex justify-content-end align-items-center">
+            <b-dropdown
+              right :variant="typeFilter || availability? 'warning' : 'secondary'"
+              class="filter-btn pr-2 text-left"
+            >
               <span slot="button-content">
                 <font-awesome-icon icon="filter" />
                 <span v-if="isDesktop">
@@ -102,7 +105,7 @@
               class="btn alert p-2 border-medium mb-0"
               :class="{
                 'border-primary': availability === avail.value,
-                'border-secondary bg-white': avail.value === 'Available' && availability !== 'Available',
+                'border-light bg-white text-dark': avail.value === 'Available' && availability !== 'Available',
                 [`alert-${avail.variant}`]: avail.variant,
               }"
               @click="() => setAvailability(avail.value)">
@@ -457,6 +460,9 @@ export default {
 
 <style lang="scss">
 .territories {
+  .dropdown-toggle {
+    height: 36px;
+  }
   .selected-group {
     .dropdown-toggle {
       width: 100%;

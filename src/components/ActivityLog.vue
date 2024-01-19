@@ -3,6 +3,7 @@
     <hr class="w-100 my-2" />
     <div class="d-flex justify-content-between align-items-center">
       <span v-if="$route.name === 'address-list'">Visit Record</span>
+      <span v-if="$route.name === 'map-view'">Visit Record</span>
       <span v-if="$route.name === 'phone-list'">Call Record</span>
       <b-button
         variant="link"
