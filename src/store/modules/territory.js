@@ -84,7 +84,7 @@ export const territory = {
     cancelTokens: state => state.cancelTokens,
     congId: state => state.territory.congregationid,
     isLoading: state => state.isLoading,
-    isBusy: state => get(state.territory, 'addresses', []).some(a => a.isBusy),
+    isBusy: state => (get(state.territory, 'addresses') || []).some(a => a.isBusy),
     isCheckingOut: state => state.isCheckingOut,
     isCheckedOut: state => state.territory && state.territory.status && state.territory.status.status === 'Checked Out',
     isOwnedByUser: (state, getters, rootState, rootGetters) => {
