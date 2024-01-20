@@ -211,13 +211,13 @@ export default {
       }
     },
     isDoNotCall(value) {
-      return value.includes(DO_NOT_CALL);
+      return value && value.includes(DO_NOT_CALL);
     },
     isDoNotMail(value) {
-      return value.includes(DO_NOT_MAIL);
+      return value && value.includes(DO_NOT_MAIL);
     },
     isActivity(value) {
-      return this.activityButtons.includes(value);
+      return value && this.activityButtons.includes(value);
     },
     // recentActivityLogs() {
     //   const logs = get(this.entity, 'activityLogs') || [];
