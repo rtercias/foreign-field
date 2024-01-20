@@ -289,13 +289,13 @@ export default {
       return get(this.territory, 'status.checkout_id');
     },
     includesDoNotCall() {
-      return get(this.entity, 'notes', '').includes(DO_NOT_CALL);
+      return (get(this.entity, 'notes') || '').includes(DO_NOT_CALL);
     },
     includesDoNotMail() {
-      return get(this.entity, 'notes', '').includes(DO_NOT_MAIL);
+      return (get(this.entity, 'notes') || '').includes(DO_NOT_MAIL);
     },
     includesInvalid() {
-      return get(this.entity, 'notes', '').includes(INVALID);
+      return (get(this.entity, 'notes') || '').includes(INVALID);
     },
     isDisabled() {
       return this.includesDoNotCall || this.includesInvalid;
