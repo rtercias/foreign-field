@@ -26,11 +26,15 @@
                   <font-awesome-icon icon="ellipsis-h" />
                 </template>
                 <b-dropdown-item
+                  v-if="$route.name === 'map-view'"
                   @click="optimizeNearMe"
                 >
                   Reorder Addresses
                 </b-dropdown-item>
-                <b-dropdown-divider></b-dropdown-divider>
+                <b-dropdown-divider
+                  v-if="$route.name === 'map-view'"
+                  class="d-block">
+                </b-dropdown-divider>
                 <b-dropdown-item
                   @click="checkIn(true)"
                   v-if="isCheckedOut"
