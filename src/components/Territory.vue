@@ -3,9 +3,9 @@
     <Loading v-if="territoryIsLoading" />
     <div v-else>
       <div v-if="collaborate" class="collaboration-mode">Collaboration Mode</div>
-      <header class="page-header sticky-top w-100 pt-2 px-2 pb-0" :sticky="true">
+      <header class="page-header sticky-top w-100 pt-2 pb-0" :sticky="true">
         <div class="w-100">
-          <div class="w-100">
+          <div class="w-100 px-2">
             <div class="text-left">{{ territoryName }}</div>
             <div class="d-flex justify-content-between">
               <div class="d-inline-flex align-items-center">
