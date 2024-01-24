@@ -2,6 +2,8 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
+import orderBy from 'lodash/orderBy';
+import first from 'lodash/first';
 import { model as phoneModel, validate, ACTION_BUTTON_LIST } from './models/PhoneModel';
 import { model as activityModel } from './models/ActivityModel';
 import * as tagUtils from '../../utils/tags';
@@ -21,6 +23,8 @@ const REMOVE_TAG_FAIL = 'REMOVE_TAG_FAIL';
 const PHONE_LOOKUP_SUCCESS = 'PHONE_LOOKUP_SUCCESS';
 const PHONE_LOOKUP_FAIL = 'PHONE_LOOKUP_FAIL';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
+const FETCH_ACTIVITY_LOGS_SUCCESS = 'FETCH_ACTIVITY_LOGS_SUCCESS';
+const FETCH_ACTIVITY_LOGS_FAIL = 'FETCH_ACTIVITY_LOGS_FAIL';
 
 export const phone = {
   namespaced: true,
@@ -72,6 +76,13 @@ export const phone = {
     FETCH_LAST_ACTIVITY_FAIL(state, exception) {
       state.error = exception;
     },
+    FETCH_ACTIVITY_LOGS_FAIL(state, exception) {
+      state.error = exception;
+    },
+    FETCH_ACTIVITY_LOGS_SUCCESS(state, activityLogs) {
+      state.error = null;
+      state.phone.activityLogs = activityLogs;
+    },
   },
 
   actions: {
@@ -120,6 +131,55 @@ export const phone = {
       }
     },
 
+    async fetchActivityLogs({ commit, dispatch }, { addressId, phoneId, checkoutId, cancelToken }) {
+      try {
+        if (!phoneId) {
+          commit(FETCH_ACTIVITY_LOGS_FAIL, 'id is required');
+          return;
+        }
+
+        dispatch('territory/setPhoneIsBusy', { addressId, phoneId, status: true }, { root: true });
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cancelToken,
+          data: {
+            query: print(gql`query Phone($phoneId: Int $checkoutId: Int) {
+              phone(id: $phoneId) {
+                activityLogs(checkout_id: $checkoutId) {
+                  ...ActivityModel
+                }
+              }
+            }
+            ${activityModel}`),
+            variables: {
+              phoneId,
+              checkoutId,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+
+        const { activityLogs } = get(response, 'data.data.phone') || {};
+        const ordered = orderBy(activityLogs, ['timestamp'], ['desc']);
+        const lastActivity = first(ordered);
+        commit(FETCH_ACTIVITY_LOGS_SUCCESS, activityLogs);
+        dispatch('territory/setPhoneLastActivity', { addressId, phoneId, lastActivity }, { root: true });
+        dispatch('territory/setPhoneActivityLogs', { addressId, phoneId, activityLogs }, { root: true });
+        dispatch('territory/setPhoneIsBusy', { addressId, phoneId, status: false }, { root: true });
+      } catch (e) {
+        commit(FETCH_ACTIVITY_LOGS_FAIL, e);
+      }
+    },
+
     async addPhone({ commit, rootGetters }, _phone) {
       try {
         commit('auth/LOADING', true, { root: true });
@@ -161,7 +221,7 @@ export const phone = {
       }
     },
 
-    async updatePhone({ commit, rootGetters }, _phone) {
+    async updatePhone({ commit, rootGetters, dispatch }, _phone) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -199,6 +259,7 @@ export const phone = {
         }
         const { updatePhone } = get(response, 'data.data');
         commit(UPDATE_PHONE, updatePhone);
+        dispatch('territory/updatePhone', updatePhone, { root: true });
       } catch (e) {
         commit(UPDATE_PHONE_FAIL, e);
         console.error(UPDATE_PHONE_FAIL, e);
@@ -207,8 +268,14 @@ export const phone = {
       }
     },
 
-    async addTag({ commit, state }, { phoneId, userid, tag }) {
+    async addTag({ commit, dispatch }, { phoneRecord, userid, tag }) {
       try {
+        const {
+          id: phoneId,
+          parent_id: addressId,
+          territory_id: territoryId,
+        } = phoneRecord || {};
+
         commit('auth/LOADING', true, { root: true });
 
         const response = await axios({
@@ -234,8 +301,27 @@ export const phone = {
           throw new Error(errors[0].message);
         }
         const { addPhoneTag } = get(response, 'data.data');
-        if (addPhoneTag && get(state, 'phone.id') === phoneId) {
-          commit(ADD_TAG, { phoneId, tag, notes: tagUtils.addTag(get(state, 'phone.notes'), tag) });
+        const notes = tagUtils.addTag(phoneRecord.notes, tag);
+
+        if (addPhoneTag) {
+          commit(ADD_TAG, {
+            phoneId,
+            tag,
+            notes,
+          });
+
+          dispatch('territory/updatePhoneNotes', {
+            territoryId,
+            addressId,
+            phoneId,
+            notes,
+          }, { root: true });
+
+          dispatch('territory/setPhoneIsBusy', {
+            addressId,
+            phoneId,
+            status: false,
+          }, { root: true });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);

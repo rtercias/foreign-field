@@ -1,5 +1,5 @@
 <template>
-  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap">
+  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap bg-light">
     <SearchBar
       class="w-100"
       :search-text="'Search this territory'"
@@ -8,16 +8,14 @@
       :model="keywordFilter"
       :results="filteredAddresses"
       :allow-exclude="true"
-      top="172px"
+      top="180px"
     />
     <PhoneAddressCard
       v-for="(a, index) in filteredAddresses" :key="a.id"
       :ref="`phone-address-${a.id}`"
-      class="phone-address-card-container"
+      class="phone-address-card-container mx-2 mb-2 bg-light"
       :class="{
         'border-success border-medium': a.id === foundId,
-        'border': $route.name === 'address-list',
-        'm-2': $route.name === 'address-list' && isDesktop,
       }"
       :address="a"
       :territory="territory"
@@ -43,7 +41,7 @@ export default {
     Loading,
   },
   beforeRouteLeave(to, from, next) {
-    const token = get(this.territoryCancelTokens, 'FETCH_LAST_ACTIVITY');
+    const token = get(this.territoryCancelTokens, 'FETCH_ACTIVITY_LOGS');
     if (token && this.isTerritoryBusy) {
       token.cancel();
       this.cancelFetchLastActivity();
@@ -188,7 +186,6 @@ li {
   .phone-address-card-container {
     width: 48%;
     flex: auto;
-    border: 1px solid $secondary;
   }
 }
 

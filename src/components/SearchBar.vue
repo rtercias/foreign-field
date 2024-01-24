@@ -1,8 +1,8 @@
 <template>
   <div
-    class="search-bar sticky-top bg-white"
+    class="search-bar sticky-top bg-light"
     :style="{ top: top }"
-    :class="{ 'p-0': noPadding, 'p-2 border-bottom': !noPadding }">
+    :class="{ 'p-0': noPadding, 'p-2': !noPadding }">
     <div :class="{
       'd-flex justify-content-between': showFilter,
       'position-relative': !showFilter,
@@ -15,48 +15,16 @@
         'position-absolute mr-1 mt-1 d-inline': !showFilter,
       }">
         <b-button
-          title="Filter"
-          v-if="showFilter && !model"
-          :disabled="!keywordFilter"
-          class="btn-sm bg-transparent border-0"
-          :class="{ 'text-light no-pointer': !keywordFilter }"
-          @click="filter">
-          <font-awesome-icon class="text-primary" icon="filter" />
-        </b-button>
-        <b-button
-          title="Clear"
-          v-if="showFilter && !!model"
-          class="btn-sm bg-transparent border-0"
-          :class="{ 'text-light no-pointer': !keywordFilter }"
-          @click="clear">
-          <font-awesome-icon class="text-danger" icon="times" />
-        </b-button>
-        <b-button
-          title="Exclude"
-          v-if="allowExclude"
-          :disabled="!keywordFilter"
-          class="btn-sm bg-transparent border-0"
-          :class="{ 'text-light no-pointer': !keywordFilter, 'mr-0': showSearch }"
-          @click="exclude = !exclude">
-          <font-awesome-icon class="text-primary" :icon="!exclude ? 'not-equal' : 'equals'" />
-        </b-button>
-        <b-button
           title="Search"
           v-if="showSearch"
           :disabled="!keywordFilter"
-          class="btn-sm bg-transparent border-0"
+          class="search-btn bg-transparent border-0"
           :class="{ 'text-light no-pointer': !keywordFilter }"
           @click="search">
           <font-awesome-icon class="text-primary" icon="search" />
         </b-button>
       </div>
     </div>
-    <!-- <div class="d-flex justify-content-end">
-      <b-check v-model="exclude" v-show="allowExclude && !!keywordFilter" class="w-50 text-left">
-        <span class="small">Exclude Filter</span>
-      </b-check>
-      <span v-if="results" class="d-block small pt-1 text-right w-50">Count: {{results.length}}</span>
-    </div> -->
   </div>
 </template>
 <script>
@@ -113,13 +81,19 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-  .buttons {
-    right: 5px;
-    .svg-inline--fa {
-      cursor: pointer;
+  .search-bar {
+    z-index: 9;
+    .search-btn {
+      font-size: 18px;
     }
-    .no-pointer {
-      cursor: default;
+    .buttons {
+      right: 5px;
+      .svg-inline--fa {
+        cursor: pointer;
+      }
+      .no-pointer {
+        cursor: default;
+      }
     }
   }
 

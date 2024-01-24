@@ -3,7 +3,17 @@ import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import { model as addressModel, validate, isCity, ACTION_BUTTON_LIST, ADDRESS_STATUS } from './models/AddressModel';
+import orderBy from 'lodash/orderBy';
+import first from 'lodash/first';
+import format from 'date-fns/format';
+import addYears from 'date-fns/addYears';
+import {
+  model as addressModel,
+  validate,
+  isCity,
+  ACTION_BUTTON_LIST,
+  ADDRESS_STATUS,
+} from './models/AddressModel';
 import { model as activityModel, createActivityLog } from './models/ActivityModel';
 import * as tagUtils from '../../utils/tags';
 
@@ -20,6 +30,8 @@ const REMOVE_TAG = 'REMOVE_TAG';
 const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
 const FETCH_LAST_ACTIVITY_SUCCESS = 'FETCH_LAST_ACTIVITY_SUCCESS';
 const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
+const FETCH_ACTIVITY_LOGS_SUCCESS = 'FETCH_ACTIVITY_LOGS_SUCCESS';
+const FETCH_ACTIVITY_LOGS_FAIL = 'FETCH_ACTIVITY_LOGS_FAIL';
 const FETCH_ADDRESS_FAIL = 'FETCH_ADDRESS_FAIL';
 const ADD_ADDRESS_FAIL = 'ADD_ADDRESS_FAIL';
 const UPDATE_ADDRESS_FAIL = 'UPDATE_ADDRESS_FAIL';
@@ -65,10 +77,10 @@ export const address = {
     DELETE_ADDRESS_FAIL(state, exception) {
       state.error = exception;
     },
-    CHANGE_STATUS(state, addr) {
-      if (state.address.id === addr.id) {
+    CHANGE_STATUS(state, { addr, tag }) {
+      if (addr && get(state, 'address.id') === addr.id) {
         state.address.status = addr.status;
-        state.address.notes = tagUtils.addTag(state.address.notes, addr.note);
+        state.address.notes = tagUtils.addTag(state.address.notes, tag);
       }
     },
     ADD_LOG(state, log) {
@@ -117,6 +129,13 @@ export const address = {
     FETCH_LAST_ACTIVITY_SUCCESS(state, lastActivity) {
       state.error = null;
       state.address.lastActivity = lastActivity;
+    },
+    FETCH_ACTIVITY_LOGS_FAIL(state, exception) {
+      state.error = exception;
+    },
+    FETCH_ACTIVITY_LOGS_SUCCESS(state, activityLogs) {
+      state.error = null;
+      state.address.activityLogs = activityLogs;
     },
   },
 
@@ -213,12 +232,62 @@ export const address = {
       }
     },
 
-    async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId }) {
+    async fetchActivityLogs({ commit, dispatch }, { addressId, checkoutId, cancelToken }) {
+      try {
+        if (!addressId) {
+          commit(FETCH_ACTIVITY_LOGS_FAIL, 'id is required');
+          return;
+        }
+
+        dispatch('territory/setAddressIsBusy', { addressId, status: true }, { root: true });
+
+        const response = await axios({
+          url: process.env.VUE_APP_ROOT_API,
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cancelToken,
+          data: {
+            query: print(gql`query Address($addressId: Int $checkoutId: Int) {
+              address(id: $addressId) {
+                activityLogs(checkout_id: $checkoutId) {
+                  ...ActivityModel
+                }
+              }
+            }
+            ${activityModel}`),
+            variables: {
+              addressId,
+              checkoutId,
+            },
+          },
+        });
+
+        const { errors } = get(response, 'data');
+        if (errors && errors.length) {
+          throw new Error(errors[0].message);
+        }
+
+        const { activityLogs } = get(response, 'data.data.address') || [];
+        const ordered = orderBy(activityLogs, ['timestamp'], ['desc']);
+        const lastActivity = first(ordered);
+        dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
+        dispatch('territory/setAddressActivityLogs', { addressId, activityLogs }, { root: true });
+        dispatch('territory/setAddressIsBusy', { addressId, status: false }, { root: true });
+        commit(FETCH_ACTIVITY_LOGS_SUCCESS, activityLogs);
+      } catch (e) {
+        commit(FETCH_ACTIVITY_LOGS_FAIL, e);
+      }
+    },
+
+    async addLog({ commit, rootGetters, dispatch }, { entityId, value, checkoutId, parentId, type }) {
       try {
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
 
         commit('auth/LOADING', true, { root: true });
+        dispatch('territory/setAddressIsBusy', { addressId: entityId, status: true }, { root: true });
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -247,10 +316,36 @@ export const address = {
         const { addLog } = get(response, 'data.data') || {};
         commit(ADD_LOG, addLog);
 
-        // TODO: separate the calls by creating "addLog" function specifically for phones
-        dispatch('territory/setAddressLastActivity', { addressId: entityId, lastActivity: addLog }, { root: true });
-        dispatch('territory/setPhoneLastActivity', { phoneId: entityId, lastActivity: addLog }, { root: true });
-
+        if (type === 'Regular') {
+          dispatch('territory/setAddressLastActivity', {
+            addressId: entityId,
+            lastActivity: addLog,
+          }, { root: true });
+          dispatch('territory/addAddressActivityLog', {
+            addressId: entityId,
+            activityLog: addLog,
+          }, { root: true });
+          dispatch('territory/setAddressIsBusy', {
+            addressId: entityId,
+            status: false,
+          }, { root: true });
+        } else if (type === 'Phone') {
+          dispatch('territory/setPhoneLastActivity', {
+            phoneId: entityId,
+            addressId: parentId,
+            lastActivity: addLog,
+          }, { root: true });
+          dispatch('territory/addPhoneActivityLog', {
+            phoneId: entityId,
+            addressId: parentId,
+            activityLog: addLog,
+          }, { root: true });
+          dispatch('territory/setPhoneIsBusy', {
+            phoneId: entityId,
+            addressId: parentId,
+            status: false,
+          }, { root: true });
+        }
         commit(FETCH_LAST_ACTIVITY_SUCCESS, addLog);
       } catch (e) {
         commit(LOG_FAIL, e);
@@ -260,7 +355,7 @@ export const address = {
       }
     },
 
-    async removeLog({ commit }, { id, entityId }) {
+    async removeLog({ commit, dispatch }, { id, entityId, parentId, type }) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -281,6 +376,32 @@ export const address = {
         });
 
         commit(REMOVE_LOG, { id, entityId });
+
+        if (type === 'Regular') {
+          dispatch(
+            'territory/removeAddressActivityLog',
+            { addressId: entityId, logId: id },
+            { root: true },
+          );
+
+          dispatch(
+            'territory/setAddressLastActivity',
+            { addressId: entityId },
+            { root: true },
+          );
+        } else if (type === 'Phone') {
+          dispatch(
+            'territory/removePhoneActivityLog',
+            { addressId: parentId, phoneId: entityId, logId: id },
+            { root: true },
+          );
+
+          dispatch(
+            'territory/setPhoneLastActivity',
+            { phoneId: entityId, addressId: parentId },
+            { root: true },
+          );
+        }
       } catch (e) {
         commit(LOG_FAIL, e);
       }
@@ -450,7 +571,7 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.NF.value, userid, note: tag });
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.NF.value, userid }, tag);
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -460,9 +581,12 @@ export const address = {
       }
     },
 
-    async markAsDoNotCall({ commit }, { addressId, userid, tag }) {
+    async markAsDoNotCall({ commit, dispatch }, { addr, userid, tag }) {
       try {
         commit('auth/LOADING', true, { root: true });
+        const { id: addressId } = addr;
+        const status = tag.caption || tag;
+        const datestamped = `${status} until ${format(addYears(new Date(), 1), 'P')}`;
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -476,9 +600,9 @@ export const address = {
             }`),
             variables: {
               addressId,
-              status: ADDRESS_STATUS.DNC.value,
+              status: ADDRESS_STATUS.Active.value,
               userid,
-              tag,
+              tag: datestamped,
             },
           },
         });
@@ -489,7 +613,15 @@ export const address = {
         }
         const { changeAddressStatus } = get(response, 'data.data');
         if (changeAddressStatus) {
-          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid, note: tag });
+          dispatch('territory/setAddressIsBusy', { addressId, status: false }, { root: true });
+          dispatch('territory/updateAddressNotes', {
+            territoryId: addr.territory_id,
+            addressId: addr.id,
+            notes: tagUtils.addTag(addr.notes, datestamped),
+          }, {
+            root: true,
+          });
+          commit(CHANGE_STATUS, { addressId, status: ADDRESS_STATUS.DNC.value, userid }, datestamped);
         }
       } catch (e) {
         commit(CHANGE_STATUS_FAIL, e);
@@ -499,9 +631,14 @@ export const address = {
       }
     },
 
-    async addTag({ commit, state }, { addressId, userid, tag }) {
+    async addTag({ commit, dispatch }, { addr, userid, tag }) {
       try {
+        const { id: addressId, territory_id: territoryId } = addr || {};
         commit('auth/LOADING', true, { root: true });
+        dispatch('territory/setAddressIsBusy', {
+          addressId,
+          status: true,
+        }, { root: true });
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -527,8 +664,25 @@ export const address = {
         }
 
         const { addNote } = get(response, 'data.data');
-        if (addNote && get(state, 'address.id') === addressId) {
-          commit(ADD_TAG, { addressId, tag, notes: tagUtils.addTag(get(state, 'address.notes'), tag) });
+        const notes = tagUtils.addTag(addr.notes, tag);
+
+        if (addNote) {
+          commit(ADD_TAG, {
+            addressId,
+            tag,
+            notes,
+          });
+
+          dispatch('territory/updateAddressNotes', {
+            territoryId,
+            addressId,
+            notes,
+          }, { root: true });
+
+          dispatch('territory/setAddressIsBusy', {
+            addressId,
+            status: false,
+          }, { root: true });
         }
       } catch (e) {
         commit(ADD_TAG_FAIL, e);

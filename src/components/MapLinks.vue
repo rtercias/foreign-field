@@ -11,44 +11,11 @@
         :territoryId="address.territory_id"
         :incomingResponse="address.lastActivity"
         @update-response="updateResponse"
+        :index="index"
       >
       </AddressCard>
-      <div class="d-flex flex-column">
-        <b-button
-          v-if="simple"
-          id="start-here"
-          class="w-100 p-1 mb-1"
-          :class="{
-            'bg-success text-white': get(startingAddress, 'id') === get(address, 'id'),
-            'bg-white text-success': get(startingAddress, 'id') !== get(address, 'id'),
-          }"
-          @click="startHere"
-        >
-          <span class="d-block">
-            <font-awesome-layers class="mx-2">
-              <font-awesome-icon icon="flag-checkered"></font-awesome-icon>
-            </font-awesome-layers>
-          </span>
-        </b-button>
-        <b-button
-          id="end-here"
-          class="w-100 p-1 mb-1"
-          :class="{
-            'bg-danger text-white': get(endingAddress, 'id') === get(address, 'id'),
-            'bg-white text-danger': get(endingAddress, 'id') !== get(address, 'id'),
-          }"
-          @click="endHere"
-        >
-          <span class="d-block">
-            <font-awesome-layers class="mx-2">
-              <font-awesome-icon icon="flag-checkered"></font-awesome-icon>
-            </font-awesome-layers>
-          </span>
-        </b-button>
-      </div>
     </div>
     <hr class="my-2" v-if="!disabled" />
-    <ActivityButtons :address="address" />
   </div>
 </template>
 
@@ -93,8 +60,6 @@ export default {
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
-      setStartingAddress: 'addresses/setStartingAddress',
-      setEndingAddress: 'addresses/setEndingAddress',
     }),
     get,
     rightButtonList(item) {
@@ -153,25 +118,6 @@ export default {
         console.error('Unable to save activity log', e);
       }
     },
-
-    startHere() {
-      if (get(this.startingAddress, 'id') === get(this.address, 'id')) {
-        this.setStartingAddress(null);
-      } else {
-        this.setStartingAddress(this.address);
-      }
-    },
-
-    endHere() {
-      if (get(this.endingAddress, 'id') === get(this.address, 'id')) {
-        this.setEndingAddress(null);
-      } else {
-        this.setEndingAddress(this.address);
-        if (this.$route.name === 'map-view') {
-          this.$emit('on-end-here-clicked');
-        }
-      }
-    },
   },
 };
 </script>
@@ -183,9 +129,6 @@ export default {
 .max-size-mobile {
   max-height: 225px;
   max-width: 100%;
-}
-.leaflet-popup-content {
-  width: 100%;
 }
 
 .address-header {

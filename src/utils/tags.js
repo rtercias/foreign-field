@@ -14,7 +14,6 @@ export const PHONE_TAGS = [
 
 export const PHONE_ADDRESS_TAGS = [
   'no number',
-  'do not mail',
   'verify',
   'business',
 ];
@@ -31,10 +30,17 @@ export function formatLanguage(tag = '', value) {
   return String(tag).replaceAll('#language#', value);
 }
 
-export function addTag(notes, tag) {
+export function addTag(notes, _tag) {
   const tags = (notes || '').split(',') || [];
+  const tag = _tag.charAt(0 === ',') ? _tag.substring(0) : _tag;
   if (!tags.includes(tag)) tags.push(tag);
-  return tags.join(',');
+
+  const stringTags = tags.join(',');
+  if (stringTags.charAt(0) === ',') {
+    return stringTags.substring(1);
+  }
+
+  return stringTags;
 }
 
 export function removeTag(notes, tag) {
