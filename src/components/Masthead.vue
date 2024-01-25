@@ -5,7 +5,7 @@
         class="py-0 sticky-top"
         :class="{
           'alert-secondary border-bottom border-secondary': isDesktop,
-          'border-warning': !isDesktop }"
+          'border-warning gold-bottom': !isDesktop }"
         :type="isDesktop ? 'light' : 'dark'"
         :variant="isDesktop ? 'none' : 'primary'"
         toggleable
@@ -137,12 +137,7 @@ export default {
         origin = '';
       }
       const back = get(this.$route, 'meta.back');
-      const backRoute = this.$router.resolve({
-        name: origin || back || !this.prevRoute || 'home',
-        params: {
-          groupId: get(this.territory, 'groupId') || 0,
-        },
-      });
+      const backRoute = this.$router.resolve({ name: origin || back || !this.prevRoute || 'home' });
       this.backLabel = this.$route.name === 'home' ? '' : get(backRoute, 'route.meta.label') || 'Home';
     },
     search(keyword) {

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="tags w-100 mt-2"
+    class="tags w-100"
     :class="{
       'd-none': !selectedTags.length && !availableTags.length,
       'px-0': $route.name === 'map-view',
@@ -14,35 +14,45 @@
           :class="{
             'vh-37': !isDesktop && !isCheckedOut && $route.name === 'address-detail',
             'vh-22': !isDesktop && isCheckedOut && $route.name === 'address-detail',
+            'vh-16': $route.name === 'map-view',
           }"
         >
           <b-badge
             v-for="(tag, index) in displayedTags"
-            class="badge tag-button d-flex mr-2 mb-2 p-2 border-0"
+            pill
+            class="tag-button d-flex mr-1 mb-1 small border-dark"
             :class="{
               active: false,
-              'bg-danger': tag.state && highlight(tag.caption),
+              [`border-${color(tag.caption)}`]: true,
+              'border-danger': tag.state && highlight(tag.caption),
             }"
             size='sm'
             :key="index"
-            :variant="tag.state && (highlight(tag.caption) ? 'danger' : 'light')"
-          >
+            @click="() => updateTag(tag)"
+            :variant="tag.state
+              ? (highlight(tag.caption) ? 'danger' : color(tag.caption))
+              : `outline-${color(tag.caption)}`">
             <span class="tag-text d-flex align-items-center small">
-              <font-awesome-icon
-                v-if="tag.state && isEditable"
-                class="tag-icon mr-1"
-                icon="times"
-                @click="() => updateTag(tag)"
-              />
-              {{ formatLanguage(tag.caption, language) }}
+              <font-awesome-icon icon="times" class="tag-icon mr-1" v-if="tag.state" />
+              {{ formatLanguage(toLower(tag.caption), language) }}
             </span>
           </b-badge>
-          <TagConfirm
-            v-if="isEditable"
-            :id="record.id"
-            :record="record"
-            :available-tags="filteredTags"
-          />
+          <b-badge
+            v-if="availableTags.length && !allTagsSelected"
+            @click="openAddDialog"
+            pill
+            class="tag-button add-tag border-info d-flex mr-1 mb-1"
+            :class="`border-${variant}`"
+            :variant="variant"
+            size='sm'
+          >
+            <span
+              class="tag-text d-flex align-items-center small font-weight-bold"
+              :class="{ 'text-white': variant === 'info' }">
+              <span v-if="collapsed">add note</span>
+              <span v-else>done</span>
+            </span>
+          </b-badge>
         </div>
       </b-button-group>
     </div>
@@ -57,10 +67,10 @@ import get from 'lodash/get';
 import toLower from 'lodash/toLower';
 import difference from 'lodash/difference';
 import startsWith from 'lodash/startsWith';
+import addYears from 'date-fns/addYears';
+import format from 'date-fns/format';
 import { format as formatPhone } from '../utils/phone';
-import { DO_NOT_CALL } from '../store/modules/models/AddressModel';
 import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
-import TagConfirm from './TagConfirm';
 import {
   formatLanguage,
   PHONE_ADDRESS_TAGS,
@@ -71,9 +81,6 @@ import {
 export default {
   name: 'Tags',
   props: ['record', 'disabled', 'variant'],
-  components: {
-    TagConfirm,
-  },
   data() {
     return {
       collapsed: true,
@@ -82,14 +89,14 @@ export default {
   },
   methods: {
     ...mapActions({
+      addAddressTag: 'address/addTag',
       removeAddressTag: 'address/removeTag',
+      addPhoneTag: 'phone/addTag',
       removePhoneTag: 'phone/removeTag',
+      markAsDoNotCall: 'address/markAsDoNotCall',
+      markAsNotForeign: 'address/markAsNotForeign',
       setPhone: 'phone/setPhone',
       setAddress: 'address/setAddress',
-      // addAddressTag: 'address/addTag',
-      // addPhoneTag: 'phone/addTag',
-      // markAsDoNotCall: 'address/markAsDoNotCall',
-      // markAsNotForeign: 'address/markAsNotForeign',
     }),
     toLower,
     formatLanguage,
@@ -125,27 +132,25 @@ export default {
         }
       });
     },
-    // async addTag(tag) {
-    //   if (this.user && this.record && this.selectedTags) {
-    //     if (this.record.type === 'Phone') {
-    //       await this.setPhone(this.record);
-    //       await this.addPhoneTag({ phoneRecord: this.record, userid: this.user.id, tag: tag.caption });
-    //     } else {
-    //       await this.setAddress(this.record);
-    //       await this.addAddressTag({ addr: this.record, userid: this.user.id, tag: tag.caption });
-    //     }
-    //   }
-    // },
+    async addTag(tag) {
+      if (this.user && this.record && this.selectedTags) {
+        if (this.record.type === 'Phone') {
+          await this.setPhone(this.record);
+          await this.addPhoneTag({ phoneId: this.record.id, userid: this.user.id, tag: tag.caption });
+        } else {
+          await this.setAddress(this.record);
+          await this.addAddressTag({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+        }
+      }
+    },
     async removeTag(tag) {
-      const body = `Are you sure you want to delete the tag
-        "${formatLanguage(tag.caption, this.language)}"?
-      `;
+      const title = this.record.type === 'Phone' ? this.formattedPhone : `${this.record.addr1} ${this.record.addr2 || ''}`;
       const response = await this.$bvModal.msgBoxConfirm(
-        body, {
-          title: 'Delete Tag',
+        formatLanguage(tag.caption, this.language), {
+          title,
           centered: true,
-          okVariant: 'danger',
-          okTitle: 'Delete',
+          okTitle: 'Remove',
+          cancelTitle: 'Close',
         }
       );
 
@@ -159,26 +164,27 @@ export default {
         }
       }
     },
-    // async doNotCall(tag) {
-    //   const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
-    //     title: `${this.record.addr1} ${this.record.addr2} - Do Not Call`,
-    //     centered: true,
-    //   });
+    async doNotCall(tag) {
+      const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
+        title: `${this.record.addr1} ${this.record.addr2} - Do Not Call`,
+        centered: true,
+      });
 
-    //   if (response) {
-    //     await this.markAsDoNotCall({ addr: this.record, userid: this.user.id, tag: tag.caption });
-    //   }
-    // },
-    // async notForeign(tag) {
-    //   const response = await this.$bvModal.msgBoxConfirm('Press OK to remove this address from the territory.', {
-    //     title: `${this.record.addr1} ${this.record.addr2} - Remove address`,
-    //     centered: true,
-    //   });
+      if (response) {
+        const datestamped = `${tag.caption} until ${format(addYears(new Date(), 1), 'P')}`;
+        await this.markAsDoNotCall({ addressId: this.record.id, userid: this.user.id, tag: datestamped });
+      }
+    },
+    async notForeign(tag) {
+      const response = await this.$bvModal.msgBoxConfirm('Press OK to remove this address from the territory.', {
+        title: `${this.record.addr1} ${this.record.addr2} - Remove address`,
+        centered: true,
+      });
 
-    //   if (response) {
-    //     await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
-    //   }
-    // },
+      if (response) {
+        await this.markAsNotForeign({ addressId: this.record.id, userid: this.user.id, tag: tag.caption });
+      }
+    },
     hasPhone() {
       if (!this.record.phone) {
         this.$bvToast.toast('There is no phone number on record', {
@@ -211,29 +217,34 @@ export default {
     collapseTags() {
       this.collapsed = !this.collapsed;
     },
-    // async openAddDialog() {
-    //   const h = this.$createElement;
-    //   const messages = {
-    //     note: h('input', {
-    //       class: 'new-note',
-    //       domProps: {
-    //         type: 'text',
-    //         maxLength: '30',
-    //       },
-    //     }),
-    //   };
+    async openAddDialog() {
+      /* TODO:
+        - add save functionality
+        - list other tags
+        - add click to edit?
+      */
+      const h = this.$createElement;
+      const messages = {
+        note: h('input', {
+          class: 'new-note',
+          domProps: {
+            type: 'text',
+            maxLength: '30',
+          },
+        }),
+      };
 
-    //   const response = await this.$bvModal.msgBoxConfirm(messages.note, {
-    //     title: `Add new note for ${this.record.addr1} ${this.record.addr2}`,
-    //     centered: true,
-    //     okTitle: 'Save',
-    //     cancelTitle: 'Cancel',
-    //   });
+      const response = await this.$bvModal.msgBoxConfirm(messages.note, {
+        title: `Add new note for ${this.record.addr1} ${this.record.addr2}`,
+        centered: true,
+        okTitle: 'Save',
+        cancelTitle: 'Cancel',
+      });
 
-    //   if (response) {
-    //     await this.addTag({ caption: get(messages, 'note.elm.value', '') });
-    //   }
-    // },
+      if (response) {
+        await this.addTag({ caption: get(messages, 'note.elm.value', '') });
+      }
+    },
   },
   computed: {
     ...mapGetters({
@@ -291,18 +302,9 @@ export default {
     displayedTags() {
       return this.collapsed ? this.preview : this.combinedTags;
     },
-    filteredTags() {
-      // remove do not call datestamp
-      const selected = this.selectedTags.map(t => (t.startsWith(DO_NOT_CALL) ? DO_NOT_CALL : t));
-      return this.availableTags.filter(a => !selected.includes(a));
-    },
     formattedPhone() {
       const { phone } = this.record;
       return formatPhone(phone);
-    },
-    isEditable() {
-      return (this.$route.name === 'address-list' && this.record.type === 'Regular')
-        || (this.$route.name === 'phone-list' && this.record.type === 'Phone');
     },
   },
   mounted() {
@@ -312,7 +314,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  @import '../assets/foreign-field-theme.scss';
   $addressLinksHeight: 20px;
 
   .vh-16 {
@@ -339,10 +340,10 @@ export default {
     flex-direction: row;
     flex-wrap: wrap;
     overflow: hidden;
-    font-size: 16px;
+    font-size: large;
   }
   .combined-tags {
-    font-size: 16px;
+    font-size: large;
     color: initial;
   }
   .slide-up-enter-active, .slide-up-leave-active {
@@ -352,13 +353,13 @@ export default {
     height: 0%;
   }
   .tag-button {
-    background-color: $extra-light;
+    border: solid 1px;
+    cursor: pointer;
     padding: 10px;
     height: fit-content;
   }
   .tag-icon {
     font-size: 0.75em;
-    cursor: pointer;
   }
   .tag-text {
     font-size: 1.25em;

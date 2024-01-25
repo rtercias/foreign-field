@@ -25,13 +25,12 @@ export const ACTION_BUTTON_LIST = [
     text: '',
     icon: '',
     color: 'success',
-    description: '(Cleared)',
   },
   {
     type: 'fa-icon',
     value: 'NA',
-    text: 'NA',
-    icon: '',
+    text: '',
+    icon: 'comment-slash',
     color: 'warning',
     description: 'No Answer',
   },
@@ -39,8 +38,8 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'CT',
     text: '',
-    icon: 'check',
-    color: 'success',
+    icon: 'comment',
+    color: 'primary',
     description: 'Contacted',
   },
   {
@@ -48,7 +47,7 @@ export const ACTION_BUTTON_LIST = [
     value: 'VM',
     text: '',
     icon: 'voicemail',
-    color: 'success',
+    color: 'primary',
     description: 'Voicemail',
   },
   {
@@ -56,7 +55,7 @@ export const ACTION_BUTTON_LIST = [
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'success',
+    color: 'primary',
     description: 'Letter',
     disabledText: 'Do Not Mail',
   },
@@ -64,7 +63,7 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'invalid',
     text: '',
-    icon: 'ban',
+    icon: 'phone-slash',
     color: 'danger',
     description: 'Invalid',
   },
@@ -72,7 +71,7 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'do not call',
     text: '',
-    icon: 'ban',
+    icon: 'minus-circle',
     color: 'danger',
     description: 'Do Not Call',
   },
@@ -87,14 +86,14 @@ export const ACTION_BUTTON_LIST = [
 ];
 
 export const LEFT_BUTTON_LIST = [
+  'do not call',
   'invalid',
   'confirmed',
-  'do not call',
 ];
 
 export const RIGHT_BUTTON_LIST = [
-  'CT',
   'NA',
+  'CT',
   'VM',
 ];
 
