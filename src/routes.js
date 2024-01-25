@@ -9,12 +9,12 @@ import Territory from './components/Territory';
 import TerritoryMap from './components/TerritoryMap';
 import SearchResults from './components/SearchResults';
 import AssignmentReport from './components/AssignmentReport';
+import AddressLinks from './components/AddressLinks';
 import ActivityHistory from './components/ActivityHistory';
 import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
 import PhoneWitnessing from './components/PhoneWitnessing';
-import AddressCarousel from './components/AddressCarousel';
 import TerritoryForm from './components/TerritoryForm';
 import CongregationForm from './components/CongregationForm';
 import GroupForm from './components/GroupForm';
@@ -88,7 +88,6 @@ const routes = [
     },
   },
   {
-    name: 'territory',
     path: '/territories/:territoryId(\\d+)',
     component: Territory,
     props: true,
@@ -97,16 +96,6 @@ const routes = [
       back: 'group',
     },
     children: [{
-      name: 'address-detail',
-      path: 'addresses/:addressId(\\d+)',
-      component: AddressCarousel,
-      props: true,
-      meta: {
-        permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
-        back: 'group',
-        label: 'Territory',
-      },
-    }, {
       name: 'address-list',
       path: '/',
       component: PhoneWitnessing,
@@ -208,8 +197,19 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO'],
-      back: 'territory',
+      back: 'address-links',
       label: 'Address Change Log',
+    },
+  },
+  {
+    name: 'address-links',
+    path: '/territories/:territoryId/addresses/:addressId/detail',
+    component: AddressLinks,
+    props: true,
+    meta: {
+      permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
+      back: 'address-list',
+      label: 'Address Info',
     },
   },
   {
@@ -219,7 +219,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
-      back: 'territory',
+      back: 'address-links',
       label: 'Address Activity History',
     },
   },
@@ -230,7 +230,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],
-      back: 'territory',
+      back: 'address-list',
       label: 'Current Checkout Activity History',
     },
   },
@@ -263,7 +263,7 @@ const routes = [
     props: true,
     meta: {
       permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E'],
-      back: 'territory',
+      back: 'address-links',
       label: 'Edit Address',
     },
   },

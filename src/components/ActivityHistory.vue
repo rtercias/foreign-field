@@ -8,14 +8,11 @@
       <span class="blockquote" v-if="activityLogs.length === 0">
         No activity logs. This address is fresh!
       </span>
-      <span v-else-if="useCheckoutId">
+      <span v-else-if="checkoutId">
         Activity history for current checkout only.
       </span>
-      <span v-else>
-        Past <span v-if="isCheckedOut">and current </span>activity.
-      </span>
       <div>
-        <div class="pb-3" v-if="isCheckedOut">
+        <div class="pb-3" v-if="!!checkoutId">
           Click
           <b-button class="p-0" variant="link" @click="toggleCheckout">here</b-button>
           <span v-if="useCheckoutId"> to see the past year's history.</span>
@@ -77,7 +74,7 @@ export default {
       isLoading: true,
       groups: {},
       groupKeys: {},
-      useCheckoutId: false,
+      useCheckoutId: !!this.checkoutId,
       buttonList: this.addressButtonList,
     };
   },
@@ -92,7 +89,6 @@ export default {
       publishers: 'publishers/publishers',
       phoneButtonList: 'phone/actionButtonList',
       addressButtonList: 'address/actionButtonList',
-      isCheckedOut: 'territory/isCheckedOut',
     }),
     activityLogs() {
       return this.address && orderBy(this.address.activityLogs, (a) => {

@@ -4,7 +4,6 @@ import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import { model, validate } from './models/CongregationModel';
-import { ADDRESS_TAGS, PHONE_ADDRESS_TAGS } from '../../utils/tags';
 
 const SET_CONGREGATION = 'SET_CONGREGATION';
 const ADD_CONGREGATION = 'ADD_CONGREGATION';
@@ -50,16 +49,6 @@ export const congregation = {
     congregation: state => state.congregation,
     error: state => state.error,
     congregationsByCircuit: state => state.congregationsByCircuit,
-    builtInAddressTags: () => ADDRESS_TAGS,
-    builtInPhoneTags: () => PHONE_ADDRESS_TAGS,
-    customAddressTags: (state) => {
-      const { customTags = '' } = get(state.congregation, 'options.address') || {};
-      return customTags.split(',').map(t => t.trim()) || [];
-    },
-    customPhoneTags: (state) => {
-      const { customTags = '' } = get(state.congregation, 'options.phone') || {};
-      return customTags.split(',').map(t => t.trim()) || [];
-    },
   },
 
   mutations: {
