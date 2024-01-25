@@ -10,7 +10,7 @@
             <div class="d-flex justify-content-between">
               <div class="d-inline-flex align-items-center">
                 <h4 class="text-truncate font-weight-bold">
-                  {{territory.description}}
+                  {{territoryDescription}}
                   <font-awesome-icon icon="circle-notch" spin class="text-black-50" v-if="isTerritoryBusy" />
                 </h4>
                 <b-badge
@@ -228,6 +228,9 @@ export default {
     territoryName() {
       return this.territory && this.territory.name ? this.territory.name : '';
     },
+    territoryDescription() {
+      return get(this.territory, 'description') || '';
+    },
     lastActivity() {
       return this.territory.lastActivity;
     },
@@ -253,7 +256,7 @@ export default {
       return get(this.territory, 'addresses.length', 0);
     },
     phoneCount() {
-      const addresses = get(this.territory, 'addresses', []).map(a => get(a, 'phones.length')) || [];
+      const addresses = (get(this.territory, 'addresses') || []).map(a => get(a, 'phones.length')) || [];
       if (addresses.length) {
         const phoneCount = addresses.reduce((acc, current) => (acc || 0) + current);
         return phoneCount;
@@ -305,12 +308,14 @@ export default {
     get,
     async refresh() {
       if (this.territory.id === this.territoryId && !!this.territory.addresses) {
-        // if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
-        //   await this.fetchActivityLogs(this.territory);
-        // }
+        if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
+          const checkoutId = get(this.territory, 'status.checkout_id');
+          await this.fetchActivityLogs({ checkoutId });
+        }
       } else {
-        await this.getTerritory({ id: this.territoryId, getLastActivity: true });
-        await this.fetchActivityLogs(this.territory);
+        await this.getTerritory({ id: this.territoryId });
+        const checkoutId = get(this.territory, 'status.checkout_id');
+        await this.fetchActivityLogs({ checkoutId });
       }
 
       if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
@@ -575,11 +580,17 @@ export default {
       immediate: true,
     },
     territory() {
-      if (this.territory.name !== '' && !this.userTerritories.find(t => t.id === this.territory.id)) {
+      if (this.territory
+        && this.territory.name !== ''
+        && !this.userTerritories.find(t => t.id === this.territory.id)
+      ) {
         this.saveSeenTerritory(this.territory);
       }
     },
     async user() {
+      await this.refresh();
+    },
+    async isCheckedOut() {
       await this.refresh();
     },
   },

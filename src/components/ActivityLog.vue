@@ -87,7 +87,8 @@ export default {
       addPhoneTag: 'phone/addTag',
     }),
     getRecentActivity(logs = []) {
-      const ordered = orderBy(logs, ['timestamp'], ['desc']);
+      const filtered = logs.filter(l => l.checkout_id === this.checkoutId);
+      const ordered = orderBy(filtered, ['timestamp'], ['desc']);
       return ordered.slice(0, 3);
     },
     async addRecord(value) {

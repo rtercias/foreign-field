@@ -244,7 +244,7 @@ export default {
       this.$router.push('/signout');
     },
     async getGroupsList() {
-      if (!this.groups.length) {
+      if (!get(this.groups, 'length')) {
         const congId = get(this.user, 'congregation.id') || get(this.congregation, 'id');
         if (congId) await this.getGroups({ congId });
       }

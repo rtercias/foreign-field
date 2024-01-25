@@ -339,7 +339,7 @@ export const auth = {
           },
         });
 
-        const { territory } = response.data.data;
+        const { territory = {} } = response.data.data;
         commit(SET_TERRITORY_LAST_ACTIVITY, territory);
       } catch (exception) {
         console.error('Unable to get last activity', exception);

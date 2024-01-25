@@ -121,7 +121,7 @@ export const territory = {
         for (const address of addresses) {
           if (getLastActivity) address.isBusy = true;
 
-          const phones = get(terr, 'phones', []).filter(p => p.parent_id === address.id);
+          const phones = (get(terr, 'phones') || []).filter(p => p.parent_id === address.id);
           address.phones = phones;
 
           for (const phone of address.phones) {

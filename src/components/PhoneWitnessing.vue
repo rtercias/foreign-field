@@ -44,7 +44,7 @@ export default {
     const token = get(this.territoryCancelTokens, 'FETCH_ACTIVITY_LOGS');
     if (token && this.isTerritoryBusy) {
       token.cancel();
-      this.cancelFetchLastActivity();
+      this.cancelFetchActivityLogs();
     }
     next();
   },
@@ -108,7 +108,7 @@ export default {
     ...mapActions({
       resetNHRecords: 'territory/resetNHRecords',
       fetchPhone: 'address/fetchAddress',
-      cancelFetchLastActivity: 'territory/cancelFetchLastActivity',
+      cancelFetchActivityLogs: 'territory/cancelFetchActivityLogs',
       setFilter: 'territory/setFilter',
     }),
 

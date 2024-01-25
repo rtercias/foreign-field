@@ -197,10 +197,10 @@ export default {
       if (!tag) return false;
       const tagsToHighlight = ['no number', 'do not mail', 'do not call', 'invalid'];
       return tagsToHighlight.includes(tag)
-        || tag.includes('not ')
-        || tag.includes(' not ')
-        || tag.includes('no ')
-        || tag.includes(' no ');
+        || tag.toLowerCase().startsWith('not ')
+        || tag.toLowerCase().includes(' not ')
+        || tag.toLowerCase().startsWith('no ')
+        || tag.toLowerCase().includes(' no ');
     },
     hide(tag) {
       const hidden = ['invalid #', 'confirmed phone'];
