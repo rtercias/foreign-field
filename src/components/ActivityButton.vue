@@ -144,7 +144,7 @@ export default {
     cursor: not-allowed;
   }
   .description {
-    font-size: 12px;
+    font-size: 7pt;
     white-space: nowrap;
   }
   .slash-shadow {
