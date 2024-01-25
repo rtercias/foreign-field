@@ -27,7 +27,12 @@
               <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
               <b-icon-dash @click="toggleGroup(index)" v-else />
             </span>
-            <AddressIcon :index="index+1" :record="address" />
+            <ActivityButton
+              class="fa-2x pr-2"
+              :displayOnly="true"
+              :value="group[0].value"
+              :action-button-list="buttonList"
+            />
             <span>{{index}} - set by {{getPublisherName(group[0].publisher_id)}}</span>
           </div>
           <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
@@ -55,7 +60,7 @@ import orderBy from 'lodash/orderBy';
 import groupBy from 'lodash/groupBy';
 import forEach from 'lodash/forEach';
 import Loading from './Loading.vue';
-import AddressIcon from './AddressIcon';
+import ActivityButton from './ActivityButton';
 import { format as formatPhone } from '../utils/phone';
 
 export default {
@@ -65,7 +70,7 @@ export default {
     Loading,
     BIconPlus,
     BIconDash,
-    AddressIcon,
+    ActivityButton,
   },
   data() {
     return {

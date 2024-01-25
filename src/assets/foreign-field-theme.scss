@@ -1,46 +1,14 @@
-$primary: #16518D;
-$secondary: #6C757D;
+$primary: #5184B7;
+$secondary: #D4E0ED;
 $success: #76B772;
-$info: #E3F2FD;
+$info: #7EA2C9;
 $warning: #FCBB5A;
-$danger: #D00000;
-$light: #EFEFEF;
-$dark: #292929;
-$extra-light: #F8F9FA;
-$white: #fff;
-$light-success: #D4EDDA;
-$light-warning: #FFF3CD;
-$header-height: 52px;
+$danger: #742F2F;
+$light: #D4E0ED;
+$dark: #18293A;
+$header-height: 58px;
 
-html, body {
-  color: #212529;
-  height: 100%;
-}
-
-.bg-light {
-  color: $secondary !important;
-}
-
-.bg-light-success {
-  background-color: $light-success !important;
-}
-
-.bg-light-warning {
-  background-color: $light-warning !important;
-}
-
-.bg-light-light {
-  background-color: $light !important;
-}
-
-.bg-light-primary {
-  background-color: $primary !important;
-}
-
-.bg-light-danger {
-  background-color: $danger !important;
-}
-
+html, body { height: 100% }
 .list-group-item + .list-group-item {
   border-top-width: 1px;
 }
@@ -58,16 +26,8 @@ html, body {
   border-width: medium !important;
 }
 .interaction {
-  width: 30px;
-  height: 30px;
-  background: $dark;
-  color: $white;
-  border-radius: 50%;
-  font-size: 18px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 80px;
+  border-radius: 0;
 }
 .page-header {
   background-color: white;
@@ -75,19 +35,9 @@ html, body {
     top: $header-height;
   }
 }
-.dropdown-menu {
-  z-index: 10000;
-}
-.dropdown-toggle {
-  padding: 0 7px;
-  height: 24px;
-
-  &.btn-light {
-    background-color: $extra-light;
-  }
-
-  &::after {
-    display: none;
+.dropdown {
+  .dropdown-menu {
+    z-index: 10000;
   }
 }
 .header-height {
@@ -111,7 +61,4 @@ html, body {
 }
 .mdl-dialog.firebaseui-dialog.firebaseui-id-dialog {
   height: fit-content;
-}
-.fa-layers svg.svg-inline--fa {
-  top: 2px;
 }

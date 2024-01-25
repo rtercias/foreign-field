@@ -3,64 +3,161 @@
     class="phone-address-card d-flex align-items-baseline"
     :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
     <div class="w-100">
-      <div>
-        <AddressCard
-          :mode="mode"
-          :index="index"
-          :class="{
-            'border-warning border-medium active': isActiveAddress(address.id),
-            'bg-secondary border-right-0 border-left-0': mode === 'phone-list',
-            'bg-white': mode === 'address-list',
-          }"
-          :address="address"
-          :territoryId="territory.id"
-        >
-        </AddressCard>
-        <div v-if="mode === 'phone-list'">
-          <div v-for="(phone, index) in phones" :key="index">
-            <PhoneCard
-              class="bg-white"
-              :class="{
-                'border-warning border-medium active': isActiveAddress(phone.id),
-              }"
+      <b-list-group>
+        <swipe-list
+          ref="list"
+          :items="combinedAddressAndPhones || []"
+          item-key="id"
+          :revealed.sync="revealed"
+          @active="onActive">
+          <template v-slot="{ item, index, revealed }">
+            <AddressCard
+              v-if="item.type === 'Regular'"
+              mode="phoneAddress"
               :index="index"
-              :phoneRecord="phone"
-              :address="address"
-              :incomingResponse="phone.lastActivity"
-              :disabled="disabled"
-            >
-            </PhoneCard>
-          </div>
-          <b-list-group>
-            <b-list-group-item
-              v-if="mode === 'phone-list'"
-              class="new-phone d-flex p-0 border-0"
-              :class="{ 'pt-0': isDesktop, 'mt-2': !isDesktop }">
-              <b-input-group size="lg">
-                <b-input-group-prepend>
-                  <b-input-group-text class="text-gray bg-white">
-                    <font-awesome-icon icon="phone-alt"></font-awesome-icon>
-                  </b-input-group-text>
-                </b-input-group-prepend>
-                <the-mask
-                  class="form-control phone-input"
-                  type="tel"
-                  :mask="'###-###-####'"
-                  :masked="false"
-                  v-model="newPhone"
-                  @mousedown.native="onActive">
-                </the-mask>
-                <b-input-group-append>
-                  <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
-                    <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
-                    <font-awesome-icon v-else icon="plus"></font-awesome-icon>
-                  </b-button>
-                </b-input-group-append>
-              </b-input-group>
+              :class="{
+                'border-warning active': isActiveAddress(item.id),
+                'bg-light border-right-0 border-left-0': mode === 'phone-list',
+              }"
+              :address="item"
+              :territoryId="territory.id"
+              :incomingResponse="item.lastActivity"
+              :revealed="revealed"
+              @update-response="updateResponse"
+              @toggle-right-panel="toggleRightPanel"
+              @toggle-left-panel="toggleLeftPanel">
+            </AddressCard>
+            <div v-else-if="!item.editMode && item.type === 'Phone'">
+              <PhoneCard
+                class="border"
+                :class="isActiveAddress(item.id) ? ['bg-white border-warning border-medium', 'active'] : []"
+                :index="index"
+                :phoneRecord="item"
+                :address="address"
+                :revealed="revealed"
+                :incomingResponse="item.lastActivity"
+                :disabled="disabled"
+                @update-response="updateResponse"
+                @toggle-right-panel="toggleRightPanel"
+                @toggle-left-panel="toggleLeftPanel"
+                @edit-phone="editPhone">
+              </PhoneCard>
+            </div>
+            <b-list-group-item v-else class="d-flex py-4 border-0">
+              <the-mask
+                class="form-control mr-2"
+                type="tel"
+                :mask="'###-###-####'"
+                :masked="false"
+                v-model="item.phone">
+              </the-mask>
+              <b-button variant="white" class="cancel text-danger position-absolute" @click="() => cancel(item)">
+                <font-awesome-icon icon="times"></font-awesome-icon>
+              </b-button>
+              <b-button class="ml-1 text-primary" variant="light" @click="() => update(item)">
+                <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
+                <font-awesome-icon v-else icon="save"></font-awesome-icon>
+              </b-button>
             </b-list-group-item>
-          </b-list-group>
-        </div>
-      </div>
+          </template>
+          <template v-slot:right="{ item, close }" :disabled="true">
+            <font-awesome-icon v-if="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
+            <ActivityButton
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
+              v-for="(button, index) in rightButtonList(item)"
+              :key="index"
+              :value="button.value"
+              :actionButtonList="actionButtonList(item.type)"
+              :slashed="button.slashed"
+              :disabled="disabled"
+              @button-click="() => updateResponse(item, button.value, close)">
+            </ActivityButton>
+            <b-button
+              v-if="item.type === 'Regular' && $route.name === 'phone-list'"
+              v-show="!item.isBusy"
+              variant="link"
+              class="interaction bg-success px-2 py-3"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
+              @click="lookupFastPeopleSearch">
+              <span class="w-100 d-block pt-1">
+                <font-awesome-layers
+                  class="text-white fa-fw fa-stack mx-2">
+                  <font-awesome-icon icon="user" class="fa-2x"></font-awesome-icon>
+                  <font-awesome-icon icon="search" class="mr-0 mt-0"></font-awesome-icon>
+                  <font-awesome-icon icon="search" class="mr-0 mt-0 search-shadow text-success"></font-awesome-icon>
+                </font-awesome-layers>
+              </span>
+              <span class="people-search-text description text-white pt-1">People Search</span>
+            </b-button>
+            <b-button
+              v-show="!item.isBusy && item.type === 'Phone'"
+              variant="link"
+              class="interaction bg-success text-decoration-none"
+              :class="{ 'py-3': item.type === 'Regular', 'mb-2': isDesktop && mode === 'phone-list' }"
+              @click="() => goToActivityHistory(item)">
+              <span class="w-100 d-block pt-1">
+                <font-awesome-layers class="text-white fa-2x mx-2">
+                  <font-awesome-icon icon="history"></font-awesome-icon>
+                </font-awesome-layers>
+              </span>
+              <span class="description text-white pt-1">History</span>
+            </b-button>
+          </template>
+          <template v-slot:left="{ item, close }">
+            <font-awesome-icon v-show="item.isBusy" icon="circle-notch" spin></font-awesome-icon>
+            <b-button
+              variant="link"
+              v-if="canWrite"
+              v-show="!item.isBusy"
+              class="interaction bg-danger"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }">
+              <span class="w-100 d-block">
+                <font-awesome-layers class="remove-number text-white fa-2x" @click="() => remove(item, close)">
+                  <font-awesome-icon icon="trash-alt"></font-awesome-icon>
+                </font-awesome-layers>
+              </span>
+              <span class="description text-white">Remove</span>
+            </b-button>
+            <ActivityButton
+              v-for="(button) in leftButtonList(item.type)"
+              v-show="!item.isBusy"
+              :key="button.value"
+              class="fa-2x"
+              :class="{ 'mb-2': isDesktop && mode === 'phone-list' }"
+              :value="button.value"
+              :actionButtonList="actionButtonList(item.type)"
+              :slashed="button.slashed"
+              @button-click="(value, button) => applyTag(item, button, close)">
+            </ActivityButton>
+          </template>
+        </swipe-list>
+        <b-list-group-item
+          v-if="mode === 'phone-list'"
+          class="new-phone d-flex p-0 pb-2 border-0"
+          :class="{ 'pt-0': isDesktop, 'mt-2 mx-2': !isDesktop }">
+          <b-input-group size="lg">
+            <b-input-group-prepend>
+              <b-input-group-text class="text-gray bg-white">
+                <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+              </b-input-group-text>
+            </b-input-group-prepend>
+            <the-mask
+              class="form-control phone-input"
+              type="tel"
+              :mask="'###-###-####'"
+              :masked="false"
+              v-model="newPhone"
+              @mousedown.native="onActive">
+            </the-mask>
+            <b-input-group-append>
+              <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
+                <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
+                <font-awesome-icon v-else icon="plus"></font-awesome-icon>
+              </b-button>
+            </b-input-group-append>
+          </b-input-group>
+        </b-list-group-item>
+      </b-list-group>
     </div>
   </div>
 </template>
@@ -69,6 +166,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
 import AddressCard from './AddressCard';
+import { SwipeList } from 'vue-swipe-actions';
 import ActivityButton from './ActivityButton';
 import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
@@ -77,18 +175,21 @@ import intersection from 'lodash/intersection';
 import format from 'date-fns/format';
 import addYears from 'date-fns/addYears';
 import { REJECT_TAGS } from '../store/modules/phone';
-import { format as formatPhone, unmask } from '../utils/phone';
+import { unmask } from '../utils/phone';
 import {
   LEFT_BUTTON_LIST,
   RIGHT_BUTTON_LIST,
+  NOT_ALLOWED as PHONE_NOT_ALLOWED,
 } from '../store/modules/models/PhoneModel';
 import {
   ADDRESS_RIGHT_BUTTON_LIST,
   PHONE_ADDRESS_LEFT_BUTTON_LIST,
   PHONE_ADDRESS_RIGHT_BUTTON_LIST,
+  NOT_ALLOWED as ADDRESS_NOT_ALLOWED,
+  ADDRESS_STATUS,
   DO_NOT_CALL,
   DO_NOT_MAIL,
-  ADDRESS_STATUS,
+  LETTER_WRITING,
 } from '../store/modules/models/AddressModel';
 
 
@@ -98,6 +199,7 @@ export default {
   components: {
     PhoneCard,
     AddressCard,
+    SwipeList,
     ActivityButton,
     TheMask,
   },
@@ -106,6 +208,7 @@ export default {
       enabled: true,
       revealed: {},
       newPhone: '',
+      oldPhone: '',
       isAddressBusy: false,
       addressLeftButtonList: PHONE_ADDRESS_LEFT_BUTTON_LIST,
       isAdding: false,
@@ -119,8 +222,8 @@ export default {
       user: 'auth/user',
       congId: 'auth/congId',
       phone: 'phone/phone',
-      isDesktop: 'auth/isDesktop',
       search: 'phone/search',
+      isDesktop: 'auth/isDesktop',
     }),
     mode() {
       return this.$route.name;
@@ -135,8 +238,11 @@ export default {
     doNotMail() {
       return this.phoneAddressTags.includes(DO_NOT_MAIL);
     },
-    phones() {
-      return this.address.phones;
+    combinedAddressAndPhones() {
+      if (this.mode === 'phone-list' && this.address && this.address.phones) {
+        return [this.address, ...this.address.phones];
+      }
+      return this.address ? [this.address] : [];
     },
   },
   methods: {
@@ -146,10 +252,12 @@ export default {
       addPhoneTag: 'phone/addTag',
       addAddressTag: 'address/addTag',
       removePhoneTag: 'phone/removeTag',
+      removeAddressTag: 'phone/removeTag',
       addLog: 'address/addLog',
       removeLog: 'address/removeLog',
-      markAsDoNotCall: 'address/markAsDoNotCall',
+      updateAddress: 'address/updateAddress',
       phoneSearch: 'phone/phoneSearch',
+      markAsDoNotCall: 'address/markAsDoNotCall',
     }),
     actionButtonList(type) {
       if (type === 'Regular') {
@@ -219,8 +327,12 @@ export default {
       this.newPhone = '';
       this.isAdding = false;
     },
+    cancel(phone) {
+      if (this.oldPhone) this.$set(phone, 'phone', this.formatPhone(this.oldPhone));
+      this.$set(phone, 'editMode', false);
+    },
     async checkDuplicates(phone, id) {
-      const title = formatPhone(phone);
+      const title = this.formatPhone(phone);
       await this.phoneSearch({ congId: this.congId, searchTerm: phone });
       const searchResults = this.search.filter(s => s.address.status === ADDRESS_STATUS.Active.value);
       if (searchResults && searchResults.length) {
@@ -248,130 +360,186 @@ export default {
 
       return false;
     },
+    async update(phone) {
+      this.$set(phone, 'isBusy', true);
+      const duplicates = await this.checkDuplicates(phone.phone, phone.id);
+      if (duplicates) {
+        this.$set(phone, 'isBusy', false);
+        return;
+      }
+      phone.phone = unmask(phone.phone);
+      await this.updatePhone(phone);
+      this.$set(phone, 'editMode', false);
+      this.$set(phone, 'isBusy', false);
+    },
+    async remove(item, close) {
+      if (item.type === 'Regular') await this.removeAddress(item, close);
+      else if (item.type === 'Phone') await this.removePhone(item, close);
+    },
+    async removePhone(phone, close) {
+      this.$set(phone, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        `Remove "${this.formatPhone(phone.phone)}" from the list?`, {
+          title: 'Remove Phone',
+          centered: true,
+        }
+      );
+
+      if (response) {
+        this.isAddressBusy = true;
+        phone.phone = unmask(phone.phone);
+        await this.updatePhone({ ...phone, status: AddressStatus.Inactive });
+        this.isAddressBusy = false;
+      }
+      this.$set(phone, 'isBusy', false);
+      if (typeof close === 'function') close();
+    },
+    async removeAddress(address) {
+      this.$set(address, 'isBusy', true);
+      const response = await this.$bvModal.msgBoxConfirm(
+        'Remove address from the list?', {
+          title: `${address.addr1} ${address.addr2}`,
+          centered: true,
+        }
+      );
+
+      if (response) {
+        this.isAddressBusy = true;
+        await this.updateAddress({ ...address, status: AddressStatus.Inactive });
+        this.isAddressBusy = false;
+      }
+
+      // remove address from list if it's no longer active
+      const index = this.territory.addresses.findIndex(a => a.id === address.id);
+      if (index >= 0) this.territory.addresses.splice(index, 1);
+    },
+    formatPhone(phone) {
+      return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+    },
     getRejectTag(phone) {
       return phone.notes.split(',').find(n => REJECT_TAGS.includes(n));
     },
 
     // update NH status for address or phone
-    // async updateResponse(entity, _value, close) {
-    //   if (typeof close === 'function') close();
-    //   let value = _value;
-    //   if (entity.selectedResponse === 'START' && value === 'START') {
-    //     this.$set(entity, 'isBusy', false);
-    //     return;
-    //   }
-    //   if (!this.actionButtonList(entity.type).some(b => b.value === value)) {
-    //     value = 'START';
-    //   }
+    async updateResponse(entity, _value, close) {
+      if (typeof close === 'function') close();
+      let value = _value;
+      if (entity.selectedResponse === 'START' && value === 'START') {
+        this.$set(entity, 'isBusy', false);
+        return;
+      }
+      if (!this.actionButtonList(entity.type).some(b => b.value === value)) {
+        value = 'START';
+      }
 
-    //   try {
-    //     this.$set(entity, 'isBusy', true);
-    //     await this.addLog({ entityId: entity.id, value, checkoutId: get(this.territory, 'status.checkout_id') });
-    //     this.$set(entity, 'isBusy', false);
-    //     if (typeof close === 'function') close();
-    //   } catch (e) {
-    //     console.error('Unable to save activity log', e);
-    //   }
-    // },
+      try {
+        this.$set(entity, 'isBusy', true);
+        await this.addLog({ entityId: entity.id, value, checkoutId: get(this.territory, 'status.checkout_id') });
+        this.$set(entity, 'isBusy', false);
+        if (typeof close === 'function') close();
+      } catch (e) {
+        console.error('Unable to save activity log', e);
+      }
+    },
 
     // apply tag to address or phone
-    // async applyTag(entity, item, close) {
-    //   if (typeof close === 'function') close();
+    async applyTag(entity, item, close) {
+      if (typeof close === 'function') close();
 
-    //   if (item.value === DO_NOT_CALL) {
-    //     await this.doNotCall();
-    //     return;
-    //   }
+      if (item.value === DO_NOT_CALL) {
+        await this.doNotCall();
+        return;
+      }
 
-    //   const newTag = item.description.toLowerCase();
-    //   this.isAddressBusy = true;
-    //   this.$set(entity, 'isBusy', true);
-    //   try {
-    //     const notesArray = entity.notes ? entity.notes.split(',') : [];
-    //     // check if new tag already exists
-    //     if (notesArray.includes(newTag)) {
-    //       this.isAddressBusy = false;
-    //       this.$set(entity, 'isBusy', false);
-    //       return;
-    //     }
+      const newTag = item.description.toLowerCase();
+      this.isAddressBusy = true;
+      this.$set(entity, 'isBusy', true);
+      try {
+        const notesArray = entity.notes ? entity.notes.split(',') : [];
+        // check if new tag already exists
+        if (notesArray.includes(newTag)) {
+          this.isAddressBusy = false;
+          this.$set(entity, 'isBusy', false);
+          return;
+        }
 
-    //     const newArray = entity.type === 'Phone' ? await this.tagAndExclude(entity, newTag) : notesArray;
+        const newArray = entity.type === 'Phone' ? await this.tagAndExclude(entity, newTag) : notesArray;
 
-    //     // add new tag
-    //     if (entity.type === 'Phone') {
-    //       await this.addPhoneTag({ phone: entity, userid: this.user.id, tag: newTag });
-    //     } else {
-    //       await this.addAddressTag({ address: entity, userid: this.user.id, tag: newTag });
-    //     }
-    //     newArray.push(newTag);
+        // add new tag
+        if (entity.type === 'Phone') {
+          await this.addPhoneTag({ phoneId: entity.id, userid: this.user.id, tag: newTag });
+        } else {
+          await this.addAddressTag({ addressId: entity.id, userid: this.user.id, tag: newTag });
+        }
+        newArray.push(newTag);
 
-    //     // update UI phone
-    //     const updatedNotes = newArray.join(',');
-    //     this.$set(entity, 'notes', `${updatedNotes}`);
-    //     this.$set(entity, 'isBusy', false);
-    //     this.isAddressBusy = false;
-    //     if (typeof close === 'function') close();
-    //   } catch (e) {
-    //     console.error('Unable to apply tag', e);
-    //   }
-    // },
+        // update UI phone
+        const updatedNotes = newArray.join(',');
+        this.$set(entity, 'notes', `${updatedNotes}`);
+        this.$set(entity, 'isBusy', false);
+        this.isAddressBusy = false;
+        if (typeof close === 'function') close();
+      } catch (e) {
+        console.error('Unable to apply tag', e);
+      }
+    },
 
-    // async tagAndExclude(phone, newTag) {
-    //   // if new tag is exclusive, then remove all other exclusive tags
-    //   const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
-    //   const oldArray = phone.notes ? phone.notes.split(',') : [];
-    //   let newArray = [...oldArray];
+    async tagAndExclude(phone, newTag) {
+      // if new tag is exclusive, then remove all other exclusive tags
+      const exclusiveTags = [...REJECT_TAGS, 'confirmed'];
+      const oldArray = phone.notes ? phone.notes.split(',') : [];
+      let newArray = [...oldArray];
 
-    //   if (exclusiveTags.includes(newTag)) {
-    //     for (const tag of exclusiveTags) {
-    //       await this.removePhoneTag({ phoneId: phone.id, userid: this.user.id, tag });
-    //     }
-    //     newArray = oldArray.filter(a => !exclusiveTags.includes(a));
-    //   }
+      if (exclusiveTags.includes(newTag)) {
+        for (const tag of exclusiveTags) {
+          await this.removePhoneTag({ phoneId: phone.id, userid: this.user.id, tag });
+        }
+        newArray = oldArray.filter(a => !exclusiveTags.includes(a));
+      }
 
-    //   return newArray;
-    // },
-    // async toggleLetterWriting() {
-    //   if (this.address.lastActivity.value === 'LW') {
-    //     await this.removeLog({ id: this.address.lastActivity.id, entityId: this.address.id });
-    //   } else {
-    //     await this.addLog({
-    //       entityId: this.address.id,
-    //       value: LETTER_WRITING,
-    //       checkoutId: get(this.territory, 'status.checkout_id'),
-    //     });
-    //   }
-    // },
-    // lookupFastPeopleSearch() {
-    //   const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
-    //   const addr2 = `${(get(this.address, 'addr2') || '').trim().replace(/\s+/g, '-')}`;
-    //   const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
-    //   const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
-    //   window.open(`https://www.fastpeoplesearch.com/address/${addr1}-${addr2}_${city}-${state}`, '_blank');
-    //   this.$refs.list.closeActions();
-    // },
+      return newArray;
+    },
+    async toggleLetterWriting() {
+      if (this.address.lastActivity.value === 'LW') {
+        await this.removeLog({ id: this.address.lastActivity.id, entityId: this.address.id });
+      } else {
+        await this.addLog({
+          entityId: this.address.id,
+          value: LETTER_WRITING,
+          checkoutId: get(this.territory, 'status.checkout_id'),
+        });
+      }
+    },
+    lookupFastPeopleSearch() {
+      const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const addr2 = `${(get(this.address, 'addr2') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
+      window.open(`https://www.fastpeoplesearch.com/address/${addr1}-${addr2}_${city}-${state}`, '_blank');
+      this.$refs.list.closeActions();
+    },
 
-    // selectedNotAllowed(item) {
-    //   const notes = get(item, 'notes', '') || '';
-    //   const tags = notes ? notes.split(',') : [];
-    //   const notAllowed = item.type === 'Regular' ? ADDRESS_NOT_ALLOWED : PHONE_NOT_ALLOWED;
-    //   return intersection(notAllowed, tags) || [];
-    // },
+    selectedNotAllowed(item) {
+      const notes = get(item, 'notes', '') || '';
+      const tags = notes ? notes.split(',') : [];
+      const notAllowed = item.type === 'Regular' ? ADDRESS_NOT_ALLOWED : PHONE_NOT_ALLOWED;
+      return intersection(notAllowed, tags) || [];
+    },
 
-    // allowedToCall(item) {
-    //   return this.selectedNotAllowed(item).length === 0;
-    // },
+    allowedToCall(item) {
+      return this.selectedNotAllowed(item).length === 0;
+    },
 
-    // goToActivityHistory(item) {
-    //   this.$router.push({
-    //     name: 'activity-history-checkout',
-    //     params: {
-    //       territoryId: this.territory.id,
-    //       addressId: item.type === 'Phone' ? item.id : this.address.id,
-    //       checkoutId: this.territory.status && this.territory.status.checkout_id || '',
-    //     },
-    //   });
-    // },
+    goToActivityHistory(item) {
+      this.$router.push({
+        name: 'activity-history-checkout',
+        params: {
+          territoryId: this.territory.id,
+          addressId: item.type === 'Phone' ? item.id : this.address.id,
+          checkoutId: this.territory.status && this.territory.status.checkout_id || '',
+        },
+      });
+    },
 
     async doNotCall() {
       const response = await this.$bvModal.msgBoxConfirm('Press OK to mark this address as "Do Not Call".', {
@@ -381,7 +549,7 @@ export default {
 
       if (response) {
         const datestamped = `${DO_NOT_CALL} until ${format(addYears(new Date(), 1), 'P')}`;
-        await this.markAsDoNotCall({ addr: this.address, userid: this.user.id, tag: datestamped });
+        await this.markAsDoNotCall({ addressId: this.address.id, userid: this.user.id, tag: datestamped });
       }
     },
   },

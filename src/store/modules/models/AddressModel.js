@@ -7,7 +7,6 @@ const GEOCODE_CITY_TYPES = ['locality', 'sublocality'];
 export const DO_NOT_CALL = 'do not call';
 export const DO_NOT_MAIL = 'do not mail';
 export const LETTER_WRITING = 'mail sent';
-export const INVALID = 'invalid';
 
 export const model = gql`fragment AddressModel on Address {
   congregationId
@@ -53,14 +52,13 @@ export const ACTION_BUTTON_LIST = [
     value: 'START',
     text: '',
     icon: '',
-    color: '',
-    description: '(Cleared)',
+    color: 'success',
   },
   {
     type: 'fa-icon',
     value: 'NH',
     text: 'NH',
-    icon: '',
+    icon: 'circle',
     color: 'warning',
     description: 'Not Home',
   },
@@ -85,8 +83,8 @@ export const ACTION_BUTTON_LIST = [
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'success',
-    description: 'Letter Sent',
+    color: 'primary',
+    description: 'Letter',
     disabledText: 'Do Not Mail',
   },
   {
@@ -101,16 +99,16 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'do not mail',
     text: '',
-    icon: 'ban',
+    icon: 'envelope',
     color: 'danger',
     description: 'Do Not Mail',
-    slashed: false,
+    slashed: true,
   },
   {
     type: 'fa-icon',
     value: 'do not call',
     text: '',
-    icon: 'ban',
+    icon: 'minus-circle',
     color: 'danger',
     description: 'Do Not Call',
   },
@@ -125,16 +123,15 @@ export const ACTION_BUTTON_LIST = [
 ];
 
 export const ADDRESS_LEFT_BUTTON_LIST = [
-  'do not mail',
   'do not call',
+  'confirmed',
 ];
 
 export const ADDRESS_RIGHT_BUTTON_LIST = [
-  'HOME',
   'NH',
+  'HOME',
   'LW',
 ];
-
 
 export const PHONE_ADDRESS_RIGHT_BUTTON_LIST = [
   'LW',

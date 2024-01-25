@@ -45,7 +45,6 @@ import {
   faSquare,
   faHome,
   faHistory,
-  faEllipsisH,
   faEllipsisV,
   faPhone,
   faEnvelope,
@@ -96,9 +95,6 @@ import {
   faFlagCheckered,
   faShoppingCart,
   faCar,
-  faBars,
-  faMapMarkedAlt,
-  faMobileAlt,
 } from '@fortawesome/free-solid-svg-icons';
 import { Icon } from 'leaflet';
 import VueClipboard from 'vue-clipboard2';
@@ -119,7 +115,6 @@ library.add(
   faSquare,
   faHome,
   faHistory,
-  faEllipsisH,
   faEllipsisV,
   faPhone,
   faEnvelope,
@@ -170,9 +165,6 @@ library.add(
   faFlagCheckered,
   faShoppingCart,
   faCar,
-  faBars,
-  faMapMarkedAlt,
-  faMobileAlt,
 );
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.component('font-awesome-layers', FontAwesomeLayers);

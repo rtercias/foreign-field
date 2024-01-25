@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import axios from 'axios';
 import { axiosToken } from '..';
 import gql from 'graphql-tag';
@@ -9,6 +8,7 @@ import toArray from 'lodash/toArray';
 import differenceInDays from 'date-fns/differenceInDays';
 import { print } from 'graphql/language/printer';
 import { TEST_GROUPS } from './models/GroupModel';
+import Vue from 'vue';
 
 export const TEST_TERRITORIES = [
   'TEST-000',
