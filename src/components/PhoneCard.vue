@@ -1,7 +1,7 @@
 <template>
   <div
-    class="phone-card p-2 my-2 text-left"
-    :class="{ 'mb-2': isDesktop }">
+    class="phone-card p-2 mb-1 text-left"
+    :class="{ 'mb-1': isDesktop }">
     <div>
       <div v-if="!phoneRecord.editMode" class="d-flex justify-content-between mt-2">
         <div class="d-flex align-items-center">

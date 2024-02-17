@@ -1,8 +1,7 @@
 <template>
   <div
-    class="search-bar sticky-top bg-light"
-    :style="{ top: top }"
-    :class="{ 'p-0': noPadding, 'p-2': !noPadding }">
+    class="search-bar sticky-top bg-light p-2"
+    :style="{ top: top }">
     <div :class="{
       'd-flex justify-content-between': showFilter,
       'position-relative': !showFilter,

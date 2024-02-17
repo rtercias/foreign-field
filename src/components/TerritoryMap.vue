@@ -83,7 +83,7 @@ export default {
     MapLinks,
     AddressIcon,
   },
-  props: ['id', 'territory', 'options', 'disabled'],
+  props: ['id', 'options', 'disabled'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -99,10 +99,11 @@ export default {
       coordinates: 'auth/coordinates',
       startingAddress: 'addresses/startingAddress',
       endingAddress: 'addresses/endingAddress',
+      territory: 'territory/territory',
     }),
     bounds() {
       let latLng = [[0, 0]];
-      if (get(this.territory, 'addresses').length) {
+      if (get(this.territory, 'addresses.length')) {
         latLng = get(this.territory, 'addresses').map(terr => [
           terr.latitude,
           terr.longitude,
@@ -177,7 +178,7 @@ export default {
   },
   async mounted() {
     if (this.token && !this.territory) {
-      await this.getTerritory({ id: this.id, getLastActivity: true });
+      await this.getTerritory({ id: this.id });
     }
   },
 };

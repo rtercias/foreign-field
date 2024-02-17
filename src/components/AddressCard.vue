@@ -3,9 +3,8 @@
     class="address-card-container d-flex justify-content-center py-2"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
-      'mb-2': $route.name === 'phone-list' && isDesktop,
       'p-2': $route.name === 'phone-list',
-      'px-2 min-height': $route.name === 'address-list'
+      'px-2 min-height': $route.name === 'address-list',
     }">
     <div
       class="w-100 row"

@@ -74,7 +74,7 @@
               <span>{{currentPublisher}}</span>
             </div>
           </div>
-          <div class="header-buttons w-100 d-flex justify-content-between pt-2">
+          <div class="header-buttons w-100 d-flex justify-content-between pt-2 pl-2">
             <b-nav tabs fill>
               <b-nav-item
                 :to="{ name: 'address-list', params: { territoryId } }"
@@ -105,7 +105,6 @@
         :ref="viewMode"
         class="router-view"
         :disabled="!isCheckedOut"
-        :territory="territory"
         :options="{ showSortOrder: true, editable: true }"
         @update-count="updateCount"
         @locating="onLocating"
@@ -175,7 +174,7 @@ export default {
   },
   async mounted() {
     this.collaborate = sessionStorage.getItem('collaborate') === 'true';
-    await this.refresh();
+    // await this.refresh();
     this.subscribe();
   },
   computed: {
@@ -198,6 +197,8 @@ export default {
       cancelTokens: 'territory/cancelTokens',
       userTerritories: 'auth/userTerritories',
       optimized: 'addresses/optimized',
+      territoryError: 'territory/error',
+      hasPhones: 'territory/hasPhones',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -257,9 +258,12 @@ export default {
     },
     phoneCount() {
       const addresses = (get(this.territory, 'addresses') || []).map(a => get(a, 'phones.length')) || [];
-      if (addresses.length) {
-        const phoneCount = addresses.reduce((acc, current) => (acc || 0) + current);
+      const phoneCount = addresses.reduce((acc, current) => (acc || 0) + current, 0);
+      if (phoneCount > 0) {
         return phoneCount;
+      }
+      if (this.$route.name !== 'phone-list') {
+        return '*';
       }
       return 0;
     },
@@ -285,7 +289,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      getTerritory: 'territory/getTerritory',
+      // getTerritory: 'territory/getTerritory',
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
@@ -307,20 +311,25 @@ export default {
     }),
     get,
     async refresh() {
-      if (this.territory.id === this.territoryId && !!this.territory.addresses) {
-        if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
-          const checkoutId = get(this.territory, 'status.checkout_id');
-          await this.fetchActivityLogs({ checkoutId });
-        }
-      } else {
-        await this.getTerritory({ id: this.territoryId });
-        const checkoutId = get(this.territory, 'status.checkout_id');
-        await this.fetchActivityLogs({ checkoutId });
-      }
+      // if (this.territory.id === this.territoryId && !!this.territory.addresses) {
+      //   if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
+      //     const checkoutId = get(this.territory, 'status.checkout_id');
+      //     await this.fetchActivityLogs({ checkoutId });
+      //   }
+      // } else {
+      // await this.getTerritory({ id: this.territoryId });
+      // const checkoutId = get(this.territory, 'status.checkout_id');
+      // await this.fetchActivityLogs({ checkoutId });
+      // }
 
-      if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
-        this.$router.replace('/unauthorized');
-      }
+      // if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
+      //   if (this.territoryError) {
+      //     console.error(this.territoryError.message);
+      //     this.$router.replace('/error');
+      //   } else {
+      //     this.$router.replace('/unauthorized');
+      //   }
+      // }
     },
 
     async checkIn() {
@@ -588,10 +597,10 @@ export default {
       }
     },
     async user() {
-      await this.refresh();
+      // await this.refresh();
     },
     async isCheckedOut() {
-      await this.refresh();
+      // await this.refresh();
     },
   },
 };

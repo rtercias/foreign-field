@@ -9,7 +9,7 @@ import get from 'lodash/get';
 import { model, validate } from './models/TerritoryModel';
 import { model as addressModel } from './models/AddressModel';
 import { model as phoneModel } from './models/PhoneModel';
-import { model as activityModel } from './models/ActivityModel';
+// import { model as activityModel } from './models/ActivityModel';
 import { AddressStatus, AddressType } from '..';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
@@ -104,6 +104,10 @@ export const territory = {
     address: state => id => state.territory.addresses.find(a => a.id === id),
     error: state => state.error,
     filter: state => state.filter,
+    hasPhones: (state) => {
+      const addresses = get(state.territory, 'addresses') || [];
+      return addresses.some(a => a.phones.length);
+    },
   },
 
   mutations: {
@@ -115,18 +119,18 @@ export const territory = {
         publisher: args.publisher,
       });
     },
-    SET_TERRITORY(state, { terr, getLastActivity }) {
+    SET_TERRITORY(state, { terr }) {
       if (terr && terr.addresses) {
         const addresses = terr.addresses || [];
         for (const address of addresses) {
-          if (getLastActivity) address.isBusy = true;
+          // if (getLastActivity) address.isBusy = true;
 
           const phones = (get(terr, 'phones') || []).filter(p => p.parent_id === address.id);
           address.phones = phones;
 
-          for (const phone of address.phones) {
-            if (getLastActivity) phone.isBusy = true;
-          }
+          // for (const phone of address.phones) {
+          //   if (getLastActivity) phone.isBusy = true;
+          // }
         }
       }
       state.territory = terr;
@@ -580,7 +584,7 @@ export const territory = {
       }
     },
 
-    async getTerritory({ commit, getters, rootGetters }, { id, getLastActivity }) {
+    async getTerritory({ commit, getters, rootGetters }, { id, includePhones }) {
       if (!id) {
         commit(RESET_TERRITORY);
         return;
@@ -594,8 +598,6 @@ export const territory = {
       if (getters.error) {
         console.warn('Token is ready');
       }
-
-      commit(LOADING_TERRITORY_TRUE);
 
       try {
         const response = await axios({
@@ -611,9 +613,9 @@ export const territory = {
                 addresses {
                   ...AddressModel
                 }
-                phones {
+                ${includePhones ? `phones {
                   ...PhoneModel
-                }
+                }` : ''}
                 status {
                   checkout_id
                   status
@@ -624,14 +626,10 @@ export const territory = {
                   campaign
                   campaign_id
                 }
-                lastActivity {
-                  ...ActivityModel
-                }
               }
             }
             ${addressModel}
-            ${phoneModel}
-            ${activityModel}`),
+            ${includePhones ? phoneModel : ''}`),
             variables: {
               terrId: id,
             },
@@ -642,7 +640,12 @@ export const territory = {
         if (terr && terr.addresses) {
           terr.addresses = orderBy(terr.addresses, 'sort');
         }
-        commit(SET_TERRITORY, { terr, getLastActivity });
+        // TODO: setTerritory should store address id's only
+        commit(SET_TERRITORY, { terr });
+
+        // TODO: call setAddresses from addresses module and send terr.addresses there
+
+        // TODO: if includePhones, call setPhones from new phones module and send terr.phones there
         commit(GET_TERRITORY_SUCCESS);
         commit(LOADING_TERRITORY_FALSE);
       } catch (exception) {
@@ -1015,18 +1018,10 @@ export const territory = {
             root: true,
           });
 
-          // await dispatch('setAddressActivityLogs', {
-          //   addressId: address.id,
-          //   activityLogs: address.activityLogs,
-          // });
-
-          // await dispatch('setAddressIsBusy', {
-          //   addressId: address.id,
-          //   status: false,
-          // });
-
           const { phones } = address || [];
           phones.forEach(async (phone) => {
+            commit(SET_PHONE_IS_BUSY, { addressId: address.id, phoneId: phone.id, status: true });
+
             await dispatch('phone/fetchActivityLogs', {
               addressId: address.id,
               phoneId: phone.id,
@@ -1036,13 +1031,9 @@ export const territory = {
               root: true,
             });
 
-            // commit(SET_PHONE_ACTIVITY_LOGS, {
-            //   addressId: address.id,
-            //   phoneId: phone.id,
-            //   activityLogs: phone.activityLogs,
-            // });
-            // commit(SET_PHONE_IS_BUSY, { addressId: address.id, phoneId: phone.id, status: false });
+            commit(SET_PHONE_IS_BUSY, { addressId: address.id, phoneId: phone.id, status: false });
           });
+          commit(SET_ADDRESS_IS_BUSY, { addressId: address.id, status: false });
         });
       } catch (e) {
         commit(FETCH_ACTIVITY_LOGS_FAIL, e);

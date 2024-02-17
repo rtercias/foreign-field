@@ -1,66 +1,62 @@
 <template>
   <div
-    class="phone-address-card d-flex align-items-baseline"
+    class="phone-address-card"
     :class="{ 'm-0': !disabled, 'm-0 pb-3': mode === 'phone-list', 'p-2': isDesktop && mode === 'phone-list' }">
-    <div class="w-100">
-      <div>
-        <AddressCard
-          :mode="mode"
-          :index="index"
+    <AddressCard
+      :mode="mode"
+      :index="index"
+      :class="{
+        'border-warning border-medium active': isActiveAddress(address.id),
+        'bg-secondary border-right-0 border-left-0': mode === 'phone-list',
+        'bg-white': mode === 'address-list',
+      }"
+      :address="address"
+      :territoryId="territory.id"
+    >
+    </AddressCard>
+    <div v-if="mode === 'phone-list'">
+      <div v-for="(phone, index) in phones" :key="index">
+        <PhoneCard
+          class="bg-white"
           :class="{
-            'border-warning border-medium active': isActiveAddress(address.id),
-            'bg-secondary border-right-0 border-left-0': mode === 'phone-list',
-            'bg-white': mode === 'address-list',
+            'border-warning border-medium active': isActiveAddress(phone.id),
           }"
+          :index="index"
+          :phoneRecord="phone"
           :address="address"
-          :territoryId="territory.id"
+          :incomingResponse="phone.lastActivity"
+          :disabled="disabled"
         >
-        </AddressCard>
-        <div v-if="mode === 'phone-list'">
-          <div v-for="(phone, index) in phones" :key="index">
-            <PhoneCard
-              class="bg-white"
-              :class="{
-                'border-warning border-medium active': isActiveAddress(phone.id),
-              }"
-              :index="index"
-              :phoneRecord="phone"
-              :address="address"
-              :incomingResponse="phone.lastActivity"
-              :disabled="disabled"
-            >
-            </PhoneCard>
-          </div>
-          <b-list-group>
-            <b-list-group-item
-              v-if="mode === 'phone-list'"
-              class="new-phone d-flex p-0 border-0"
-              :class="{ 'pt-0': isDesktop, 'mt-2': !isDesktop }">
-              <b-input-group size="lg">
-                <b-input-group-prepend>
-                  <b-input-group-text class="text-gray bg-white">
-                    <font-awesome-icon icon="phone-alt"></font-awesome-icon>
-                  </b-input-group-text>
-                </b-input-group-prepend>
-                <the-mask
-                  class="form-control phone-input"
-                  type="tel"
-                  :mask="'###-###-####'"
-                  :masked="false"
-                  v-model="newPhone"
-                  @mousedown.native="onActive">
-                </the-mask>
-                <b-input-group-append>
-                  <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
-                    <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
-                    <font-awesome-icon v-else icon="plus"></font-awesome-icon>
-                  </b-button>
-                </b-input-group-append>
-              </b-input-group>
-            </b-list-group-item>
-          </b-list-group>
-        </div>
+        </PhoneCard>
       </div>
+      <b-list-group>
+        <b-list-group-item
+          v-if="mode === 'phone-list'"
+          class="new-phone d-flex p-0 border-0"
+          :class="{ 'pt-0': isDesktop, 'mt-2': !isDesktop }">
+          <b-input-group size="lg">
+            <b-input-group-prepend>
+              <b-input-group-text class="text-gray bg-white">
+                <font-awesome-icon icon="phone-alt"></font-awesome-icon>
+              </b-input-group-text>
+            </b-input-group-prepend>
+            <the-mask
+              class="form-control phone-input"
+              type="tel"
+              :mask="'###-###-####'"
+              :masked="false"
+              v-model="newPhone"
+              @mousedown.native="onActive">
+            </the-mask>
+            <b-input-group-append>
+              <b-button class="text-white" variant="success" @click="addNewPhone" :disabled="isAdding">
+                <font-awesome-icon v-if="isAdding" icon="circle-notch" spin></font-awesome-icon>
+                <font-awesome-icon v-else icon="plus"></font-awesome-icon>
+              </b-button>
+            </b-input-group-append>
+          </b-input-group>
+        </b-list-group-item>
+      </b-list-group>
     </div>
   </div>
 </template>

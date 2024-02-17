@@ -243,6 +243,7 @@ export default {
       isCheckingOut: 'territory/isCheckingOut',
       scrollYPosition: 'auth/scrollYPosition',
       loadingStatuses: 'territories/loadingStatuses',
+      groupError: 'group/error',
     }),
     searchedTerritories() {
       if (this.keywordFilter) {
@@ -328,8 +329,13 @@ export default {
       const congId = this.congId || get(this.congregation, 'id') || (this.user && this.user.congId);
       if (congId && !this.groups.length) await this.getGroups({ congId });
       if (this.user && get(this.group, 'congregation_id')
-        && get(this.user, 'congregation.id') !== get(this.group, 'congregation_id')) {
-        this.$router.replace('/unauthorized');
+      && get(this.user, 'congregation.id') !== get(this.group, 'congregation_id')) {
+        if (this.groupError) {
+          console.error(this.groupError.message);
+          this.$router.replace('/error');
+        } else {
+          this.$router.replace('/unauthorized');
+        }
         return;
       }
       if (!this.publishers.length) {

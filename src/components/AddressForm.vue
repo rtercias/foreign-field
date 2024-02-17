@@ -283,6 +283,7 @@ export default {
       markAsDoNotCall: 'address/markAsDoNotCall',
       markAsNotForeign: 'address/markAsNotForeign',
       back: 'auth/back',
+      addressError: 'address/error',
     }),
     async submitAddress() {
       try {
@@ -361,7 +362,7 @@ export default {
       }
 
       if (this.user && this.territoryId && this.territory.id !== this.territoryId) {
-        this.getTerritory({ id: this.territoryId, getLastActivity: true });
+        this.getTerritory({ id: this.territoryId });
       }
 
       if (this.mode === Modes.edit) {
@@ -381,8 +382,13 @@ export default {
         };
       }
       if (this.user && this.mode === Modes.edit
-        && this.user.congregation.id !== this.address.congregationId) {
-        this.$router.replace('/unauthorized');
+      && this.user.congregation.id !== this.address.congregationId) {
+        if (this.addressError) {
+          console.error(this.addressError.message);
+          this.$router.replace('/error');
+        } else {
+          this.$router.replace('/unauthorized');
+        }
       }
       this.isLoading = false;
     },
@@ -534,7 +540,12 @@ export default {
         && this.congId !== this.territory.congregationid;
 
       if (unauthAddressCongId || unauthTerritoryCongId) {
-        this.$router.replace('/unauthorized');
+        if (this.addressError) {
+          console.error(this.addressError.message);
+          this.$router.replace('/error');
+        } else {
+          this.$router.replace('/unauthorized');
+        }
       }
     },
     congId() {
