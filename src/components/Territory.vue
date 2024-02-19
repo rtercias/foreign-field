@@ -268,7 +268,8 @@ export default {
       return 0;
     },
     displayType() {
-      return this.territory.type === 'Active' ? '' : get(TerritoryType[this.territory.type], 'text');
+      const { type } = this.territory || {};
+      return type === 'Active' ? '' : get(TerritoryType[type], 'text');
     },
     isOptimized() {
       return this.optimized && !!this.optimized.length;

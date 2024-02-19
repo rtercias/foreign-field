@@ -1,6 +1,6 @@
 <template>
   <div
-    class="address-card-container d-flex justify-content-center py-2"
+    class="address-card-container min-height d-flex justify-content-center py-2"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
       'p-2': $route.name === 'phone-list',
@@ -249,6 +249,9 @@ export default {
 .address-card-container {
   &.min-height {
     min-height: 150px;
+  }
+  &.min-height-phone-address {
+    min-height: 119px;
   }
   .address-card {
     display: flex;

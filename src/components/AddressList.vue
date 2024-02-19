@@ -55,7 +55,7 @@ export default {
   props: ['territoryId', 'disabled'],
   async mounted() {
     const addresses = get(this.territory, 'addresses') || [];
-    if (this.token && !addresses.length) {
+    if (this.token && (!addresses.length || this.territoryId !== this.territory.id)) {
       await this.getTerritory({ id: this.territoryId });
     }
 
@@ -201,6 +201,7 @@ li {
 
   .address-card-container {
     width: 48%;
+    max-width: 48%;
     flex: auto;
 
     &:nth-child(even) {
@@ -215,6 +216,7 @@ li {
 
     .address-card-container {
       width: 48%;
+      max-width: 48%;
       flex: auto;
     }
   }
@@ -226,6 +228,7 @@ li {
 
     .address-card-container {
       width: 32%;
+      max-width: 32%;
       flex: auto;
     }
   }

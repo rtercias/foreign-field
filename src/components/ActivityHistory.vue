@@ -53,6 +53,7 @@ import groupBy from 'lodash/groupBy';
 import forEach from 'lodash/forEach';
 import Loading from './Loading.vue';
 import AddressIcon from './AddressIcon';
+import ActivityButton from './ActivityButton';
 import { format as formatPhone } from '../utils/phone';
 
 export default {
@@ -63,6 +64,7 @@ export default {
     BIconPlus,
     BIconDash,
     AddressIcon,
+    ActivityButton,
   },
   data() {
     return {

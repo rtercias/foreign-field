@@ -177,7 +177,7 @@ export default {
     },
   },
   async mounted() {
-    if (this.token && !this.territory) {
+    if (this.token && (!this.territory || this.id !== this.territory.id)) {
       await this.getTerritory({ id: this.id });
     }
   },
@@ -196,9 +196,6 @@ export default {
 .leaflet-popup h2 {
   font-size: 18px;
 }
-.leaflet-popup-content {
-}
-
 .sort-order-icon {
   border: solid 3px;
   border-radius: 50%;

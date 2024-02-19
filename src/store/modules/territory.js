@@ -289,7 +289,6 @@ export const territory = {
     },
     LOADING_TERRITORY_TRUE(state) {
       Vue.set(state, 'isLoading', true);
-      state.territory = { ...initialState.territory };
     },
     LOADING_TERRITORY_FALSE(state) {
       Vue.set(state, 'isLoading', false);
@@ -598,6 +597,8 @@ export const territory = {
       if (getters.error) {
         console.warn('Token is ready');
       }
+
+      commit(LOADING_TERRITORY_TRUE);
 
       try {
         const response = await axios({

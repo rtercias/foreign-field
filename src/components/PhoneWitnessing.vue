@@ -50,7 +50,7 @@ export default {
   },
   props: ['territoryId', 'disabled'],
   async mounted() {
-    if (this.token && !this.hasPhones) {
+    if (this.token && (!this.hasPhones || this.territoryId !== this.territory.id)) {
       await this.getTerritory({ id: this.territoryId, includePhones: true });
     }
 
@@ -187,11 +187,13 @@ li {
 
 .phone-address-card-container {
   width: 100%;
+  min-height: 190px;
 }
 
 @media (min-width: 769px) {
   .phone-address-card-container {
-    width: 48%;
+    width: 50%;
+    max-width: 50%;
     flex: auto;
 
     &:nth-child(odd) {
@@ -203,6 +205,7 @@ li {
 @media (min-width: 1400px) {
   .phone-address-card-container {
     width: 32%;
+    max-width: 32%;
   }
 }
 
