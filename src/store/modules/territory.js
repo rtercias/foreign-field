@@ -9,8 +9,9 @@ import get from 'lodash/get';
 import { model, validate } from './models/TerritoryModel';
 import { model as addressModel } from './models/AddressModel';
 import { model as phoneModel } from './models/PhoneModel';
-// import { model as activityModel } from './models/ActivityModel';
+import { model as activityModel } from './models/ActivityModel';
 import { AddressStatus, AddressType } from '..';
+import { removeDeprecatedTags } from '../../utils/tags';
 
 const CHANGE_STATUS = 'CHANGE_STATUS';
 const SET_TERRITORY = 'SET_TERRITORY';
@@ -131,6 +132,8 @@ export const territory = {
           // for (const phone of address.phones) {
           //   if (getLastActivity) phone.isBusy = true;
           // }
+
+          address.notes = removeDeprecatedTags(address.notes);
         }
       }
       state.territory = terr;
@@ -227,7 +230,10 @@ export const territory = {
       const address = addresses.find(a => a.id === addressId) || {};
       const { activityLogs } = address;
       if (activityLogs) {
-        activityLogs.push(activityLog);
+        // add activity log if it's not already on the list
+        if (!activityLogs.some(a => a.id === activityLog.id)) {
+          activityLogs.push(activityLog);
+        }
       }
     },
     ADD_PHONE_ACTIVITY_LOG(state, { addressId, phoneId, activityLog }) {
@@ -237,7 +243,10 @@ export const territory = {
       const phone = phones.find(p => p.id === phoneId) || {};
       const { activityLogs } = phone;
       if (activityLogs) {
-        activityLogs.push(activityLog);
+        // add activity log if it's not already on the list
+        if (!activityLogs.some(a => a.id === activityLog.id)) {
+          activityLogs.push(activityLog);
+        }
       }
     },
     REMOVE_ADDRESS_ACTIVITY_LOG(state, { addressId, logId }) {
@@ -605,7 +614,7 @@ export const territory = {
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
           data: {
-            query: print(gql`query Territory($terrId: Int) {
+            query: print(gql`query Territory($terrId: Int $checkoutId: Int) {
               territory (id: $terrId) {
                 id congregationid name description type city group_id
                 group {
@@ -627,10 +636,14 @@ export const territory = {
                   campaign
                   campaign_id
                 }
+                activityLogs(checkout_id: $checkoutId territory_id: $terrId) {
+                  ...ActivityModel
+                }
               }
             }
             ${addressModel}
-            ${includePhones ? phoneModel : ''}`),
+            ${includePhones ? phoneModel : ''}
+            ${activityModel}`),
             variables: {
               terrId: id,
             },

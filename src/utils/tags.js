@@ -26,6 +26,10 @@ export const READ_ONLY_PHONE_ADDRESS_TAGS = [
 export const NF_TAG = 'does not speak #language#';
 export const DNC_TAG = 'do not call';
 
+export const DEPRECATED_TAGS = [
+  'invalid ',
+];
+
 export function formatLanguage(tag = '', value) {
   return String(tag).replaceAll('#language#', value);
 }
@@ -51,4 +55,9 @@ export function removeTag(notes, tag) {
 export function removeDoNotCallTag(notes) {
   const tags = (notes || '').split(',') || [];
   return tags.filter(t => !t.includes(DO_NOT_CALL)).join(',');
+}
+
+export function removeDeprecatedTags(notes) {
+  const tags = (notes || '').split(',') || [];
+  return tags.filter(t => !DEPRECATED_TAGS.some(d => t.includes(d))).join(',');
 }

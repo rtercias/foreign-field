@@ -116,6 +116,15 @@ export const ACTION_BUTTON_LIST = [
   },
   {
     type: 'fa-icon',
+    value: 'invalid',
+    text: '',
+    icon: 'ban',
+    color: 'danger',
+    description: 'Invalid',
+    slashed: false,
+  },
+  {
+    type: 'fa-icon',
     value: 'confirmed',
     text: '',
     icon: 'check',

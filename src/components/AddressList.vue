@@ -60,7 +60,7 @@ export default {
     }
 
     const checkoutId = get(this.territory, 'status.checkout_id');
-    await this.fetchActivityLogs({ checkoutId });
+    await this.fetchActivityLogs({ id: this.territoryId, checkoutId });
 
     window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     this.keywordFilter = this.savedFilter.keyword;

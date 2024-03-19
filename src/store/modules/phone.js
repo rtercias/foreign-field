@@ -131,7 +131,7 @@ export const phone = {
       }
     },
 
-    async fetchActivityLogs({ commit, dispatch }, { addressId, phoneId, checkoutId, cancelToken }) {
+    async fetchActivityLogs({ commit, rootGetters, dispatch }, { addressId, phoneId, checkoutId }) {
       try {
         if (!phoneId) {
           commit(FETCH_ACTIVITY_LOGS_FAIL, 'id is required');
@@ -140,35 +140,10 @@ export const phone = {
 
         dispatch('territory/setPhoneIsBusy', { addressId, phoneId, status: true }, { root: true });
 
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cancelToken,
-          data: {
-            query: print(gql`query Phone($phoneId: Int $checkoutId: Int) {
-              phone(id: $phoneId) {
-                activityLogs(checkout_id: $checkoutId) {
-                  ...ActivityModel
-                }
-              }
-            }
-            ${activityModel}`),
-            variables: {
-              phoneId,
-              checkoutId,
-            },
-          },
-        });
+        const territory = rootGetters['territory/territory'];
+        const { activityLogs: territoryLogs = [] } = territory;
+        const activityLogs = territoryLogs.filter(log => log.address_id === phoneId && log.checkout_id === checkoutId);
 
-        const { errors } = get(response, 'data');
-        if (errors && errors.length) {
-          throw new Error(errors[0].message);
-        }
-
-        const { activityLogs } = get(response, 'data.data.phone') || {};
         const ordered = orderBy(activityLogs, ['timestamp'], ['desc']);
         const lastActivity = first(ordered);
         commit(FETCH_ACTIVITY_LOGS_SUCCESS, activityLogs);

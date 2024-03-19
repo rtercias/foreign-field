@@ -232,7 +232,7 @@ export const address = {
       }
     },
 
-    async fetchActivityLogs({ commit, dispatch }, { addressId, checkoutId, cancelToken }) {
+    async fetchActivityLogs({ commit, rootGetters, dispatch }, { addressId, checkoutId }) {
       try {
         if (!addressId) {
           commit(FETCH_ACTIVITY_LOGS_FAIL, 'id is required');
@@ -241,35 +241,10 @@ export const address = {
 
         dispatch('territory/setAddressIsBusy', { addressId, status: true }, { root: true });
 
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cancelToken,
-          data: {
-            query: print(gql`query Address($addressId: Int $checkoutId: Int) {
-              address(id: $addressId) {
-                activityLogs(checkout_id: $checkoutId) {
-                  ...ActivityModel
-                }
-              }
-            }
-            ${activityModel}`),
-            variables: {
-              addressId,
-              checkoutId,
-            },
-          },
-        });
+        const territory = rootGetters['territory/territory'];
+        const { activityLogs: territoryLogs = [] } = territory;
+        const activityLogs = territoryLogs.filter(log => log.address_id === addressId && log.checkout_id === checkoutId);
 
-        const { errors } = get(response, 'data');
-        if (errors && errors.length) {
-          throw new Error(errors[0].message);
-        }
-
-        const { activityLogs } = get(response, 'data.data.address') || [];
         const ordered = orderBy(activityLogs, ['timestamp'], ['desc']);
         const lastActivity = first(ordered);
         dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
@@ -285,6 +260,18 @@ export const address = {
       try {
         const user = rootGetters['auth/user'];
         const activityLog = createActivityLog(0, entityId, value, checkoutId, user);
+
+        // temporarily commit the new log to update the display
+        commit(ADD_LOG, activityLog);
+        dispatch('territory/addAddressActivityLog', {
+          addressId: entityId,
+          activityLog: { ...activityLog, timestamp: Date.now() },
+        }, { root: true });
+        dispatch('territory/addPhoneActivityLog', {
+          phoneId: entityId,
+          addressId: parentId,
+          activityLog: { ...activityLog, timestamp: Date.now() },
+        }, { root: true });
 
         commit('auth/LOADING', true, { root: true });
         dispatch('territory/setAddressIsBusy', { addressId: entityId, status: true }, { root: true });
@@ -313,6 +300,19 @@ export const address = {
           throw new Error(errors[0].message);
         }
 
+        // remove the temporary log
+        commit(REMOVE_LOG, { id: 0, addressId: entityId });
+        dispatch('territory/removeAddressActivityLog', {
+          addressId: entityId,
+          logId: 0,
+        }, { root: true });
+        dispatch('territory/removePhoneActivityLog', {
+          phoneId: entityId,
+          addressId: parentId,
+          logId: 0,
+        }, { root: true });
+
+        // commit the permanent new log record
         const { addLog } = get(response, 'data.data') || {};
         commit(ADD_LOG, addLog);
 

@@ -11,7 +11,6 @@
               <div class="d-inline-flex align-items-center">
                 <h4 class="text-truncate font-weight-bold">
                   {{territoryDescription}}
-                  <font-awesome-icon icon="circle-notch" spin class="text-black-50" v-if="isTerritoryBusy" />
                 </h4>
                 <b-badge
                   variant="warning"
@@ -191,7 +190,6 @@ export default {
       options: 'auth/options',
       token: 'auth/token',
       territoryIsLoading: 'territory/isLoading',
-      isTerritoryBusy: 'territory/isBusy',
       isAuthenticated: 'auth/isAuthenticated',
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
