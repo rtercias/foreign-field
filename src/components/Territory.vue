@@ -25,6 +25,12 @@
                   <font-awesome-icon icon="ellipsis-h" />
                 </template>
                 <b-dropdown-item
+                  @click="toggleIcon"
+                >
+                  <span v-if="mapIcon === 'ACTIVITY'">Icon: Show Numbers</span>
+                  <span v-else>Icon: Show Activity</span>
+                </b-dropdown-item>
+                <b-dropdown-item
                   v-if="$route.name === 'map-view'"
                   @click="optimizeNearMe"
                 >
@@ -63,6 +69,16 @@
                   <span v-if="collaborate">Turn Off</span>
                   <span v-else>Turn On</span>
                   Collaborate Mode
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="$route.name === 'map-view' && canManage"
+                  :to="{
+                    name: 'optimize',
+                    params: { territoryId },
+                    query: { origin: $route.name },
+                  }"
+                >
+                  Optimizer
                 </b-dropdown-item>
                 <b-dropdown-item v-if="canManage" variant="danger" @click="reset">
                   Reset Territory
@@ -125,7 +141,7 @@ import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 import { subscription } from '../main';
 import { unmask } from '../utils/phone';
-
+import { MAP_ICON } from '../store/modules/models/TerritoryModel';
 
 export default {
   name: 'Territory',
@@ -173,7 +189,6 @@ export default {
   },
   async mounted() {
     this.collaborate = sessionStorage.getItem('collaborate') === 'true';
-    // await this.refresh();
     this.subscribe();
   },
   computed: {
@@ -197,6 +212,7 @@ export default {
       optimized: 'addresses/optimized',
       territoryError: 'territory/error',
       hasPhones: 'territory/hasPhones',
+      mapIcon: 'territory/mapIcon',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -307,30 +323,9 @@ export default {
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       optimize: 'addresses/optimize',
       reorderAddresses: 'territory/reorderAddresses',
+      toggleMapIcon: 'territory/toggleMapIcon',
     }),
     get,
-    async refresh() {
-      // if (this.territory.id === this.territoryId && !!this.territory.addresses) {
-      //   if (!this.cancelTokens.FETCH_ACTIVITY_LOGS) {
-      //     const checkoutId = get(this.territory, 'status.checkout_id');
-      //     await this.fetchActivityLogs({ checkoutId });
-      //   }
-      // } else {
-      // await this.getTerritory({ id: this.territoryId });
-      // const checkoutId = get(this.territory, 'status.checkout_id');
-      // await this.fetchActivityLogs({ checkoutId });
-      // }
-
-      // if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
-      //   if (this.territoryError) {
-      //     console.error(this.territoryError.message);
-      //     this.$router.replace('/error');
-      //   } else {
-      //     this.$router.replace('/unauthorized');
-      //   }
-      // }
-    },
-
     async checkIn() {
       const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
         title: `${this.territory.name}`,
@@ -576,6 +571,13 @@ export default {
         autoHideDelay: 1000,
       });
     },
+    toggleIcon() {
+      if (this.mapIcon === MAP_ICON.ACTIVITY) {
+        this.toggleMapIcon(MAP_ICON.NUMBER);
+      } else {
+        this.toggleMapIcon(MAP_ICON.ACTIVITY);
+      }
+    },
   },
   watch: {
     '$route.name': {
@@ -590,6 +592,7 @@ export default {
     territory() {
       if (this.territory
         && this.territory.name !== ''
+        && this.userTerritories
         && !this.userTerritories.find(t => t.id === this.territory.id)
       ) {
         this.saveSeenTerritory(this.territory);

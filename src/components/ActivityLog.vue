@@ -39,7 +39,7 @@
     </b-dropdown>
     <table class="recent-logs w-100">
       <tr
-        v-for="log = {} in getRecentActivity(entity.activityLogs)"
+        v-for="log = {} in recentActivity"
         :key="log.id"
         :class="getBgColor(log.value)"
       >
@@ -86,11 +86,6 @@ export default {
       addAddressTag: 'address/addTag',
       addPhoneTag: 'phone/addTag',
     }),
-    getRecentActivity(logs = []) {
-      const filtered = logs.filter(l => l.checkout_id === this.checkoutId);
-      const ordered = orderBy(filtered, ['timestamp'], ['desc']);
-      return ordered.slice(0, 3);
-    },
     async addRecord(value) {
       if (this.isActivity(value)) {
         await this.addLog(value);
@@ -220,11 +215,6 @@ export default {
     isActivity(value) {
       return value && this.activityButtons.includes(value);
     },
-    // recentActivityLogs() {
-    //   const logs = get(this.entity, 'activityLogs') || [];
-    //   const ordered = orderBy(logs, ['timestamp'], ['desc']);
-    //   return ordered.splice(0, 3);
-    // },
   },
   computed: {
     ...mapGetters({
@@ -300,6 +290,12 @@ export default {
     },
     isDisabled() {
       return this.includesDoNotCall || this.includesInvalid;
+    },
+    recentActivity() {
+      const { activityLogs } = this.entity || {};
+      const filtered = activityLogs.filter(l => l.checkout_id === this.checkoutId);
+      const ordered = orderBy(filtered, ['timestamp'], ['desc']);
+      return ordered.slice(0, 3);
     },
   },
 };

@@ -11,6 +11,11 @@
       }"
     />
     <ActivityButton
+      v-else-if="mapIcon === 'NUMBER' || !isCheckedOut"
+      :class="{ [`bg-${bg}`]: bg }"
+      :text="index"
+    />
+    <ActivityButton
       v-else-if="notAllowedTag"
       class="selected-tag bg-danger text-white"
       :value="notAllowedTag"
@@ -61,6 +66,8 @@ export default {
     ...mapGetters({
       user: 'auth/user',
       publisher: 'publisher/publisher',
+      isCheckedOut: 'territory/isCheckedOut',
+      mapIcon: 'territory/mapIcon',
     }),
     notAllowedList() {
       return [...ADDRESS_NOT_ALLOWED, ...PHONE_NOT_ALLOWED];

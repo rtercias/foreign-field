@@ -6,7 +6,7 @@ import maxBy from 'lodash/maxBy';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 import get from 'lodash/get';
-import { model, validate } from './models/TerritoryModel';
+import { model, validate, MAP_ICON } from './models/TerritoryModel';
 import { model as addressModel } from './models/AddressModel';
 import { model as phoneModel } from './models/PhoneModel';
 import { model as activityModel } from './models/ActivityModel';
@@ -57,6 +57,7 @@ const CHECKING_OUT = 'CHECKING_OUT';
 const CHECKOUT_FAIL = 'CHECKOUT_FAIL';
 const SET_FILTER = 'SET_FILTER';
 const SET_ADDRESSES = 'SET_ADDRESSES';
+const SET_MAP_ICON = 'SET_MAP_ICON';
 
 const initialState = {
   territory: {
@@ -71,6 +72,7 @@ const initialState = {
     keyword: '',
     exclude: false,
   },
+  mapIcon: MAP_ICON.ACTIVITY,
   error: '',
 };
 
@@ -109,6 +111,7 @@ export const territory = {
       const addresses = get(state.territory, 'addresses') || [];
       return addresses.some(a => a.phones.length);
     },
+    mapIcon: state => state.mapIcon,
   },
 
   mutations: {
@@ -125,23 +128,19 @@ export const territory = {
         const addresses = terr.addresses || [];
         for (const address of addresses) {
           const phones = (get(terr, 'phones') || []).filter(p => p.parent_id === address.id);
-          address.phones = phones;
-          // eslint-disable-next-line prefer-destructuring
-          address.activityLogs = terr.activityLogs.filter(a => a.address_id === address.id);
-          // eslint-disable-next-line prefer-destructuring
-          address.lastActivity = orderBy(address.activityLogs, ['timestamp'], ['desc'])[0];
-          address.notes = removeDeprecatedTags(address.notes);
+          Vue.set(address, 'phones', phones);
+          Vue.set(address, 'activityLogs', terr.activityLogs.filter(a => a.address_id === address.id));
+          Vue.set(address, 'lastActivity', orderBy(address.activityLogs, ['timestamp'], ['desc'])[0]);
+          Vue.set(address, 'notes', removeDeprecatedTags(address.notes));
 
           for (const phone of address.phones) {
-            // eslint-disable-next-line prefer-destructuring
-            phone.activityLogs = terr.activityLogs.filter(a => a.address_id === phone.id);
-            // eslint-disable-next-line prefer-destructuring
-            phone.lastActivity = orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0];
-            phone.notes = removeDeprecatedTags(phone.notes);
+            Vue.set(phone, 'activityLogs', terr.activityLogs.filter(a => a.address_id === phone.id));
+            Vue.set(phone, 'lastActivity', orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0]);
+            Vue.set(phone, 'notes', removeDeprecatedTags(phone.notes));
           }
         }
       }
-      state.territory = terr;
+      Vue.set(state, 'territory', terr);
     },
     GET_TERRITORY_FAIL(state, exception) {
       state.error = exception;
@@ -423,6 +422,9 @@ export const territory = {
       if (state.territory) {
         Vue.set(state.territory, 'addresses', addresses);
       }
+    },
+    SET_MAP_ICON(state, value) {
+      state.mapIcon = value;
     },
   },
 
@@ -1065,6 +1067,10 @@ export const territory = {
 
     setPhoneIsBusy({ commit }, { addressId, phoneId, status }) {
       commit(SET_PHONE_IS_BUSY, { addressId, phoneId, status });
+    },
+
+    toggleMapIcon({ commit }, value) {
+      commit(SET_MAP_ICON, value);
     },
   },
 };
