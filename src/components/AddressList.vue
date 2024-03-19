@@ -200,8 +200,6 @@ li {
   width: 100%;
 
   .address-card-container {
-    width: 48%;
-    max-width: 48%;
     flex: auto;
 
     &:nth-child(even) {
