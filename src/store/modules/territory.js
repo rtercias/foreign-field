@@ -652,7 +652,7 @@ export const territory = {
 
         const { territory: terr } = get(response, 'data.data');
         if (terr && terr.addresses) {
-          terr.addresses = orderBy(terr.addresses, 'sort');
+          Vue.set(terr, 'addresses', orderBy(terr.addresses, 'sort'));
         }
         // TODO: setTerritory should store address id's only
         commit(SET_TERRITORY, { terr });
