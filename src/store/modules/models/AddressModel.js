@@ -68,8 +68,8 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'HOME',
     text: '',
-    icon: 'house-user',
-    color: 'primary',
+    icon: 'check',
+    color: 'success',
     description: 'Home',
   },
   {

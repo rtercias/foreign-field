@@ -87,7 +87,6 @@ import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
 import AddressIcon from './AddressIcon';
 import Tags from './Tags';
-import Notes from './Notes';
 import ActivityLog from './ActivityLog';
 import { format as formatPhone } from '../utils/phone';
 import { AddressStatus } from '../store';
@@ -99,7 +98,6 @@ export default {
     AddressLinks,
     ActivityButton,
     Tags,
-    Notes,
     AddressIcon,
     ActivityLog,
   },

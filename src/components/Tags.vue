@@ -63,8 +63,6 @@ import { ACTION_BUTTON_LIST } from '../store/modules/models/PhoneModel';
 import TagConfirm from './TagConfirm';
 import {
   formatLanguage,
-  ADDRESS_TAGS,
-  PHONE_TAGS,
   PHONE_ADDRESS_TAGS,
   NF_TAG,
   DNC_TAG,
@@ -208,7 +206,7 @@ export default {
     },
     color(tag) {
       const button = ACTION_BUTTON_LIST.find(b => b.value === tag);
-      return button ? button.color : 'primary';
+      return button ? button.color : 'light';
     },
     collapseTags() {
       this.collapsed = !this.collapsed;
@@ -242,32 +240,35 @@ export default {
       user: 'auth/user',
       updatedAddress: 'address/address',
       congregation: 'congregation/congregation',
+      builtInAddressTags: 'congregation/builtInAddressTags',
+      builtInPhoneTags: 'congregation/builtInPhoneTags',
+      customAddressTags: 'congregation/customAddressTags',
+      customPhoneTags: 'congregation/customPhoneTags',
+      isCheckedOut: 'territory/isCheckedOut',
+      isDesktop: 'auth/isDesktop',
     }),
     language() {
       return toLower(get(this.congregation, 'language') || 'Tagalog');
     },
     availableTags() {
-      const tags = this.record.type === 'Phone' ? PHONE_TAGS : ADDRESS_TAGS;
+      const tags = this.record.type === 'Phone' ? this.builtInPhoneTags : this.builtInAddressTags;
       return union(tags, this.customTags).filter(t => t);
     },
     customTags() {
-      const options = get(this.congregation, 'options', {});
-      const record = this.record.type === 'Regular' ? options.address : options.phone;
-      const tags = get(record, 'customTags', '');
-      return tags.split(',').map(t => t.trim()) || [];
+      return this.record.type === 'Regular' ? this.customAddressTags : this.customPhoneTags;
     },
     combinedTags() {
       const newArr = union(this.selectedTags, this.availableTags)
-        .map(t => toLower(t))
+        .map(t => t.trim())
         .filter(t => t && !this.hide(t))
         .sort();
 
-      const finalArr = map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
-      return finalArr;
+      return map(newArr, x => ({ caption: x, state: this.selectedTags.includes(x) }));
     },
     selectedTags() {
       const notes = get(this.record, 'notes') || '';
-      return (toLower(notes).split(',').filter(n => n.length)) || [];
+      return (notes.split(',')
+        .filter(n => n.length)) || [];
     },
     allTagsSelected() {
       return difference(this.availableTags, this.selectedTags).length === 0;
@@ -282,7 +283,7 @@ export default {
       }
 
       if (result.length && typeof result[0] === 'string') {
-        return result.map(t => ({ caption: t, state: true }));
+        return result.map(t => ({ caption: t.trim(), state: true }));
       }
 
       return result;
@@ -360,10 +361,14 @@ export default {
     cursor: pointer;
   }
   .tag-text {
-    font-size: 14px;
+    font-size: 1.25em;
   }
   .tag-button-preview {
     cursor: pointer;
+  }
+
+  .new-note {
+    width: 100%;
   }
 
   @media print {
