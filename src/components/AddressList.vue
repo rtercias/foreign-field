@@ -59,9 +59,6 @@ export default {
       await this.getTerritory({ id: this.territoryId });
     }
 
-    const checkoutId = get(this.territory, 'status.checkout_id');
-    await this.fetchActivityLogs({ id: this.territoryId, checkoutId });
-
     window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
     this.keywordFilter = this.savedFilter.keyword;
     this.exclude = this.savedFilter.exclude;

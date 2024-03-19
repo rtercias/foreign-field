@@ -124,16 +124,21 @@ export const territory = {
       if (terr && terr.addresses) {
         const addresses = terr.addresses || [];
         for (const address of addresses) {
-          // if (getLastActivity) address.isBusy = true;
-
           const phones = (get(terr, 'phones') || []).filter(p => p.parent_id === address.id);
           address.phones = phones;
-
-          // for (const phone of address.phones) {
-          //   if (getLastActivity) phone.isBusy = true;
-          // }
-
+          // eslint-disable-next-line prefer-destructuring
+          address.activityLogs = terr.activityLogs.filter(a => a.address_id === address.id);
+          // eslint-disable-next-line prefer-destructuring
+          address.lastActivity = orderBy(address.activityLogs, ['timestamp'], ['desc'])[0];
           address.notes = removeDeprecatedTags(address.notes);
+
+          for (const phone of address.phones) {
+            // eslint-disable-next-line prefer-destructuring
+            phone.activityLogs = terr.activityLogs.filter(a => a.address_id === phone.id);
+            // eslint-disable-next-line prefer-destructuring
+            phone.lastActivity = orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0];
+            phone.notes = removeDeprecatedTags(phone.notes);
+          }
         }
       }
       state.territory = terr;
@@ -652,7 +657,7 @@ export const territory = {
 
         const { territory: terr } = get(response, 'data.data');
         if (terr && terr.addresses) {
-          Vue.set(terr, 'addresses', orderBy(terr.addresses, 'sort'));
+          terr.addresses = orderBy(terr.addresses, 'sort');
         }
         // TODO: setTerritory should store address id's only
         commit(SET_TERRITORY, { terr });

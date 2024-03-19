@@ -182,9 +182,6 @@ export default {
     if (this.token && (!addresses.length || this.territoryId !== this.territory.id)) {
       await this.getTerritory({ id: this.territoryId });
     }
-
-    const checkoutId = get(this.territory, 'status.checkout_id');
-    await this.fetchActivityLogs({ id: this.territoryId, checkoutId });
   },
 };
 </script>
