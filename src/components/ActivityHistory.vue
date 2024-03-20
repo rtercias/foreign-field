@@ -24,18 +24,27 @@
               <b-icon-plus @click="toggleGroup(index)" v-if="groupKeys[index].collapsed" />
               <b-icon-dash @click="toggleGroup(index)" v-else />
             </span>
-            <AddressIcon :index="index+1" :record="address" />
-            <span>{{index}} - set by {{getPublisherName(group[0].publisher_id)}}</span>
+            <ActivityButton
+              class="fa-2x"
+              :value="group[0].value"
+              :action-button-list="buttonList"
+            />
+            <span class="pl-2">{{ logDescription(group[0].value) }}</span>
+            <span class="pl-2">
+              {{ index }} - set by {{ getPublisherName(group[0].publisher_id) }}
+            </span>
           </div>
-          <div :id="index" class="group-detail pl-4" v-show="!groupKeys[index].collapsed">
+          <div :id="index" class="group-detail pl-5" v-show="!groupKeys[index].collapsed">
             <div class="log pl-3 pb-1" v-for="log in group" :key="log.id">
               <ActivityButton
-                class="fa-2x pl-3 pr-2"
-                :displayOnly="true"
+                class="fa-2x"
                 :value="log.value"
                 :action-button-list="buttonList"
               />
-              <span>{{friendlyTime(log.timestamp)}} - set by {{getPublisherName(log.publisher_id)}}</span>
+              <span class="pl-2">{{ logDescription(log) }}</span>
+              <span class="pl-2">
+                {{ friendlyTime(log.timestamp) }} - set by {{ getPublisherName(log.publisher_id) }}
+              </span>
             </div>
           </div>
         </div>
@@ -143,12 +152,17 @@ export default {
       return '';
     },
     logsGroupedByDate() {
-      const group = groupBy(this.activityLogs, log => this.friendlyDate(log.timestamp));
+      const filteredActivityLogs = this.activityLogs.filter(l => l.value !== 'START');
+      const group = groupBy(filteredActivityLogs, log => this.friendlyDate(log.timestamp));
       const filteredGroup = forEach(group, (date, index) => {
         this.$set(this.groupKeys, index, { collapsed: true });
         date.filter((log, logIndex) => logIndex !== 0 && log.value !== 'START');
       });
       return filteredGroup;
+    },
+    logDescription(log) {
+      const button = this.buttonList.find(bl => bl.value === log.value) || {};
+      return button.description;
     },
     toggleGroup(index) {
       this.$set(this.groupKeys, index, { collapsed: !this.groupKeys[index].collapsed });

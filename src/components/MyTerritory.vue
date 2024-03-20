@@ -10,7 +10,7 @@
       {{formattedLastVisited}}
     </div>
     <div class="small font-weight-normal" v-if="territory.lastActivity">
-      Last activity: {{this.lastTimestamp}}
+      {{lastTimestamp}}
     </div>
   </div>
 </template>
@@ -40,13 +40,13 @@ export default {
       return this.territory.lastActivity;
     },
     lastTimestamp() {
-      if (this.lastActivity) {
+      if (this.lastActivity && this.lastActivity.timestamp) {
         const timestamp = Number(this.lastActivity.timestamp);
         if (!Number.isNaN(timestamp)) {
-          return formatDistance(new Date(timestamp), new Date(), { addSuffix: true });
+          return `Last Activity: ${formatDistance(new Date(timestamp), new Date(), { addSuffix: true })}`;
         }
       }
-      return null;
+      return 'Not started';
     },
     formattedLastVisited() {
       return formatDistance(new Date(this.territory.lastVisited), new Date(), { addSuffix: true });
