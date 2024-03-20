@@ -127,14 +127,20 @@ export const territory = {
       if (terr && terr.addresses) {
         const addresses = terr.addresses || [];
         for (const address of addresses) {
-          const phones = (get(terr, 'phones') || []).filter(p => p.parent_id === address.id);
-          Vue.set(address, 'phones', phones);
-          Vue.set(address, 'activityLogs', terr.activityLogs.filter(a => a.address_id === address.id));
+          const checkoutId = get(terr, 'status.checkout_id');
+          Vue.set(address, 'activityLogs', terr.activityLogs.filter(a => a.address_id === address.id
+            && a.checkout_id === checkoutId
+            && a.value !== 'START'));
           Vue.set(address, 'lastActivity', orderBy(address.activityLogs, ['timestamp'], ['desc'])[0]);
           Vue.set(address, 'notes', removeDeprecatedTags(address.notes));
 
+          const phones = (get(terr, 'phones') || []).filter(p => p.parent_id === address.id);
+          Vue.set(address, 'phones', phones);
+
           for (const phone of address.phones) {
-            Vue.set(phone, 'activityLogs', terr.activityLogs.filter(a => a.address_id === phone.id));
+            Vue.set(phone, 'activityLogs', terr.activityLogs.filter(a => a.address_id === phone.id
+              && a.checkout_id === checkoutId
+              && a.value !== 'START'));
             Vue.set(phone, 'lastActivity', orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0]);
             Vue.set(phone, 'notes', removeDeprecatedTags(phone.notes));
           }
