@@ -263,18 +263,20 @@ export const address = {
 
         // temporarily commit the new log to update the display
         commit(ADD_LOG, activityLog);
-        dispatch('territory/addAddressActivityLog', {
-          addressId: entityId,
-          activityLog: { ...activityLog, timestamp: Date.now() },
-        }, { root: true });
-        dispatch('territory/addPhoneActivityLog', {
-          phoneId: entityId,
-          addressId: parentId,
-          activityLog: { ...activityLog, timestamp: Date.now() },
-        }, { root: true });
+        if (type === 'Regular') {
+          dispatch('territory/addAddressActivityLog', {
+            addressId: entityId,
+            activityLog: { ...activityLog, timestamp: Date.now() },
+          }, { root: true });
+        } else if (type === 'Phone') {
+          dispatch('territory/addPhoneActivityLog', {
+            phoneId: entityId,
+            addressId: parentId,
+            activityLog: { ...activityLog, timestamp: Date.now() },
+          }, { root: true });
+        }
 
         commit('auth/LOADING', true, { root: true });
-        dispatch('territory/setAddressIsBusy', { addressId: entityId, status: true }, { root: true });
 
         const response = await axios({
           url: process.env.VUE_APP_ROOT_API,
@@ -302,25 +304,18 @@ export const address = {
 
         // remove the temporary log
         commit(REMOVE_LOG, { id: 0, addressId: entityId });
-        dispatch('territory/removeAddressActivityLog', {
-          addressId: entityId,
-          logId: 0,
-        }, { root: true });
-        dispatch('territory/removePhoneActivityLog', {
-          phoneId: entityId,
-          addressId: parentId,
-          logId: 0,
-        }, { root: true });
 
         // commit the permanent new log record
         const { addLog } = get(response, 'data.data') || {};
         commit(ADD_LOG, addLog);
 
         if (type === 'Regular') {
-          dispatch('territory/setAddressLastActivity', {
+          // remove the temporary log
+          dispatch('territory/removeAddressActivityLog', {
             addressId: entityId,
-            lastActivity: addLog,
+            logId: 0,
           }, { root: true });
+
           dispatch('territory/addAddressActivityLog', {
             addressId: entityId,
             activityLog: addLog,
@@ -330,11 +325,13 @@ export const address = {
             status: false,
           }, { root: true });
         } else if (type === 'Phone') {
-          dispatch('territory/setPhoneLastActivity', {
+          // remove the temporary log
+          dispatch('territory/removePhoneActivityLog', {
             phoneId: entityId,
             addressId: parentId,
-            lastActivity: addLog,
+            logId: 0,
           }, { root: true });
+
           dispatch('territory/addPhoneActivityLog', {
             phoneId: entityId,
             addressId: parentId,

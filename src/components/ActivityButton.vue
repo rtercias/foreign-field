@@ -168,6 +168,7 @@ export default {
   }
 
   &:hover {
+    color: #fff;
     text-decoration: none;
   }
   &:focus {

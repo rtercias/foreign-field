@@ -243,6 +243,7 @@ export const territory = {
         // add activity log if it's not already on the list
         if (!activityLogs.some(a => a.id === activityLog.id)) {
           activityLogs.push(activityLog);
+          Vue.set(address, 'lastActivity', orderBy(address.activityLogs, ['timestamp'], ['desc'])[0]);
         }
       }
     },
@@ -256,6 +257,7 @@ export const territory = {
         // add activity log if it's not already on the list
         if (!activityLogs.some(a => a.id === activityLog.id)) {
           activityLogs.push(activityLog);
+          Vue.set(phone, 'lastActivity', orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0]);
         }
       }
     },
@@ -268,6 +270,7 @@ export const territory = {
         if (index >= 0) {
           activityLogs.splice(index, 1);
           Vue.set(address, 'activityLogs', activityLogs);
+          Vue.set(address, 'lastActivity', orderBy(address.activityLogs, ['timestamp'], ['desc'])[0]);
         }
       }
     },
@@ -282,6 +285,7 @@ export const territory = {
         if (index >= 0) {
           activityLogs.splice(index, 1);
           Vue.set(phone, 'activityLogs', activityLogs);
+          Vue.set(phone, 'lastActivity', orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0]);
         }
       }
     },

@@ -65,7 +65,6 @@
 import { mapGetters, mapActions } from 'vuex';
 import PhoneCard from './PhoneCard';
 import AddressCard from './AddressCard';
-import ActivityButton from './ActivityButton';
 import { TheMask } from 'vue-the-mask';
 import { AddressType, AddressStatus } from '../store';
 import get from 'lodash/get';
@@ -94,7 +93,6 @@ export default {
   components: {
     PhoneCard,
     AddressCard,
-    ActivityButton,
     TheMask,
   },
   data() {

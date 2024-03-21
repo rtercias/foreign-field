@@ -142,7 +142,6 @@ export default {
     async addLog(_value) {
       let value = _value;
       if (this.entity.selectedResponse === 'START' && value === 'START') {
-        this.$set(this.entity, 'isBusy', false);
         return;
       }
       if (!this.actionButtonList.some(b => b.value === value)) {
@@ -150,7 +149,6 @@ export default {
       }
 
       try {
-        this.$set(this.entity, 'isBusy', true);
         await this.addEntityLog({
           entityId: this.entity.id,
           value,
@@ -158,7 +156,6 @@ export default {
           parentId: this.entity.parent_id,
           type: this.entity.type,
         });
-        this.$set(this.entity, 'isBusy', false);
       } catch (e) {
         console.error('Unable to save activity log', e);
       }
