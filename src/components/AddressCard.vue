@@ -62,6 +62,15 @@
           >
             Edit Address
           </b-dropdown-item>
+          <b-dropdown-item
+            :to="{
+              name: 'activity-history',
+              params: { territoryId, addressId: address.id, checkoutId },
+              query: { origin: $route.name }
+            }"
+          >
+            See History
+          </b-dropdown-item>
           <b-dropdown-item v-if="canWrite" variant="danger" @click="removeAddress">
             Delete
           </b-dropdown-item>
@@ -235,6 +244,13 @@ export default {
       const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
       const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
       return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
+    },
+    checkoutId() {
+      const { status = {} } = this.territory || {};
+      if (status.status === 'Checked Out') {
+        return get(status, 'status.checkout_id');
+      }
+      return null;
     },
   },
 };

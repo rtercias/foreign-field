@@ -3,6 +3,10 @@
     There are no addresses in this territory.
   </h3> -->
   <div class="territory-map">
+    <div v-if="error" class="text-danger font-weight-bold">
+      <span>Error: {{ error }}</span>
+      <b-button variant="link" class="text-danger p-0 pl-2 mt-n1" @click="clearError">x</b-button>
+    </div>
     <l-map
       class="map"
       :center="center"
@@ -100,6 +104,7 @@ export default {
       startingAddress: 'addresses/startingAddress',
       endingAddress: 'addresses/endingAddress',
       territory: 'territory/territory',
+      error: 'addresses/error',
     }),
     bounds() {
       let latLng = [[0, 0]];
@@ -123,6 +128,7 @@ export default {
       getTerritory: 'territory/getTerritory',
       updateCoordinates: 'auth/updateCoordinates',
       fetchActivityLogs: 'territory/fetchActivityLogs',
+      clearError: 'addresses/clearError',
     }),
     get,
     centerMarker(address) {
