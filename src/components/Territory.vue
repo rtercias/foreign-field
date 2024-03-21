@@ -213,6 +213,8 @@ export default {
       territoryError: 'territory/error',
       hasPhones: 'territory/hasPhones',
       mapIcon: 'territory/mapIcon',
+      publishers: 'publishers/publishers',
+      congId: 'auth/congId',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -304,7 +306,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      // getTerritory: 'territory/getTerritory',
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
@@ -324,6 +325,7 @@ export default {
       optimize: 'addresses/optimize',
       reorderAddresses: 'territory/reorderAddresses',
       toggleMapIcon: 'territory/toggleMapIcon',
+      fetchPublishers: 'publishers/fetchPublishers',
     }),
     get,
     async checkIn() {
@@ -599,10 +601,9 @@ export default {
       }
     },
     async user() {
-      // await this.refresh();
-    },
-    async isCheckedOut() {
-      // await this.refresh();
+      if (!this.publishers.length) {
+        await this.fetchPublishers(this.congId);
+      }
     },
   },
 };

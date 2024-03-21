@@ -98,6 +98,7 @@ export const address = {
         const index = state.address.activityLogs.findIndex(a => a.id === id);
         if (index !== -1) {
           state.address.activityLogs.splice(index, 1);
+          Vue.set(address, 'lastActivity', get(state, 'address.activityLogs[0]'));
         }
       }
     },
@@ -356,6 +357,20 @@ export const address = {
       try {
         commit('auth/LOADING', true, { root: true });
 
+        if (type === 'Regular') {
+          dispatch(
+            'territory/removeAddressActivityLog',
+            { addressId: entityId, logId: id },
+            { root: true },
+          );
+        } else if (type === 'Phone') {
+          dispatch(
+            'territory/removePhoneActivityLog',
+            { addressId: parentId, phoneId: entityId, logId: id },
+            { root: true },
+          );
+        }
+
         await axios({
           url: process.env.VUE_APP_ROOT_API,
           method: 'post',
@@ -373,32 +388,6 @@ export const address = {
         });
 
         commit(REMOVE_LOG, { id, entityId });
-
-        if (type === 'Regular') {
-          dispatch(
-            'territory/removeAddressActivityLog',
-            { addressId: entityId, logId: id },
-            { root: true },
-          );
-
-          dispatch(
-            'territory/setAddressLastActivity',
-            { addressId: entityId },
-            { root: true },
-          );
-        } else if (type === 'Phone') {
-          dispatch(
-            'territory/removePhoneActivityLog',
-            { addressId: parentId, phoneId: entityId, logId: id },
-            { root: true },
-          );
-
-          dispatch(
-            'territory/setPhoneLastActivity',
-            { phoneId: entityId, addressId: parentId },
-            { root: true },
-          );
-        }
       } catch (e) {
         commit(LOG_FAIL, e);
       }

@@ -44,7 +44,11 @@
         :class="getBgColor(log.value)"
       >
         <td class="text-left log-date pl-2">{{ formatDate(log.timestamp) }}</td>
-        <td class="text-left log-description">{{ getDescription(log.value) }}</td>
+        <td class="text-left log-description m">
+          <b-button variant="link" class="p-0 text-decoration-none" @click="showLogDetails(log)">
+            {{ getDescription(log.value) }}
+          </b-button>
+        </td>
         <td class="remove-log-container text-center">
           <b-button variant="link" class="remove-log p-0" @click="() => removeLog(log)">
             <font-awesome-icon icon="times" />
@@ -212,12 +216,26 @@ export default {
     isActivity(value) {
       return value && this.activityButtons.includes(value);
     },
+    async showLogDetails(log) {
+      const publisher = this.publishers.find(p => p.id === log.publisher_id);
+      const publisherName = `${publisher.firstname} ${publisher.lastname}`;
+      const message = `
+        "${this.getDescription(log.value)}"
+        added by ${publisherName}
+        on ${this.formatDate(log.timestamp)}
+      `;
+      await this.$bvModal.msgBoxOk(message, {
+        title: 'Activity Record',
+        centered: true,
+      });
+    },
   },
   computed: {
     ...mapGetters({
       territory: 'territory/territory',
       user: 'auth/user',
       isCheckedOut: 'territory/isCheckedOut',
+      publishers: 'publishers/publishers',
     }),
     activityButtons() {
       const list = {
