@@ -2,6 +2,11 @@ import gql from 'graphql-tag';
 import clone from 'lodash/clone';
 import { InvalidTerritoryError } from '../../exceptions/custom-errors';
 
+export const MAP_ICON = {
+  NUMBER: 'NUMBER',
+  ACTIVITY: 'ACTIVITY',
+};
+
 export const model = gql`fragment TerritoryModel on Territory {
   id
   group_id

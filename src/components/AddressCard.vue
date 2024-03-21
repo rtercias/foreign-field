@@ -1,106 +1,90 @@
 <template>
   <div
-    class="address-card-container d-flex align-items-center"
+    class="address-card-container min-height d-flex justify-content-center py-2"
     :class="{
       'min-height-phone-address': $route.name === 'phone-list',
-      'mb-2': $route.name === 'phone-list' && isDesktop,
       'p-2': $route.name === 'phone-list',
-      'px-2 min-height': $route.name === 'address-list'
+      'px-2 min-height': $route.name === 'address-list',
     }">
-    <font-awesome-layers
-      v-show="mode !== 'map'"
-      class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleLeftPanel"
+    <div
+      class="w-100 row"
     >
-      <font-awesome-icon icon="ellipsis-v" class="ml-0"></font-awesome-icon>
-    </font-awesome-layers>
-    <div class="w-100 row">
-      <div class="address-card col-9 row justify-content-between align-items-start ml-0 mr-0 text-black-50"
+      <div class="address-card row justify-content-between align-items-start ml-0 mr-0 w-100"
         :class="{
-          'min-height': $route.name === 'address-list',
-          'col-12': mode === 'map',
+          'min-height text-dark': $route.name === 'address-list',
+          'text-white': $route.name === 'phone-list',
+          'col-12 p-0': mode === 'map-view',
         }">
-        <div v-if="$route.name === 'phone-list'" class="pb-3 pl-2">
-          <b-link
-            class="w-100"
-            :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
-            <div class="address text-primary font-weight-bold" :class="{ 'phone-address': $route.name === 'phone-list' }">
-              {{address.addr1}} {{address.addr2}}
+        <div class="d-flex pb-1" :class="{ 'w-75': $route.name === 'map-view' }">
+          <AddressIcon :index="index+1" :record="address" />
+          <div class="pl-2">
+            <div class="address d-flex align-items-center">
+              <div class="d-inline mb-0">{{address.addr1}}&nbsp;</div>
+              {{address.addr2}}
             </div>
-            <div class="text-left small font-weight-bold">
-              {{address.city}} {{address.state_province}} {{address.postal_code}}
-            </div>
-          </b-link>
-        </div>
-        <div v-else class="address flex-column pb-4">
-          <div>
-            <h5 class="mb-0">
-              <b-link :to="`/territories/${territory.id}/addresses/${address.id}/detail${mapQueryParam}`">
-                {{address.addr1}}
-              </b-link>&nbsp;
-            </h5>
-            {{address.addr2}}
-            <div class="mb-1">
+            <div class="text-left city-state-zip mb-1">
               {{address.city}} {{address.state_province}} {{address.postal_code}}
             </div>
           </div>
         </div>
+        <b-dropdown
+          variant="light"
+          right
+        >
+          <template #button-content>
+            <font-awesome-icon icon="ellipsis-h" />
+          </template>
+          <b-dropdown-item
+            v-if="$route.name === 'map-view'"
+            @click="startHere"
+          >
+            Reorder - Start Here
+          </b-dropdown-item>
+          <b-dropdown-item
+            v-if="$route.name === 'map-view'"
+            @click="endHere"
+          >
+            Reorder - End Here
+          </b-dropdown-item>
+          <b-dropdown-item :href="mapsUrl" target="_blank">
+            Get Driving Direction
+          </b-dropdown-item>
+          <b-dropdown-item :href="lookupFastPeopleSearch" target="_blank">
+            Lookup Fast People Search
+          </b-dropdown-item>
+          <b-dropdown-item
+            v-if="canWrite"
+            :to="{
+              name: 'address-edit',
+              params: { territoryId, addressId: address.id, mode: 'edit' },
+              query: { origin: $route.name }
+            }"
+          >
+            Edit Address
+          </b-dropdown-item>
+          <b-dropdown-item
+            :to="{
+              name: 'activity-history',
+              params: { territoryId, addressId: address.id, checkoutId },
+              query: { origin: $route.name }
+            }"
+          >
+            See History
+          </b-dropdown-item>
+          <b-dropdown-item v-if="canWrite" variant="danger" @click="removeAddress">
+            Delete
+          </b-dropdown-item>
+        </b-dropdown>
         <Tags
           :record="address"
-          :variant="$route.name === 'phone-list' ? 'info' : ''"
+          :variant="$route.name === 'phone-list' ? 'info' : 'primary'"
           :class="{'pl-2': $route.name === 'phone-list'}"
           :addressIndex="index"
           v-on="$listeners"
         ></Tags>
-      </div>
-      <div
-        class="static-buttons"
-        :class="{
-          'align-self-center': $route.name === 'phone-list',
-          'col-3 ml-n1': mode !== 'map',
-          'tiny-busy position-absolute mt-n3': mode === 'map',
-        }"
-      >
-        <font-awesome-icon
-          class="text-info text-left fa-2x"
-          icon="circle-notch"
-          spin
-          v-if="isLogging || address.isBusy"
-        />
-        <span
-          v-else-if="mode !== 'map'"
-          class="d-flex flex-column w-100">
-          <ActivityButton
-            v-if="!allowedToCall"
-            class="fa-2x ml-n3 selected-tag"
-            :value="notAllowedTag"
-            :selected="true"
-            :display-only="true"
-            :bg="$route.name === 'phone-list' ? 'light' : 'white'"
-            :actionButtonList="actionButtonList">
-          </ActivityButton>
-          <ActivityButton
-            class="selected-response fa-2x"
-            :class="{
-              faded: !isMySelectedResponse || isIncomingResponse,
-              hidden: selectedResponse === 'START' || address.isBusy,
-            }"
-            :value="selectedResponse"
-            :next="'START'"
-            :selected="true"
-            :actionButtonList="actionButtonList"
-            @button-click="confirmClearStatus">
-          </ActivityButton>
-        </span>
+        <ActivityLog v-if="mode!=='phone-list'" :entity="address" />
       </div>
     </div>
-    <font-awesome-layers
-      v-show="!isTerritoryBusy && mode !== 'map'"
-      class="ellipsis-v-static text-muted fa-1x"
-      @click="toggleRightPanel"
-    >
-      <font-awesome-icon icon="ellipsis-v" class="mr-0"></font-awesome-icon>
-    </font-awesome-layers>
   </div>
 </template>
 
@@ -108,25 +92,26 @@
 import { mapGetters, mapActions } from 'vuex';
 import format from 'date-fns/format';
 import get from 'lodash/get';
-import intersection from 'lodash/intersection';
 import AddressLinks from './AddressLinks';
 import ActivityButton from './ActivityButton';
+import AddressIcon from './AddressIcon';
 import Tags from './Tags';
+import ActivityLog from './ActivityLog';
 import { format as formatPhone } from '../utils/phone';
-import { NOT_ALLOWED } from '../store/modules/models/AddressModel';
+import { AddressStatus } from '../store';
 
 export default {
   name: 'AddressCard',
-  props: ['address', 'territoryId', 'incomingResponse', 'revealed', 'index', 'mode'],
+  props: ['address', 'addressId', 'territoryId', 'index', 'mode'],
   components: {
     AddressLinks,
     ActivityButton,
     Tags,
+    AddressIcon,
+    ActivityLog,
   },
   data() {
     return {
-      storageId: `foreignfield-${this.address.id}`,
-      isIncomingResponse: false,
       responseText: '',
       animate: false,
       currentOffset: 0,
@@ -136,66 +121,65 @@ export default {
       isLogging: false,
     };
   },
+  created() {
+    if (
+      this.$route.name === 'address-detail'
+      && !this.address && this.territory.addresses.length
+    ) {
+      const address = this.territory.addresses.find(a => a.id === this.addressId)
+        || this.territory.addresses[0];
+      this.setAddress(address);
+    }
+  },
+
   methods: {
     ...mapActions({
       addLog: 'address/addLog',
       setAddress: 'address/setAddress',
-      fetchPublisher: 'publisher/fetchPublisher',
+      updateAddress: 'address/updateAddress',
+      setStartingAddress: 'addresses/setStartingAddress',
+      setEndingAddress: 'addresses/setEndingAddress',
     }),
-    toggleRightPanel() {
-      this.$emit('toggle-right-panel', this.index, this.revealed);
-    },
-    toggleLeftPanel() {
-      this.$emit('toggle-left-panel', this.index, this.revealed);
-    },
-    async confirmClearStatus() {
-      try {
-        const h = this.$createElement;
-        let publisherName = '';
-        if (this.lastActivity.publisher_id === this.user.id) {
-          publisherName = 'you';
-        } else {
-          await this.getLastActivityPublisher();
-          if (this.publisher) {
-            publisherName = this.publisher.firstname && this.publisher.lastname
-              && `${this.publisher.firstname} ${this.publisher.lastname}`;
-          } else {
-            publisherName = 'a guest publisher';
-          }
-        }
-
-        const message = h('p', {
-          domProps: {
-            innerHTML:
-            `<div class="pb-3">
-              ${publisherName ? `Updated by <b>${publisherName}</b> on ${this.formattedSelectedResponseTS}
-            </div>` : ''}`,
-          },
-        });
-        const value = await this.$bvModal.msgBoxConfirm([message], {
-          title: `${this.address.addr1} ${this.address.addr2}`,
-          centered: true,
-          okTitle: 'Remove',
-          cancelTitle: 'Close',
-        });
-
-        if (value) {
-          this.isLogging = true;
-          this.$emit('update-response', this.address, 'START', () => {
-            this.isLogging = false;
-          });
-        }
-      } catch (err) {
-        // do nothing
-      }
-    },
+    get,
     getPxValue(styleValue) {
       return Number(styleValue.substring(0, styleValue.indexOf('px')));
     },
+    async removeAddress() {
+      const response = await this.$bvModal.msgBoxConfirm(
+        'Remove address from the list?', {
+          title: `${this.address.addr1} ${this.address.addr2}`,
+          centered: true,
+        }
+      );
 
-    async getLastActivityPublisher() {
-      const id = Number.parseInt(this.lastActivity.publisher_id, 10);
-      await this.fetchPublisher({ id });
+      if (response) {
+        await this.updateAddress({ ...this.address, status: AddressStatus.Inactive });
+
+        // remove address from list if it's no longer active
+        if (this.territory && this.territory.id === this.territoryId) {
+          const index = this.territory.addresses.findIndex(a => a.id === this.address.id);
+          if (index >= 0) this.territory.addresses.splice(index, 1);
+        }
+      }
+    },
+
+    startHere() {
+      if (get(this.startingAddress, 'id') === get(this.address, 'id')) {
+        this.setStartingAddress(null);
+      } else {
+        this.setStartingAddress(this.address);
+      }
+    },
+
+    endHere() {
+      if (get(this.endingAddress, 'id') === get(this.address, 'id')) {
+        this.setEndingAddress(null);
+      } else {
+        this.setEndingAddress(this.address);
+        if (this.$route.name === 'map-view') {
+          this.$emit('on-end-here-clicked');
+        }
+      }
     },
   },
   computed: {
@@ -205,9 +189,10 @@ export default {
       updatedAddress: 'address/address',
       actionButtonList: 'address/actionButtonList',
       user: 'auth/user',
-      publisher: 'publisher/publisher',
       isTerritoryBusy: 'territory/isBusy',
       isDesktop: 'auth/isDesktop',
+      isCheckedOut: 'territory/isCheckedOut',
+      canWrite: 'auth/canWrite',
     }),
     overflowRatio() {
       return this.$refs.activityContainer.scrollWidth / this.$refs.activityContainer.offsetWidth;
@@ -242,22 +227,30 @@ export default {
     selectedResponse() {
       return this.lastActivity.value;
     },
-    isMySelectedResponse() {
-      const publisherId = get(this.lastActivity, 'publisher_id') || '';
-      const userId = get(this.user, 'id') || '';
-      return publisherId.toString() === userId.toString();
-    },
-    allowedToCall() {
-      const tags = this.address.notes ? this.address.notes.split(',') : [];
-      return intersection(NOT_ALLOWED, tags).length === 0;
-    },
-    notAllowedTag() {
-      const tags = this.address.notes ? this.address.notes.split(',') : [];
-      const notAllowedTags = intersection(NOT_ALLOWED, tags) || [];
-      return notAllowedTags[0];
-    },
     mapQueryParam() {
       return this.mode === 'map' ? '?origin=map-view' : '';
+    },
+    storageId() {
+      return `foreignfield-${this.address.id}`;
+    },
+    mapsUrl() {
+      const addr1 = get(this.address, 'addr1') || '';
+      const city = get(this.address, 'city') || '';
+      const state = get(this.address, 'state_province') || '';
+      return `https://www.google.com/maps/dir/?api=1&destination=${addr1} ${city} ${state}`;
+    },
+    lookupFastPeopleSearch() {
+      const addr1 = `${(get(this.address, 'addr1') || '').trim().replace(/\s+/g, '-')}`;
+      const city = `${(get(this.address, 'city') || '').trim().replace(/\s+/g, '-')}`;
+      const state = `${(get(this.address, 'state_province') || '').trim().replace(/\s+/g, '-')}`;
+      return `https://www.fastpeoplesearch.com/address/${addr1}_${city}-${state}`;
+    },
+    checkoutId() {
+      const { status = {} } = this.territory || {};
+      if (status.status === 'Checked Out') {
+        return get(status, 'status.checkout_id');
+      }
+      return null;
     },
   },
 };
@@ -268,17 +261,15 @@ export default {
   height: 100%;
 }
 .address-card-container {
-  &.min-height-phone-address {
-    min-height: 91px;
-  }
   &.min-height {
     min-height: 150px;
+  }
+  &.min-height-phone-address {
+    min-height: 119px;
   }
   .address-card {
     display: flex;
     flex-direction: row;
-    overflow: hidden;
-    position: relative;
     transition: ease-in-out 0.3s;
 
     &.min-height {
@@ -289,7 +280,9 @@ export default {
 .address {
   display: flex;
   text-align: left;
+  font-size: 18px;
 }
+
 .phone-address {
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -325,6 +318,20 @@ export default {
 }
 .tiny-busy {
   font-size: 8px;
+}
+.sort-order-icon {
+  display: inline-block;
+  border: solid 3px;
+  border-radius: 50%;
+  line-height: 14px;
+  height: 20px;
+  width: 20px;
+  font-size: 14px;
+  text-align: center;
+}
+.footer {
+  margin-bottom: 57px;
+  left: unset;
 }
 
 @media print {

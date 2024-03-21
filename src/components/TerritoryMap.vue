@@ -3,6 +3,10 @@
     There are no addresses in this territory.
   </h3> -->
   <div class="territory-map">
+    <div v-if="error" class="text-danger font-weight-bold">
+      <span>Error: {{ error }}</span>
+      <b-button variant="link" class="text-danger p-0 pl-2 mt-n1" @click="clearError">x</b-button>
+    </div>
     <l-map
       class="map"
       :center="center"
@@ -40,23 +44,12 @@
         :lat-lng="getLatLng(x)"
       >
         <l-icon v-if="mapOptions.showSortOrder">
-          <div
-            class="sort-order-icon font-weight-bolder"
-            :class="{
-              'text-white bg-primary border-primary': ['HOME', 'LW'].includes(get(x, 'lastActivity.value')),
-              'bg-warning': get(x, 'lastActivity.value') === 'NH',
-              'bg-white': get(x, 'lastActivity.value', '') === '',
-              'bg-light text-info border-info': disabled,
-              'border-success text-success': get(x, 'id') === get(startingAddress, 'id'),
-              'border-danger text-danger': get(x, 'id') === get(endingAddress, 'id'),
-            }"
-          >
-            {{ i + 1 }}
-          </div>
+          <AddressIcon :index="i+1" :record="x" />
         </l-icon>
-        <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100 }">
+        <l-popup ref="addressPopup" :options="{ keepInView: true, zIndex: 1100, minWidth: 250 }">
           <MapLinks
             :address="x"
+            :index="i"
             :territory="territory"
             :simple="mapOptions.simple"
             :disabled="disabled"
@@ -75,6 +68,7 @@ import { latLngBounds } from 'leaflet';
 import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import MapLinks from './MapLinks';
+import AddressIcon from './AddressIcon';
 
 const defaultOptions = {
   showSortOrder: false,
@@ -91,8 +85,9 @@ export default {
     LPopup,
     LLocateControl,
     MapLinks,
+    AddressIcon,
   },
-  props: ['id', 'territory', 'options', 'disabled'],
+  props: ['territoryId', 'options', 'disabled'],
   data() {
     return {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -108,10 +103,12 @@ export default {
       coordinates: 'auth/coordinates',
       startingAddress: 'addresses/startingAddress',
       endingAddress: 'addresses/endingAddress',
+      territory: 'territory/territory',
+      error: 'addresses/error',
     }),
     bounds() {
       let latLng = [[0, 0]];
-      if (get(this.territory, 'addresses').length) {
+      if (get(this.territory, 'addresses.length')) {
         latLng = get(this.territory, 'addresses').map(terr => [
           terr.latitude,
           terr.longitude,
@@ -130,6 +127,8 @@ export default {
     ...mapActions({
       getTerritory: 'territory/getTerritory',
       updateCoordinates: 'auth/updateCoordinates',
+      fetchActivityLogs: 'territory/fetchActivityLogs',
+      clearError: 'addresses/clearError',
     }),
     get,
     centerMarker(address) {
@@ -185,8 +184,9 @@ export default {
     },
   },
   async mounted() {
-    if (this.token && !this.territory) {
-      await this.getTerritory({ id: this.id, getLastActivity: true });
+    const addresses = get(this.territory, 'addresses') || [];
+    if (this.token && (!addresses.length || this.territoryId !== this.territory.id)) {
+      await this.getTerritory({ id: this.territoryId });
     }
   },
 };
@@ -198,12 +198,12 @@ export default {
 
   .map {
     width: 100%;
+    z-index: 1;
   }
 }
 .leaflet-popup h2 {
   font-size: 18px;
 }
-
 .sort-order-icon {
   border: solid 3px;
   border-radius: 50%;

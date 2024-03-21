@@ -2,8 +2,10 @@
   <div class="masthead lead sticky-top">
     <vue-pull-refresh class="bg-primary" :on-refresh="onPageRefresh" :config="refreshOptions">
       <b-navbar
-        class="py-0"
-        :class="{ 'alert-secondary border-bottom border-secondary': isDesktop, 'border-warning gold-bottom': !isDesktop }"
+        class="py-0 sticky-top"
+        :class="{
+          'alert-secondary border-bottom border-secondary': isDesktop,
+          'border-warning': !isDesktop }"
         :type="isDesktop ? 'light' : 'dark'"
         :variant="isDesktop ? 'none' : 'primary'"
         toggleable
@@ -135,7 +137,12 @@ export default {
         origin = '';
       }
       const back = get(this.$route, 'meta.back');
-      const backRoute = this.$router.resolve({ name: origin || back || !this.prevRoute || 'home' });
+      const backRoute = this.$router.resolve({
+        name: origin || back || !this.prevRoute || 'home',
+        params: {
+          groupId: get(this.territory, 'groupId') || 0,
+        },
+      });
       this.backLabel = this.$route.name === 'home' ? '' : get(backRoute, 'route.meta.label') || 'Home';
     },
     search(keyword) {

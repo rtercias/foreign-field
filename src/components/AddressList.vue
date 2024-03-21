@@ -1,5 +1,5 @@
 <template>
-  <div class="phone-witnessing w-100 d-flex flex-row flex-wrap bg-light">
+  <div class="address-list w-100 bg-light">
     <SearchBar
       class="w-100"
       :search-text="'Search this territory'"
@@ -10,33 +10,37 @@
       :allow-exclude="true"
       top="180px"
     />
-    <PhoneAddressCard
-      v-for="(a, index) in filteredAddresses" :key="a.id"
-      :ref="`phone-address-${a.id}`"
-      class="phone-address-card-container bg-light"
-      :class="{
-        'border-success border-medium': a.id === foundId,
-      }"
-      :address="a"
-      :territory="territory"
-      :index="index"
-      :disabled="disabled">
-    </PhoneAddressCard>
+    <div class="address-list-container d-flex flex-row flex-wrap">
+      <AddressCard
+        v-for="(a, index) in filteredAddresses" :key="a.id"
+        :mode="$route.name"
+        :index="index"
+        class="mx-2 mb-2 mt-0"
+        :class="{
+          'border-warning border-medium active': isActiveAddress(a.id),
+          'bg-secondary border-right-0 border-left-0': $route.name === 'phone-list',
+          'bg-white': $route.name === 'address-list',
+        }"
+        :address="a"
+        :territoryId="territory.id"
+      >
+      </AddressCard>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import get from 'lodash/get';
-import PhoneAddressCard from './PhoneAddressCard';
+import AddressCard from './AddressCard';
 import SearchBar from './SearchBar';
 import Loading from './Loading.vue';
 
 const BUTTON_LIST = ['NH', 'HOME', 'PH', 'LW'];
 export default {
-  name: 'PhoneWitnessing',
+  name: 'AddressList',
   components: {
-    PhoneAddressCard,
+    AddressCard,
     SearchBar,
     Loading,
   },
@@ -50,8 +54,9 @@ export default {
   },
   props: ['territoryId', 'disabled'],
   async mounted() {
-    if (this.token && (!this.hasPhones || this.territoryId !== this.territory.id)) {
-      await this.getTerritory({ id: this.territoryId, includePhones: true });
+    const addresses = get(this.territory, 'addresses') || [];
+    if (this.token && (!addresses.length || this.territoryId !== this.territory.id)) {
+      await this.getTerritory({ id: this.territoryId });
     }
 
     window.scrollTo(0, this.scrollYPosition[this.$route.path] || 0);
@@ -86,7 +91,6 @@ export default {
       savedFilter: 'territory/filter',
       scrollYPosition: 'auth/scrollYPosition',
       territory: 'territory/territory',
-      hasPhones: 'territory/hasPhones',
     }),
     lastActivity() {
       return this.territory.lastActivity;
@@ -117,6 +121,7 @@ export default {
       cancelFetchActivityLogs: 'territory/cancelFetchActivityLogs',
       setFilter: 'territory/setFilter',
       getTerritory: 'territory/getTerritory',
+      fetchActivityLogs: 'territory/fetchActivityLogs',
     }),
 
     search(_keyword) {
@@ -157,6 +162,9 @@ export default {
         false,
       );
     },
+    isActiveAddress(id) {
+      return this.territory.lastActivity ? id === this.territory.lastActivity.address_id : false;
+    },
   },
 };
 </script>
@@ -185,27 +193,39 @@ li {
   font-size: 24px;
 }
 
-.phone-address-card-container {
+.address-list-container {
   width: 100%;
-  min-height: 190px;
+
+  .address-card-container {
+    flex: auto;
+
+    &:nth-child(even) {
+      margin-left: 0 !important;
+    }
+  }
 }
 
 @media (min-width: 769px) {
-  .phone-address-card-container {
-    width: 50%;
-    max-width: 50%;
-    flex: auto;
+  .address-list-container {
+    width: 100%;
 
-    &:nth-child(odd) {
-      padding-left: 0 !important;
+    .address-card-container {
+      width: 48%;
+      max-width: 48%;
+      flex: auto;
     }
   }
 }
 
 @media (min-width: 1400px) {
-  .phone-address-card-container {
-    width: 32%;
-    max-width: 32%;
+  .address-list-container {
+    width: 100%;
+
+    .address-card-container {
+      width: 32%;
+      max-width: 32%;
+      flex: auto;
+    }
   }
 }
 

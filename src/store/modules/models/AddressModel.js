@@ -7,6 +7,7 @@ const GEOCODE_CITY_TYPES = ['locality', 'sublocality'];
 export const DO_NOT_CALL = 'do not call';
 export const DO_NOT_MAIL = 'do not mail';
 export const LETTER_WRITING = 'mail sent';
+export const INVALID = 'invalid';
 
 export const model = gql`fragment AddressModel on Address {
   congregationId
@@ -52,13 +53,14 @@ export const ACTION_BUTTON_LIST = [
     value: 'START',
     text: '',
     icon: '',
-    color: 'success',
+    color: '',
+    description: '(Cleared)',
   },
   {
     type: 'fa-icon',
     value: 'NH',
     text: 'NH',
-    icon: 'circle',
+    icon: '',
     color: 'warning',
     description: 'Not Home',
   },
@@ -66,8 +68,8 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'HOME',
     text: '',
-    icon: 'house-user',
-    color: 'primary',
+    icon: 'check',
+    color: 'success',
     description: 'Home',
   },
   {
@@ -83,8 +85,8 @@ export const ACTION_BUTTON_LIST = [
     value: 'LW',
     text: '',
     icon: 'envelope',
-    color: 'primary',
-    description: 'Letter',
+    color: 'success',
+    description: 'Letter Sent',
     disabledText: 'Do Not Mail',
   },
   {
@@ -99,18 +101,27 @@ export const ACTION_BUTTON_LIST = [
     type: 'fa-icon',
     value: 'do not mail',
     text: '',
-    icon: 'envelope',
+    icon: 'ban',
     color: 'danger',
     description: 'Do Not Mail',
-    slashed: true,
+    slashed: false,
   },
   {
     type: 'fa-icon',
     value: 'do not call',
     text: '',
-    icon: 'minus-circle',
+    icon: 'ban',
     color: 'danger',
     description: 'Do Not Call',
+  },
+  {
+    type: 'fa-icon',
+    value: 'invalid',
+    text: '',
+    icon: 'ban',
+    color: 'danger',
+    description: 'Invalid',
+    slashed: false,
   },
   {
     type: 'fa-icon',
@@ -123,15 +134,16 @@ export const ACTION_BUTTON_LIST = [
 ];
 
 export const ADDRESS_LEFT_BUTTON_LIST = [
+  'do not mail',
   'do not call',
-  'confirmed',
 ];
 
 export const ADDRESS_RIGHT_BUTTON_LIST = [
-  'NH',
   'HOME',
+  'NH',
   'LW',
 ];
+
 
 export const PHONE_ADDRESS_RIGHT_BUTTON_LIST = [
   'LW',

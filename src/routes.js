@@ -14,6 +14,7 @@ import ActivityHistory from './components/ActivityHistory';
 import AddressForm from './components/AddressForm';
 import Optimize from './components/Optimize';
 import ChangeLog from './components/ChangeLog';
+import AddressList from './components/AddressList';
 import PhoneWitnessing from './components/PhoneWitnessing';
 import TerritoryForm from './components/TerritoryForm';
 import CongregationForm from './components/CongregationForm';
@@ -98,7 +99,7 @@ const routes = [
     children: [{
       name: 'address-list',
       path: '/',
-      component: PhoneWitnessing,
+      component: AddressList,
       props: true,
       meta: {
         permissions: ['Admin', 'TS', 'SO', 'GO', 'CO', 'RP', 'RP-E', 'PUB'],

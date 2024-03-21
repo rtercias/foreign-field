@@ -1,6 +1,6 @@
 <template>
   <b-navbar-nav
-    class="pt-3 flex-column large-font-menu font-weight-bold sticky-top"
+    class="pb-4 flex-column large-font-menu font-weight-bold sticky-top"
     :class="{ 'text-left': isDesktop }">
     <b-nav-item to="/">Home</b-nav-item>
     <b-nav-item
@@ -244,7 +244,7 @@ export default {
       this.$router.push('/signout');
     },
     async getGroupsList() {
-      if (!this.groups.length) {
+      if (!get(this.groups, 'length')) {
         const congId = get(this.user, 'congregation.id') || get(this.congregation, 'id');
         if (congId) await this.getGroups({ congId });
       }

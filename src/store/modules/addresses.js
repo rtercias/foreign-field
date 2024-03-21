@@ -4,10 +4,13 @@ import orderBy from 'lodash/orderBy';
 import get from 'lodash/get';
 import { print } from 'graphql/language/printer';
 
+const ADDRESS_COUNT_LIMIT = 26;
+
 const DNC_SUCCESS = 'DNC_SUCCESS';
 const DNC_FAIL = 'DNC_FAIL';
 const OPTIMIZE_SUCCESS = 'OPTIMIZE_SUCCESS';
 const OPTIMIZE_FAIL = 'OPTIMIZE_FAIL';
+const CLEAR_ERROR = 'CLEAR_ERROR';
 const SORT_UPDATED = 'SORT_UPDATED';
 const ADDRESS_LOOKUP_SUCCESS = 'ADDRESS_LOOKUP_SUCCESS';
 const ADDRESS_LOOKUP_FAIL = 'ADDRESS_LOOKUP_FAIL';
@@ -17,6 +20,7 @@ const CHANGE_LOGS_FAIL = 'CHANGE_LOGS_FAIL';
 const RESET_CHANGE_LOG_PAYLOAD = 'RESET_CHANGE_LOG_PAYLOAD';
 const SET_STARTING_ADDRESS = 'SET_STARTING_ADDRESS';
 const SET_ENDING_ADDRESS = 'SET_ENDING_ADDRESS';
+
 
 export const addresses = {
   namespaced: true,
@@ -40,6 +44,7 @@ export const addresses = {
     cancelTokens: state => state.cancelTokens,
     startingAddress: state => state.startingAddress,
     endingAddress: state => state.endingAddress,
+    error: state => state.error,
   },
   mutations: {
     DNC_SUCCESS(state, dnc) {
@@ -52,7 +57,11 @@ export const addresses = {
       state.optimized = optimized;
     },
     OPTIMIZE_FAIL(state, exception) {
+      state.error = exception;
       console.error(OPTIMIZE_FAIL, exception);
+    },
+    CLEAR_ERROR(state) {
+      state.error = null;
     },
     SORT_UPDATED() {},
     ADDRESS_LOOKUP_SUCCESS(state, search) {
@@ -137,6 +146,12 @@ export const addresses = {
         const hasStartingCoords = !!startLat && !!startLng;
         const mapQuestApiKey = process.env.VUE_APP_MAPQUEST_API_KEY;
         const { addresses: _addresses = [] } = territory;
+
+        if (_addresses.length > ADDRESS_COUNT_LIMIT) {
+          commit(OPTIMIZE_FAIL, `Too many addresses. Current limit is ${ADDRESS_COUNT_LIMIT}.`);
+          return;
+        }
+
         const startingAddress = _addresses.find(a => a.id === get(state, 'startingAddress.id'));
         const endingAddress = _addresses.find(a => a.id === get(state, 'endingAddress.id'));
         const remainingAddresses = _addresses
@@ -378,6 +393,9 @@ export const addresses = {
 
     setEndingAddress({ commit }, address) {
       commit(SET_ENDING_ADDRESS, address);
+    },
+    clearError({ commit }) {
+      commit(CLEAR_ERROR);
     },
   },
 };

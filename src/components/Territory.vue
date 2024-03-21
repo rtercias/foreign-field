@@ -2,87 +2,117 @@
   <div class="territory">
     <Loading v-if="territoryIsLoading" />
     <div v-else>
-      <header class="page-header sticky-top w-100 pt-2 px-2 pb-0 bg-white border-bottom" :sticky="true">
+      <div v-if="collaborate" class="collaboration-mode">Collaboration Mode</div>
+      <header class="page-header sticky-top w-100 pt-2 pb-0" :sticky="true">
         <div class="w-100">
-          <div class="w-100">
+          <div class="w-100 px-2">
+            <div class="text-left">{{ territoryName }}</div>
             <div class="d-flex justify-content-between">
-              <h4 class="text-truncate" :class="{ 'text-medium': !isDesktop && territory.description.length > 10 }">
-                {{territory.description}}
-                <font-awesome-icon icon="circle-notch" spin class="text-info" v-if="isTerritoryBusy" />
-              </h4>
-              <h4 class="text-right">
-                <font-awesome-icon
-                  class="text-primary d-xl-none"
-                  icon="sms"
-                  size="sm"
-                  @click="openSMSMobile()">
-                </font-awesome-icon> {{territoryName}}
-              </h4>
-            </div>
-            <div class="d-flex justify-content-between">
-              <div>
-                <span class="small">{{filteredCount || displayCount}}</span>
-                <b-badge variant="warning" class="ml-2">{{displayType}}</b-badge>
+              <div class="d-inline-flex align-items-center">
+                <h4 class="text-truncate font-weight-bold">
+                  {{territoryDescription}}
+                </h4>
+                <b-badge
+                  variant="warning"
+                  class="ml-2"
+                  v-if="displayType !== 'Regular'"
+                >
+                  {{displayType}}
+                </b-badge>
               </div>
-              <span class="small">{{currentPublisher}}</span>
+              <b-dropdown variant="light" right>
+                <template #button-content>
+                  <font-awesome-icon icon="ellipsis-h" />
+                </template>
+                <b-dropdown-item
+                  @click="toggleIcon"
+                >
+                  <span v-if="mapIcon === 'ACTIVITY'">Icon: Show Numbers</span>
+                  <span v-else>Icon: Show Activity</span>
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="$route.name === 'map-view'"
+                  @click="optimizeNearMe"
+                >
+                  Reorder Addresses
+                </b-dropdown-item>
+                <b-dropdown-divider
+                  v-if="$route.name === 'map-view'"
+                  class="d-block">
+                </b-dropdown-divider>
+                <b-dropdown-item
+                  @click="checkIn(true)"
+                  v-if="isCheckedOut"
+                >
+                  Check-in Territory
+                </b-dropdown-item>
+                <b-dropdown-item v-if="canWrite"
+                  :to="{
+                    name: 'address-new-terr',
+                    params: { territoryId, mode: 'add' },
+                    query: { origin: $route.name },
+                  }"
+                >
+                  Add New Address
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="isAuthenticated"
+                  v-clipboard:copy="href"
+                  v-clipboard:success="urlCopied"
+                >
+                  Copy Link To Territory
+                </b-dropdown-item>
+                <b-dropdown-item
+                  @click="toggleCollaborate"
+                  v-if="isCheckedOut"
+                >
+                  <span v-if="collaborate">Turn Off</span>
+                  <span v-else>Turn On</span>
+                  Collaborate Mode
+                </b-dropdown-item>
+                <b-dropdown-item
+                  v-if="$route.name === 'map-view' && canManage"
+                  :to="{
+                    name: 'optimize',
+                    params: { territoryId },
+                    query: { origin: $route.name },
+                  }"
+                >
+                  Optimizer
+                </b-dropdown-item>
+                <b-dropdown-item v-if="canManage" variant="danger" @click="reset">
+                  Reset Territory
+                </b-dropdown-item>
+              </b-dropdown>
+            </div>
+            <div class="checkout-info d-flex justify-content-between my-1">
+              <span>{{currentPublisher}}</span>
             </div>
           </div>
-          <div class="header-buttons w-100 d-flex justify-content-between py-2">
-            <b-button-group size="sm" class="badge px-0">
-              <b-button
-                variant="outline-info"
+          <div class="header-buttons w-100 d-flex justify-content-between pt-2 pl-2">
+            <b-nav tabs fill>
+              <b-nav-item
                 :to="{ name: 'address-list', params: { territoryId } }"
-                :pressed="viewMode === 'address-list'">
-                Address
-              </b-button>
-              <b-button
-                variant="outline-info"
+                :pressed="viewMode === 'address-list'"
+              >
+                <font-awesome-icon icon="bars" />
+                <span class="pl-2">List ({{ addressCount }})</span>
+              </b-nav-item>
+              <b-nav-item
+                :to="{ name: 'map-view', params: { territoryId } }"
+                :pressed="viewMode==='map-view'"
+              >
+                <font-awesome-icon icon="map-marked-alt" />
+                <span class="pl-2">Map ({{ addressCount }})</span>
+              </b-nav-item>
+              <b-nav-item
                 :to="{ name: 'phone-list', params: { territoryId } }"
-                :pressed="viewMode === 'phone-list'">
-                Phone
-              </b-button>
-              <b-button variant="outline-info" :to="`/territories/${territoryId}/map`" :pressed="viewMode==='map-view'">
-                Map
-              </b-button>
-            </b-button-group>
-            <b-button-group size="sm" class="badge px-0">
-              <b-button
-                v-if="viewMode==='map-view'"
-                variant="success"
-                class="text-white"
-                @click="optimizeNearMe"
-                :disabled="isOptimizing"
+                :pressed="viewMode === 'phone-list'"
               >
-                <font-awesome-icon v-if="isOptimizing" icon="circle-notch" spin />
-                <font-awesome-icon v-else :icon="nearMeIcon" />
-                <span v-if="isDesktop" class="ml-2">{{nearMeText}}</span>
-              </b-button>
-              <b-button
-                v-if="canManage && viewMode==='map-view'"
-                variant="primary"
-                :to="`/territories/${territoryId}/optimize`"
-              >
-                <font-awesome-icon icon="compass" />
-                <span v-if="isDesktop" class="ml-2">Optimize</span>
-              </b-button>
-              <b-button v-if="canManage && isCheckedOut" variant="danger" @click="reset">
-                <font-awesome-icon v-if="isResetting" class="text-primary" icon="circle-notch" spin />
-                <font-awesome-icon v-else icon="backward" />
-                <span v-if="isDesktop" class="ml-2">Reset</span>
-              </b-button>
-              <b-button v-if="showCheckInButton" variant="warning" @click="checkIn(true)">
-                <font-awesome-icon v-if="isCheckingIn" class="text-primary" icon="circle-notch" spin />
-                <font-awesome-icon v-else icon="check" />
-                <span class="ml-2" :class="{ 'd-none': canManage && !isDesktop }">Check In</span>
-              </b-button>
-              <b-button
-                v-if="canWrite"
-                variant="success"
-                :to="`/territories/${territoryId}/addresses/add?origin=map-view`">
-                <font-awesome-icon icon="plus"></font-awesome-icon>
-                <span v-if="isDesktop" class="ml-2">Address</span>
-              </b-button>
-            </b-button-group>
+                <font-awesome-icon icon="mobile-alt" />
+                <span class="pl-2">Phone ({{ phoneCount }})</span>
+              </b-nav-item>
+            </b-nav>
           </div>
         </div>
       </header>
@@ -90,7 +120,6 @@
         :ref="viewMode"
         class="router-view"
         :disabled="!isCheckedOut"
-        :territory="territory"
         :options="{ showSortOrder: true, editable: true }"
         @update-count="updateCount"
         @locating="onLocating"
@@ -112,7 +141,7 @@ import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 import { subscription } from '../main';
 import { unmask } from '../utils/phone';
-
+import { MAP_ICON } from '../store/modules/models/TerritoryModel';
 
 export default {
   name: 'Territory',
@@ -155,10 +184,11 @@ export default {
       isNearMeClicked: false,
       nearMeText: 'Near Me',
       nearMeIcon: 'location-arrow',
+      collaborate: false,
     };
   },
   async mounted() {
-    await this.refresh();
+    this.collaborate = sessionStorage.getItem('collaborate') === 'true';
     this.subscribe();
   },
   computed: {
@@ -175,11 +205,16 @@ export default {
       options: 'auth/options',
       token: 'auth/token',
       territoryIsLoading: 'territory/isLoading',
-      isTerritoryBusy: 'territory/isBusy',
+      isAuthenticated: 'auth/isAuthenticated',
       isDesktop: 'auth/isDesktop',
       cancelTokens: 'territory/cancelTokens',
       userTerritories: 'auth/userTerritories',
       optimized: 'addresses/optimized',
+      territoryError: 'territory/error',
+      hasPhones: 'territory/hasPhones',
+      mapIcon: 'territory/mapIcon',
+      publishers: 'publishers/publishers',
+      congId: 'auth/congId',
     }),
     isCheckedOut() {
       return (this.territory && this.territory.status && this.territory.status.status === 'Checked Out')
@@ -210,6 +245,9 @@ export default {
     territoryName() {
       return this.territory && this.territory.name ? this.territory.name : '';
     },
+    territoryDescription() {
+      return get(this.territory, 'description') || '';
+    },
     lastActivity() {
       return this.territory.lastActivity;
     },
@@ -231,26 +269,23 @@ export default {
     showCheckInButton() {
       return this.isCheckedOut && (this.canWrite || this.isOwnedByUser);
     },
-    count() {
-      if (this.viewMode === 'phone-list') {
-        const addresses = get(this.territory, 'addresses', []).map(a => get(a, 'phones.length')) || [];
-        if (addresses.length) {
-          const addressCount = addresses.length;
-          const phoneCount = addresses.reduce((acc, current) => (acc || 0) + current);
-          if (this.isDesktop) {
-            return `${addressCount} addresses, ${phoneCount} phones`;
-          }
-          return `${addressCount}, ${phoneCount}`;
-        }
-        return 0;
-      }
+    addressCount() {
       return get(this.territory, 'addresses.length', 0);
     },
-    displayCount() {
-      return `Count: ${this.count}`;
+    phoneCount() {
+      const addresses = (get(this.territory, 'addresses') || []).map(a => get(a, 'phones.length')) || [];
+      const phoneCount = addresses.reduce((acc, current) => (acc || 0) + current, 0);
+      if (phoneCount > 0) {
+        return phoneCount;
+      }
+      if (this.$route.name !== 'phone-list') {
+        return '*';
+      }
+      return 0;
     },
     displayType() {
-      return this.territory.type === 'Active' ? '' : get(TerritoryType[this.territory.type], 'text');
+      const { type } = this.territory || {};
+      return type === 'Active' ? '' : get(TerritoryType[type], 'text');
     },
     isOptimized() {
       return this.optimized && !!this.optimized.length;
@@ -261,14 +296,20 @@ export default {
       const $locateBtn = $locateContainer.children[0];
       return $locateBtn;
     },
+    selectedAddress() {
+      const firstAddress = get(this.territory, 'addresses[0]') || {};
+      return this.address || firstAddress;
+    },
+    href() {
+      return window.location.href;
+    },
   },
   methods: {
     ...mapActions({
-      getTerritory: 'territory/getTerritory',
       checkinTerritory: 'territory/checkinTerritory',
       resetTerritoryActivities: 'territory/resetTerritoryActivities',
       saveSeenTerritory: 'territories/saveSeenTerritory',
-      fetchLastActivities: 'territory/fetchLastActivities',
+      fetchActivityLogs: 'territory/fetchActivityLogs',
       setTerritory: 'territories/setTerritory',
       addAddress: 'territory/addAddress',
       addPhone: 'territory/addPhone',
@@ -283,22 +324,10 @@ export default {
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       optimize: 'addresses/optimize',
       reorderAddresses: 'territory/reorderAddresses',
+      toggleMapIcon: 'territory/toggleMapIcon',
+      fetchPublishers: 'publishers/fetchPublishers',
     }),
-
-    async refresh() {
-      if (this.territory.id === this.territoryId && !!this.territory.addresses) {
-        if (!this.cancelTokens.FETCH_LAST_ACTIVITY) {
-          await this.fetchLastActivities(this.territory);
-        }
-      } else {
-        await this.getTerritory({ id: this.territoryId, getLastActivity: true });
-      }
-
-      if (this.user && get(this.user, 'congregation.id') !== get(this.territory, 'congregationid')) {
-        this.$router.replace('/unauthorized');
-      }
-    },
-
+    get,
     async checkIn() {
       const response = await this.$bvModal.msgBoxConfirm('Ready to check-in the territory?', {
         title: `${this.territory.name}`,
@@ -382,7 +411,7 @@ export default {
       });
       subscription.bind('update-address', (address) => {
         if (address) {
-          if (address.status !== AddressStatus.Active) {
+          if ([AddressStatus.Active, AddressStatus.DNC].includes(address.status)) {
             this.deleteAddress(address);
           } else {
             this.updateAddress(address);
@@ -395,7 +424,7 @@ export default {
         address.territory_id = address.territory_id || this.territory.id;
         const addresses = this.territory.addresses || [];
         if (addresses.some(a => a.id === address.id)) {
-          if (address.status !== AddressStatus.Active) {
+          if (![AddressStatus.Active, AddressStatus.DNC].includes(address.status)) {
             this.deleteAddress(address);
           } else {
             this.updateAddress(address);
@@ -526,6 +555,31 @@ export default {
     async onLocationError() {
       this.isOptimizing = false;
     },
+
+    toggleCollaborate() {
+      this.collaborate = !this.collaborate;
+      sessionStorage.setItem('collaborate', this.collaborate);
+      if (this.collaborate) {
+        this.$router.go();
+      } else {
+        subscription.disconnect();
+      }
+    },
+    urlCopied() {
+      this.$bvToast.toast(`Copied link: ${document.location.href}`, {
+        variant: 'success',
+        toaster: 'b-toaster-bottom-right mr-5',
+        noCloseButton: true,
+        autoHideDelay: 1000,
+      });
+    },
+    toggleIcon() {
+      if (this.mapIcon === MAP_ICON.ACTIVITY) {
+        this.toggleMapIcon(MAP_ICON.NUMBER);
+      } else {
+        this.toggleMapIcon(MAP_ICON.ACTIVITY);
+      }
+    },
   },
   watch: {
     '$route.name': {
@@ -538,23 +592,59 @@ export default {
       immediate: true,
     },
     territory() {
-      if (this.territory.name !== '' && !this.userTerritories.find(t => t.id === this.territory.id)) {
+      if (this.territory
+        && this.territory.name !== ''
+        && this.userTerritories
+        && !this.userTerritories.find(t => t.id === this.territory.id)
+      ) {
         this.saveSeenTerritory(this.territory);
       }
     },
     async user() {
-      await this.refresh();
+      if (!this.publishers.length) {
+        await this.fetchPublishers(this.congId);
+      }
     },
   },
 };
 </script>
 
 <style scoped lang="scss">
+@import '../assets/foreign-field-theme.scss';
+
 .territory {
+  .page-header {
+    z-index: 10;
+  }
+  h4 {
+    font-size: 24px;
+    margin-bottom: 0;
+  }
+  font-size: 14px;
+  .collaboration-mode {
+    color: #fff;
+    height: 18px;
+    background: #777;
+  }
   .header-buttons {
-    .btn {
-      font-size: 12px;
+    ul {
+      border-bottom: none;
+      li {
+        font-size: 16px;
+        margin: 0;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+
+        &[pressed="true"] {
+          font-weight: 700;
+          background: $light;
+        }
+      }
     }
+  }
+
+  .checkout-info {
+    height: 1em;
   }
 }
 .list-group {

@@ -1,9 +1,12 @@
+import Vue from 'vue';
 import axios from 'axios';
 import gql from 'graphql-tag';
 import { print } from 'graphql/language/printer';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import { model, validate } from './models/CongregationModel';
+import { ADDRESS_TAGS, PHONE_ADDRESS_TAGS } from '../../utils/tags';
+import { ADDRESS_LEFT_BUTTON_LIST } from './models/AddressModel';
+import { LEFT_BUTTON_LIST as PHONE_LEFT_BUTTON_LIST } from './models/PhoneModel';
 
 const SET_CONGREGATION = 'SET_CONGREGATION';
 const ADD_CONGREGATION = 'ADD_CONGREGATION';
@@ -49,6 +52,17 @@ export const congregation = {
     congregation: state => state.congregation,
     error: state => state.error,
     congregationsByCircuit: state => state.congregationsByCircuit,
+    builtInAddressTags: () => [...ADDRESS_TAGS, ...ADDRESS_LEFT_BUTTON_LIST],
+    builtInPhoneTags: () => [...PHONE_ADDRESS_TAGS, ...PHONE_LEFT_BUTTON_LIST],
+    language: state => get(state.congregation, 'language') || 'Tagalog',
+    customAddressTags: (state) => {
+      const { customTags = '' } = get(state.congregation, 'options.address') || {};
+      return customTags.split(',').map(t => t.trim()) || [];
+    },
+    customPhoneTags: (state) => {
+      const { customTags = '' } = get(state.congregation, 'options.phone') || {};
+      return customTags.split(',').map(t => t.trim()) || [];
+    },
   },
 
   mutations: {
@@ -86,10 +100,10 @@ export const congregation = {
       state.error = exception;
     },
     START_CAMPAIGN(state, campaign) {
-      set(state, 'congregation.currentCampaign', campaign);
+      Vue.set(state, 'congregation.currentCampaign', campaign);
     },
     END_CAMPAIGN(state) {
-      set(state, 'congregation.currentCampaign', null);
+      Vue.set(state, 'congregation.currentCampaign', null);
     },
     START_CAMPAIGN_FAIL(state, error) {
       state.error = error;
