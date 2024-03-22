@@ -94,6 +94,7 @@
               <b-nav-item
                 :to="{ name: 'address-list', params: { territoryId } }"
                 :pressed="viewMode === 'address-list'"
+                class="px-2 text-nowrap"
               >
                 <font-awesome-icon icon="bars" />
                 <span class="pl-2">List ({{ addressCount }})</span>
@@ -101,6 +102,7 @@
               <b-nav-item
                 :to="{ name: 'map-view', params: { territoryId } }"
                 :pressed="viewMode==='map-view'"
+                class="px-2 text-nowrap"
               >
                 <font-awesome-icon icon="map-marked-alt" />
                 <span class="pl-2">Map ({{ addressCount }})</span>
@@ -108,6 +110,7 @@
               <b-nav-item
                 :to="{ name: 'phone-list', params: { territoryId } }"
                 :pressed="viewMode === 'phone-list'"
+                class="px-2 text-nowrap"
               >
                 <font-awesome-icon icon="mobile-alt" />
                 <span class="pl-2">Phone ({{ phoneCount }})</span>
@@ -638,6 +641,11 @@ export default {
         &[pressed="true"] {
           font-weight: 700;
           background: $light;
+        }
+
+        a {
+          padding-left: 0.2rem;
+          padding-right: 0.2rem;
         }
       }
     }
