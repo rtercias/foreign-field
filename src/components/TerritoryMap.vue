@@ -7,6 +7,15 @@
       <span>Error: {{ error }}</span>
       <b-button variant="link" class="text-danger p-0 pl-2 mt-n1" @click="clearError">x</b-button>
     </div>
+    <b-button
+      class="btn-show-status position-absolute border-dark text-dark px-2"
+      @click="toggleIcon"
+    >
+      <span class="check px-1 bg-success text-white mr-1" v-if="mapIcon === 'ACTIVITY'">
+        <font-awesome-icon icon="check" />
+      </span>
+      <span>Show Status</span>
+    </b-button>
     <l-map
       class="map"
       :center="center"
@@ -69,6 +78,7 @@ import get from 'lodash/get';
 import { mapGetters, mapActions } from 'vuex';
 import MapLinks from './MapLinks';
 import AddressIcon from './AddressIcon';
+import { MAP_ICON } from '../store/modules/models/TerritoryModel';
 
 const defaultOptions = {
   showSortOrder: false,
@@ -105,6 +115,7 @@ export default {
       endingAddress: 'addresses/endingAddress',
       territory: 'territory/territory',
       error: 'addresses/error',
+      mapIcon: 'territory/mapIcon',
     }),
     bounds() {
       let latLng = [[0, 0]];
@@ -129,6 +140,7 @@ export default {
       updateCoordinates: 'auth/updateCoordinates',
       fetchActivityLogs: 'territory/fetchActivityLogs',
       clearError: 'addresses/clearError',
+      toggleMapIcon: 'territory/toggleMapIcon',
     }),
     get,
     centerMarker(address) {
@@ -182,6 +194,13 @@ export default {
     onMapClick() {
       this.$emit('map-click');
     },
+    toggleIcon() {
+      if (this.mapIcon === MAP_ICON.ACTIVITY) {
+        this.toggleMapIcon(MAP_ICON.NUMBER);
+      } else {
+        this.toggleMapIcon(MAP_ICON.ACTIVITY);
+      }
+    },
   },
   async mounted() {
     const addresses = get(this.territory, 'addresses') || [];
@@ -195,6 +214,21 @@ export default {
 <style lang="scss" scoped>
 .territory-map {
   height: calc(100vh - 226px);
+
+  .btn-show-status {
+    z-index: 2;
+    background: #fff;
+    border-radius: 20px;
+    right: 10px;
+    margin-top: 10px;
+    box-shadow: 0 0.5rem 1rem #6C757D;
+
+    .check {
+      border: solid 1px;
+      border-radius: 50%;
+      padding-top: 2px;
+    }
+  }
 
   .map {
     width: 100%;

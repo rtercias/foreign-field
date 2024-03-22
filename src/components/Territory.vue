@@ -25,12 +25,6 @@
                   <font-awesome-icon icon="ellipsis-h" />
                 </template>
                 <b-dropdown-item
-                  @click="toggleIcon"
-                >
-                  <span v-if="mapIcon === 'ACTIVITY'">Icon: Show Numbers</span>
-                  <span v-else>Icon: Show Activity</span>
-                </b-dropdown-item>
-                <b-dropdown-item
                   v-if="$route.name === 'map-view'"
                   @click="optimizeNearMe"
                 >
@@ -144,7 +138,6 @@ import { displayName, displayShortName } from '../utils/publisher';
 import { CongDefault } from '../store/modules/models/CongDefaultOptions';
 import { subscription } from '../main';
 import { unmask } from '../utils/phone';
-import { MAP_ICON } from '../store/modules/models/TerritoryModel';
 
 export default {
   name: 'Territory',
@@ -215,7 +208,6 @@ export default {
       optimized: 'addresses/optimized',
       territoryError: 'territory/error',
       hasPhones: 'territory/hasPhones',
-      mapIcon: 'territory/mapIcon',
       publishers: 'publishers/publishers',
       congId: 'auth/congId',
     }),
@@ -327,7 +319,6 @@ export default {
       setPhoneLastActivity: 'territory/setPhoneLastActivity',
       optimize: 'addresses/optimize',
       reorderAddresses: 'territory/reorderAddresses',
-      toggleMapIcon: 'territory/toggleMapIcon',
       fetchPublishers: 'publishers/fetchPublishers',
     }),
     get,
@@ -575,13 +566,6 @@ export default {
         noCloseButton: true,
         autoHideDelay: 1000,
       });
-    },
-    toggleIcon() {
-      if (this.mapIcon === MAP_ICON.ACTIVITY) {
-        this.toggleMapIcon(MAP_ICON.NUMBER);
-      } else {
-        this.toggleMapIcon(MAP_ICON.ACTIVITY);
-      }
     },
   },
   watch: {
