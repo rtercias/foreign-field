@@ -307,7 +307,7 @@ export default {
       return this.includesDoNotCall || this.includesInvalid;
     },
     recentActivity() {
-      const { activityLogs } = this.entity || {};
+      const activityLogs = get(this.entity, 'activityLogs') || [];
       const filtered = activityLogs.filter(l => l.checkout_id === this.checkoutId);
       const ordered = orderBy(filtered, ['timestamp'], ['desc']);
       return ordered.slice(0, 3);

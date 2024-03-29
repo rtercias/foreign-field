@@ -252,13 +252,11 @@ export const territory = {
       const address = addresses.find(a => a.id === addressId) || {};
       const phones = address.phones || [];
       const phone = phones.find(p => p.id === phoneId) || {};
-      const { activityLogs } = phone;
-      if (activityLogs) {
-        // add activity log if it's not already on the list
-        if (!activityLogs.some(a => a.id === activityLog.id)) {
-          activityLogs.push(activityLog);
-          Vue.set(phone, 'lastActivity', orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0]);
-        }
+      phone.activityLogs = phone.activityLogs || [];
+      // add activity log if it's not already on the list
+      if (!phone.activityLogs.some(a => a.id === activityLog.id)) {
+        phone.activityLogs.push(activityLog);
+        Vue.set(phone, 'lastActivity', orderBy(phone.activityLogs, ['timestamp'], ['desc'])[0]);
       }
     },
     REMOVE_ADDRESS_ACTIVITY_LOG(state, { addressId, logId }) {
