@@ -95,6 +95,7 @@ export default {
     formatLanguage,
     async updateTag(tag) {
       if (this.disabled) return;
+      await this.setAddress(this.record);
       this.$set(this.record, 'isBusy', true);
       const index = this.selectedTags.findIndex(t => t === tag.caption);
       let cancel;
@@ -137,6 +138,7 @@ export default {
     //   }
     // },
     async removeTag(tag) {
+      await this.setAddress(this.record);
       const body = `Are you sure you want to delete the tag
         "${formatLanguage(tag.caption, this.language)}"?
       `;

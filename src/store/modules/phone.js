@@ -5,7 +5,6 @@ import get from 'lodash/get';
 import orderBy from 'lodash/orderBy';
 import first from 'lodash/first';
 import { model as phoneModel, validate, ACTION_BUTTON_LIST } from './models/PhoneModel';
-import { model as activityModel } from './models/ActivityModel';
 import * as tagUtils from '../../utils/tags';
 
 
@@ -22,7 +21,6 @@ const REMOVE_TAG = 'REMOVE_TAG';
 const REMOVE_TAG_FAIL = 'REMOVE_TAG_FAIL';
 const PHONE_LOOKUP_SUCCESS = 'PHONE_LOOKUP_SUCCESS';
 const PHONE_LOOKUP_FAIL = 'PHONE_LOOKUP_FAIL';
-const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
 const FETCH_ACTIVITY_LOGS_SUCCESS = 'FETCH_ACTIVITY_LOGS_SUCCESS';
 const FETCH_ACTIVITY_LOGS_FAIL = 'FETCH_ACTIVITY_LOGS_FAIL';
 
@@ -73,9 +71,6 @@ export const phone = {
       }
     },
     REMOVE_TAG_FAIL(state, error) { state.error = error; },
-    FETCH_LAST_ACTIVITY_FAIL(state, exception) {
-      state.error = exception;
-    },
     FETCH_ACTIVITY_LOGS_FAIL(state, exception) {
       state.error = exception;
     },
@@ -90,46 +85,6 @@ export const phone = {
       commit(SET_PHONE, _phone);
     },
 
-    async fetchLastActivity({ commit, dispatch }, { phoneId, checkoutId, cancelToken }) {
-      try {
-        if (!phoneId) {
-          commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
-          return;
-        }
-
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cancelToken,
-          data: {
-            query: print(gql`query Phone($phoneId: Int $checkoutId: Int) {
-              phone(id: $phoneId) {
-                lastActivity(checkout_id: $checkoutId) {
-                  ...ActivityModel
-                }
-              }
-            }
-            ${activityModel}`),
-            variables: {
-              phoneId,
-              checkoutId,
-            },
-          },
-        });
-
-        const { errors } = get(response, 'data');
-        if (errors && errors.length) {
-          throw new Error(errors[0].message);
-        }
-        const { lastActivity } = get(response, 'data.data.phone') || {};
-        dispatch('territory/setPhoneLastActivity', { phoneId, lastActivity }, { root: true });
-      } catch (e) {
-        commit(FETCH_LAST_ACTIVITY_FAIL, e);
-      }
-    },
 
     async fetchActivityLogs({ commit, rootGetters, dispatch }, { addressId, phoneId, checkoutId }) {
       try {
@@ -155,7 +110,7 @@ export const phone = {
       }
     },
 
-    async addPhone({ commit, rootGetters }, _phone) {
+    async addPhone({ commit, dispatch, rootGetters }, _phone) {
       try {
         commit('auth/LOADING', true, { root: true });
 
@@ -188,6 +143,7 @@ export const phone = {
         }
         const { addPhone } = get(response, 'data.data');
         commit(ADD_PHONE, addPhone);
+        dispatch('territory/addPhone', addPhone, { root: true });
       } catch (e) {
         commit(ADD_PHONE_FAIL, e);
         console.error(ADD_PHONE_FAIL, e);
