@@ -89,8 +89,10 @@ export default {
       markAsDoNotCall: 'address/markAsDoNotCall',
       addAddressTag: 'address/addTag',
       addPhoneTag: 'phone/addTag',
+      setAddress: 'address/setAddress',
     }),
     async addRecord(value) {
+      await this.setAddress(this.entity);
       if (this.isActivity(value)) {
         await this.addLog(value);
       } else {
@@ -187,6 +189,7 @@ export default {
       return format(d, 'MMM dd EEE');
     },
     async removeLog({ id, value, timestamp }) {
+      await this.setAddress(this.entity);
       const description = this.getDescription(value);
       const date = this.formatDate(timestamp);
       const response = await this.$bvModal.msgBoxConfirm(`
@@ -307,7 +310,7 @@ export default {
       return this.includesDoNotCall || this.includesInvalid;
     },
     recentActivity() {
-      const { activityLogs } = this.entity || {};
+      const activityLogs = get(this.entity, 'activityLogs') || [];
       const filtered = activityLogs.filter(l => l.checkout_id === this.checkoutId);
       const ordered = orderBy(filtered, ['timestamp'], ['desc']);
       return ordered.slice(0, 3);

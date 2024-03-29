@@ -29,7 +29,6 @@ const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
 const UPDATE_GEOCODE = 'UPDATE_GEOCODE';
 const FETCH_LAST_ACTIVITY_SUCCESS = 'FETCH_LAST_ACTIVITY_SUCCESS';
-const FETCH_LAST_ACTIVITY_FAIL = 'FETCH_LAST_ACTIVITY_FAIL';
 const FETCH_ACTIVITY_LOGS_SUCCESS = 'FETCH_ACTIVITY_LOGS_SUCCESS';
 const FETCH_ACTIVITY_LOGS_FAIL = 'FETCH_ACTIVITY_LOGS_FAIL';
 const FETCH_ADDRESS_FAIL = 'FETCH_ADDRESS_FAIL';
@@ -191,47 +190,6 @@ export const address = {
       }
     },
 
-    async fetchLastActivity({ commit, dispatch }, { addressId, checkoutId, cancelToken }) {
-      try {
-        if (!addressId) {
-          commit(FETCH_LAST_ACTIVITY_FAIL, 'id is required');
-          return;
-        }
-
-        const response = await axios({
-          url: process.env.VUE_APP_ROOT_API,
-          method: 'post',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cancelToken,
-          data: {
-            query: print(gql`query Address($addressId: Int $checkoutId: Int) {
-              address(id: $addressId) {
-                lastActivity(checkout_id: $checkoutId) {
-                  ...ActivityModel
-                }
-              }
-            }
-            ${activityModel}`),
-            variables: {
-              addressId,
-              checkoutId,
-            },
-          },
-        });
-
-        const { errors } = get(response, 'data');
-        if (errors && errors.length) {
-          throw new Error(errors[0].message);
-        }
-
-        const { lastActivity } = get(response, 'data.data.address') || {};
-        dispatch('territory/setAddressLastActivity', { addressId, lastActivity }, { root: true });
-      } catch (e) {
-        commit(FETCH_LAST_ACTIVITY_FAIL, e);
-      }
-    },
 
     async fetchActivityLogs({ commit, rootGetters, dispatch }, { addressId, checkoutId }) {
       try {
