@@ -301,6 +301,11 @@ export const auth = {
                 description
                 group_id
                 type
+                lastActivity {
+                  value
+                  territory_id
+                  timestamp
+                }
               }
             }
           }`),

@@ -167,9 +167,6 @@ export default {
         if (this.user) {
           if (this.user.username && this.doUpdateTerritories) {
             await this.getUserTerritories(this.user.username);
-            for (const territory of this.userTerritories) {
-              this.getTerritoryLastActivity(territory.id);
-            }
           }
         }
         this.forceUpdate = false;
