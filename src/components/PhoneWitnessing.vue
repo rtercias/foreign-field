@@ -50,7 +50,7 @@ export default {
   },
   props: ['territoryId', 'disabled'],
   async mounted() {
-    if (this.token && (!this.hasPhones || this.territoryId !== this.territory.id)) {
+    if (this.token && (this.territoryId !== this.territory.id)) {
       await this.getTerritory({ id: this.territoryId, includePhones: true });
     }
 

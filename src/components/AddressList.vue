@@ -54,8 +54,7 @@ export default {
   },
   props: ['territoryId', 'disabled'],
   async mounted() {
-    const addresses = get(this.territory, 'addresses') || [];
-    if (this.token && (!addresses.length || this.territoryId !== this.territory.id)) {
+    if (this.token && (this.territoryId !== this.territory.id)) {
       await this.getTerritory({ id: this.territoryId });
     }
 
