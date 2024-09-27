@@ -97,7 +97,7 @@ export default {
       if (this.disabled) return;
       await this.setAddress(this.record);
       this.$set(this.record, 'isBusy', true);
-      const index = this.selectedTags.findIndex(t => t === tag.caption);
+      const index = this.selectedTags.findIndex(t => t.trim() === tag.caption.trim());
       let cancel;
 
       if (index !== -1 && tag.state) {
@@ -106,8 +106,6 @@ export default {
         await this.doNotCall(tag);
       } else if (startsWith(tag.caption, NF_TAG)) {
         await this.notForeign(tag);
-      } else {
-        await this.addTag(tag);
       }
 
       if (!cancel) {
