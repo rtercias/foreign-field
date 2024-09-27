@@ -49,7 +49,7 @@ export function addTag(notes, _tag) {
 
 export function removeTag(notes, tag) {
   const tags = (notes || '').split(',') || [];
-  return tags.filter(t => toLower(t) !== toLower(tag)).join(',');
+  return tags.filter(t => toLower(t.trim()) !== toLower(tag.trim())).join(',');
 }
 
 export function removeDoNotCallTag(notes) {
